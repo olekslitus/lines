@@ -46,9 +46,9 @@ export interface NoteSource {
    * lines gave it when it was first imported, and its name then.
    */
   collection?: { id: string; name: string };
-  /** Its id there: Bear's, or its path in an Obsidian vault. */
+  /** Its id there: Bear's, or its path in an Obsidian vault; a locked note keeps only a hash of it (sync/format.ts, `lockedSource`). */
   id: string;
-  /** What it was called there, which links to it use. */
+  /** What it was called there, which links to it use; empty for a locked note. */
   name: string;
 }
 

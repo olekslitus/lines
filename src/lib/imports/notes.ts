@@ -5,6 +5,7 @@ import { escapeMarkdown, unescapeMarkdown } from "../notes/escape";
 import { addTagIn } from "../notes/parse";
 import { nameOf, wikiLinkOf } from "../notes/properties";
 import type { Entry } from "../notes/store.svelte";
+import { hiddenSourceId } from "../sync/format";
 import type { ExportedFile } from "./exported";
 import type { ImportWork, NewNote } from "./imports.svelte";
 
@@ -94,12 +95,15 @@ function importedOf(app: string, entries: Entry[]) {
   return collections;
 }
 
+/** Whether `ids` has the note `id` of `app`'s collection `imported`: as it is, or as the hash a locked note keeps of it. */
+const holds = (ids: Set<string>, app: string, imported: Imported, id: string) => ids.has(id) || ids.has(hiddenSourceId(app, imported.id, id));
+
 /**
  * Whether a note is here, from importing before: out of the Trash, or in it but in the app's trash
  * too. One in the Trash otherwise (an import undone) importing again brings back.
  */
-const isHere = (imported: Imported | undefined, { id, trashed }: { id: string; trashed?: boolean }) =>
-  !!imported && (imported.out.has(id) || (!!trashed && imported.trashed.has(id)));
+const isHere = (app: string, imported: Imported | undefined, { id, trashed }: { id: string; trashed?: boolean }) =>
+  !!imported && (holds(imported.out, app, imported, id) || (!!trashed && holds(imported.trashed, app, imported, id)));
 
 /** A collection imported before that this export may be: by its name, or the most notes with the same ids. */
 export interface Earlier {
@@ -137,15 +141,15 @@ export function planNotes(app: string, source: Source, entries: Entry[], { same 
   if (source.local) {
     for (const each of collections.values()) {
       if (!each.id) continue;
-      const shared = source.notes.filter((note) => each.out.has(note.id) || each.trashed.has(note.id)).length;
+      const shared = source.notes.filter((note) => holds(each.out, app, each, note.id) || holds(each.trashed, app, each, note.id)).length;
       const named = each.name.toLowerCase() === source.name.toLowerCase();
       if ((shared || named) && (!earlier || shared > earlier.shared)) earlier = { id: each.id, name: each.name, notes: each.out.size + each.trashed.size, shared };
     }
   }
   const collection = source.local ? (earlier && same ? { id: earlier.id, name: source.name } : { id: fresh, name: source.name }) : undefined;
   const imported = collections.get(collection?.id ?? "");
-  const add = source.notes.filter((note) => !isHere(imported, note));
-  const there = source.notes.filter((note) => isHere(imported, note));
+  const add = source.notes.filter((note) => !isHere(app, imported, note));
+  const there = source.notes.filter((note) => isHere(app, imported, note));
   const folders = new Set(add.flatMap((note) => note.folders.map((_, i) => note.folders.slice(0, i + 1).join("/"))));
   const attachments = new Set<number>();
   for (const note of add) for (const [, index] of note.body.matchAll(ATTACHMENT_PLACE)) attachments.add(Number(index));
@@ -218,7 +222,7 @@ export function notesInput(app: string, plan: NotesPlan, names: Map<number, stri
 export function notesWork(input: unknown, entries: Entry[]): ImportWork {
   const { app, collection, notes, report } = input as NotesInput;
   const imported = importedOf(app, entries).get(collection?.id ?? "");
-  return { add: notes.filter((note) => "source" in note && !isHere(imported, { id: note.source.id, trashed: note.trashed })), append: [], report };
+  return { add: notes.filter((note) => "source" in note && !isHere(app, imported, { id: note.source.id, trashed: note.trashed })), append: [], report };
 }
 
 /**
@@ -226,7 +230,9 @@ export function notesWork(input: unknown, entries: Entry[]): ImportWork {
  * heading of exactly that text, unless it starts with that heading already.
  */
 export function withTitle(name: string, body: string, front = "") {
-  const heading = /^#{1,6}[ \t]+(.*?)[ \t#]*$/.exec(/^\s*(.*)/.exec(body)![1]);
+  // Blank lines before its text go; spaces starting its first line stay, as code in it needs them.
+  const text = body.replace(/^(?:[ \t]*\n)+/, "");
+  const heading = /^ {0,3}#{1,6}[ \t]+(.*?)[ \t#]*$/.exec(text.split("\n", 1)[0]);
   const titled = heading && nameOf(unescapeMarkdown(heading[1])) === nameOf(name);
-  return `${front}${titled ? body.trimStart() : `# ${escapeMarkdown(name)}\n\n${body.trimStart()}`}`;
+  return `${front}${titled ? text : `# ${escapeMarkdown(name)}\n\n${text}`}`;
 }

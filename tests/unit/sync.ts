@@ -5,7 +5,7 @@ import type { SyncRecord } from "../../src/lib/notes/storage";
 import type { Note } from "../../src/lib/notes/types";
 import type { NoteLanguage } from "../../src/lib/plugins/types";
 import type { FolderConfig } from "../../src/lib/sync/providers";
-import { stubApp } from "./stubs";
+import { importers, stubApp } from "./stubs";
 
 /*
  * Devices syncing through a cloud drive's folder, for sync's tests: the real notes store and sync
@@ -81,6 +81,9 @@ mock.module("../../src/lib/plugins/registry.svelte", () => ({
     language,
     meta: (id: string | undefined, body: string) => language(id).meta!(body),
     libraryKind: () => undefined,
+    get imports() {
+      return importers;
+    },
   },
 }));
 

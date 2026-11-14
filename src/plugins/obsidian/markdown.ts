@@ -1,4 +1,4 @@
-import { between, type Edit, edited, editsIn, isElsewhere, pathOf, readMarkdown, type Span, within } from "../../lib/imports/markdown";
+import { between, type Edit, edited, editsIn, isElsewhere, pathOf, type Read, readMarkdown, type Span, within } from "../../lib/imports/markdown";
 import { attachmentPath, noteLink, type Tally } from "../../lib/imports/notes";
 import { attachmentType } from "../../lib/notes/attachments";
 import { frontMatter } from "../../lib/notes/properties";
@@ -83,14 +83,12 @@ function partsOf(inner: string) {
     path: (hash < 0 ? link : link.slice(0, hash)).trim(),
     heading: hash < 0 ? undefined : link.slice(hash + 1).trim(),
     shown: bar ? inner.slice(bar.index + bar[0].length).trim() : undefined,
-    escaped: bar?.[0] === "\\|",
   };
 }
 
-/** A link to a note, or a picture or file of the vault, as lines writes it; `escaped` keeps a bar as a table needs it, `\|`. */
-function written(target: Target, { heading, shown, embed, image, escaped }: { heading?: string; shown?: string; embed: boolean; image?: boolean; escaped?: boolean }) {
-  const bar = escaped ? "\\|" : "|";
-  if ("note" in target) return noteLink(target.note, { heading, shown: embed ? undefined : shown }).replace("|", bar);
+/** A link to a note, or a picture or file of the vault, as lines writes it (in a table, its bar is escaped as `edited` writes it). */
+function written(target: Target, { heading, shown, embed, image }: { heading?: string; shown?: string; embed: boolean; image?: boolean }) {
+  if ("note" in target) return noteLink(target.note, { heading, shown: embed ? undefined : shown });
   const label = (shown ?? "").replace(/[[\]]/g, "");
   const place = attachmentPath(target.file);
   if (embed && attachmentType(target.name).startsWith("image/")) {
@@ -98,14 +96,14 @@ function written(target: Target, { heading, shown, embed, image, escaped }: { he
     if (image) return `![${label}](${place})`;
     // Obsidian's `![[photo.png|300]]` (or `|300x200`) is lines' `![|300](…)`; anything else after the bar is its description.
     const size = /^(\d{1,5})(?:x\d{1,5})?$/.exec(label.trim());
-    return `![${size ? `${bar}${size[1]}` : label}](${place})`;
+    return `![${size ? `|${size[1]}` : label}](${place})`;
   }
   return `[${label || target.name.replace(/[[\]]/g, "")}](${place})`;
 }
 
 /** What a wiki link or embed written as `[[inner]]` becomes, reported as it needs to be. */
 function wiki(vault: Vault, name: string, whole: string, inner: string, embed: boolean) {
-  const { path, heading, shown, escaped } = partsOf(inner);
+  const { path, heading, shown } = partsOf(inner);
   if (!path) {
     // A link to a heading in the note itself, which lines can't open at.
     vault.report.add("import.report.headingLinks", `${whole} (${name})`);
@@ -118,44 +116,66 @@ function wiki(vault: Vault, name: string, whole: string, inner: string, embed: b
     return embed && !/\.(?!md$)[a-z0-9]{1,8}$/i.test(path) ? whole.slice(1) : whole;
   }
   if (embed && "note" in target) vault.report.add("import.report.embeds", `${whole} (${name})`);
-  return written(target, { heading, shown, embed, escaped });
+  return written(target, { heading, shown, embed });
 }
 
 /** The wiki links and embeds in `parts` of `text`, as edits. */
 const wikiEdits = (vault: Vault, name: string, text: string, parts: Span[]) =>
   editsIn(text, parts, WIKI, ([whole, bang, inner]) => wiki(vault, name, whole, inner, !!bang));
 
+/** Some of `text`, from `from` up to the end of its line, as a report shows it: no more than 40 characters, and the note it's in. */
+function clipped(text: string, from: number, name: string) {
+  const end = text.indexOf("\n", from);
+  const line = text.slice(from, end < 0 ? text.length : end);
+  return `${line.length > 40 ? `${line.slice(0, 39)}…` : line} (${name})`;
+}
+
 /**
- * Obsidian's `%%comments%%` as HTML's, each `%%` paired with the next outside code. A pair with a
- * code or HTML block between, or text an HTML comment can't hold (`-->`), is left as written.
+ * Obsidian's `%%comments%%` as HTML's, as Obsidian reads them: one that starts a paragraph at the
+ * note's top level runs on to the next `%%`, past blank lines too, as an HTML comment there can; one
+ * within text ends in the same paragraph (or heading, or table cell), or its `%%` stays text. Only a
+ * `%%` outside code, math, HTML and links counts. A pair with a code or HTML block between, or text
+ * an HTML comment can't hold (`-->`), is left as written.
  */
-function comments(vault: Vault, name: string, text: string, kept: Span[], blocks: Span[]) {
+function comments(vault: Vault, name: string, text: string, { kept, blocks, leaves, links }: Read) {
+  const wikis = between([...kept, ...links], 0, text.length).flatMap(({ from, to }) =>
+    [...text.slice(from, to).matchAll(WIKI)].map((match) => ({ from: from + match.index, to: from + match.index + match[0].length })),
+  );
   const marks: number[] = [];
-  for (const { from, to } of between(kept, 0, text.length)) {
+  for (const { from, to } of between([...kept, ...links, ...wikis], 0, text.length)) {
     for (let at = text.indexOf("%%", from); at >= 0 && at + 2 <= to; at = text.indexOf("%%", at + 2)) marks.push(at);
   }
+  const leafOf = (at: number) => leaves.find((leaf) => leaf.from <= at && at < leaf.to);
   const edits: Edit[] = [];
   const spans: Span[] = [];
-  for (let i = 0; i + 1 < marks.length; i += 2) {
-    const span = { from: marks[i], to: marks[i + 1] + 2 };
-    const inside = text.slice(marks[i] + 2, marks[i + 1]);
+  for (let i = 0; i < marks.length; i++) {
+    const [open, close] = [marks[i], marks[i + 1]];
+    const leaf = leafOf(open);
+    const block = !!leaf?.top && leaf.from === open;
+    if (close === undefined || (!block && leafOf(close) !== leaf)) {
+      vault.report.add("import.report.openComments", clipped(text, open, name));
+      continue;
+    }
+    i++;
+    const span = { from: open, to: close + 2 };
     if (within(span, blocks)) continue;
     spans.push(span);
-    if (UNSAFE_COMMENT.test(inside)) {
+    if (UNSAFE_COMMENT.test(text.slice(open + 2, close))) {
       const whole = text.slice(span.from, span.to);
       vault.report.add("import.report.comments", `${whole.length > 40 ? `${whole.slice(0, 39)}…` : whole} (${name})`);
       continue;
     }
-    edits.push({ from: marks[i], to: marks[i] + 2, insert: "<!--" }, { from: marks[i + 1], to: marks[i + 1] + 2, insert: "-->" });
+    edits.push({ from: open, to: open + 2, insert: "<!--" }, { from: close, to: close + 2, insert: "-->" });
   }
   return { edits, spans };
 }
 
 /** The note's text but its properties, in Linedown. */
 function body(text: string, vault: Vault, name: string) {
-  const { kept, blocks, links, languages } = readMarkdown(text);
+  const read = readMarkdown(text);
+  const { kept, links, languages } = read;
   for (const language of languages) if (/^dataview(?:js)?$/i.test(language)) vault.report.add("import.report.dataview", name);
-  const notes = comments(vault, name, text, kept, blocks);
+  const notes = comments(vault, name, text, read);
   // What's text: not code, math, HTML, a comment, or a Markdown link (each changed as a whole).
   const prose = between([...kept, ...notes.spans, ...links], 0, text.length);
   const edits = [...notes.edits, ...wikiEdits(vault, name, text, prose)];

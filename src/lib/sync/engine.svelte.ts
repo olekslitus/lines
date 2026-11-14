@@ -164,15 +164,32 @@ function markConflicted({ body, format }: Note): string {
 }
 
 /** A note's text, format and lock: all it says but its dates and what `merge` takes apart from them; hashed. */
-const textOf = (note: Note) => hash(serialize({ ...note, updatedAt: 0, pinned: false, trashed: false, inbox: undefined, icon: undefined, color: undefined }));
+const textOf = (note: Note) =>
+  hash(serialize({ ...note, updatedAt: 0, pinned: false, trashed: false, inbox: undefined, icon: undefined, color: undefined, header: undefined }));
 
 /** What a sync record keeps of a note as synced, so `merge` can tell later what each side changed. */
-const baseOf = (note: Note) => ({ text: textOf(note), pinned: note.pinned, trashed: note.trashed, inbox: note.inbox, icon: note.icon, color: note.color });
+const baseOf = (note: Note) => ({ text: textOf(note), pinned: note.pinned, trashed: note.trashed, inbox: note.inbox, icon: note.icon, color: note.color, header: note.header });
+
+/**
+ * The lines a newer version wrote in a note's header (`Note.header`), of both sides, a line at a
+ * time: each as the side that changed it since `base` has it (here's, if both did), so a line one
+ * side gained is kept, and one it dropped goes. Without a record of them, every line of either side,
+ * as `text`'s side has it if both do.
+ */
+function mergedHeader(here: Note, there: Note, text: Note, base: SyncRecord | undefined) {
+  const header: Record<string, string> = {};
+  for (const key of new Set([...Object.keys(here.header ?? {}), ...Object.keys(there.header ?? {})])) {
+    const [mine, theirs] = [here.header?.[key], there.header?.[key]];
+    const value = base?.text ? (mine !== base.header?.[key] ? mine : theirs) : ((text === here ? mine : theirs) ?? mine ?? theirs);
+    if (value !== undefined) header[key] = value;
+  }
+  return Object.keys(header).length ? header : undefined;
+}
 
 /**
  * A note changed on both sides since it was synced as `base`, made one: its text from the side that
- * edited it, its pin, trash, Inbox, icon and color from the side that changed each (pinning or locking it isn't an
- * edit). Text edited on both sides is the newer edit's, and the other comes back as `older`, for a
+ * edited it, its pin, trash, Inbox, icon and color from the side that changed each, and its header's
+ * lines from a newer version a line at a time (pinning or locking it isn't an edit). Text edited on both sides is the newer edit's, and the other comes back as `older`, for a
  * conflicted copy. A lock on either side stays: sync never turns a locked note back into plain text.
  */
 async function merge(here: Note, there: Note, base: SyncRecord | undefined): Promise<{ merged: Note; older?: Note }> {
@@ -197,7 +214,7 @@ async function merge(here: Note, there: Note, base: SyncRecord | undefined): Pro
   const pick = <K extends "pinned" | "trashed" | "inbox" | "icon" | "color">(field: K) =>
     (base?.text ? !same(here[field], base[field]) : text === here) ? here[field] : there[field];
   return {
-    merged: { ...text, pinned: pick("pinned"), trashed: pick("trashed"), inbox: pick("inbox"), icon: pick("icon"), color: pick("color") },
+    merged: { ...text, pinned: pick("pinned"), trashed: pick("trashed"), inbox: pick("inbox"), icon: pick("icon"), color: pick("color"), header: mergedHeader(here, there, text, base) },
     older: edited(other) ? other : undefined,
   };
 }

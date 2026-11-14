@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync, statSync } from "node:fs";
+import { deflateRawSync } from "node:zlib";
 import { join, relative } from "node:path";
 import type { Exported } from "../../src/lib/imports/exported";
 import type { NewNote } from "../../src/lib/imports/imports.svelte";
@@ -20,9 +21,10 @@ stubApp();
 const { readVault } = await import("../../src/plugins/obsidian/vault");
 const { translate } = await import("../../src/plugins/obsidian/markdown");
 const { attachmentPath, notesInput, notesWork, planNotes, Tally: Tallies, withTitle } = await import("../../src/lib/imports/notes");
-const { exportedFrom } = await import("../../src/lib/imports/exported");
-const { zip } = await import("../../src/lib/zip");
+const { exportedFrom, TooBig } = await import("../../src/lib/imports/exported");
+const { Unpacking, zip } = await import("../../src/lib/zip");
 const { computeMeta } = await import("../../src/lib/notes/parse");
+const { imageSize, withWidth } = await import("../../src/lib/notes/attachments");
 
 /** A folder of fixtures/ as a picker of folders gives it, each file dated alike. */
 function folder(name: string): Exported {
@@ -215,9 +217,31 @@ describe("Obsidian's Markdown", () => {
     expect([unsafe.body, unsafe.report]).toEqual(["%% a --> b %% and [[Plan]]", { comments: [1, "%% a --> b %% (Note)"] }]);
   });
 
-  test("links in a table keep their bar escaped, `\\|`, as a table needs it", () => {
-    const done = translated("| Picture | Link |\n|---|---|\n| ![[a.png\\|300]] | [[Plan\\|the plan]] |", { notes: ["Plan"], files: ["a.png"] });
-    expect(done.body).toBe("| Picture | Link |\n|---|---|\n| ![\\|300](<a.png>) | [[Plan\\|the plan]] |");
+  test("a bar it writes in a table is escaped, `\\|`, as the table needs it: a link's, a heading link's, a picture's width; in a callout too", () => {
+    const notes = ["Plan"];
+    const table = (row: string) => `| A | B |\n|---|---|\n${row}`;
+    expect(translated(table("| ![[a.png\\|300]] | [[Plan\\|the plan]] |"), { notes, files: ["a.png"] }).body).toBe(table("| ![\\|300](<a.png>) | [[Plan\\|the plan]] |"));
+    expect(translated(table("| [the plan](Plan.md) | [goals](Plan.md#Goals) |"), { notes }).body).toBe(table("| [[Plan\\|the plan]] | [[Plan#Goals\\|goals]] |"));
+    expect(translated("> [!note]\n> | A |\n> |---|\n> | [x](Plan.md) |", { notes }).body).toBe(":::info icon=pencil\n| A |\n|---|\n| [[Plan\\|x]] |\n:::");
+    // lines reads a picture's width after an escaped bar, and keeps it escaped when it's resized.
+    expect([imageSize("\\|300"), imageSize("Lake\\|300"), withWidth("Lake\\|300", 400), withWidth("Lake|300", 400)]).toEqual([
+      { alt: "", width: 300 },
+      { alt: "Lake", width: 300 },
+      "Lake\\|400",
+      "Lake|400",
+    ]);
+    // Outside a table, a bar is a bar.
+    expect(translated("[the plan](Plan.md) ![[a.png|300]]", { notes, files: ["a.png"] }).body).toBe("[[Plan|the plan]] ![|300](<a.png>)");
+  });
+
+  test("a comment within text ends in its paragraph, or its `%%` stays text, said so; one starting a paragraph runs on; links aren't looked in", () => {
+    const notes = ["Plan"];
+    const open = translated("Text %%a thought\n\nmore%% and [[Plan]]", { notes });
+    expect([open.body, open.report]).toEqual(["Text %%a thought\n\nmore%% and [[Plan]]", { openComments: [2, "%%a thought (Note)", "%% and [[Plan]] (Note)"] }]);
+    expect(translated("- one %%a\n- two%%").body).toBe("- one %%a\n- two%%");
+    expect(translated("| %%a | b%% |\n|---|---|").body).toBe("| %%a | b%% |\n|---|---|");
+    expect(translated("%%\nHidden\n\nstill hidden\n%%\nShown").body).toBe("<!--\nHidden\n\nstill hidden\n-->\nShown");
+    expect(translated("[50%% off](Plan.md) [[Plan|100%%]] %%note%%", { notes }).body).toBe("[[Plan|50%% off]] [[Plan|100%%]] <!--note-->");
   });
 
   test("Markdown links with brackets or reserved characters in their paths", () => {
@@ -238,11 +262,90 @@ describe("Obsidian's Markdown", () => {
   });
 });
 
+describe("what's chosen to import", () => {
+  /** A file as a picker of folders gives it, knowing its path in the folder chosen. */
+  const inFolder = (path: string, data: BlobPart) => Object.defineProperty(new File([data], path.split("/").at(-1)!), "webkitRelativePath", { value: path });
+  const zipOf = (files: Record<string, string | Uint8Array>) => zip(Object.entries(files).map(([name, data]) => ({ name, data, modified: new Date(DAY) })));
+  const MB = 1024 ** 2;
+
+  /** A ZIP of `files`, each deflated, as most apps write them. */
+  function deflated(files: Record<string, Uint8Array>) {
+    const local: Uint8Array[] = [];
+    const central: Uint8Array[] = [];
+    let offset = 0;
+    for (const [name, data] of Object.entries(files)) {
+      const packed = deflateRawSync(data);
+      const path = new TextEncoder().encode(name);
+      const head = new DataView(new ArrayBuffer(30));
+      head.setUint32(0, 0x04034b50, true);
+      head.setUint16(8, 8, true);
+      head.setUint32(18, packed.length, true);
+      head.setUint32(22, data.length, true);
+      head.setUint16(26, path.length, true);
+      const record = new DataView(new ArrayBuffer(46));
+      record.setUint32(0, 0x02014b50, true);
+      record.setUint16(10, 8, true);
+      record.setUint32(20, packed.length, true);
+      record.setUint32(24, data.length, true);
+      record.setUint16(28, path.length, true);
+      record.setUint32(42, offset, true);
+      local.push(new Uint8Array(head.buffer), path, packed);
+      central.push(new Uint8Array(record.buffer), path);
+      offset += 30 + path.length + packed.length;
+    }
+    const end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true);
+    end.setUint16(8, central.length / 2, true);
+    end.setUint16(10, central.length / 2, true);
+    end.setUint32(16, offset, true);
+    return new Uint8Array(Buffer.concat([...local, ...central, new Uint8Array(end.buffer)]));
+  }
+
+  test("a folder's files, a ZIP in it too: never unpacked, nor changing its name or paths", async () => {
+    const exported = await exportedFrom([inFolder("Vault/Welcome.md", "# Hi"), inFolder("Vault/Attachments/archive.zip", zipOf({ "readme.md": "# Readme" })), inFolder("Vault/old.zip", "damaged"), inFolder("Vault/.obsidian/app.json", "{}")]);
+    expect([exported.name, exported.files.map((file) => file.path), exported.skipped]).toEqual(["Vault", ["Welcome.md", "Attachments/archive.zip", "old.zip", ".obsidian/app.json"], undefined]);
+    expect((await exported.files[1].file()).size).toBeGreaterThan(0);
+  });
+
+  test("a folder of nothing but ZIPs (and hidden files), as a large Notion export unpacks to, is theirs; so is a ZIP of ZIPs", async () => {
+    const parts = await exportedFrom([inFolder("Export/Part-1.zip", zipOf({ "Workspace/A.md": "a" })), inFolder("Export/Part-2.zip", zipOf({ "Workspace/B.md": "b" })), inFolder("Export/.DS_Store", "x")]);
+    expect([parts.name, parts.files.map((file) => file.path)]).toEqual(["Workspace", ["A.md", "B.md"]]);
+    const nested = await exportedFrom([new File([zipOf({ "Part-1.zip": zipOf({ "Workspace/A.md": "a" }), "Part-2.zip": zipOf({ "Workspace/B.md": "b" }) })], "Export.zip")]);
+    expect([nested.name, nested.files.map((file) => file.path), await nested.files[1].text()]).toEqual(["Workspace", ["A.md", "B.md"], "b"]);
+  });
+
+  test("a ZIP that can't be read is left out and said so, unless it's all there is; one too big to read here says so", async () => {
+    const warn = console.warn;
+    console.warn = () => {};
+    try {
+      const damaged = await exportedFrom([inFolder("Export/Part-1.zip", zipOf({ "A.md": "a" })), inFolder("Export/Part-2.zip", "not a ZIP")]);
+      expect([damaged.name, damaged.files.map((file) => file.path), damaged.skipped]).toEqual(["Export", ["A.md"], ["Part-2.zip"]]);
+      await expect(exportedFrom([new File(["not a ZIP"], "Vault.zip")])).rejects.toThrow("Nothing in Vault.zip could be read");
+    } finally {
+      console.warn = warn;
+    }
+    const big = Object.defineProperty(new File([""], "Vault.zip"), "size", { value: 3 * 1024 ** 3 });
+    await expect(exportedFrom([big])).rejects.toBeInstanceOf(TooBig);
+  });
+
+  test("a file that would unpack to too much is left out and said so: packed tighter than any real file, past what one can be, or past what's left", async () => {
+    const exported = await exportedFrom([new File([deflated({ "Vault/Note.md": new TextEncoder().encode("# Note"), "Vault/zeros.bin": new Uint8Array(2 * MB) })], "Vault.zip")]);
+    expect([exported.name, exported.files.map((file) => file.path), exported.skipped]).toEqual(["Vault", ["Note.md"], ["Vault/zeros.bin"]]);
+    const file = (size: number, packed = size) => ({ size, packed, modified: 0, read: async () => new Uint8Array() });
+    const unpacking = new Unpacking(10 * MB);
+    expect([6 * MB, 6 * MB, [2 * MB, MB / 100], [1000, 1], 3 * MB].map((size) => unpacking.allows(Array.isArray(size) ? file(size[0], size[1]) : file(size)))).toEqual([true, false, false, true, true]);
+    expect(new Unpacking().allows(file(300 * MB))).toBe(false);
+  });
+});
+
 describe("importing notes", () => {
   test("its title above its text, unless it starts with it, written so nothing in it is more than text", () => {
     expect(withTitle("Plan", "Text")).toBe("# Plan\n\nText");
     expect(withTitle("Plan", "\n## plan\nText")).toBe("## plan\nText");
     expect(withTitle("Ideas #inbox", "Text", "---\na: b\n---\n")).toBe("---\na: b\n---\n# Ideas \\#inbox\n\nText");
+    // Blank lines before its text go, but not the spaces code starts with.
+    expect(withTitle("Plan", "\n\n    code\nText")).toBe("# Plan\n\n    code\nText");
+    expect(withTitle("Plan", "\n  # Plan\nText")).toBe("  # Plan\nText");
   });
 
   test("what it would do: notes not imported before (but those in the Trash), their folders and the files they show", () => {
@@ -342,5 +445,30 @@ describe("the import itself", () => {
     }
     expect(said.length).toBeLessThan(5);
     expect(imports.state).toEqual({ id: "obsidian", kind: "done", added: 0, appended: 0, stopped: true, failed: false });
+  });
+
+  test("notes sent ahead for an import stopped meanwhile are never another's", async () => {
+    const { importers } = await import("./stubs");
+    const { imports } = await import("../../src/lib/imports/imports.svelte");
+    // What each start is given to write, by the notes' text.
+    const given: string[][] = [];
+    importers.push({
+      id: "test",
+      work: (input) => {
+        given.push((input as { notes: { body: string }[] }).notes.map((note) => note.body));
+        return { add: [], append: [] };
+      },
+    });
+    const made = (body: string): NewNote => ({ body, source: { app: "test", id: body, name: body } });
+    // Sent, and then stopped (or Settings closed) before it started.
+    imports.receive("stopped", [made("Stale")]);
+    await imports.start("test", { notes: [] }, "next");
+    imports.receive("stopped again", [made("Stale too")]);
+    imports.stop();
+    await imports.start("test", { notes: [] }, "stopped again");
+    imports.receive("last", [made("Fresh")]);
+    imports.receive("last", [made("Fresh too")]);
+    await imports.start("test", { notes: [] }, "last");
+    expect(given).toEqual([[], [], ["Fresh", "Fresh too"]]);
   });
 });

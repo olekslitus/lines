@@ -96,7 +96,7 @@ export function tableData(ref: TypeRef): TableData {
         icon: iconOf(entry),
         cells: columns.map((column) => {
           const property = propertyOf(entry.meta.properties, column.key);
-          return cell(column, property ? valueText(property.value) : "");
+          return cell(column, property ? valueText(property.value, entry.note) : "");
         }),
       }))
       .sort((a, b) => a.title.localeCompare(b.title)),

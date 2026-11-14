@@ -49,7 +49,7 @@ trashed: false
 Plain Markdown, readable by any editor.
 ```
 
-A note in the Inbox has an `inbox: true` line, and loses it once filed. A note with an icon has an `icon` line, and one with a color a `color` line. A note in another format has a `format` line, followed by its text: `format: latex` and its LaTeX ([latex.md](latex.md)), or `format: spreadsheet` and its title and CSV ([spreadsheets.md](spreadsheets.md#its-text)). A note imported from another app has a `source` line saying where it came from, as JSON ([importing.md](importing.md#importing-again)). A line lines doesn't know, a newer version's, is kept as it is and written back when the note changes.
+A note in the Inbox has an `inbox: true` line, and loses it once filed. A note with an icon has an `icon` line, and one with a color a `color` line. A note in another format has a `format` line, followed by its text: `format: latex` and its LaTeX ([latex.md](latex.md)), or `format: spreadsheet` and its title and CSV ([spreadsheets.md](spreadsheets.md#its-text)). A note imported from another app has a `source` line saying where it came from, as JSON ([importing.md](importing.md#importing-again)). A line lines doesn't know, a newer version's, is kept as it is and written back when the note changes. A note changed on two devices at once keeps such lines of both, a line at a time, each as the side that changed it since has it (this device's, if both did), and they aren't part of its text, so one of them changed elsewhere is never an edit to keep a conflicted copy of. A version that retires such a line keeps its name known (read, and left out), so older versions that still have it don't bring it back.
 
 Importing such a file (Settings → Export and Import → Import Files…) brings the note back as it was, with its id, unless a note on the device has that id; then it comes in as a note of its own, so an import never replaces one.
 
@@ -137,7 +137,7 @@ AWeRtq…
 
 - The Markdown is encrypted with AES-256-GCM under a random key that notes locked with the same password share. Each note carries that key, locked with the password (PBKDF2-SHA-256, 600,000 iterations), so it opens on any device where you type the password. A device that has no password of its own yet takes this one once it's typed.
 - Changing the password locks the same key again, in every note that has it; they sync, and the new password opens them everywhere. "Forgot password" sets a new one for notes you lock from then on; notes already locked still need the old one.
-- Readable: the title, dates, pin and icon, and the names of the images and files it shows. Those images and files themselves aren't encrypted by the lock (end-to-end encryption does encrypt them).
+- Readable: the title, dates, pin and icon, and the names of the images and files it shows. Those images and files themselves aren't encrypted by the lock (end-to-end encryption does encrypt them). A note imported from another app says which, and what it was imported with (a vault's name), but of the note's id there (its path, which would say what folders it was in) only a hash, which importing again knows it by, and not its name there; unlocked again, it stays so.
 
 ## Setting up a bucket
 

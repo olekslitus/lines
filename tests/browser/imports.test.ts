@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { type App, engine, noErrors, openApp } from "./app";
+import { type App, engine, mod, noErrors, openApp } from "./app";
 
 /*
  * Notes from another app, imported from Settings → Export and Import: an Obsidian vault (the unit
@@ -71,6 +71,16 @@ test("an Obsidian vault: what importing it would do, said first; then its notes,
   await page.evaluate((id) => window.testing.notes.setText(id, "# Someday\n\n- A garden #someday\n"), notes["Ideas.md"].id);
   const finds = (from?: string) => page.evaluate((from) => window.testing.notes.find("Ideas", from ? window.testing.notes.get(from)?.note : undefined)?.meta.title, from);
   expect([await finds(notes["Welcome.md"].id), await finds()]).toEqual(["Someday", undefined]);
+  // Printed too.
+  await app.closeSettings();
+  await page.evaluate((id) => window.testing.notes.select(id), notes["Welcome.md"].id);
+  await page.waitForFunction(() => window.testing.text()?.includes("Welcome to the vault"));
+  await page.evaluate(() => window.testing.place(0));
+  await page.keyboard.press(`${mod()}+P`);
+  await page.getByRole("dialog").locator(".doc-mention", { hasText: /^Someday$/ }).first().waitFor();
+  await page.keyboard.press("Escape");
+  await page.getByRole("dialog").waitFor({ state: "hidden" });
+  await app.settings("Export and Import");
 
   // Undone: the notes it made are in the Trash, but the one changed since.
   await group.getByRole("button", { name: "Undo Import" }).click();
@@ -98,7 +108,7 @@ test("an Obsidian vault: what importing it would do, said first; then its notes,
 
   // Its folders are tags in the sidebar.
   await page.locator('.sidebar [data-tag="projects"]').waitFor();
-});
+}, 90_000);
 
 test("ten thousand notes: the import says how it's going, with Settings closed and opened again too, can be stopped, and what it wrote undone", async () => {
   app = await openApp();

@@ -73,18 +73,20 @@ export const isImage = (file: Blob) => file.type in IMAGES;
 
 /**
  * An image's description (or a video's name), and the width it's shown at when one follows a bar,
- * as Obsidian writes it: `![Lake at dawn|400](…)`, `[Sky.mp4|400](…)`. A height (`|400x300`) is
- * read and left out: images and videos keep their shape.
+ * as Obsidian writes it: `![Lake at dawn|400](…)`, `[Sky.mp4|400](…)`; in a table, the bar escaped
+ * as a table needs it, `\|400`. A height (`|400x300`) is read and left out: images and videos keep
+ * their shape.
  */
 export function imageSize(label: string): { alt: string; width: number | null } {
-  const match = /^(.*?)\s*\|\s*(\d{1,5})(?:\s*x\s*\d{1,5})?\s*$/.exec(label);
+  const match = /^(.*?)\s*\\?\|\s*(\d{1,5})(?:\s*x\s*\d{1,5})?\s*$/.exec(label);
   return match && Number(match[2]) > 0 ? { alt: match[1], width: Number(match[2]) } : { alt: label, width: null };
 }
 
-/** An image's label with its width set, or without one (null) for the image's own size. */
+/** An image's label with its width set (after a bar escaped as it was), or without one (null) for the image's own size. */
 export function withWidth(label: string, width: number | null) {
   const { alt } = imageSize(label);
-  return width ? `${alt}|${width}` : alt;
+  const bar = /\\\|\s*\d+(?:\s*x\s*\d+)?\s*$/.test(label) ? "\\|" : "|";
+  return width ? `${alt}${bar}${width}` : alt;
 }
 
 /** The attachment a link or image points at, if it's one of ours. */

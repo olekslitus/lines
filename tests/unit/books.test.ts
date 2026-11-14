@@ -194,4 +194,60 @@ describe("a ZIP's files", () => {
     // Saying so isn't enough past the limit.
     await expect(zipEntries(deflated(4096, 4096), 1024).get("big.bin")!.read()).rejects.toThrow("bigger than it says");
   });
+
+  /** `data`, a ZIP `zip` wrote, as one written with ZIP64: its end record full, the count and place in ZIP64's own record. */
+  function asZip64(data: Uint8Array) {
+    const end = data.length - 22;
+    const view = new DataView(data.buffer, data.byteOffset);
+    const [length, start] = [view.getUint32(end + 12, true), view.getUint32(end + 16, true)];
+    const record = new DataView(new ArrayBuffer(56 + 20 + 22));
+    record.setUint32(0, 0x06064b50, true);
+    record.setBigUint64(4, 44n, true);
+    record.setBigUint64(24, BigInt(count), true);
+    record.setBigUint64(32, BigInt(count), true);
+    record.setBigUint64(40, BigInt(length), true);
+    record.setBigUint64(48, BigInt(start), true);
+    record.setUint32(56, 0x07064b50, true);
+    record.setBigUint64(64, BigInt(end), true);
+    record.setUint32(72, 1, true);
+    record.setUint32(76, 0x06054b50, true);
+    record.setUint16(84, 0xffff, true);
+    record.setUint16(86, 0xffff, true);
+    record.setUint32(88, 0xffffffff, true);
+    record.setUint32(92, 0xffffffff, true);
+    return new Uint8Array(Buffer.concat([data.subarray(0, end), new Uint8Array(record.buffer)]));
+  }
+  const count = 70_000;
+
+  test("more than 65,535 of them, from ZIP64's record, or from an app that writes past what 16 bits hold without it: all listed, or it's damaged", () => {
+    const modified = new Date(2026, 10, 13);
+    const many = zip(Array.from({ length: count }, (_, i) => ({ name: `n${i}.md`, data: `${i}`, modified })));
+    expect(new DataView(many.buffer).getUint16(many.length - 12, true)).toBe(count % 65_536);
+    expect(zipEntries(many).size).toBe(count);
+    const zip64 = asZip64(many);
+    expect([zipEntries(zip64).size, zipEntries(zip64).get(`n${count - 1}.md`)!.size]).toEqual([count, 5]);
+    // Saying it has a file more than it lists, it's damaged, not read as far as it goes.
+    new DataView(many.buffer).setUint16(many.length - 12, (count % 65_536) + 1, true);
+    expect(() => zipEntries(many)).toThrow("damaged");
+  });
+
+  test("a file's size and place from ZIP64's extra field, where 32 bits can't hold them", async () => {
+    const one = zip([{ name: "a.txt", data: "hello", modified: new Date(2026, 10, 13) }]);
+    const at = one.length - 22 - 46 - 5;
+    const extra = new DataView(new ArrayBuffer(28));
+    extra.setUint16(0, 1, true);
+    extra.setUint16(2, 24, true);
+    extra.setBigUint64(4, 5n, true);
+    extra.setBigUint64(12, 5n, true);
+    const record = one.slice(at, at + 46 + 5);
+    const fields = new DataView(record.buffer);
+    fields.setUint32(20, 0xffffffff, true);
+    fields.setUint32(24, 0xffffffff, true);
+    fields.setUint32(42, 0xffffffff, true);
+    fields.setUint16(30, 28, true);
+    const end = one.slice(one.length - 22);
+    new DataView(end.buffer).setUint32(12, 46 + 5 + 28, true);
+    const data = new Uint8Array(Buffer.concat([one.subarray(0, at), record, new Uint8Array(extra.buffer), end]));
+    expect(new TextDecoder().decode(await zipEntries(data).get("a.txt")!.read())).toBe("hello");
+  });
 });

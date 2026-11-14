@@ -110,6 +110,15 @@ describe("importing a note's file from a sync folder", () => {
     expect(notes.entries[0].note.id).not.toBe(id);
   });
 
+  test("a copy of one imported from another app, given an id of its own, isn't where that came from", async () => {
+    const [here] = await devices(1);
+    const source = { app: "obsidian", collection: { id: "c1", name: "Vault" }, id: "Plan.md", name: "Plan" };
+    await notes.insert({ id: "imported", body: "# Plan", createdAt: 1, updatedAt: 1, pinned: false, trashed: false, source });
+    await here.sync();
+    await notes.importFiles([new File([drive.get(fileOf("imported"))!.text], "imported.md")]);
+    expect(notes.entries.map(({ note }) => [note.id === "imported", note.source])).toEqual([[false, undefined], [true, source]]);
+  });
+
   test("a locked note's comes in locked, not as its encrypted text", async () => {
     const { noteKeys } = await import("../../src/lib/notes/noteKeys.svelte");
     const { key } = await noteKeys.create("correct horse");
@@ -233,6 +242,23 @@ describe("sync, of a note changed on two devices", () => {
     expect(drive.get(fileOf(id))!.text).toContain('\nfuture: {"kept":true}\n---\n# Plan\n\none\ntwo\nthree');
   });
 
+  test("a line a newer version writes in a note's header elsewhere, while it's edited here, is kept, a line at a time, without a conflicted copy", async () => {
+    const [here, there] = await devices(2);
+    const id = notes.add("# Plan\n\none");
+    await here.sync();
+    const write = (change: (text: string) => string) => drive.set(fileOf(id), { text: change(drive.get(fileOf(id))!.text), etag: crypto.randomUUID() });
+    write((text) => text.replace("\ntrashed: false\n", "\ntrashed: false\nfuture: 1\nlater: a\n"));
+    await there.sync();
+    expect(notes.get(id)!.note.header).toEqual({ future: "1", later: "a" });
+    // Edited here while a newer version elsewhere archives it, changes one line and drops another.
+    notes.update(id, "# Plan\n\none\ntwo");
+    write((text) => text.replace("\nfuture: 1\nlater: a\n", "\nfuture: 2\narchived: true\n"));
+    await there.sync();
+    expect(notes.entries.length).toBe(1);
+    expect(notes.get(id)!.note).toMatchObject({ body: "# Plan\n\none\ntwo", header: { future: "2", archived: "true" } });
+    expect(drive.get(fileOf(id))!.text).toContain("\nfuture: 2\narchived: true\n---\n# Plan\n\none\ntwo");
+  });
+
   test("a note moved to the trash while it's edited elsewhere goes there with the edit", async () => {
     const [here, there] = await devices(2);
     const id = notes.add("# Draft\n\none");
@@ -281,6 +307,22 @@ describe("sync, of a note changed on two devices", () => {
       await here.sync();
       expect(listed()).toEqual([{ body: "# Bank\n\nPIN 1234\nPUK 5678", pinned: false, trashed: false, icon: undefined, color: undefined, locked: true }]);
       expect(drive.get(fileOf(id))!.text).not.toContain("PIN");
+    });
+
+    test("imported from another app, keeps only a hash of where it came from, which importing again still knows it by", async () => {
+      const [here, there] = await devices(2);
+      const source = { app: "obsidian", collection: { id: "c1", name: "Vault" }, id: "Finance/Bank.md", name: "Bank" };
+      await notes.insert({ id: "bank", body: "# Bank\n\nPIN 1234", createdAt: 1, updatedAt: 1, pinned: false, trashed: false, source });
+      await notes.lock("bank");
+      await here.sync();
+      const text = drive.get(fileOf("bank"))!.text;
+      expect([text.includes("Finance"), text.includes('"name":"Bank"')]).toEqual([false, false]);
+      await there.sync();
+      const kept = notes.get("bank")!.note.source!;
+      expect([kept.app, kept.collection, /^#\w+$/.test(kept.id), kept.name]).toEqual(["obsidian", source.collection, true, ""]);
+      const { planNotes, Tally } = await import("../../src/lib/imports/notes");
+      const vault = { name: "Vault", local: true, notes: [{ id: "Finance/Bank.md", name: "Bank", body: "# Bank", folders: ["Finance"], tags: [] }], attachments: [], report: new Tally() };
+      expect(planNotes("obsidian", vault, notes.entries).there.length).toBe(1);
     });
 
     test("and with the password not given here, the locked note is kept as it is, the edit as a copy", async () => {

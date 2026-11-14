@@ -12,6 +12,7 @@ export default {
   // Notes from another app (NotesImport.svelte): what's found, said before anything's written: "1,234 notes, 56 attachments and 12 folders in My Vault."
   "import.reading": "Reading…",
   "import.unreadable": "This couldn’t be read, so nothing was imported.",
+  "import.tooBig": "This ZIP is too big to read here (over 2 GB), so nothing was imported. Unpack it, and choose its folder.",
   "import.found": "{things} in {name}.",
   "import.nothingNew": "Everything in {name} is in lines already.",
   "import.count.notes": "{count, plural, one {# note} other {# notes}}",
@@ -37,8 +38,10 @@ export default {
   "import.report.properties": "{count, plural, one {# note’s properties lines can’t read, kept as YAML at its top: {examples}} other {# notes’ properties lines can’t read, kept as YAML at their top: {examples}}}",
   "import.report.cssClasses": "{count, plural, one {# CSS class, kept as a property, which lines doesn’t use: {examples}} other {# CSS classes, kept as properties, which lines doesn’t use: {examples}}}",
   "import.report.comments": "{count, plural, one {# comment kept as written, as it holds what would end an HTML comment: {examples}} other {# comments kept as written, as they hold what would end an HTML comment: {examples}}}",
+  "import.report.openComments": "{count, plural, one {# %% with no %% to close it in its paragraph, kept as text: {examples}} other {# %% with no %% to close them in their paragraphs, kept as text: {examples}}}",
   "import.report.sameName": "{count, plural, one {# note has another’s name, and links to it may find that one: {examples}} other {# notes have another’s name, and links to that name find the one edited last: {examples}}}",
   "import.report.unused": "{count, plural, one {# file no note shows, left out: {examples}} other {# files no note shows, left out: {examples}}}",
+  "import.report.skipped": "{count, plural, one {# file couldn’t be read, or would unpack to too much, and was left out: {examples}} other {# files couldn’t be read, or would unpack to too much, and were left out: {examples}}}",
   // Obsidian's group of Settings → Export and Import.
   "import.obsidian.title": "From Obsidian",
   "import.obsidian.note": "A vault is a folder of Markdown files, so there’s nothing to export: choose the vault’s folder. To find it, open Obsidian’s vault switcher (the vault’s name, at the bottom of the sidebar) → Manage Vaults, or right-click a note → Reveal in Finder. Notes, folders, links, pictures and files, callouts, bookmarks (pinned) and daily notes (on the Calendar) all come across.",

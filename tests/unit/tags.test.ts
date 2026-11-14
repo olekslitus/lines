@@ -50,4 +50,6 @@ test("a bare mention of a name with combining marks is read whole", () => {
 test("a wiki link in a table, its bar escaped as a table needs it, reads as one outside it", () => {
   expect(readMention("[[Ada Lovelace\\|Ada]]")).toEqual(readMention("[[Ada Lovelace|Ada]]"));
   expect(readMention("[[Ada Lovelace\\|Ada]]")).toEqual({ name: "Ada Lovelace", shown: "Ada" });
+  // A backslash that ends a title, with no bar after it, is the title's.
+  expect(readMention("[[C:\\]]")).toEqual({ name: "C:\\" });
 });

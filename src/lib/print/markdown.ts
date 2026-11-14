@@ -67,7 +67,7 @@ export function markdownDocument(body: string, parts: Parts): HTMLElement {
     text = body.split("\n").slice(front.lines).join("\n");
     if (front.properties.length) {
       const list = el("dl", "doc-properties");
-      for (const { key, value } of front.properties) list.append(el("dt", "", key), el("dd", "", valueText(value)));
+      for (const { key, value } of front.properties) list.append(el("dt", "", key), el("dd", "", valueText(value, parts.note)));
       doc.append(list);
     }
   }
@@ -173,7 +173,7 @@ export function markdownDocument(body: string, parts: Parts): HTMLElement {
       case "Tag":
         return void into.appendChild(el("span", "doc-tag", slice(node.from, node.to)));
       case "Mention":
-        return void into.appendChild(el("span", "doc-mention", valueText(slice(node.from, node.to))));
+        return void into.appendChild(el("span", "doc-mention", valueText(slice(node.from, node.to), parts.note)));
       case "Escape":
         return plain(slice(node.from + 1, node.to), into);
       case "Entity": {

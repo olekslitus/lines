@@ -29,6 +29,7 @@ import {
 import { plainLine } from "../notes/stats";
 import { locale, t } from "../i18n/index.svelte";
 import { type Entry, notes } from "../notes/store.svelte";
+import type { Note } from "../notes/types";
 import { typeLooks } from "../notes/looks.svelte";
 import { speak } from "../a11y";
 import { announce, windowLabel } from "../windows/channel";
@@ -67,16 +68,17 @@ export function iconOf({ note, meta }: Entry): IconName {
 
 /**
  * Text as it reads: no Markdown, and mentions as what they show, notes' titles and properties'
- * values. A value mentioning another is followed twice at most, so two that mention each other end.
+ * values, found as they are from the note it's in (`from`, `notes.find`). A value mentioning another
+ * is followed twice at most, so two that mention each other end.
  */
-export function valueText(text: string, depth = 0): string {
+export function valueText(text: string, from?: Note, depth = 0): string {
   const resolved = text.replace(MENTION, (written) => {
     const mention = readMention(written);
-    const entry = mention && notes.find(mention.name);
+    const entry = mention && notes.find(mention.name, from);
     if (!mention || !entry) return written;
     if (!mention.key) return mention.shown ?? (entry.meta.title || written);
     const property = depth < 2 && !entry.note.locked ? propertyOf(entry.meta.properties, mention.key) : undefined;
-    return (property && valueText(property.value, depth + 1)) || written;
+    return (property && valueText(property.value, entry.note, depth + 1)) || written;
   });
   return plainLine(resolved).trim();
 }
@@ -136,7 +138,7 @@ export class MentionWidget extends WidgetType {
 }
 
 /** The note an editor shows, which a mention in it finds notes from (`notes.find`). */
-const shownNote = (state: EditorState) => notes.get(state.facet(editedNote) ?? "")?.note;
+export const shownNote = (state: EditorState) => notes.get(state.facet(editedNote) ?? "")?.note;
 
 /**
  * How the mention written as `text` in `state` is drawn: a widget, or why it can't be (shown as
@@ -161,7 +163,7 @@ export function drawMention(text: string, state: EditorState): { widget: Mention
   if (!mention.key) return { widget: new MentionWidget(note.id, mention.shown ?? title, iconOf(entry), tip) };
   if (note.locked) return { missing: t("editor.mention.locked", { title }) };
   const property = propertyOf(meta.properties, mention.key);
-  const value = property && valueText(property.value);
+  const value = property && valueText(property.value, note);
   if (!value) {
     return {
       missing: property
@@ -225,12 +227,12 @@ export function mentionSource(context: CompletionContext): CompletionResult | nu
     return options.length ? { from: context.pos - typingKey[3].length, filter: false, options } : null;
   }
   if (typingKey) {
-    const entry = notes.find(typingKey[1] ?? typingKey[2]);
+    const entry = notes.find(typingKey[1] ?? typingKey[2], shownNote(context.state));
     if (!entry?.meta.properties.length) return null;
     const query = typingKey[3].toLowerCase();
     const options = entry.meta.properties
       .filter((property) => mentionKey(property.key).toLowerCase().startsWith(query))
-      .map((property): IconCompletion => ({ label: mentionKey(property.key), detail: valueText(property.value).slice(0, 30), icon: null }));
+      .map((property): IconCompletion => ({ label: mentionKey(property.key), detail: valueText(property.value, entry.note).slice(0, 30), icon: null }));
     return options.length ? { from: context.pos - typingKey[3].length, filter: false, options } : null;
   }
 

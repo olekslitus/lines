@@ -33,6 +33,8 @@ import type { Note, NoteLock, NoteSource } from "../notes/types";
  *   locked: {"title":"Bank","files":[],"key":{"id":"…","changed":…,"kdf":"PBKDF2-SHA256",…}}
  *   ---
  *   AWeRtq…
+ *
+ * Of where it came from, it keeps only a hash of its id there (`lockedSource`).
  */
 
 export function serialize(note: Note): string {
@@ -48,7 +50,7 @@ export function serialize(note: Note): string {
     ...(note.icon ? [`icon: ${note.icon}`] : []),
     ...(note.color ? [`color: ${note.color}`] : []),
     ...(note.format ? [`format: ${note.format}`] : []),
-    ...(note.source ? [`source: ${JSON.stringify(note.source)}`] : []),
+    ...(note.source ? [`source: ${JSON.stringify(note.locked ? lockedSource(note.source) : note.source)}`] : []),
     ...Object.entries(note.header ?? {}).map(([key, value]) => `${key}: ${value}`),
     ...(lock ? [`locked: ${JSON.stringify(lock)}`] : []),
     "---",
@@ -113,6 +115,19 @@ function readLock(field: string | undefined, body: string): NoteLock | undefined
   } catch {
     return;
   }
+}
+
+/** The hash a locked note keeps of its id in the app it came from (`lockedSource`). */
+export const hiddenSourceId = (app: string, collection: string, id: string) => `#${hash([app, collection, id].join("\u0001"))}`;
+
+/**
+ * Where a locked note came from, as it's kept and synced: the app and what it was imported with, but
+ * of its id there (a path, which says what folders it was in) only a hash, which importing again
+ * still knows it by, and not its name there.
+ */
+export function lockedSource(source: NoteSource): NoteSource {
+  if (!source.name) return source;
+  return { ...source, id: hiddenSourceId(source.app, source.collection?.id ?? "", source.id), name: "" };
 }
 
 function readSource(field: string | undefined): NoteSource | undefined {

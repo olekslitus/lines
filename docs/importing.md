@@ -20,9 +20,13 @@ What carries over, from any app:
 - **Attachments.** Pictures and files the notes show are kept as lines keeps any ([linedown.md](linedown.md#attachments)), by their content: a file shown by several notes, or imported before, is kept once. A file no note shows is left out, and said so.
 - **Links between notes** become wiki links (`[[Plan]]`, `[[Plan#Goals|the goals]]`), which lines draws as mentions. A link to a note that isn't there stays one, which lines offers to create.
 
+### ZIPs, and how big an export can be
+
+A ZIP in a folder chosen is one of its files, like any other, never unpacked: only a ZIP chosen as a file is, or a folder of nothing but ZIPs (an export in parts, unpacked once), and a ZIP of ZIPs. A ZIP is read into memory, so it can be up to 2 GB, and what's in it can unpack to 2 GB all told; for a bigger one, unpack it and choose its folder, whose files are read one at a time, with no limit. A file in a ZIP that would unpack to more than 256 MB, or that's packed more than 100 times over (as no real file is, only one made to fill memory), is left out, and said so, as is a ZIP in parts that can't be read. ZIPs of more than 65,535 files (ZIP64) are read whole.
+
 ### Importing again
 
-Importing the same export again adds only the notes that aren't here yet, and says which are (a few by name): lines keeps, with each note it imports, where it came from (the app, the note's id there and its name there), in the note's own record rather than its text. It's written in the header lines keeps above a synced note's text ([sync.md](sync.md)) as `source: {"app":"obsidian","collection":{"id":"9c2e…","name":"Vault"},"id":"Projects/Plan.md","name":"Plan"}`, so it goes to your other devices too, and isn't in an export. A note you've changed since isn't changed again, nor brought back as a second copy. One in the Trash counts as not here (an import undone, say), unless it was in the other app's trash too. A conflicted copy sync makes of an imported note doesn't say where it came from: only the note does.
+Importing the same export again adds only the notes that aren't here yet, and says which are (a few by name): lines keeps, with each note it imports, where it came from (the app, the note's id there and its name there), in the note's own record rather than its text. It's written in the header lines keeps above a synced note's text ([sync.md](sync.md)) as `source: {"app":"obsidian","collection":{"id":"9c2e…","name":"Vault"},"id":"Projects/Plan.md","name":"Plan"}`, so it goes to your other devices too, and isn't in an export. A note you've changed since isn't changed again, nor brought back as a second copy. One in the Trash counts as not here (an import undone, say), unless it was in the other app's trash too. A conflicted copy sync makes of an imported note doesn't say where it came from: only the note does. A locked note keeps only a hash of its id there, and not its name there ([sync.md](sync.md#locked-notes)): importing again still knows it, but links brought with it don't find it by its old name once it's renamed.
 
 Some apps' notes have ids of their own everywhere (Bear's). An Obsidian vault's are only its notes' paths, which another vault can have too, and a vault has no id lines can read. So each vault gets an id of lines' own when it's first imported (`collection` above), and when one is chosen that may be a vault imported before (the same name, or notes with the same paths, as when it's been renamed or moved) lines asks: **The same as "Vault", imported before** is on to begin with, and says how many of its notes have the same paths. On, what's here already is left out; off, it's another vault, and all of it is imported.
 
@@ -47,14 +51,14 @@ A mention finds a note by its title ([linedown.md](linedown.md#mentions)), and r
 | Pictures and files wherever the vault keeps them (its attachment folder setting, a folder of each note's) | Found as Obsidian finds them, by their name |
 | `> [!tip] Title` callouts | lines' callouts (`:::info icon=lightbulb`), the title in bold on their first line; note, info, tip, success, example and the like as info, with Obsidian's icon; question; warning; danger, bug and failure as error. Nested ones nest. One of a kind lines doesn't know is a card of its name. Folding ones are open |
 | `==highlight==`, `#tag`, `#nested/tag`, `$math$`, ` ```mermaid `, tables, tasks | The same: lines writes them alike |
-| `%%comment%%` | `<!--comment-->`, Markdown's own: faint in lines, and not shown by other Markdown apps. One that runs past a code block, or holds what would end an HTML comment (`-->`), is kept as written, and said so |
-| `[[Plan\|the plan]]` and `![[photo.png\|300]]` in a table, the bar escaped | The same, the bar still escaped, so the table keeps its columns |
+| `%%comment%%` | `<!--comment-->`, Markdown's own: faint in lines, and not shown by other Markdown apps. One within text ends in its paragraph (or heading, or table cell), or its `%%` stays text, and is said so; one that starts a paragraph runs on to the next `%%`, past blank lines too. One that runs past a code block, or holds what would end an HTML comment (`-->`), is kept as written, and said so |
+| A bar in a table: `[[Plan\|the plan]]`, `![[photo.png\|300]]`, escaped | Every bar the import writes in a table escaped, `\|`: a link's, a Markdown link made a wiki link (`[[Plan\|the plan]]`), a picture's width (`![\|300](…)`), so the table keeps its columns |
 | Bookmarked notes (and starred, in older vaults) | Pinned |
 | Daily notes, named as Daily notes' settings say (`2026-11-14`) in their folder, or any note named like a day | `date: 2026-11-14`, so it's on the Calendar on that day |
 | Notes in the vault's `.trash` | In the Trash |
 | `created:` and `updated:` properties (or `date created`, `modified`…) | When the note was made and changed; otherwise its file's date |
 
-**Code is left as it is**, read as lines reads Markdown: fenced and indented code blocks, in lists and quotes too, inline code, math and HTML. A link, an embed or a `%%` in them stays as written.
+**Code is left as it is**, read as lines reads Markdown: fenced and indented code blocks, in lists and quotes too, inline code, math and HTML. A link, an embed or a `%%` in them stays as written; so does a `%%` in a link (`[50%% off](Sale.md)`, `[[Sale|50%%]]`).
 
 **Links never lead into the vault's trash** (`.trash`), as in Obsidian: only its notes are imported, into the Trash; its pictures and files aren't.
 

@@ -46,6 +46,8 @@ How each import works is in [importing.md](importing.md).
 - Not tried in the Mac, Windows or Linux apps, nor with Settings in a window of its own, where the attachments are copied in the Settings window and the notes made in the main one (sent to it 500 at a time). Closing that window while attachments are copied stops the import there, before any note is made.
 - Versions of lines from before importing came keep a synced note's `source:` line only until they change the note: writing it again, they leave it out, so importing again on a device with this version would bring that note in twice. This version, and later ones, keep any line of the header they don't know and write it back.
 - An Obsidian vault has no id of its own that lines can read, so a vault imported before is found by its name, or by notes with the same paths; whether it's the same is asked, not guessed.
+- A ZIP is read into memory: up to 2 GB, unpacking to 2 GB all told. A bigger one is to be unpacked, and its folder chosen.
+- A note imported and then locked keeps only a hash of where it came from, even unlocked again: links brought with it no longer find it by its old name once it's renamed.
 
 ## The website
 

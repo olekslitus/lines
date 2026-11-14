@@ -5,7 +5,7 @@ import type { Note, NoteSource } from "../notes/types";
 import { plugins } from "../plugins/registry.svelte";
 import type { LibraryItem } from "../plugins/types";
 import { prefs } from "../prefs.svelte";
-import { keepAttachments, notesInput, type NotesPlan, type Source } from "./notes";
+import { keepAttachments, notesInput, type NotesInput, type NotesPlan, type Source } from "./notes";
 
 /*
  * Bringing things into lines from elsewhere: notes from another app (Obsidian), and things for the
@@ -96,9 +96,9 @@ class Imports {
   /** What the import last done wrote: each note it made, as made, and each it added to, before and after. */
   #wrote: { added: Map<string, string>; appended: { id: string; before: string; after: string }[] } | null = null;
   #controller: AbortController | undefined;
-  /** Keeping the files of notes from another app, in this window (`importNotes`). */
-  #copying: AbortController | undefined;
-  /** Notes for an import, sent ahead of starting it (`receive`). */
+  /** Keeping the files of notes from another app and sending the notes, in this window (`importNotes`). */
+  #preparing: AbortController | undefined;
+  /** Notes sent ahead of starting an import, by the run of it they're for (`receive`). */
   #received = new Map<string, NewNote[]>();
 
   get busy() {
@@ -112,7 +112,7 @@ class Imports {
    */
   async importNotes(id: string, source: Source, plan: NotesPlan, options: { folderTags: boolean; report: string[] }) {
     if (this.busy) return;
-    const controller = (this.#copying = new AbortController());
+    const controller = (this.#preparing = new AbortController());
     const total = plan.attachments.length;
     let said = -Infinity;
     const copied = (done: number) => {
@@ -121,37 +121,44 @@ class Imports {
       this.state = { id, kind: "copying", total, done };
     };
     if (total) copied(0);
-    let names: Map<number, string>;
+    // This run's, so notes sent for one that was stopped are never another's.
+    const run = crypto.randomUUID();
+    let input: Omit<NotesInput, "notes">;
     try {
-      names = await keepAttachments(source, plan, controller.signal, copied);
+      const names = await keepAttachments(source, plan, controller.signal, copied);
       controller.signal.throwIfAborted();
+      const { notes, ...rest } = { ...notesInput(id, plan, names, source, options), report: options.report };
+      input = rest;
+      // Under way already, as the main window will say.
+      this.state = { id, kind: "importing", total: notes.length, written: 0 };
+      for (let from = 0; from < notes.length; from += SENT) {
+        await this.receive(run, notes.slice(from, from + SENT));
+        controller.signal.throwIfAborted();
+      }
     } catch {
-      // Stopped while copying, before any note was made: nothing to take back.
+      // Stopped before any note was made: nothing to take back.
       this.state = { id, kind: "done", added: 0, appended: 0, stopped: true, failed: false };
       return;
     } finally {
-      this.#copying = undefined;
+      this.#preparing = undefined;
     }
-    const { notes, ...input } = { ...notesInput(id, plan, names, source, options), report: options.report };
-    // Under way already, as the main window will say.
-    this.state = { id, kind: "importing", total: notes.length, written: 0 };
-    for (let from = 0; from < notes.length; from += SENT) await this.receive(id, notes.slice(from, from + SENT));
-    await this.start(id, { ...input, notes: [] });
+    await this.start(id, { ...input, notes: [] }, run);
   }
 
-  /** Notes for the import `id`, ahead of starting it, so they go between windows a part at a time; `start` takes them. */
-  receive(id: string, notes: NewNote[]) {
-    this.#received.set(id, [...(this.#received.get(id) ?? []), ...notes]);
+  /** Notes for the run `run` of an import, ahead of starting it, so they go between windows a part at a time; `start` takes them. */
+  receive(run: string, notes: NewNote[]) {
+    this.#received.set(run, [...(this.#received.get(run) ?? []), ...notes]);
   }
 
   /**
    * Imports `input` with the import `id` (what its panel found), unless one's under way. Resolves
    * once it's done. With nothing to write by then, what the last import wrote is kept, to undo.
    */
-  async start(id: string, input: unknown) {
+  async start(id: string, input: unknown, run?: string) {
     const source = plugins.imports.find((each) => each.id === id);
-    const received = this.#received.get(id);
-    this.#received.delete(id);
+    const received = run === undefined ? undefined : this.#received.get(run);
+    // Any other run's are left from one stopped while they were sent.
+    this.#received.clear();
     if (!source || this.#controller) return;
     if (received) input = { ...(input as object), notes: received };
     // Against the notes as they are now, not as they were when it was asked about.
@@ -225,14 +232,15 @@ class Imports {
     return { note: { ...dated, body, pinned: false, trashed: false } satisfies Note, keep: () => keepCover(written, dated.id) };
   }
 
-  /** Stops the import under way between notes, keeping what it wrote, which Undo takes back. */
+  /** Stops the import under way between notes, keeping what it wrote, which Undo takes back; or one whose notes are still being sent. */
   stop() {
     this.#controller?.abort();
+    this.#received.clear();
   }
 
-  /** Stops the import under way, in this window (copying files) or the main one (making notes). */
+  /** Stops the import under way, in this window (copying files, sending notes) or the main one (making notes). */
   cancel() {
-    this.#copying?.abort();
+    this.#preparing?.abort();
     void this.stop();
   }
 

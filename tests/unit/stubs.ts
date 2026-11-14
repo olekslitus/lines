@@ -1,5 +1,6 @@
 import { mock } from "bun:test";
 import { readFileSync } from "node:fs";
+import type { Import } from "../../src/lib/plugins/types";
 
 /*
  * What a module imports for the app, which a unit test outside a page doesn't have: messages (as
@@ -13,9 +14,12 @@ const platformPath = new URL("../../src/lib/platform.ts", import.meta.url).pathn
 /** Every name the platform module exports, so a stub of it misses none another module imports. */
 const NAMES = [...readFileSync(platformPath, "utf8").matchAll(/^export (?:const|async function|function) (\w+)/gm)].map((match) => match[1]);
 
+/** The imports plugins add (none), for a test of the import itself to add one to; the same in every stub of the plugins. */
+export const importers: Pick<Import, "id" | "work">[] = [];
+
 export function stubApp(platform: Record<string, unknown> = {}) {
   mock.module("../../src/lib/i18n/index.svelte", () => ({ t: (key: string) => key, language: "en", locale: "en" }));
   const stubs: Record<string, unknown> = Object.fromEntries(NAMES.map((name) => [name, /^(is|can)[A-Z]/.test(name) ? false : name === "modKey" || name === "newNoteKey" ? "" : () => undefined]));
   mock.module("../../src/lib/platform", () => ({ ...stubs, coarsePointer: { matches: false }, reducedMotion: { matches: false }, ...platform }));
-  mock.module("../../src/lib/plugins/registry.svelte", () => ({ DEFAULT_LANGUAGE: "markdown", plugins: { libraryKind: () => undefined, librarySources: [] } }));
+  mock.module("../../src/lib/plugins/registry.svelte", () => ({ DEFAULT_LANGUAGE: "markdown", plugins: { libraryKind: () => undefined, librarySources: [], imports: importers } }));
 }

@@ -7,7 +7,7 @@
   // lib/imports/imports.svelte.ts). Rows of the card of its plugin's group.
   import { speak } from "../../a11y";
   import { locale, t } from "../../i18n/index.svelte";
-  import { type Exported, exportedFrom } from "../../imports/exported";
+  import { type Exported, exportedFrom, TooBig } from "../../imports/exported";
   import { imports } from "../../imports/imports.svelte";
   import { type NotesPlan, planNotes, type Source } from "../../imports/notes";
   import { notes } from "../../notes/store.svelte";
@@ -83,13 +83,16 @@
     error = null;
     found = plan = null;
     try {
-      found = { source: await read(await exportedFrom(files)), fresh: crypto.randomUUID() };
+      const exported = await exportedFrom(files);
+      const source = await read(exported);
+      for (const path of exported.skipped ?? []) source.report.add("import.report.skipped", path);
+      found = { source, fresh: crypto.randomUUID() };
       same = true;
       plan = planned();
       speak(lines.join(" "));
     } catch (problem) {
       console.warn(`lines: couldn't read what was chosen to import from ${id}`, problem);
-      error = t("import.unreadable");
+      error = problem instanceof TooBig ? t("import.tooBig") : t("import.unreadable");
     } finally {
       reading = false;
     }

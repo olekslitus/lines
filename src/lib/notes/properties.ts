@@ -124,8 +124,11 @@ export function readMention(text: string): Mention | null {
   MENTION.lastIndex = 0;
   const match = MENTION.exec(text);
   if (!match || match.index !== 0) return null;
-  // In a table, the bar before the text shown is `\|`, as a table needs it.
-  if (match[4] !== undefined) return { name: match[4].trim().replace(/\\$/, ""), ...(match[5]?.trim() ? { shown: match[5].trim() } : {}) };
+  if (match[4] !== undefined) {
+    // In a table, the bar before the text shown is `\|`, as a table needs it; a backslash ending a name with no bar after it is the name's.
+    const name = match[4].trim();
+    return { name: match[5] === undefined ? name : name.replace(/\\$/, ""), ...(match[5]?.trim() ? { shown: match[5].trim() } : {}) };
+  }
   return { name: unescapeMarkdown(match[1] ?? match[2]), ...(match[3] ? { key: match[3] } : {}) };
 }
 

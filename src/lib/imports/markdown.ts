@@ -25,12 +25,20 @@ export interface Edit extends Span {
   insert: string;
 }
 
+/** A block of text: a paragraph, a heading, a table's cell. */
+export interface Leaf extends Span {
+  /** Whether it's at the note's top level, in no list or quote. */
+  top: boolean;
+}
+
 /** What lines reads in a text: where it's left as it is, and its links. */
 export interface Read {
   /** Code, math, HTML and comments, which an import leaves as they are. */
   kept: Span[];
   /** Code and HTML blocks, which a comment from another app can't run across. */
   blocks: Span[];
+  /** Its paragraphs, headings and tables' cells, in order. */
+  leaves: Leaf[];
   /** Its Markdown links and pictures. */
   links: MarkdownLink[];
   /** The languages of its code blocks. */
@@ -39,11 +47,13 @@ export interface Read {
 
 const KEPT = new Set(["InlineCode", "InlineMath", "Comment", "HTMLTag", "Autolink", "URL"]);
 const BLOCKS = new Set(["FencedCode", "CodeBlock", "HTMLBlock", "CommentBlock", "MathBlock", "ProcessingInstructionBlock"]);
+const LEAVES = /^(?:Paragraph|ATXHeading\d|SetextHeading\d|TableCell)$/;
 
 export function readMarkdown(text: string): Read {
-  const read: Read = { kept: [], blocks: [], links: [], languages: [] };
+  const read: Read = { kept: [], blocks: [], leaves: [], links: [], languages: [] };
   linedownParser.parse(text).iterate({
     enter(node) {
+      if (LEAVES.test(node.name)) read.leaves.push({ from: node.from, to: node.to, top: node.node.parent?.name === "Document" });
       if (BLOCKS.has(node.name)) {
         read.kept.push({ from: node.from, to: node.to });
         read.blocks.push({ from: node.from, to: node.to });
@@ -103,12 +113,31 @@ export function editsIn(text: string, parts: Span[], pattern: RegExp, replace: (
   return edits;
 }
 
-/** `text` with `edits` made, which don't overlap. */
+/** The rows of `text`'s tables, where a bar starts another cell. */
+function rowsOf(text: string): Span[] {
+  const rows: Span[] = [];
+  linedownParser.parse(text).iterate({
+    enter(node) {
+      if (node.name !== "TableHeader" && node.name !== "TableRow") return;
+      rows.push({ from: node.from, to: node.to });
+      return false;
+    },
+  });
+  return rows;
+}
+
+/**
+ * `text` with `edits` made, which don't overlap. A bar an edit writes in a table's row (a link's
+ * `[[Plan|the plan]]`, a picture's `![|300](…)`) is escaped, `\|`, as the table needs it, so it
+ * doesn't start another cell.
+ */
 export function edited(text: string, edits: Edit[]) {
+  const rows = edits.some((edit) => edit.insert.includes("|")) ? rowsOf(text) : [];
   let out = "";
   let at = 0;
   for (const edit of [...edits].sort((a, b) => a.from - b.from)) {
-    out += text.slice(at, edit.from) + edit.insert;
+    const inRow = rows.some((row) => row.from <= edit.from && edit.to <= row.to);
+    out += text.slice(at, edit.from) + (inRow ? edit.insert.replace(/(?<!\\)\|/g, "\\|") : edit.insert);
     at = edit.to;
   }
   return out + text.slice(at);

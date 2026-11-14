@@ -3,6 +3,7 @@ import { SvelteMap } from "svelte/reactivity";
 import { speak } from "../a11y";
 import { t } from "../i18n/index.svelte";
 import { keepCover } from "../library/covers";
+import { lookUp } from "../library/lookup";
 import { coverOfItem, libraryNote } from "../library/note";
 import { addedAgain, inLibrary, libraryNoteOf } from "../library/same";
 import { clock, coverOf, known, withCover } from "../library/text";
@@ -267,6 +268,13 @@ class Feeds {
       await this.take(url, feed, response.validators);
       return feed;
     } catch (error) {
+      // Its site answered, but not with the feed (not to be asked again yet, it'd have said): some can be read another way (YouTube's, from its page).
+      const missing = error instanceof NotAFeed || (error instanceof FetchError && !!error.status && error.status !== 429 && !error.retryAt);
+      const instead = missing ? await feedInstead(url).catch((reason) => void console.warn(`lines: couldn't read the feed ${url} another way`, reason)) : null;
+      if (instead) {
+        await this.take(url, instead, {});
+        return instead;
+      }
       console.warn(`lines: couldn't fetch the feed ${url}`, error);
       const now = Date.now();
       const reason = error instanceof NotAFeed ? "not a feed" : error instanceof Error ? error.message : String(error);
@@ -391,6 +399,28 @@ class Feeds {
     const show = this.subscription(feed)?.title || record?.title;
     const published = post.date ? dayOf(post.date) : undefined;
     const html = await this.content(post);
+    const channel = notes.get(this.subscription(feed)?.note ?? "");
+    if (channel?.meta.type === "channel" && post.link) {
+      // A channel's video, kept as a link to it is (its source looks it up), its channel the channel's note.
+      const found = await lookUp(post.link, signal ?? new AbortController().signal).catch(() => null);
+      const video: LibraryItem =
+        found?.type === "video"
+          ? found
+          : {
+              type: "video",
+              title: post.title,
+              link: post.link,
+              properties: known([
+                ["channel", show],
+                ["published", published],
+                ["duration", clock(post.duration)],
+              ]),
+              cover: post.image,
+              description: html ? plainText(html) : post.excerpt,
+            };
+      const page = propertyOf(channel.meta.properties, "link")?.value.trim();
+      return this.#write(page ? { ...video, linked: { ...video.linked, channel: page } } : video, signal);
+    }
     const item: LibraryItem = post.audio
       ? {
           type: "episode",
@@ -424,7 +454,7 @@ class Feeds {
 
   /** A note for `item`, made as any library note is: its text written, then its cover kept with it. Its id. */
   async #write(item: LibraryItem, signal?: AbortSignal): Promise<string> {
-    const note = await libraryNote(item, signal);
+    const note = await libraryNote(item, notes.entries, signal);
     const id = crypto.randomUUID();
     const now = Date.now();
     await notes.insert({ id, body: note.text, createdAt: now, updatedAt: now, pinned: false, trashed: false });
@@ -441,6 +471,30 @@ class Feeds {
   async subscribe(input: string, signal = new AbortController().signal): Promise<{ url: string; again: boolean }> {
     const link = linkOf(input);
     if (!link) throw new NoFeed(input);
+    // A subscription of a kind of its own (a YouTube channel), as its source makes it: its feed, or that read another way while it can't be had.
+    // Where its source can't say (on the web, which can't read YouTube's pages), the link is a feed's or a page's, as any is.
+    const own = await subscriptionOf(link, signal).catch((error) => {
+      signal.throwIfAborted();
+      console.warn(`lines: couldn't ask what subscribing to ${link} is`, error);
+      return null;
+    });
+    const url = own?.properties.find(([key]) => key === "feed")?.[1];
+    if (own && url) {
+      // By its feed's address: the channel subscribed to already, or its feed as a site's.
+      const there = libraryNoteOf({ type: own.type, properties: [["feed", url]] });
+      if (there) {
+        addedAgain(there);
+        return { url: feedOf(there.meta.properties) ?? url, again: true };
+      }
+      const found = await findFeed(url, signal).catch(async (error) => {
+        const feed = await feedInstead(url, signal).catch(() => null);
+        if (!feed) throw error;
+        return { url, feed, validators: {} };
+      });
+      await this.take(url, found.feed, found.validators);
+      await this.#write(own, signal);
+      return { url, again: false };
+    }
     // The link given is the person's own, wherever it is; a feed it names, or a podcast's site's, is the web's.
     const named = await namedFeed(link, signal);
     const found = await findFeed(named ?? link, signal, namedFeed, { own: !named });
@@ -591,6 +645,28 @@ export async function namedFeed(link: string, signal = new AbortController().sig
     const feed = await source.feed(url, signal).catch(() => null);
     signal.throwIfAborted();
     if (feed) return feed;
+  }
+  return null;
+}
+
+/** What subscribing to `link` makes where a source says it's a subscription of its own (`LibrarySource.subscription`). */
+async function subscriptionOf(link: string, signal: AbortSignal): Promise<LibraryItem | null> {
+  const url = new URL(link);
+  for (const source of plugins.librarySources) {
+    if (!source.subscription || !source.recognizes(url)) continue;
+    const item = await source.subscription(url, signal);
+    signal.throwIfAborted();
+    if (item) return item;
+  }
+  return null;
+}
+
+/** A feed read another way where it can't be had itself, if a source knows it (`LibrarySource.feedInstead`): YouTube's, from the channel's page. */
+export async function feedInstead(url: string, signal = new AbortController().signal): Promise<Feed | null> {
+  const feed = new URL(url);
+  for (const source of plugins.librarySources) {
+    const read = await source.feedInstead?.(feed, signal);
+    if (read) return read;
   }
   return null;
 }

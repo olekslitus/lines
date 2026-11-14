@@ -338,6 +338,18 @@ describe("what's chosen to import", () => {
     const unpacking = new Unpacking(10 * MB);
     expect([6 * MB, 6 * MB, [2 * MB, MB / 100], [1000, 1], 3 * MB].map((size) => unpacking.allows(Array.isArray(size) ? file(size[0], size[1]) : file(size)))).toEqual([true, false, false, true, true]);
     expect(new Unpacking().allows(file(300 * MB))).toBe(false);
+  });
+
+  test("a Bear backup: a note that would unpack to too much is left out and said so; TextPacks in a folder are a bundle each", async () => {
+    const text = (value: string) => new TextEncoder().encode(value);
+    const backup = deflated({ "Bomb.textbundle/text.markdown": new Uint8Array(2 * MB), "Bomb.textbundle/info.json": text("{}"), "Note.textbundle/text.markdown": text("# Note"), "Note.textbundle/info.json": text("{}") });
+    const exported = await exportedFrom([new File([backup], "Bear.bear2bk")]);
+    expect([(await readBear(exported)).notes.map((note) => note.name), exported.skipped]).toEqual([["Note"], ["Bomb.textbundle/text.markdown"]]);
+    const pack = (title: string) => zipOf({ "text.markdown": `# ${title}`, "info.json": "{}" });
+    const packs = await exportedFrom([inFolder("Export/One.textpack", pack("One")), inFolder("Export/Two.textpack", pack("Two"))]);
+    expect((await readBear(packs)).notes.map((note) => note.name).sort()).toEqual(["One", "Two"]);
+  });
+});
 
 /** A folder of fixtures/ as a ZIP of what's in it, named `name`. */
 function zipped(folder: string, name: string) {
@@ -414,6 +426,11 @@ describe("Bear", () => {
     // Code as lines' Markdown reads it: indented, in a list, a URL too.
     expect(translated("Text\n\n    ~one~ #a b#\n\n- Item\n\n      ~two~\n\nhttps://example.com/~a~")).toBe("Text\n\n    ~one~ #a b#\n\n- Item\n\n      ~two~\n\nhttps://example.com/~a~");
     expect(translated("A\n| a |\n|---|\n\n| b |\n|---|")).toBe("A\n\n| a |\n|---|\n\n| b |\n|---|");
+    // A bar it writes in a table, right under text too, is escaped: a link's text, a heading's, a picture's width.
+    const files = { ...links, file: () => ({ index: 0, name: "a.png" }) };
+    expect(translateBear('A\n| [x](bear://x-callback-url/open-note?id=A1) | [[Plan/Goals\\|the goals]] | ![](a.png)<!-- {"width":320} --> |\n|---|---|---|', files, "Note")).toBe(
+      "A\n\n| [[Plan\\|x]] | [[Plan#Goals\\|the goals]] | ![\\|320](../attachments/\uE0000\uE000) |\n|---|---|---|",
+    );
   });
 });
 

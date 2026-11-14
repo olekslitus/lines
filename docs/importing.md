@@ -22,7 +22,7 @@ What carries over, from any app:
 
 ### ZIPs, and how big an export can be
 
-A ZIP in a folder chosen is one of its files, like any other, never unpacked: only a ZIP chosen as a file is, or a folder of nothing but ZIPs (an export in parts, unpacked once), and a ZIP of ZIPs. A ZIP is read into memory, so it can be up to 2 GB, and what's in it can unpack to 2 GB all told; for a bigger one, unpack it and choose its folder, whose files are read one at a time, with no limit. A file in a ZIP that would unpack to more than 256 MB, or that's packed more than 100 times over (as no real file is, only one made to fill memory), is left out, and said so, as is a ZIP in parts that can't be read. ZIPs of more than 65,535 files (ZIP64) are read whole.
+A ZIP in a folder chosen is one of its files, like any other, never unpacked: only a ZIP chosen as a file is (Bear's backups and TextPacks are ZIPs too), or a folder of nothing but ZIPs (an export in parts, unpacked once; TextPacks, each its TextBundle), and a ZIP of ZIPs. A ZIP is read into memory, so it can be up to 2 GB, and what's in it can unpack to 2 GB all told; for a bigger one, unpack it and choose its folder, whose files are read one at a time, with no limit. A file in a ZIP that would unpack to more than 256 MB, or that's packed more than 100 times over (as no real file is, only one made to fill memory), is left out, and said so, as is a ZIP in parts that can't be read. ZIPs of more than 65,535 files (ZIP64) are read whole.
 
 ### Importing again
 

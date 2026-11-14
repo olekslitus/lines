@@ -54,7 +54,8 @@ function dashed(tag: string) {
 /** A link written as `written`, or a wiki link to `wiki`, as lines has it. */
 function linked(links: Links, name: string, written: string, parts: { bang?: string; text?: string; address?: string; json?: string; wiki?: string }) {
   if (parts.wiki !== undefined) {
-    const [link, shown] = parts.wiki.split("|");
+    // In a table, its bar is `\|`.
+    const [link, shown] = parts.wiki.split(/\\?\|/);
     const whole = links.note({ title: link.trim() });
     if (whole) return noteLink(whole, { shown });
     // Bear's link to a heading: `[[Note/Heading]]`.
@@ -89,8 +90,21 @@ function linked(links: Links, name: string, written: string, parts: { bang?: str
   return `[${text || file.name}](${attachmentPath(file.index)})`;
 }
 
-/** A Bear note's text in Linedown. */
+/** `text` with a blank line before each table right under a line of text, as Bear writes one, which Markdown needs to read it as a table. */
+function tablesApart(text: string) {
+  const lines = text.split("\n");
+  const starts: number[] = [];
+  for (let i = 1, at = lines[0].length + 1; i < lines.length; at += lines[i].length + 1, i++) {
+    if (TABLE.test(lines[i]) && DASHES.test(lines[i + 1] ?? "") && lines[i - 1].trim() && !TABLE.test(lines[i - 1])) starts.push(at);
+  }
+  if (!starts.length) return text;
+  const { kept } = readMarkdown(text);
+  return edited(text, starts.filter((at) => !within({ from: at, to: at + 1 }, kept)).map((at) => ({ from: at, to: at, insert: "\n" })));
+}
+
+/** A Bear note's text in Linedown: its tables apart first, so what's written in them is read as in a table (`edited`). */
 export function translate(text: string, links: Links, name: string): string {
+  text = tablesApart(text);
   const read = readMarkdown(text);
   const edits: Edit[] = [];
   const taken: Span[] = [...read.kept];
@@ -113,12 +127,5 @@ export function translate(text: string, links: Links, name: string): string {
       return `${before}#${tagged}`;
     }),
   );
-  // A table right under a line of text, as Bear writes one, gets a blank line between them, which Markdown needs.
-  const lines = text.split("\n");
-  for (let i = 1, at = lines[0].length + 1; i < lines.length; at += lines[i].length + 1, i++) {
-    if (TABLE.test(lines[i]) && DASHES.test(lines[i + 1] ?? "") && lines[i - 1].trim() && !TABLE.test(lines[i - 1]) && !within({ from: at, to: at + 1 }, read.kept)) {
-      edits.push({ from: at, to: at, insert: "\n" });
-    }
-  }
   return edited(text, edits);
 }

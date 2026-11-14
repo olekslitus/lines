@@ -38,8 +38,15 @@ export const textOf = (bytes: Uint8Array) => new TextDecoder().decode(bytes).rep
 
 const typed = (blob: Blob, path: string) => new File([blob], nameOf(path), { type: attachmentType(path) });
 
-/** ZIPs. */
-const ZIP = /\.zip$/i;
+/** ZIPs, by the names apps give theirs too: Bear's backups (.bear2bk), TextPacks (a TextBundle, zipped). */
+const ZIP = /\.(?:zip|bear2bk|textpack)$/i;
+
+/** A TextPack's files in the TextBundle it is, if they aren't in one already, so several don't run together. */
+function bundled(name: string, files: ExportedFile[]) {
+  if (!/\.textpack$/i.test(name) || files.every((file) => /^[^/]+\.textbundle\//i.test(file.path))) return files;
+  const bundle = name.replace(/\.textpack$/i, ".textbundle");
+  return files.map((file) => ({ ...file, path: `${bundle}/${file.path}` }));
+}
 
 /** A file as it was chosen, at `path` in the export. */
 const chosenFile = (file: File, path: string): ExportedFile => ({
@@ -105,7 +112,7 @@ export async function exportedFrom(chosen: File[]): Promise<Exported> {
   for (const file of folder === undefined ? chosen : shown) {
     if (!ZIP.test(file.name)) files.push(chosenFile(file, file.name));
     else if (file.size > UNPACKED) throw new TooBig(file.name);
-    else files.push(...(await unzipped(file.name, async () => new Uint8Array(await file.arrayBuffer()), unpacking, skipped)));
+    else files.push(...bundled(file.name, await unzipped(file.name, async () => new Uint8Array(await file.arrayBuffer()), unpacking, skipped)));
   }
   if (!files.length && skipped.length) throw new Error(`Nothing in ${skipped.join(", ")} could be read`);
   const zip = chosen.length === 1 && ZIP.test(chosen[0].name) ? chosen[0].name.replace(ZIP, "") : "";

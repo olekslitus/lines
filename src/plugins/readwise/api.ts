@@ -61,7 +61,7 @@ async function get<T>(token: string, url: string, signal: AbortSignal, { json = 
     await turn?.(signal);
     let wait = BACKOFF * 2 ** attempt;
     try {
-      const response = await request(url, signal, { headers: { authorization: `Token ${token}`, accept: "application/json" } }, TIMEOUT);
+      const response = await request(url, signal, { headers: { authorization: `Token ${token}`, accept: "application/json" } }, { timeout: TIMEOUT });
       if (response.status === 401 || response.status === 403) throw new ReadwiseError("token");
       if (response.ok) return (json ? await response.json() : undefined) as T;
       if (response.status !== 429 && response.status < 500) throw new ReadwiseError("status", response.status);

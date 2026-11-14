@@ -549,7 +549,7 @@ test("searching finds posts by their words; Mark All as Read; trashing the note 
   await page.getByText("No feeds yet.").waitFor();
 });
 
-test("OPML in: each feed fetched for what it says, one that can't be kept as the file says; OPML out", async () => {
+test("OPML in: each feed fetched for what it says, one that can't be kept as the file says, one on this computer left for the person to add; OPML out", async () => {
   app = await openApp();
   await serveBlog(app);
   const page = app.page;
@@ -557,17 +557,21 @@ test("OPML in: each feed fetched for what it says, one that can't be kept as the
   const opml = `<?xml version="1.0"?><opml version="2.0"><body><outline text="Blogs">
     <outline type="rss" text="Svelte (from the file)" xmlUrl="${BLOG}"/>
     <outline type="rss" text="Gone" xmlUrl="https://gone.example/rss" htmlUrl="https://gone.example/"/>
+    <outline type="rss" text="The router" xmlUrl="http://192.168.1.1:8080/feed.xml"/>
   </outline></body></opml>`;
   // A bookmark of a feed's address isn't a subscription to it.
   await page.evaluate(async () => {
     const body = "---\ntype: resource\nlink: https://gone.example/rss\n---\n# Gone's feed";
     await window.testing.notes.insert({ id: crypto.randomUUID(), body, createdAt: 0, updatedAt: 0, pinned: false, trashed: false });
   });
-  expect(await page.evaluate((opml) => window.testing.feeds.importOpml(opml), opml)).toBe(2);
+  const asked: string[] = [];
+  page.on("request", (request) => asked.push(request.url()));
+  expect(await page.evaluate((opml) => window.testing.feeds.importOpml(opml), opml)).toEqual({ added: 2, local: 1 });
+  expect(asked.filter((url) => url.includes("192.168.1.1"))).toEqual([]);
   const titles = await page.evaluate(() => window.testing.feeds.subscriptions.map(({ title }) => title));
   expect(titles).toEqual(["Gone", "Svelte blog"]);
   // Again, nothing new.
-  expect(await page.evaluate((opml) => window.testing.feeds.importOpml(opml), opml)).toBe(0);
+  expect(await page.evaluate((opml) => window.testing.feeds.importOpml(opml), opml)).toEqual({ added: 0, local: 1 });
 
   const out = await page.evaluate(() => window.testing.feeds.exportOpml());
   expect(out).toContain('<outline type="rss" text="Gone" title="Gone" xmlUrl="https://gone.example/rss" htmlUrl="https://gone.example/"/>');
@@ -845,7 +849,7 @@ test("OPML in fetches its feeds in turn, as refreshing does, keeping why one cou
   const counts = await answerSlowly(app, (url) => (urls.includes(url) ? { status: 429, headers: { "retry-after": "3600" } } : null));
   const opml = `<?xml version="1.0"?><opml version="2.0"><body>${urls.map((url, i) => `<outline text="Feed ${i}" xmlUrl="${url}"/>`).join("")}</body></opml>`;
   const before = Date.now();
-  expect(await page.evaluate((opml) => window.testing.feeds.importOpml(opml), opml)).toBe(3);
+  expect(await page.evaluate((opml) => window.testing.feeds.importOpml(opml), opml)).toEqual({ added: 3, local: 0 });
   expect([counts.asked.length, counts.mostOfOneSite]).toEqual([3, 1]);
   const records = await page.evaluate(() => [...window.testing.feeds.records.values()].map(({ error, retryAt }) => ({ error, retryAt: retryAt! })));
   expect(records.map(({ error }) => error)).toEqual(["HTTP 429", "HTTP 429", "HTTP 429"]);

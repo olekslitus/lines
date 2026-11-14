@@ -91,4 +91,5 @@ export default {
   "feeds.exportOpml": "Exportar OPML",
   "feeds.importing": "Importando…",
   "feeds.imported": "{count, plural, =0 {Ningún feed al que no estuvieras ya suscrito} one {Te has suscrito a # feed} other {Te has suscrito a # feeds}}",
+  "feeds.importedLocal": "{count, plural, one {# de este ordenador o de su red se omite: suscríbete a él por su enlace} other {# de este ordenador o de su red se omiten: suscríbete a cada uno por su enlace}}",
 } satisfies Translation<typeof en>;

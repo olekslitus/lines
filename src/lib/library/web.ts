@@ -1,5 +1,5 @@
 import { withTimeout } from "../pacing";
-import { isLocal, outsideFetch } from "../outside";
+import { type Asking, hostOf, isLocal, outsideFetch } from "../outside";
 import { isTauri } from "../platform";
 import { plugins } from "../plugins/registry.svelte";
 import { REPO, VERSION } from "../release";
@@ -26,11 +26,12 @@ export class LookupError extends Error {}
 
 /**
  * Asks for `url` (as lines, in the apps), giving up once `signal` aborts, or after `timeout` ms,
- * the answer's body read or not.
+ * the answer's body read or not. An address from the web is never followed onto this computer or
+ * its network, as one the person gave (`own`) may be (outside.ts).
  */
-export async function request(url: string, signal: AbortSignal, init: RequestInit = {}, timeout = TIMEOUT): Promise<Response> {
+export async function request(url: string, signal: AbortSignal, init: RequestInit = {}, { timeout = TIMEOUT, own }: Asking & { timeout?: number } = {}): Promise<Response> {
   const headers = { ...(init.headers as Record<string, string>), ...(isTauri && { "user-agent": CLIENT }) };
-  return outsideFetch(url, { ...init, headers, signal: withTimeout(signal, timeout) });
+  return outsideFetch(url, { ...init, headers, signal: withTimeout(signal, timeout) }, { own });
 }
 
 /** What a service answers in JSON; null if it has nothing there (404). Rejects offline, or on any other error. */
@@ -47,20 +48,24 @@ export async function getJson<T>(url: string, signal: AbortSignal): Promise<T | 
  */
 const readings = new WeakMap<AbortSignal, Map<string, Promise<Page | null>>>();
 
-/** What a page says about itself (page.ts); null if it isn't a page (an image, a PDF) or isn't there. Asked again with the same signal, the same reading. */
-export function getPage(url: string, signal: AbortSignal): Promise<Page | null> {
+/**
+ * What a page says about itself (page.ts); null if it isn't a page (an image, a PDF) or isn't there.
+ * Its own, if the person gave it (`own`). Asked again with the same signal, the same reading.
+ */
+export function getPage(url: string, signal: AbortSignal, asking: Asking = {}): Promise<Page | null> {
   const read = readings.get(signal) ?? new Map<string, Promise<Page | null>>();
   readings.set(signal, read);
-  let page = read.get(url);
+  const key = `${!!asking.own}\n${url}`;
+  let page = read.get(key);
   if (!page) {
-    page = readFrom(url, signal);
-    read.set(url, page);
+    page = readFrom(url, signal, asking);
+    read.set(key, page);
   }
   return page;
 }
 
-async function readFrom(url: string, signal: AbortSignal): Promise<Page | null> {
-  const response = await request(url, signal, { headers: { accept: "text/html,application/xhtml+xml" } });
+async function readFrom(url: string, signal: AbortSignal, asking: Asking): Promise<Page | null> {
+  const response = await request(url, signal, { headers: { accept: "text/html,application/xhtml+xml" } }, asking);
   if (response.status === 404 || response.status === 410) return null;
   if (!response.ok) throw new LookupError(`${new URL(url).hostname} answered ${response.status}`);
   if (!/html/i.test(response.headers.get("content-type") ?? "text/html")) return null;
@@ -106,7 +111,7 @@ export async function pageInApps(url: string, signal: AbortSignal): Promise<Page
 export function isPublic(address: string): boolean {
   try {
     const url = new URL(address);
-    return url.protocol === "https:" && !isLocal(url.hostname);
+    return url.protocol === "https:" && !isLocal(hostOf(url));
   } catch {
     return false;
   }

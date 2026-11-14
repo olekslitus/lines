@@ -33,8 +33,8 @@ const source: LibrarySource = {
   name: t("plugins.webPages.name"),
   general: true,
   recognizes: (url) => url.protocol === "https:" || url.protocol === "http:",
-  async lookup(url, signal) {
-    const page = await getPage(url.href, signal);
+  async lookup(url, signal, asking) {
+    const page = await getPage(url.href, signal, asking);
     if (!page) return null;
     return itemOfPage(page) ?? (await fromOEmbed(page, signal));
   },

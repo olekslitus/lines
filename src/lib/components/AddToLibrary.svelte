@@ -46,7 +46,7 @@
     if (!text || page > 1) return { items: [], more: false };
     const link = linkOnly(text);
     if (link) {
-      const item = await lookUpAny(link, signal);
+      const item = await lookUpAny(link, signal, { own: true });
       return { items: item ? [{ id: link, item, whole: true }] : [], more: false };
     }
     const asked = current?.asked ?? [];

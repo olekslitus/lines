@@ -28,7 +28,7 @@
 
   let picker = $state<HTMLInputElement>();
   let importing = $state(false);
-  let imported = $state<number | null>(null);
+  let imported = $state<{ added: number; local: number } | null>(null);
   let error = $state<string | null>(null);
 
   async function importChosen() {
@@ -39,7 +39,7 @@
     error = null;
     try {
       imported = await feeds.importOpml(await file.text());
-      speak(t("feeds.imported", { count: imported }));
+      speak(importedText(imported));
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
     } finally {
@@ -47,6 +47,9 @@
       if (picker) picker.value = "";
     }
   }
+
+  /** What an import did: how many it subscribed to, and how many on this computer or its network it left out. */
+  const importedText = ({ added, local }: { added: number; local: number }) => [t("feeds.imported", { count: added }), ...(local ? [t("feeds.importedLocal", { count: local })] : [])].join(". ");
 
   function exportAll() {
     downloadText("feeds.opml", feeds.exportOpml(), "text/x-opml");
@@ -77,7 +80,7 @@
       {#if imported !== null}
         <p class="m-0 mt-2 flex items-center gap-2 text-sm leading-normal text-muted" role="status">
           <Icon name="check" size={15} class="shrink-0 text-success" />
-          {t("feeds.imported", { count: imported })}
+          {importedText(imported)}
         </p>
       {/if}
       {#if error}

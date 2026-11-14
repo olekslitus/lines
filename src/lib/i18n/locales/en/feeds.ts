@@ -118,4 +118,5 @@ export default {
   "feeds.exportOpml": "Export OPML",
   "feeds.importing": "Importing…",
   "feeds.imported": "{count, plural, =0 {No feeds that aren’t subscribed to already} one {Subscribed to # feed} other {Subscribed to # feeds}}",
+  "feeds.importedLocal": "{count, plural, one {# on this computer or its network is left out: subscribe to it by its link} other {# on this computer or its network are left out: subscribe to each by its link}}",
 };

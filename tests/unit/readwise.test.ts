@@ -241,6 +241,17 @@ describe("importing", () => {
     highlights: more.highlights ?? [said(`A sentence from ${title}.`)],
   });
 
+  test("something there by its title is found by who it's by as its note reads, a podcast it mentions or a channel it links to by name", () => {
+    const mine = entries(
+      "---\ntype: episode\npodcast: @[The Daily]\n---\n# Episode 12\n",
+      "---\ntype: video\nchannel: [Bindery](https://www.youtube.com/@bindery)\n---\n# How Books Are Bound\n",
+    );
+    const by = (type: string, title: string, key: string, name: string): Source => ({ ...source(title, { type }), item: { type, title, properties: [[key, name]] } });
+    const planned = plan({ sources: [by("episode", "Episode 12", "podcast", "The Daily"), by("video", "How Books Are Bound", "channel", "Bindery")], leftOut: 0 }, mine);
+    expect(planned.work.add).toEqual([]);
+    expect(planned.addingTo).toEqual(["Episode 12", "How Books Are Bound"]);
+  });
+
   test("something there by its title is added to only if both say who it's by and they don't link to different pages", () => {
     const mine = entries(
       "---\ntype: article\nlink: https://mine.example/intro\n---\n# Introduction\n\nMy own notes.\n",

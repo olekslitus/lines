@@ -59,6 +59,8 @@ export default {
   "feeds.didUnread": "Marked as unread",
   // A link to where a post is talked about (its comments' page), under its title.
   "feeds.comments": "Comments",
+  // A post's date where it's a guess (a YouTube video's, from "3 days ago" on its channel's page).
+  "feeds.about": "about {date}",
   "feeds.openInBrowser": "Open in Browser",
   // A post's discussion, read under it where a plugin reads its comments link (Hacker News'): its heading, how many comments, where they're from.
   "feeds.discussion.count": "{count, plural, one {# comment} other {# comments}}",

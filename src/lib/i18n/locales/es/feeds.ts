@@ -47,6 +47,7 @@ export default {
   "feeds.didRead": "Marcada como leída",
   "feeds.didUnread": "Marcada como no leída",
   "feeds.comments": "Comentarios",
+  "feeds.about": "hacia {date}",
   "feeds.discussion.count": "{count, plural, one {# comentario} other {# comentarios}}",
   "feeds.discussion.openOn": "Abrir en {site}",
   "feeds.discussion.loading": "Cargando comentarios…",

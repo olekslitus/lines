@@ -96,7 +96,7 @@ test("a channel's link subscribed to is a note in Channels, its picture its cove
   app = await openApp();
   const { page } = app;
   const { asked } = await serveYouTube(page);
-  expect(await subscribe(page, "https://www.youtube.com/@tidepools/featured")).toBe(FEED);
+  expect(await subscribe(page, "https://www.youtube.com/@tidepools/featured")).toEqual({ url: FEED, again: false });
   const body = await bodyOf(page, FEED);
   expect(body).toStartWith(`---\ntype: channel\nfeed: ${FEED}\nlink: ${HANDLE}\n---\n# Tide Pool Science\n`);
   expect(body).toContain("Small worlds between the tides");
@@ -114,7 +114,17 @@ test("a channel's link subscribed to is a note in Channels, its picture its cove
     ["Anemones at low tide", "https://www.youtube.com/watch?v=tidepool002", "https://i1.ytimg.com/vi/tidepool002/hqdefault.jpg", "They close when the water goes, a"],
   ]);
   // Subscribed to again, by a video of its: the same channel, nothing more made.
-  expect(await subscribe(page, "https://youtu.be/tidepool002")).toBe(FEED);
+  expect(await subscribe(page, "https://youtu.be/tidepool002")).toEqual({ url: FEED, again: true });
+  expect(await page.evaluate((feed) => window.testing.feeds.notesOf(feed).length, FEED)).toBe(1);
+});
+
+test("a channel whose feed is subscribed to already, as a site's, is that subscription: no second note", async () => {
+  app = await openApp();
+  const { page } = app;
+  await serveYouTube(page);
+  await app.open(`---\ntype: feed\nfeed: ${FEED}\nlink: https://www.youtube.com/channel/${ID}\n---\n# Tide Pool Science\n`);
+  await page.waitForFunction((feed) => window.testing.feeds.subscription(feed), FEED);
+  expect(await subscribe(page, HANDLE)).toEqual({ url: FEED, again: true });
   expect(await page.evaluate((feed) => window.testing.feeds.notesOf(feed).length, FEED)).toBe(1);
 });
 
@@ -136,7 +146,8 @@ test("a video's post shows its picture and what it says, and plays in place, You
   const { asked } = await serveYouTube(page);
   await subscribe(page, HANDLE);
   await page.evaluate((feed) => window.testing.notes.setFilter({ kind: "feeds", feed }), FEED);
-  await page.locator(".note-list").getByRole("button", { name: /^How hermit crabs trade shells/ }).click();
+  const post = page.locator(".note-list").getByRole("button", { name: /^How hermit crabs trade shells/ });
+  await post.click();
   const card = page.getByRole("group", { name: "How hermit crabs trade shells" });
   await card.waitFor();
   expect(await card.locator("img").getAttribute("src")).toBe("https://i.ytimg.com/vi/tidepool003/hqdefault.jpg");
@@ -149,23 +160,45 @@ test("a video's post shows its picture and what it says, and plays in place, You
   const src = new URL((await element.getAttribute("src"))!);
   expect(src.origin + src.pathname).toBe("https://www.youtube-nocookie.com/embed/tidepool003");
   expect(src.searchParams.get("enablejsapi")).toBe("1");
+  expect(src.searchParams.has("autoplay")).toBe(false);
   expect(await element.getAttribute("referrerpolicy")).toBe("strict-origin-when-cross-origin");
-  const frame = (await (await element.elementHandle())!.contentFrame())!;
-  // Spoken to until it answers, then asked to say how it plays, and played.
-  await frame.waitForFunction(() => (window as unknown as { told?: string[] }).told?.includes("playVideo"));
-  expect(await frame.evaluate(() => (window as unknown as { told: string[] }).told)).toEqual(["listening", "addEventListener onStateChange", "playVideo"]);
+  expect(await element.getAttribute("allow")).toContain("fullscreen");
+  const told = async () => {
+    const frame = (await (await element.elementHandle())!.contentFrame())!;
+    await frame.waitForFunction(() => (window as unknown as { told?: string[] }).told?.includes("addEventListener onStateChange"));
+    await page.waitForTimeout(300);
+    return frame.evaluate(() => (window as unknown as { told: string[] }).told);
+  };
+  // Spoken to until it answers, then asked to say how it plays, and played: by the Play pressed.
+  expect(await told()).toEqual(["listening", "addEventListener onStateChange", "playVideo"]);
+
+  // Drawn again (another post, then this one), it's its player, waiting: not played again by itself.
+  await page.locator(".note-list").getByRole("button", { name: /^Anemones at low tide/ }).click();
+  await post.click();
+  await element.waitFor();
+  expect(await told()).toEqual(["listening", "addEventListener onStateChange"]);
 });
 
 test("a channel whose feed is missing is read from its page, its videos' dates a guess until the feed's back, which puts them right; a page changed past reading guesses nothing", async () => {
   app = await openApp({ timezone: "UTC" });
   const { page } = app;
   const { answers } = await serveYouTube(page, { feed: 404 });
-  expect(await subscribe(page, HANDLE)).toBe(FEED);
+  expect(await subscribe(page, HANDLE)).toEqual({ url: FEED, again: false });
   const posts = () => page.evaluate((feed) => window.testing.feeds.posts(feed).map(({ post }) => ({ title: post.title, date: post.date, approximate: post.approximate })), FEED);
   const guessed = await posts();
   expect(guessed.map(({ title }) => title)).toEqual(["How hermit crabs trade shells", "Anemones at low tide", "Why the sea comes back twice a day"]);
   expect(guessed.every(({ approximate, date }) => approximate && date)).toBe(true);
   await sidebar(page).getByRole("button", { name: "Tide Pool Science, 3 unread" }).waitFor();
+  // Its dates read as the guesses they are; and one saved isn't kept as when it came out.
+  await page.evaluate((feed) => window.testing.notes.setFilter({ kind: "feeds", feed }), FEED);
+  expect(await page.locator(".note-list time").first().innerText()).toMatch(/^about /);
+  const saved = await page.evaluate(async (feed) => {
+    const { feeds, notes } = window.testing;
+    const id = await feeds.save(feeds.posts(feed).find(({ post }) => post.title === "Anemones at low tide")!);
+    return notes.get(id)?.note.body;
+  }, FEED);
+  expect(saved).toContain("type: video");
+  expect(saved).not.toContain("published:");
 
   // Fetched again with the feed missing still: its guesses stay as they were, not moved on by "2 days ago" a day later.
   await page.evaluate(() => window.testing.feeds.refresh());
@@ -206,8 +239,10 @@ test("a video saved from a channel's post mentions the channel's note; a video's
   await sidebar(page).getByRole("button", { name: /^Videos/ }).click();
   await page.locator(".note-list").getByText("Tide Pool Science", { exact: true }).waitFor();
 
-  // The channel's note in the Trash: a video's link becomes a note linking to the channel's page, not mentioning a note that isn't there.
+  // The channel's note in the Trash: a video's link becomes a note linking to the channel's page, not mentioning a note that isn't there,
+  // nor another kind's of the same name.
   await page.evaluate((feed) => window.testing.notes.trashMany(window.testing.feeds.notesOf(feed)), FEED);
+  await app.open("---\ntype: article\n---\n# Tide Pool Science\n");
   await app.open("");
   await page.evaluate(() => window.testing.place());
   await paste(page, "https://www.youtube.com/watch?v=tidepool002");

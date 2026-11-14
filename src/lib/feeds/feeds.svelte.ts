@@ -397,7 +397,8 @@ class Feeds {
     const { feed, post } = row;
     const record = this.records.get(feed);
     const show = this.subscription(feed)?.title || record?.title;
-    const published = post.date ? dayOf(post.date) : undefined;
+    // A guessed date (`approximate`) isn't one to keep as when it came out.
+    const published = post.date && !post.approximate ? dayOf(post.date) : undefined;
     const html = await this.content(post);
     const channel = notes.get(this.subscription(feed)?.note ?? "");
     if (channel?.meta.type === "channel" && post.link) {

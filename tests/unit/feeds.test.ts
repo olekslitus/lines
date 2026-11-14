@@ -244,6 +244,35 @@ describe("a picture's kind and size, read from its file before it's drawn", () =
   });
 });
 
+describe("posts read another way (a YouTube channel's page)", () => {
+  const NOW = Date.UTC(2026, 10, 14);
+  const DAY_MS = 86_400_000;
+  const post = (id: string, date: number, more: Partial<Post> = {}): Post => ({ id, title: id, link: `https://www.youtube.com/watch?v=${id}`, date, html: "", base: "https://www.youtube.com/", excerpt: "", ...more });
+
+  test("one kept keeps what it says, its date and whether it was read; one first seen older than the newest kept is read, one newer isn't", () => {
+    let key = 0;
+    const fed = merge([], [post("newest", NOW - DAY_MS, { html: "<p>What it says.</p>", excerpt: "What it says." }), post("older", NOW - 9 * DAY_MS, { html: "<p>Older.</p>", excerpt: "Older." })], NOW, () => `k${++key}`);
+    const kept = fed.posts.map((each) => (each.id === "newest" ? { ...each, read: true } : each));
+    const read = merge(
+      kept,
+      [
+        post("newest", NOW - 2 * DAY_MS, { approximate: true }),
+        post("older", NOW - 10 * DAY_MS, { approximate: true }),
+        post("from-the-page", NOW - 40 * DAY_MS, { approximate: true }),
+        post("just-out", NOW, { approximate: true }),
+      ],
+      NOW,
+      () => `k${++key}`,
+    );
+    const byId = new Map(read.posts.map((each) => [each.id, each]));
+    expect([byId.get("newest")!.date, byId.get("newest")!.excerpt, byId.get("newest")!.read]).toEqual([NOW - DAY_MS, "What it says.", true]);
+    expect(byId.get("older")!.version).toBe(fed.posts.find((each) => each.id === "older")!.version);
+    // Its content isn't written over with nothing.
+    expect(read.changed.map(({ key: changed }) => changed)).toEqual(["k3", "k4"]);
+    expect([byId.get("from-the-page")!.read, byId.get("just-out")!.read]).toEqual([true, false]);
+  });
+});
+
 describe("links", () => {
   test("takes a feed's link as pasted", () => {
     expect(linkOf("  https://example.com/feed.xml ")).toBe("https://example.com/feed.xml");

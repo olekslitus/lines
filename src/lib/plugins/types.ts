@@ -277,9 +277,9 @@ export interface LibraryKind {
   /** The shape its covers come in, which its rows show them in: a book's tall, an album's square (the first), a video's wide. */
   cover?: "square" | "tall" | "wide";
   /**
-   * Its properties whose value names something with a note of its own (an episode's `podcast`, a
-   * video's `channel`), which its notes write as a mention of that note while it's in the Library;
-   * else as a link to its page (`LibraryItem.linked`), or as just its name.
+   * Its properties whose value names something with a note of its own, each key the `type` of that
+   * note (an episode's `podcast`, a video's `channel`): written as a mention of it while it's in the
+   * Library; else as a link to its page (`LibraryItem.linked`), or as just its name.
    */
   mentions?: string[];
   /** Where it's got to, in order (the first is where it starts): what's written, and what's shown. None for kinds without (a podcast). */

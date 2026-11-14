@@ -66,21 +66,22 @@
       elsewhere,
       // By whom, but not again where it's the feed's own name (a channel's videos are by the channel).
       post.author && post.author !== source && escapeMarkdown(post.author),
-      post.date && escapeMarkdown(formatDay(post.date)),
+      post.date && escapeMarkdown(post.approximate ? t("feeds.about", { date: formatDay(post.date) }) : formatDay(post.date)),
       post.comments && markdownLink(t("feeds.comments"), post.comments),
     ].filter(Boolean);
     const title = post.link ? markdownLink(post.title, post.link) : escapeMarkdown(post.title);
     // One a site's player plays (a YouTube video), that player first: its link on a line of its own.
     const played = post.link && plugins.embed({ href: post.link, image: null, label: post.title }) ? markdownLink(post.title, post.link) : "";
-    const body = [played, bodyOf(post, html, summary)].filter(Boolean).join("\n\n");
+    const body = [played, bodyOf(post, html, summary, !played)].filter(Boolean).join("\n\n");
     // No empty lines for a body it hasn't, between its byline and its comments.
     return `# ${title}\n${by.join(" · ")}${body && `\n\n${body}\n`}`;
   }
 
-  function bodyOf(post: Row["post"], html: string | undefined, summary?: Summary) {
+  /** What a post says; where it says nothing of its own, what its page says of itself, its picture too unless a player of it shows one (`picture`). */
+  function bodyOf(post: Row["post"], html: string | undefined, summary: Summary | undefined, picture: boolean) {
     if (html === undefined) return escapeMarkdown(post.excerpt);
     if (saysMore(html, post.base, [post.link, post.comments])) return htmlToMarkdown(html, post.base);
-    return [summary?.image && `![](${destination(summary.image)})`, summary?.description && escapeMarkdown(summary.description)].filter(Boolean).join("\n\n");
+    return [picture && summary?.image && `![](${destination(summary.image)})`, summary?.description && escapeMarkdown(summary.description)].filter(Boolean).join("\n\n");
   }
 
   /** Whether to ask the page a post links to what it says of itself: it says nothing of its own. */

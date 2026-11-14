@@ -128,6 +128,14 @@ export function readMention(text: string): Mention | null {
   return { name: unescapeMarkdown(match[1] ?? match[2]), ...(match[3] ? { key: match[3] } : {}) };
 }
 
+/** The name a value gives, if it's a mention (`@[The Daily]`) or a link (`[Veritasium](https://…)`): the note's title, or the link's text. */
+export function namedIn(text: string): string | undefined {
+  const mention = readMention(text)?.name;
+  if (mention) return mention;
+  const words = /^\[((?:\\.|[^\\\]])*)\]\((?:<[^>]*>|[^\s)]*)\)$/.exec(text)?.[1];
+  return words === undefined ? undefined : unescapeMarkdown(words);
+}
+
 /** A wiki link to the note titled `title`, without the characters one can't hold. */
 export const wikiLinkOf = (title: string) => `[[${title.replace(/[[\]|#\n]/g, "")}]]`;
 

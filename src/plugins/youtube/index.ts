@@ -11,8 +11,9 @@ import { type Channel, channelAsFeed, channelFeed, channelPage, channelPath, fee
  * ask too; and in the apps, from a video's page, when it came out, how long it is and what it's
  * about. Its channels (channel.ts), from their pages, which only the apps can read (YouTube doesn't
  * let web pages): a channel is a library note that subscribes to its feed, its videos read from its
- * page while the feed can't be had. A link to a video on a line of its own plays in YouTube's player,
- * from youtube-nocookie.com, once it's played. Only the links are sent.
+ * page while the feed can't be had. A link to a video on a line of its own is its picture (from
+ * i.ytimg.com, as it's drawn) and plays in YouTube's player, from youtube-nocookie.com, which is
+ * loaded only once Play is pressed. Only the links are sent.
  */
 
 /** The video a link to YouTube is, by its id: `watch?v=`, youtu.be, Shorts, live and embedded videos. */
@@ -42,6 +43,8 @@ const CHANNEL: LibraryKind = {
   icon: "tv-minimal-play",
   properties: ["feed"],
   subtitle: [],
+  // Its feed's address, which names its id: the same channel whatever its handle, and the same as its feed subscribed to as a site's.
+  ids: ["feed"],
 };
 
 /** The video's largest picture without black bars: its full-size one, which older videos lack, or else a small one. */
@@ -161,12 +164,13 @@ const player: Embed = {
         title: label,
         kind: t("plugins.youtube.video"),
         poster: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
-        // Without its cookies; it plays at once, as it's loaded by being played.
-        src: `https://www.youtube-nocookie.com/embed/${id}?enablejsapi=1&autoplay=1&playsinline=1&rel=0&origin=${encodeURIComponent(location.origin)}`,
+        // Without its cookies. Told to play once it's ready, by the Play that loaded it, not by itself: drawn again, it waits.
+        src: `https://www.youtube-nocookie.com/embed/${id}?enablejsapi=1&playsinline=1&rel=0&origin=${encodeURIComponent(location.origin)}`,
         ratio: 16 / 9,
         origin: "https://www.youtube-nocookie.com",
         // It plays only for a page that says where it is.
         referrer: "strict-origin-when-cross-origin",
+        fullscreen: true,
         read,
         greet: say({ event: "listening" }),
         listen: [say({ event: "command", func: "addEventListener", args: ["onStateChange"] })],

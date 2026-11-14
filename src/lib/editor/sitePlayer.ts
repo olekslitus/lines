@@ -28,6 +28,8 @@ export interface SitePlayer {
   ratio?: number;
   /** Whether its frame tells the site where it is, which some players (YouTube's) ask; else nothing of it. */
   referrer?: ReferrerPolicy;
+  /** Whether it may fill the screen, or play in a window of its own (picture in picture): a video's. */
+  fullscreen?: boolean;
   /** Where its messages come from, and lines' to it go. */
   origin: string;
   /** What a message from it says (parsed from JSON, if it's text): that it's ready, playing or paused; null for anything else. */

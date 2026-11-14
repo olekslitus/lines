@@ -73,18 +73,20 @@ export async function libraryNote(item: LibraryItem, notes: readonly Entry[], si
 
 /**
  * How `item`'s properties naming something with a note of its own are written (its kind's
- * `mentions`: an episode's podcast, a video's channel): a mention of that note while the Library has
- * it (among `notes`), found by its page (`LibraryItem.linked`) or else by its title; else a link to
- * its page, or just its name. Never a mention of a note that isn't there.
+ * `mentions`: an episode's podcast, a video's channel): a mention of that note, of that kind (a
+ * `podcast`, a `channel`), while the Library has it (among `notes`), found by its page
+ * (`LibraryItem.linked`) or else by its title; else a link to its page, or just its name. Never a
+ * mention of a note that isn't there, nor of another kind's of the same name.
  */
 export function namedValues(item: LibraryItem, notes: readonly Entry[]): Record<string, string> {
-  const library = notes.filter(({ note, meta }) => !note.trashed && plugins.libraryKind(meta.type));
   return Object.fromEntries(
     (plugins.libraryKind(item.type)?.mentions ?? []).flatMap((key) => {
       const name = item.properties.find(([each]) => each === key)?.[1].trim();
       if (!name) return [];
       const page = item.linked?.[key];
-      const named = library.find(({ meta }) => (page ? propertyOf(meta.properties, "link")?.value.trim() === page : meta.title === name));
+      const named = notes.find(
+        ({ note, meta }) => !note.trashed && meta.type === key && (page ? propertyOf(meta.properties, "link")?.value.trim() === page : meta.title === name),
+      );
       return named ? [[key, mentionOf(named.meta.title)]] : page ? [[key, markdownLink(name, page)]] : [];
     }),
   );

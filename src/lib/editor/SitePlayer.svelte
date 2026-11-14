@@ -9,10 +9,11 @@
 </script>
 
 <script lang="ts">
-  // A site's player in a note (sitePlayer.ts): a card like an audio file's until it's played, then
-  // the site's own player in a sandboxed frame, which can't take lines' window elsewhere. Nothing
-  // is asked of the site before. Keys pressed in the frame never reach lines, so Tab out of it goes
-  // back to the note. Styled by editor.css (.cm-lp-site-player).
+  // A site's player in a note (sitePlayer.ts): a card like an audio file's until it's played (a
+  // video's, its picture, loaded as it's drawn), then the site's own player in a sandboxed frame,
+  // which can't take lines' window elsewhere. The player isn't asked for before; it's played by the
+  // Play that loads it, and drawn again later it waits. Keys pressed in the frame never reach lines,
+  // so Tab out of it goes back to the note. Styled by editor.css (.cm-lp-site-player).
   import { tick, untrack } from "svelte";
   import { t } from "../i18n/index.svelte";
   import Icon from "../icons/Icon.svelte";
@@ -124,7 +125,8 @@
     style:aspect-ratio={player.ratio}
     src={player.src}
     title={t("editor.sitePlayer.frame", { site: player.site, title })}
-    allow="autoplay; encrypted-media"
+    allow={player.fullscreen ? "autoplay; encrypted-media; fullscreen; picture-in-picture" : "autoplay; encrypted-media"}
+    allowfullscreen={player.fullscreen}
     referrerpolicy={player.referrer ?? "no-referrer"}
     sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
   ></iframe>

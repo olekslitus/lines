@@ -6,6 +6,7 @@ import { ui } from "../ui.svelte";
 import { completeNote, openNote, tell } from "./linkNotes";
 import { lookUp } from "./lookup";
 import { addedAgain, libraryNoteOf } from "./same";
+import { namedValues } from "./note";
 import { firstStatus, shelves } from "./shelves.svelte";
 import { known, libraryNoteText } from "./text";
 
@@ -30,7 +31,7 @@ export function addToLibrary(item: LibraryItem, whole = false) {
     tell(existing.note.id, "already");
     return existing.note.id;
   }
-  const text = libraryNoteText(item, { status: firstStatus(item.type), mentions: plugins.libraryKind(item.type)?.mentions });
+  const text = libraryNoteText(item, { status: firstStatus(item.type), written: namedValues(item, notes.entries) });
   // Added, not made like a new note: one left as it is isn't discarded as untouched.
   const id = notes.add(text);
   notes.pendingFocus = id;

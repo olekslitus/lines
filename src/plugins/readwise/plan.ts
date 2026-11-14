@@ -1,6 +1,6 @@
 import { keysOf as libraryKeys, linkKey } from "../../lib/library/keys";
 import type { ImportWork, NewNote } from "../../lib/library/imports.svelte";
-import { nameOf, propertyOf } from "../../lib/notes/properties";
+import { namedIn, nameOf, propertyOf } from "../../lib/notes/properties";
 import type { Entry } from "../../lib/notes/store.svelte";
 import { isClosed } from "../../lib/notes/types";
 import { plugins } from "../../lib/plugins/registry.svelte";
@@ -18,6 +18,8 @@ import { HIGHLIGHTS, hasHighlights, highlightText, moreOf, quotesOf } from "./wr
 
 /** Who something's by, by its kind: the property telling things of one title apart. */
 const BY: Record<string, string> = { book: "author", article: "author", episode: "podcast", video: "channel", paper: "authors" };
+/** Of those, the ones a note writes as a mention of another note, or a link to its page (library/note.ts' namedValues): read by the name they give. */
+const NAMED = new Set(["podcast", "channel"]);
 
 /** A note an import writes to: one there (`id`), or one to make for `source`; the highlights it gets, and which it has. */
 interface Target {
@@ -94,7 +96,10 @@ class Notes {
       this.there.push(target);
       // By its link only if it's a note of a kind (a typed note); by its title only if a kind Readwise has.
       const by = BY[meta.type];
-      this.#add(target, { readwise: value("readwise"), reader: value("reader"), link: meta.type ? value("link") : undefined, type: meta.type, title: meta.title, by: by && value(by) });
+      // As it reads: a podcast or a channel its note mentions, or links to, by its name.
+      const byValue = by && value(by);
+      const named = byValue && NAMED.has(by) ? namedIn(byValue) : undefined;
+      this.#add(target, { readwise: value("readwise"), reader: value("reader"), link: meta.type ? value("link") : undefined, type: meta.type, title: meta.title, by: named ?? byValue });
     }
   }
 

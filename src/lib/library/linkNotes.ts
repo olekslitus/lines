@@ -105,7 +105,7 @@ async function run(id: string, lookup: Lookup, find: Find) {
     // What the Library has already, by what was found: its note, rather than another.
     const there = item && lookup.dedupe ? libraryNoteOf(item, id) : undefined;
     if (there) return alreadyThere(id, lookup, there, item!);
-    const note = item && (await libraryNote(item, abort.signal));
+    const note = item && (await libraryNote(item, notes.entries, abort.signal));
     if (!current()) return;
     if (!item && lookup.asked) return say(id, lookup, "nothing");
     lookups.delete(id);

@@ -55,20 +55,28 @@ export const newestFirst = (a: KeptPost, b: KeptPost) => (b.date ?? b.seen) - (a
  * A feed's posts once it's been fetched again: those it lists now, as they are now, and those it
  * no longer lists, newest first, KEEP of them. Each keeps its key and whether it was read; a new one
  * is unread, under a new key (`newKey`). Also the content to store (new or changed, by key), and the
- * keys of posts that went, to delete.
+ * keys of posts that went, to delete. A post read another way, with less of it known (`approximate`:
+ * a YouTube channel's page, while its feed is missing), takes nothing from one kept: not its date,
+ * nor its content; and one first seen so that's older than the newest kept is no news: read.
  */
 export function merge(kept: readonly KeptPost[], fetched: readonly Post[], now: number, newKey: () => string = () => crypto.randomUUID()) {
   const before = new Map(kept.map((post) => [post.id, post]));
+  const newest = Math.max(-Infinity, ...kept.map((post) => post.date ?? -Infinity));
   const listed = new Set<string>();
   const changed: { key: string; html: string }[] = [];
   const posts: KeptPost[] = fetched.map(({ html, ...post }, i) => {
     listed.add(post.id);
     const was = before.get(post.id);
     const key = was?.key ?? newKey();
+    if (post.approximate && was) {
+      // A guessed date doesn't move one known, nor does content it hasn't take the place of what's kept.
+      return { ...was, title: post.title, link: post.link ?? was.link, image: was.image ?? post.image, duration: was.duration ?? post.duration };
+    }
     const version = fingerprint(html);
     if (was?.version !== version) changed.push({ key, html });
+    const old = !was && !!post.approximate && (post.date ?? -Infinity) < newest;
     // Posts with no date keep the feed's order: its first is the newest.
-    return { ...post, key, version, read: was?.read ?? false, seen: was?.seen ?? now - i };
+    return { ...post, key, version, read: was?.read ?? old, seen: was?.seen ?? now - i };
   });
   posts.push(...kept.filter((post) => !listed.has(post.id)));
   posts.sort(newestFirst);

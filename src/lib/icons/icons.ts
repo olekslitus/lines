@@ -27,6 +27,7 @@ import {
   Book,
   Bookmark,
   BookmarkPlus,
+  BookImage,
   BookOpen,
   Box,
   Brain,
@@ -316,6 +317,7 @@ export const ICONS = {
   bitcoin: [Bitcoin, "bitcoinsign.circle"],
   bold: [Bold, "bold"],
   book: [Book, "book.closed"],
+  "book-image": [BookImage, "photo.on.rectangle"],
   "book-open": [BookOpen, "book"],
   bookmark: [Bookmark, "bookmark"],
   "bookmark-plus": [BookmarkPlus, "bookmark"],
@@ -623,7 +625,7 @@ export const TAG_ICON_GROUPS: { name: string; icons: IconName[] }[] = [
   },
   {
     name: t("picker.groupCreative"),
-    icons: ["palette", "paintbrush", "camera", "image", "film", "popcorn", "drama", "music", "guitar", "piano", "headphones", "mic", "dices"],
+    icons: ["palette", "paintbrush", "camera", "image", "book-image", "film", "popcorn", "drama", "music", "guitar", "piano", "headphones", "mic", "dices"],
   },
   {
     name: t("picker.groupTravel"),
@@ -678,6 +680,7 @@ export const ICON_WORDS: Partial<Record<IconName, string>> = {
   school: "education study class learning",
   book: "reading library literature",
   "book-open": "reading study library",
+  "book-image": "comic manga manhwa webtoon graphic novel picture book",
   pencil: "write edit draft",
   "file-text": "document page paper report",
   clipboard: "checklist paste notes",

@@ -35,12 +35,16 @@ export async function request(url: string, signal: AbortSignal, init: RequestIni
 }
 
 /** What a service answers in JSON; null if it has nothing there (404). Rejects offline, or on any other error. */
-export async function getJson<T>(url: string, signal: AbortSignal): Promise<T | null> {
-  const response = await request(url, signal, { headers: { accept: "application/json" } });
+export async function getJson<T>(url: string, signal: AbortSignal, init: RequestInit = {}): Promise<T | null> {
+  const response = await request(url, signal, { ...init, headers: { accept: "application/json", ...(init.headers as Record<string, string>) } });
   if (response.status === 404) return null;
   if (!response.ok) throw new LookupError(`${new URL(url).hostname} answered ${response.status}`);
   return (await response.json()) as T;
 }
+
+/** What a service answers in JSON to `body`, sent as JSON (a GraphQL query), as `getJson` says. */
+export const postJson = <T>(url: string, body: unknown, signal: AbortSignal) =>
+  getJson<T>(url, signal, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
 
 /**
  * The pages read for each lookup, by its signal: what Web Pages read of a page is what a resource is

@@ -1,5 +1,6 @@
 import { isApple } from "../lib/platform";
 import type { Plugin } from "../lib/plugins/types";
+import { anilist } from "./anilist";
 import { applePodcasts } from "./apple-podcasts";
 import { arxiv } from "./arxiv";
 import { asciinema } from "./asciinema";
@@ -79,6 +80,7 @@ export const builtIn = (): Plugin[] => [
   youtube(),
   openLibrary(),
   wikidata(),
+  anilist(),
   musicbrainz(),
   spotify(),
   soundcloud(),

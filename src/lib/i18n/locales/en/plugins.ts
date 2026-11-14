@@ -125,7 +125,7 @@ export default {
     "Shows links to arXiv’s papers the way arXiv cites them: arXiv:1706.03762. In the apps, adds /paper, to search arXiv and link to a paper, and fills in a note that’s a link to one as a paper in the Library. What you search for goes to arXiv.",
   "plugins.library.name": "Library",
   "plugins.library.description":
-    "Books, movies, shows, videos, music, podcasts, articles and papers, each a note, listed in the sidebar’s Library with its cover and where you’ve got to. A new note that’s just a link is filled in with what it is.",
+    "Books, comics, movies, shows, videos, music, podcasts, articles and papers, each a note, listed in the sidebar’s Library with its cover and where you’ve got to. A new note that’s just a link is filled in with what it is.",
   // YouTube, Open Library, Wikidata, MusicBrainz, Apple Podcasts, IMDb, Spotify… are names, not translated.
   "plugins.webPages.name": "Web Pages",
   "plugins.webPages.description":
@@ -137,6 +137,8 @@ export default {
   "plugins.youtube.channels": "Channels",
   // What a link to a YouTube video is, on its card until it plays.
   "plugins.youtube.video": "Video",
+  "plugins.anilist.description":
+    "Looks up manga, manhwa and manhua by a link to AniList, MyAnimeList or, in the apps, MangaDex, and finds them from Add to Library’s Comics: author, artist, year, chapters and cover. The id in the link, or the words searched for, go to AniList.",
   "plugins.openLibrary.description": "Looks up books by a link to Open Library, or an ISBN in a link (a bookshop’s, or Amazon’s): author, year, pages and cover. The book’s ISBN or id goes to Open Library.",
   "plugins.wikidata.description":
     "Looks up movies, shows and books by a link to IMDb, The Movie Database, Letterboxd, Wikipedia or Wikidata: director, year, runtime, genre, and what they’re about from Wikipedia. The id in the link goes to Wikidata and Wikipedia.",

@@ -1,5 +1,5 @@
 import { type Bookmark, bookmarkItem, planImport } from "./bookmarks";
-import type { ImportWork } from "./imports.svelte";
+import type { ImportWork } from "../imports/imports.svelte";
 import { inLibrary } from "./same";
 
 /*

@@ -313,7 +313,7 @@ export const linkLookups = ViewPlugin.fromClass(
       const link = linkIn(update.state, id);
       if (!link || link === linkIn(update.startState, id) || !prefs.lookUpLinks || notes.get(id)?.note.locked) return stop(id);
       const pasted = update.transactions.some((tr) => tr.isUserEvent("input.paste") || tr.isUserEvent("input.drop"));
-      lookUpNote(id, update.state.doc.toString(), (signal) => lookUp(link, signal), pasted ? 0 : TYPED_DELAY, { fresh: notes.templateOf(id) !== undefined, dedupe: true });
+      lookUpNote(id, update.state.doc.toString(), (signal) => lookUp(link, signal, { own: true }), pasted ? 0 : TYPED_DELAY, { fresh: notes.templateOf(id) !== undefined, dedupe: true });
     }
 
     draw() {

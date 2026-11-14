@@ -1,4 +1,5 @@
 import { dayOf } from "../notes/calendar";
+import type { Asking } from "../outside";
 import { plugins } from "../plugins/registry.svelte";
 import type { LibraryItem } from "../plugins/types";
 import { linkId } from "./keys";
@@ -10,14 +11,15 @@ import { getPage, LookupError } from "./web";
  * What `link` is, asked of the sources in turn (the registry's order: each site's, then those that
  * read any page): the first to recognize it and find something the library keeps. Null when none
  * can say, so nothing is guessed; rejects when none found it and one couldn't be asked (offline).
+ * A link the person gave (`own`: their note's, the one they chose) may be on their own network.
  */
-export async function lookUp(link: string, signal: AbortSignal): Promise<LibraryItem | null> {
+export async function lookUp(link: string, signal: AbortSignal, asking: Asking = {}): Promise<LibraryItem | null> {
   const url = new URL(link);
   let failure: unknown = null;
   for (const source of plugins.librarySources) {
     if (!source.recognizes(url)) continue;
     try {
-      const item = await source.lookup(url, signal);
+      const item = await source.lookup(url, signal, asking);
       if (item?.title.trim() && plugins.libraryKind(item.type)) return item;
     } catch (error) {
       signal.throwIfAborted();
@@ -93,11 +95,11 @@ const missing = (title: string) => title.split(/\s+[|–—:·-]\s+/).some((part
  * asked (offline; on the web, a site that doesn't let pages read it), or read: what answered was a
  * sign-in or consent page it was sent to, or one saying it isn't there.
  */
-export async function lookUpAny(link: string, signal: AbortSignal): Promise<LibraryItem | null> {
-  const item = await lookUp(link, signal);
+export async function lookUpAny(link: string, signal: AbortSignal, asking: Asking = {}): Promise<LibraryItem | null> {
+  const item = await lookUp(link, signal, asking);
   if (item) return item;
   // As Web Pages read it, if it was asked: the address as `lookUp` gave it, the same.
-  const page = await getPage(new URL(link).href, signal);
+  const page = await getPage(new URL(link).href, signal, asking);
   if (!page) return null;
   if (gated(link, page.address)) throw new LookupError(`${new URL(link).hostname} sent lines to sign in`);
   if (missing(page.title) || missing(page.meta.get("og:title") ?? "")) throw new LookupError(`${new URL(link).hostname} says its page isn't there`);

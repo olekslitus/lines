@@ -75,7 +75,7 @@ export async function addLink(view: EditorView, link: WebLink) {
   speak(t("library.lookingUp"));
   const signal = withTimeout(adding.abort.signal, LOOKUP_TIME);
   try {
-    const item = await lookUpAny(link.href, signal);
+    const item = await lookUpAny(link.href, signal, { own: true });
     if (!addings.has(adding)) return;
     if (!item) return say(adding, "nothing", t("library.nothing"));
     const existing = libraryNoteOf(item) ?? libraryNoteOf({ link: link.href });

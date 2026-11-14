@@ -33,6 +33,7 @@ export default {
   "feeds.fetching": "Descargando…",
   "feeds.noMatches": "Ninguna publicación coincide con “{query}”.",
   "feeds.errorBlocked": "El sitio de este feed no deja que lo lean las páginas web. Las apps de escritorio sí pueden.",
+  "feeds.errorLocal": "Lleva a una dirección de este ordenador o de su red, adonde lines no sigue lo que viene de la web.",
   "feeds.errorTimeout": "El feed ha tardado demasiado en responder.",
   "feeds.errorTooBig": "El feed es demasiado grande para leerlo.",
   "feeds.errorNotFeed": "Ya no hay ningún feed en esta dirección.",
@@ -90,4 +91,5 @@ export default {
   "feeds.exportOpml": "Exportar OPML",
   "feeds.importing": "Importando…",
   "feeds.imported": "{count, plural, =0 {Ningún feed al que no estuvieras ya suscrito} one {Te has suscrito a # feed} other {Te has suscrito a # feeds}}",
+  "feeds.importedLocal": "{count, plural, one {# de este ordenador o de su red se omite: suscríbete a él por su enlace} other {# de este ordenador o de su red se omiten: suscríbete a cada uno por su enlace}}",
 } satisfies Translation<typeof en>;

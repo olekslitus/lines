@@ -9,6 +9,7 @@ import type { SlashCommand } from "../editor/slashCommands";
 import type { IconName } from "../icons/icons";
 import type { NoteStats } from "../notes/stats";
 import type { NoteMeta } from "../notes/types";
+import type { Asking } from "../outside";
 import type { Episode } from "../player/player.svelte";
 import type { Parts } from "../print/parts";
 import type { ImportWork } from "../library/imports.svelte";
@@ -313,7 +314,7 @@ export interface LibrarySource {
    */
   key?(url: URL): string | null;
   /** What the link is, or null if it isn't something the library keeps. Rejects when it can't be asked (offline). */
-  lookup(url: URL, signal: AbortSignal): Promise<LibraryItem | null>;
+  lookup(url: URL, signal: AbortSignal, asking?: Asking): Promise<LibraryItem | null>;
   /** The kinds it can search for, by type, in Add to Library. */
   searches?: string[];
   /**

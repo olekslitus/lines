@@ -7,6 +7,7 @@ import { coverOfItem, libraryNote } from "../library/note";
 import { addedAgain, inLibrary, libraryNoteOf } from "../library/same";
 import { clock, coverOf, known, withCover } from "../library/text";
 import { putAttachment } from "../notes/attachments";
+import { type Asking, hostOf as hostName, isLocal } from "../outside";
 import { dayOf } from "../notes/calendar";
 import { propertyOf } from "../notes/properties";
 import { isClosed, notes } from "../notes/store.svelte";
@@ -256,7 +257,7 @@ class Feeds {
     const record = this.records.get(url);
     if (!asked && (record?.gone || (record?.retryAt && record.retryAt > Date.now()))) return null;
     try {
-      const response = await fetchFeed(url, record ?? {});
+      const response = await fetchFeed(url, record ?? {}, undefined, { own: record?.own });
       if (!response.changed) {
         this.#update(url, { checked: Date.now(), error: undefined, failures: 0, retryAt: undefined, gone: false });
         return null;
@@ -278,10 +279,13 @@ class Feeds {
     }
   }
 
-  /** Keeps a feed as it was just fetched: its posts merged with those kept, which were read staying read. */
-  take(url: string, feed: Feed, validators: Validators): Promise<void> {
+  /**
+   * Keeps a feed as it was just fetched: its posts merged with those kept, which were read staying
+   * read. One whose address is the person's own (`own`) is asked as theirs from then on (outside.ts).
+   */
+  take(url: string, feed: Feed, validators: Validators, { own }: Asking = {}): Promise<void> {
     // After the feed's last, so each merges with what the one before kept.
-    const taking = (this.#taking.get(url) ?? Promise.resolve()).catch(() => {}).then(() => this.#take(url, feed, validators));
+    const taking = (this.#taking.get(url) ?? Promise.resolve()).catch(() => {}).then(() => this.#take(url, feed, validators, own));
     this.#taking.set(url, taking);
     void taking
       .catch(() => {})
@@ -291,7 +295,7 @@ class Feeds {
     return taking;
   }
 
-  async #take(url: string, feed: Feed, validators: Validators) {
+  async #take(url: string, feed: Feed, validators: Validators, own?: boolean) {
     const { posts, changed, dropped } = merge(this.records.get(url)?.posts ?? [], feed.posts, Date.now());
     await feedStorage.putContents(changed.map(({ key, html }) => ({ id: key, html })));
     // As the posts are now: one opened (or marked) while their content was written stays as it was left.
@@ -309,6 +313,7 @@ class Feeds {
       failures: 0,
       retryAt: undefined,
       gone: false,
+      own: own || now?.own,
     });
     await feedStorage.deleteContents(dropped);
   }
@@ -436,7 +441,9 @@ class Feeds {
   async subscribe(input: string, signal = new AbortController().signal): Promise<{ url: string; again: boolean }> {
     const link = linkOf(input);
     if (!link) throw new NoFeed(input);
-    const found = await findFeed((await namedFeed(link, signal)) ?? link, signal, namedFeed);
+    // The link given is the person's own, wherever it is; a feed it names, or a podcast's site's, is the web's.
+    const named = await namedFeed(link, signal);
+    const found = await findFeed(named ?? link, signal, namedFeed, { own: !named });
     const item = feedItem(found.url, found.feed);
     // By its feed's address: a note of the site it's from (a bookmark) isn't a subscription.
     const there = libraryNoteOf({ type: item.type, properties: [["feed", found.url]] });
@@ -444,7 +451,7 @@ class Feeds {
       addedAgain(there);
       return { url: feedOf(there.meta.properties) ?? found.url, again: true };
     }
-    await this.take(found.url, found.feed, found.validators);
+    await this.take(found.url, found.feed, found.validators, { own: !named && new URL(found.url).origin === new URL(link).origin });
     await this.#write(item, signal);
     return { url: found.url, again: false };
   }
@@ -498,18 +505,25 @@ class Feeds {
   /**
    * Subscribes to the feeds an OPML file lists that aren't already, each fetched in its turn as
    * feeds are refreshed, for what it says of itself; one that can't be, a note of what the file
-   * says of it, and why kept as any feed's that failed. How many were added.
+   * says of it, and why kept as any feed's that failed. One on this computer or its network (by its
+   * name, or as asking it finds) isn't subscribed to. How many were added, and left out so.
    */
-  async importOpml(text: string): Promise<number> {
+  async importOpml(text: string): Promise<{ added: number; local: number }> {
     // By their feeds' addresses: a page of a site (a bookmark) isn't a subscription to its feed.
-    const outlines = readOpml(text).filter(({ url }) => !inLibrary({ type: "feed", properties: [["feed", url]] }));
+    const listed = readOpml(text).filter(({ url }) => !inLibrary({ type: "feed", properties: [["feed", url]] }));
+    // A file isn't the person's word for an address on their own computer or network: they subscribe to one by its link.
+    const outlines = listed.filter(({ url }) => !isLocal(hostName(new URL(url))));
+    let local = listed.length - outlines.length;
+    let added = 0;
     await Promise.all(
       outlines.map(async ({ url, title, site }) => {
         const feed = await this.#request(url);
+        if (this.records.get(url)?.error === "local") return void local++;
         await this.#write(feedItem(url, feed ?? { title: title || url, link: site, posts: [] }));
+        added++;
       }),
     );
-    return outlines.length;
+    return { added, local };
   }
 
   /** Every feed subscribed to, as an OPML file other readers take. */
@@ -540,6 +554,8 @@ export function feedError(reason: string): string {
   switch (reason) {
     case "blocked":
       return t("feeds.errorBlocked");
+    case "local":
+      return t("feeds.errorLocal");
     case "timeout":
       return t("feeds.errorTimeout");
     case "too big":

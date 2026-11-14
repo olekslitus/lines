@@ -88,6 +88,20 @@ export async function saveFile(filename: string, data: Uint8Array<ArrayBuffer>, 
   return invoke<string>("save_export", data, { headers: { "x-file-name": encodeURIComponent(filename) } });
 }
 
+/**
+ * Whether every address a site's name stands for is on the web at large, as the system looks it up
+ * (the apps, src-tauri's addresses.rs); true elsewhere, where the browser asks. Rejects where the
+ * system can't say in time, or once `signal` aborts.
+ */
+export async function hostIsPublic(host: string, signal?: AbortSignal): Promise<boolean> {
+  if (!isTauri) return true;
+  signal?.throwIfAborted();
+  const { invoke } = await import("@tauri-apps/api/core");
+  const stopped = new Promise<never>((_, reject) => signal?.addEventListener("abort", () => reject(signal.reason), { once: true }));
+  stopped.catch(() => {});
+  return Promise.race([invoke<boolean>("host_is_public", { host }), stopped]);
+}
+
 /** The paths of what was last dragged from Finder, which a page isn't told (the Mac app); none elsewhere. */
 export async function droppedPaths(): Promise<string[]> {
   if (!isMacApp) return [];

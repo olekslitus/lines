@@ -34,12 +34,12 @@ const source: LibrarySource = {
   id: FEED_SOURCE,
   name: t("feeds.title"),
   recognizes: looksLikeFeed,
-  async lookup(url, signal) {
-    const response = await fetchFeed(url.href, {}, signal);
+  async lookup(url, signal, asking) {
+    const response = await fetchFeed(url.href, {}, signal, asking);
     if (!response.changed || !isFeed(response.text)) return null;
     const feed = readFeed(response.text, response.url);
     // Kept now, so the subscription's posts are there with its note, without fetching it again.
-    await feeds.take(url.href, feed, response.validators);
+    await feeds.take(url.href, feed, response.validators, asking);
     return feedItem(url.href, feed);
   },
 };
@@ -54,10 +54,10 @@ const site: LibrarySource = {
   general: true,
   requires: ["web-pages"],
   recognizes: (url) => url.protocol === "https:" || url.protocol === "http:",
-  async lookup(url, signal) {
+  async lookup(url, signal, asking) {
     try {
-      const found = await findFeed(url.href, signal, namedFeed);
-      await feeds.take(found.url, found.feed, found.validators);
+      const found = await findFeed(url.href, signal, namedFeed, asking);
+      await feeds.take(found.url, found.feed, found.validators, { own: asking?.own && new URL(found.url).origin === url.origin });
       return feedItem(found.url, found.feed);
     } catch (error) {
       if (error instanceof NoFeed) return null;

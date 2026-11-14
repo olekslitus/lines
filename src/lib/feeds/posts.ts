@@ -37,6 +37,8 @@ export interface FeedRecord extends Omit<Feed, "posts"> {
   retryAt?: number;
   /** It said it's gone for good (410): not asked again unless asked to. */
   gone?: boolean;
+  /** Its address is the person's own (subscribed to by the link they gave), which may be on this computer or its network (outside.ts). */
+  own?: boolean;
 }
 
 /** A short fingerprint of some text (FNV-1a): enough to tell a post's content changed. */

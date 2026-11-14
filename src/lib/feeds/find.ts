@@ -1,3 +1,4 @@
+import type { Asking } from "../outside";
 import { FetchError, fetchFeed, type Validators } from "./fetch";
 import { isFeed, isPodcast, readFeed, type Feed } from "./parse";
 
@@ -85,20 +86,23 @@ export type PodcastAt = (link: string, signal?: AbortSignal) => Promise<string |
 /**
  * The feed at `link`; or of the site its page is on: the podcast's it links to, if the feed the page
  * names has no sound, then that feed, then one where sites usually keep theirs. Throws NoFeed if
- * there's none, FetchError if it can't be fetched.
+ * there's none, FetchError if it can't be fetched. A link the person gave (`own`) is asked wherever
+ * it is, and so is what its page names on the same site; anything else it names, as the web gives it.
  */
-export async function findFeed(link: string, signal?: AbortSignal, podcastAt?: PodcastAt): Promise<Found> {
-  const response = await fetchFeed(link, {}, signal);
+export async function findFeed(link: string, signal?: AbortSignal, podcastAt?: PodcastAt, asking: Asking = {}): Promise<Found> {
+  const response = await fetchFeed(link, {}, signal, asking);
   if (!response.changed) throw new NoFeed(link);
   // Its address as given, even if it was found further on: a redirect may be for now only.
   if (isFeed(response.text)) return { url: link, feed: readFeed(response.text, response.url), validators: response.validators };
+  const site = new URL(link).origin;
+  const named = (url: string): Asking => ({ own: !!asking.own && new URL(url).origin === site });
   const page = readSite(response.text, response.url);
-  const named = await firstFeed(page.named.slice(0, TRIED), signal);
-  if (named && isPodcast(named.feed)) return named;
+  const listed = await firstFeed(page.named.slice(0, TRIED), signal, named);
+  if (listed && isPodcast(listed.feed)) return listed;
   const found =
-    (await sitePodcast(page.links, response.url, signal, podcastAt)) ??
-    named ??
-    (await firstFeed(usualFeeds(response.url).filter((url) => !page.named.includes(url)), signal));
+    (await sitePodcast(page.links, response.url, signal, podcastAt, named)) ??
+    listed ??
+    (await firstFeed(usualFeeds(response.url).filter((url) => !page.named.includes(url)), signal, named));
   if (found) return found;
   throw new NoFeed(link);
 }
@@ -110,11 +114,11 @@ const siteOf = (link: string) => new URL(link).hostname.replace(/^www\./, "");
  * one a page only mentions): a link to its feed, or to its page elsewhere that a source finds the
  * feed of (Apple Podcasts).
  */
-async function sitePodcast(links: URL[], page: string, signal?: AbortSignal, podcastAt?: PodcastAt): Promise<Found | null> {
+async function sitePodcast(links: URL[], page: string, signal?: AbortSignal, podcastAt?: PodcastAt, asking?: (url: string) => Asking): Promise<Found | null> {
   const site = siteOf(page);
   let tried = 0;
   for await (const url of linkedFeeds(links, signal, podcastAt)) {
-    const found = await firstFeed([url], signal);
+    const found = await firstFeed([url], signal, asking);
     if (found && isPodcast(found.feed) && found.feed.link && siteOf(found.feed.link) === site) return found;
     if (++tried === TRIED) break;
   }
@@ -131,16 +135,18 @@ async function* linkedFeeds(links: URL[], signal?: AbortSignal, podcastAt?: Podc
 }
 
 /**
- * The first of `urls` that's a feed, asked one at a time: past those that aren't there, but giving
- * up on a site that asks to be left alone a while (429, 5xx) or doesn't answer.
+ * The first of `urls` that's a feed, asked one at a time (each as `asking` says): past those that
+ * aren't there, but giving up on a site that asks to be left alone a while (429, 5xx) or doesn't answer.
  */
-async function firstFeed(urls: string[], signal?: AbortSignal): Promise<Found | null> {
+async function firstFeed(urls: string[], signal?: AbortSignal, asking?: (url: string) => Asking): Promise<Found | null> {
   for (const url of urls) {
     try {
-      const feed = await fetchFeed(url, {}, signal);
+      const feed = await fetchFeed(url, {}, signal, asking?.(url));
       if (feed.changed && isFeed(feed.text)) return { url, feed: readFeed(feed.text, feed.url), validators: feed.validators };
     } catch (error) {
       if (signal?.aborted) throw error;
+      // One the web led onto this computer or its network is passed over, as one that isn't there.
+      if (error instanceof FetchError && error.message === "local") continue;
       if (!(error instanceof FetchError) || !error.status || error.status === 429 || error.status >= 500) return null;
     }
   }

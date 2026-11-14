@@ -42,6 +42,7 @@ export default {
   "feeds.noMatches": "No posts match “{query}”.",
   // Why a feed couldn't be fetched, over its posts and in its row's tooltip.
   "feeds.errorBlocked": "This feed’s site doesn’t let web pages read it. The desktop apps can.",
+  "feeds.errorLocal": "It leads to an address on this computer or its network, which lines doesn’t follow from the web.",
   "feeds.errorTimeout": "The feed took too long to answer.",
   "feeds.errorTooBig": "The feed is too big to read.",
   "feeds.errorNotFeed": "There’s no feed at this address any more.",
@@ -117,4 +118,5 @@ export default {
   "feeds.exportOpml": "Export OPML",
   "feeds.importing": "Importing…",
   "feeds.imported": "{count, plural, =0 {No feeds that aren’t subscribed to already} one {Subscribed to # feed} other {Subscribed to # feeds}}",
+  "feeds.importedLocal": "{count, plural, one {# on this computer or its network is left out: subscribe to it by its link} other {# on this computer or its network are left out: subscribe to each by its link}}",
 };

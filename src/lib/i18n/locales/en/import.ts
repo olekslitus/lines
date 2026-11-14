@@ -71,6 +71,15 @@ export default {
   "import.notion.note": "In Notion, open Settings → Export all workspace content (or a page’s ••• menu → Export), choose Markdown & CSV, with Include subpages and Create folders for subpages on, and choose the ZIP it downloads here, as it is: a large one holds other ZIPs, which lines unpacks too. Pages, sub-pages (as tags), links, pictures and files, callouts and databases (each row a note of a type, the database a table of them) come across.",
   "import.notion.chooseZip": "Choose Export ZIP…",
   "import.notion.chooseFolder": "Choose Unpacked Folder…",
+  "import.report.encrypted": "{count, plural, one {# note with an encrypted part, kept as Evernote encrypted it, with what it is said, as lines can’t open it: {examples}} other {# notes with encrypted parts, kept as Evernote encrypted them, with what they are said, as lines can’t open them: {examples}}}",
+  // Evernote's group of Settings → Export and Import, and what a note's text says of what it can't show.
+  "import.evernote.title": "From Evernote",
+  "import.evernote.note": "In Evernote, right-click a notebook → Export Notebook… (or select notes → Export Notes…), choose ENEX (.enex) as the format, and choose the files here: a notebook’s notes, with their files, checklists, tags and dates, come across, in a tag of the notebook’s name.",
+  "import.evernote.choose": "Choose .enex Files…",
+  "import.evernote.untitled": "Untitled",
+  "import.evernote.file": "File",
+  "import.evernote.encrypted": "🔒 Encrypted in Evernote, as it was:",
+  "import.evernote.encryptedHint": "🔒 Encrypted in Evernote (hint: {hint}), as it was:",
   // Obsidian's group of Settings → Export and Import.
   "import.obsidian.title": "From Obsidian",
   "import.obsidian.note": "A vault is a folder of Markdown files, so there’s nothing to export: choose the vault’s folder. To find it, open Obsidian’s vault switcher (the vault’s name, at the bottom of the sidebar) → Manage Vaults, or right-click a note → Reveal in Finder. Notes, folders, links, pictures and files, callouts, bookmarks (pinned) and daily notes (on the Calendar) all come across.",

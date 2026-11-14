@@ -228,8 +228,11 @@ export class Unpacking {
     this.#left = total;
   }
 
-  /** Whether `file` may be unpacked: no bigger than one can be, nor packed so tightly no real file is, nor past what's left; counted if so. */
-  allows(file: ZippedFile) {
+  /**
+   * Whether `file` may be unpacked: no bigger than one can be, nor packed so tightly no real file is,
+   * nor past what's left; counted if so. Any file packed some way (an .enex's base64) is asked of too.
+   */
+  allows(file: Pick<ZippedFile, "size" | "packed">) {
     if (file.size > LIMIT || (file.size > SMALL && file.size > file.packed * RATIO) || file.size > this.#left) return false;
     this.#left -= file.size;
     return true;

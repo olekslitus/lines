@@ -1,4 +1,4 @@
-import { afterEach, expect, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
@@ -238,4 +238,106 @@ test("Notion's export, a ZIP of ZIPs: its pages, a database as a table of its ro
 
   await (await app.settings("Export and Import")).getByRole("region", { name: "From Notion" }).locator("input[accept='.zip']").setInputFiles(exported);
   await group.getByText("Everything in Export-0a1b is in lines already.").waitFor();
+});
+
+describe("Evernote", () => {
+  const enex = readFileSync(new URL("../unit/fixtures/evernote/Work.enex", import.meta.url), "utf8");
+
+  test("a notebook's notes in Linedown: its ENML read as HTML is, where nothing runs; files by their MD5, checklists, code, highlights, an encrypted part", async () => {
+    app = await openApp();
+    const { notes, attachments, report } = await app.page.evaluate((xml) => window.testing.readEnex("Work", xml), enex);
+    expect(notes.map(({ id, name, folders, tags }) => [id, name, folders, tags])).toEqual([
+      ["Work/Plan/20240301T090000Z", "Plan", ["Work"], ["work", "big ideas"]],
+      ["Work/Untitled/20240401T090000Z", "Untitled", ["Work"], []],
+    ]);
+    expect(attachments).toEqual(["Work/Plan/photo.png", "Work/Plan/Report 2026.pdf", "Work/Untitled/File.png"]);
+    const due = await app.page.evaluate(() => {
+      const date = new Date(Date.UTC(2024, 10, 20, 14));
+      const two = (value: number) => String(value).padStart(2, "0");
+      return `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())} ${two(date.getHours())}:${two(date.getMinutes())}`;
+    });
+    expect(notes[0].body.replace(/(\d+)/g, "<$1>")).toBe(
+      [
+        "---",
+        "author: Ada Lovelace",
+        "url: https://example.com/plan",
+        `due: ${due}`,
+        "---",
+        "# Plan",
+        "",
+        "Meeting notes with **bold**, *italics*, a [link](https://example.com/doc) and a ==highlight==.",
+        "",
+        "![|300](../attachments/<0>)",
+        "",
+        "[Report 2026.pdf](../attachments/<1>)",
+        "",
+        "- [x] Book the room",
+        "- [ ] Send the agenda",
+        "- [x] Newer done",
+        "- [ ] Newer open",
+        "",
+        "```",
+        "const a = 1;",
+        'const b = "#not-a-tag";',
+        "```",
+        "",
+        "| Item | Cost |",
+        "| --- | --- |",
+        "| Tea | 3 |",
+        "",
+        "Secret: 🔒 Encrypted in Evernote (hint: the usual), as it was: `RU5DMAAAAAA=`",
+        "",
+        // Its script is left out, a picture from `javascript:` too, and its words are only words.
+        "\\#not a tag either",
+        "",
+      ].join("\n"),
+    );
+    // A file its text doesn't show is under it, not left out.
+    expect(notes[1].body).toBe("# Untitled\n\nA note without a title, and a file its text doesn't show.\n\n![File.png](../attachments/2)\n");
+    expect(report).toEqual({ "import.report.encrypted": [1, "Plan"] });
+  });
+
+  test("read safely: nothing a DOCTYPE declares, files held to the import's limits, a picture in a table with its bar escaped", async () => {
+    app = await openApp();
+    const read = (xml: string, total?: number) =>
+      app.page.evaluate(([xml, total]) => {
+        try {
+          return window.testing.readEnex("Work", xml as string, total as number | undefined);
+        } catch (error) {
+          return String(error);
+        }
+      }, [xml, total] as const);
+    // Entities made of entities ("billion laughs"), or one read from elsewhere: never expanded, so the file can't be read.
+    const laughs = `<?xml version="1.0"?><!DOCTYPE en-export [<!ENTITY a "ha"><!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;"><!ENTITY c "&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;">]><en-export><note><title>&c;</title></note></en-export>`;
+    const outside = `<?xml version="1.0"?><!DOCTYPE en-export [<!ENTITY x SYSTEM "file:///etc/passwd">]><en-export><note><title>&x;</title></note></en-export>`;
+    for (const xml of [laughs, outside]) expect(String(await read(xml))).toMatch(/isn't an \.enex file lines can read/);
+    // Its files past what's left are left out, and said so; a picture in a table keeps the table's columns.
+    const table = enex.replace('<table><tr><td>Item</td>', '<table><tr><td><en-media hash="884697b1b2bb4136e34ee5669e4030b6" type="image/png" width="300"/></td>');
+    const held = (await read(table, 100)) as Exclude<Awaited<ReturnType<typeof read>>, string>;
+    expect([held.attachments, held.report["import.report.skipped"]]).toEqual([["Work/Plan/photo.png", "Work/Plan/Report 2026.pdf"], [1, "Work/Untitled/File.png"]]);
+    expect(held.notes[0].body).toContain("\n| ![\\|300](../attachments/\uE0000\uE000) | Cost |\n");
+  });
+
+  test("imported from its .enex: the notebook a tag, its files kept; then nothing new", async () => {
+    app = await openApp({ onDisk: true });
+    const { page } = app;
+    const settings = await app.settings("Export and Import");
+    const group = settings.getByRole("region", { name: "From Evernote" });
+    const file = { name: "Work.enex", mimeType: "application/xml", buffer: Buffer.from(enex) };
+    await group.locator("input[accept='.enex']").setInputFiles(file);
+    await group.getByText("2 notes, 3 attachments, and 1 folder in Work.").waitFor();
+    await group.getByRole("button", { name: "Import 2 Notes" }).click();
+    await group.getByText("Imported 2 notes.").waitFor();
+    const notes = await page.evaluate(() =>
+      Object.fromEntries(window.testing.notes.entries.filter(({ note }) => note.source?.app === "evernote").map(({ note, meta }) => [meta.title, { body: note.body, created: note.createdAt }])),
+    );
+    expect(Object.keys(notes).sort()).toEqual(["Plan", "Untitled"]);
+    expect(notes.Plan.body).toMatch(/\n!\[\|300\]\(\.\.\/attachments\/[0-9a-f]{32}\.png\)\n/);
+    // Its tags, and its notebook's, which is one of them here.
+    expect(notes.Plan.body).toEndWith("\n\n#work #big-ideas\n");
+    expect(notes.Plan.created).toBe(Date.UTC(2024, 2, 1, 9));
+    await page.locator('.sidebar [data-tag="big-ideas"]').waitFor();
+    await group.locator("input[accept='.enex']").setInputFiles(file);
+    await group.getByText("Everything in Work is in lines already.").waitFor();
+  });
 });

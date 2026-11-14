@@ -4,7 +4,7 @@ Notes from another notes app come into lines from **Settings → Export and Impo
 
 ## How an import goes
 
-1. **Choose** what the app exported: a folder (an Obsidian vault, a Logseq graph, Bear's Markdown), or a file (Bear's backup, Notion's export, a ZIP; a ZIP of nothing but ZIPs, as Notion splits a large export, is unpacked in turn: [below](#zips-and-how-big-an-export-can-be)). Nothing is written yet, and nothing in it is run: its notes are read as text.
+1. **Choose** what the app exported: a folder (an Obsidian vault, a Logseq graph, Bear's Markdown), or files (Bear's backup, Notion's export, Evernote's notebooks, a ZIP; a ZIP of nothing but ZIPs, as Notion splits a large export, is unpacked in turn: [below](#zips-and-how-big-an-export-can-be)). Nothing is written yet, and nothing in it is run: its notes are read as text.
 2. **What it would do** comes first: how many notes, attachments and folders, and on lines of their own, what won't come across as it was, each kind with how many and a few examples (`^37066d (Plan)`): what's kept as text because lines has nothing like it, and what's left out. Notes imported from it before are left out too, and said so, with which ([below](#importing-again)).
 3. **Import** (focused, so Enter imports) copies the pictures and files the notes show into lines' attachments, then makes the notes a few hundred at a time, with a bar showing how far it's got; Stop stops either, keeping what's made (stopped while copying, no note is made, and it says so). Ten thousand notes take a few seconds. Closing Settings doesn't stop it, and opening it again shows how it's going, or how it went.
 4. **What it did**, with what didn't come across said again, and **Undo Import**, which moves every note it made to the Trash (but one you've changed since, which is yours now). Nothing an import made is ever deleted outright: empty the Trash for that. Choosing something else to import keeps the last import's Undo, under what the next would do; an import with nothing to bring can't be started, so it never takes that Undo's place.
@@ -154,4 +154,28 @@ The code is in `src/plugins/logseq/`: `graph.ts` reads the graph, `outline.ts` i
 **Said so:** links to pages that aren't in the export (kept as written), toggles, files no page shows (left out), and pages with the same name (lines finds notes by title, so a link to that name finds one of them).
 
 Notion's Markdown export doesn't say when a page was made, so pages are dated when they were exported, but rows, by their Created and Last edited columns where the database has them. The code is in `src/plugins/notion/`: `export.ts` reads the export and its databases, `markdown.ts` its pages.
+
+## Evernote
+
+**What to choose:** in Evernote, right-click a notebook → **Export Notebook…** (or select notes → **Export Notes…**) and choose **ENEX** (`.enex`) as the format. Choose the files with **Choose .enex Files…**: several notebooks' at once, if you like.
+
+**What comes across:**
+
+| In Evernote | In lines |
+| --- | --- |
+| A note | A note, titled as it was ("Untitled" for one without a title), dated when it was made and changed |
+| Its notebook (the .enex file's name) | A tag of its name, with folder tags on |
+| Tags | Tags (`big ideas` as `#big-ideas`) |
+| Its text (ENML, Evernote's HTML) | Linedown, read as lines reads a feed's HTML ([library.md](library.md#feeds)), where nothing in it runs or loads: paragraphs, headings, bold, italics, links (to the web and mail), lists, quotes, tables, pictures from the web. Scripts, forms and the like are left out, and its words are only words (a `#` in them isn't a tag) |
+| Its files (`<en-media>`, found by their MD5) | Kept in lines, pictures at their width; a file its text doesn't show, under it |
+| Checklists, old (`<en-todo>`) and new | Tasks, ticked where they were |
+| Code blocks | Code blocks |
+| Highlights | `==highlights==` |
+| Author, source URL | `author:` and `url:` properties |
+| A reminder not done | `due:`, so it's on the Calendar |
+| An encrypted part (`<en-crypt>`) | Text saying so, with its hint, and the encrypted text as Evernote wrote it, in code (said so): lines can't decrypt it, and nothing is lost |
+
+Evernote's .enex has no id for a note, so importing again knows a note by its notebook, title and when it was made, whichever notebooks are chosen with it.
+
+**Read safely:** an .enex is XML read without its DOCTYPE, so nothing it declares is fetched from elsewhere or multiplied ("billion laughs"): a file that declares any is said not to be readable. Its files, in base64, are held to the same limits as a ZIP's ([above](#zips-and-how-big-an-export-can-be)): 256 MB each, 2 GB all told, any past that left out and said so. An .enex over 2 GB, or one that can't be read, is left out and said so, when other notebooks are chosen with it. In a table, a picture's width keeps the table's columns (`![\|300](…)`). The code is in `src/plugins/evernote/`: `enex.ts` reads a notebook, `md5.ts` names its files as Evernote does.
 

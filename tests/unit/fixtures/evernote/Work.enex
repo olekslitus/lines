@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE en-export SYSTEM "http://xml.evernote.com/pub/evernote-export4.dtd">
+<en-export export-date="20241114T120000Z" application="Evernote" version="10.105.4">
+  <note>
+    <title>Plan</title>
+    <created>20240301T090000Z</created>
+    <updated>20240302T101500Z</updated>
+    <tag>work</tag>
+    <tag>big ideas</tag>
+    <note-attributes>
+      <author>Ada Lovelace</author>
+      <source-url>https://example.com/plan</source-url>
+      <reminder-time>20241120T140000Z</reminder-time>
+    </note-attributes>
+    <content><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">
+<en-note><div>Meeting&nbsp;notes with <b>bold</b>, <i>italics</i>, a <a href="https://example.com/doc">link</a> and a <span style="--en-highlight:yellow;background-color: #ffef9e;">highlight</span>.</div><div><br/></div><en-media hash="884697b1b2bb4136e34ee5669e4030b6" type="image/png" width="300"/><div><en-media hash="f62b27e45a1dfb140c91a291ab586d3e" type="application/pdf"/></div><div><en-todo checked="true"/>Book the room</div><div><en-todo checked="false"/>Send the agenda</div><ul style="--en-todo:true;"><li style="--en-checked:true;"><div>Newer done</div></li><li style="--en-checked:false;"><div>Newer open</div></li></ul><div style="--en-codeblock:true;"><div>const a = 1;</div><div>const b = "#not-a-tag";</div></div><table><tr><td>Item</td><td>Cost</td></tr><tr><td>Tea</td><td>3</td></tr></table><div>Secret: <en-crypt hint="the usual" cipher="AES" length="128">RU5DMAAAAAA=</en-crypt></div><script>alert(1)</script><div><img src="javascript:alert(1)"/>#not a tag either</div></en-note>]]></content>
+    <resource>
+      <data encoding="base64">iVBORw0KGgoAAAANSUhEUgAAAAQAAAAGCAIAAABrW6giAAAAEElEQVR4nGPQiFoARwyUcgAZmhsx2Z6P+QAAAABJRU5ErkJggg==</data>
+      <mime>image/png</mime>
+      <width>4</width>
+      <height>6</height>
+      <resource-attributes><file-name>photo.png</file-name></resource-attributes>
+    </resource>
+    <resource>
+      <data encoding="base64">JVBERi0xLjQKJSVFT0YK</data>
+      <mime>application/pdf</mime>
+      <resource-attributes><file-name>Report 2026.pdf</file-name></resource-attributes>
+    </resource>
+  </note>
+  <note>
+    <title></title>
+    <created>20240401T090000Z</created>
+    <content><![CDATA[<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd"><en-note><div>A note without a title, and a file its text doesn't show.</div></en-note>]]></content>
+    <resource>
+      <data encoding="base64">iVBORw0KGgoAAAANSUhEUgAAAAQAAAAGCAIAAABrW6giAAAAEElEQVR4nGPQiFoARwyUcgAZmhsx2Z6P+QAAAABJRU5ErkJggw==</data>
+      <mime>image/png</mime>
+    </resource>
+  </note>
+</en-export>

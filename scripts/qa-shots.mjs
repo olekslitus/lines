@@ -1815,6 +1815,23 @@ const SCENES = [
     shoot: ".editor-pane",
   },
   {
+    id: "evernote-note",
+    title: "A note brought from Evernote",
+    look: "Plan: author, url and due as properties; the text with bold, italics, a link and a highlight; the picture at 300 px; the PDF's card; four tasks, two ticked; the code block; the table; the encrypted part as a line saying so with its text in code; at the end its tags.",
+    act: async (page) => {
+      await page.getByRole("button", { name: "Settings", exact: true }).click();
+      await page.getByRole("dialog").getByRole("navigation").getByText("Export and Import", { exact: true }).first().click();
+      const group = page.getByRole("dialog").getByRole("region", { name: "From Evernote" });
+      await group.locator("input[accept='.enex']").setInputFiles(`${root}tests/unit/fixtures/evernote/Work.enex`);
+      await group.getByRole("button", { name: /^Import \d+ Notes$/ }).click();
+      await group.getByRole("button", { name: "Undo Import" }).waitFor();
+      await page.keyboard.press("Escape");
+      await page.evaluate(() => window.testing.notes.select(window.testing.notes.entries.find((entry) => entry.meta.title === "Plan" && entry.note.source?.app === "evernote").note.id));
+      await page.locator(".cm-content").getByText("Book the room").evaluate((line) => line.scrollIntoView({ block: "center" }));
+    },
+    shoot: ".editor-pane",
+  },
+  {
     id: "readwise-note",
     title: "A book brought from Readwise",
     look: "Its properties (author, readwise), title and cover; its tag, then the person's note; Highlights, each a quote with where it is and when in it, the person's note on it under it as text.",

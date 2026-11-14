@@ -31,6 +31,7 @@ import { openLibrary } from "./open-library";
 import { paper } from "./paper";
 import { pdfReader } from "./pdf-reader";
 import { epubReader } from "./epub-reader";
+import { evernote } from "./evernote";
 import { pele } from "./pele";
 import { readwise } from "./readwise";
 import { secrets } from "./secrets";
@@ -99,6 +100,7 @@ export const builtIn = (): Plugin[] => [
   bear(),
   logseq(),
   notion(),
+  evernote(),
   // Books kept with library notes, read in the note's place.
   pdfReader(),
   epubReader(),

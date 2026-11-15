@@ -41,6 +41,19 @@ const KINDS: LibraryKind[] = [
     statuses: READ,
   },
   {
+    // Manga, manhwa, manhua, webtoons, comics and graphic novels: `format` says which.
+    type: "comic",
+    name: t("library.comic"),
+    label: t("library.comics"),
+    icon: "book-image",
+    properties: ["author", "artist", "format", "year", "chapters", "anilist", "myanimelist"],
+    subtitle: ["author", "format"],
+    cover: "tall",
+    // AniList's and MyAnimeList's ids, so one added from MangaDex or Wikipedia is the one added from either.
+    ids: ["anilist", "myanimelist"],
+    statuses: READ,
+  },
+  {
     type: "movie",
     name: t("library.movie"),
     label: t("library.movies"),

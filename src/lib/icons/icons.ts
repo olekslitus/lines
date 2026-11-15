@@ -654,7 +654,7 @@ export const ICON_WORDS: Partial<Record<IconName, string>> = {
   heart: "love favorite like health",
   flag: "goal milestone report country",
   lightbulb: "idea tip insight",
-  sparkles: "magic new ai shiny",
+  sparkles: "magic new ai shiny anime",
   eye: "watch see view",
   bell: "notification reminder alert alarm",
   lock: "private secure password secret",

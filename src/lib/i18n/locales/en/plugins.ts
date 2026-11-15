@@ -138,10 +138,11 @@ export default {
   // What a link to a YouTube video is, on its card until it plays.
   "plugins.youtube.video": "Video",
   "plugins.anilist.description":
-    "Looks up manga, manhwa and manhua by a link to AniList, MyAnimeList or, in the apps, MangaDex, and finds them from Add to Library’s Comics: author, artist, year, chapters and cover. The id in the link, or the words searched for, go to AniList.",
+    "Looks up anime by a link to AniList (format, studio, year, season, episodes and cover), and manga, manhwa and manhua by a link to AniList, MyAnimeList or, in the apps, MangaDex (author, artist, year, chapters and cover), with their ids on AniList and MyAnimeList; and finds both from Add to Library’s Anime and Comics. The id in the link, or the words searched for, go to AniList.",
   "plugins.openLibrary.description": "Looks up books by a link to Open Library, or an ISBN in a link (a bookshop’s, or Amazon’s): author, year, pages and cover. The book’s ISBN or id goes to Open Library.",
   "plugins.wikidata.description":
     "Looks up movies, shows and books by a link to IMDb, The Movie Database, Letterboxd, Wikipedia or Wikidata: director, year, runtime, genre, and what they’re about from Wikipedia. The id in the link goes to Wikidata and Wikipedia.",
+  "plugins.myanimelist.description": "Looks up anime by a link to MyAnimeList, through Jikan, an open API that reads MyAnimeList: format, studio, year, season, episodes and cover. The anime’s id goes to Jikan.",
   "plugins.musicbrainz.description":
     "Looks up songs and albums by a link to MusicBrainz, or one to Spotify, Apple Music, Bandcamp, Deezer or Tidal it knows: artist, album, year and cover. The link goes to MusicBrainz.",
   "plugins.applePodcasts.description": "Looks up podcasts and their episodes by a link to Apple Podcasts, with the podcast’s feed. The ids in the link go to Apple.",

@@ -24,6 +24,7 @@ import { markdown } from "./markdown";
 import { mermaid } from "./mermaid";
 import { models } from "./models";
 import { musicbrainz } from "./musicbrainz";
+import { myanimelist } from "./myanimelist";
 import { notion } from "./notion";
 import { obsidian } from "./obsidian";
 import { openLibrary } from "./open-library";
@@ -84,6 +85,7 @@ export const builtIn = (): Plugin[] => [
   wikidata(),
   anilist(),
   musicbrainz(),
+  myanimelist(),
   spotify(),
   soundcloud(),
   applePodcasts(),

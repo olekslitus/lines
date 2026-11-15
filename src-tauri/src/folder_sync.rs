@@ -123,9 +123,11 @@ fn candidate(provider: &'static str, name: String, path: PathBuf) -> Candidate {
   Candidate { provider, name, path: path.to_string_lossy().into_owned() }
 }
 
-/// Every note or image file in `dir`, creating it if needed (which also checks we may write there).
+/// Every note or image file in `dir`: for `notes` and `attachments`, creating it if needed (which
+/// also checks we may write there); for another (`feeds`), none if it isn't there, as it's made
+/// only when a file is first written to it, so a sync folder with nothing for it has no such folder.
 ///
-/// Only the sync folder and its `notes` and `attachments` folders are ever created. If the folder they go in is gone
+/// Only the sync folder and its `notes` and `attachments` folders are ever created by listing. If the folder they go in is gone
 /// (a drive that's signed out, a folder that was moved), this fails rather than return an empty
 /// list, which would look like every note had been deleted on another device.
 #[tauri::command]
@@ -136,7 +138,11 @@ pub async fn sync_folder_list(dir: String) -> Result<Vec<Entry>, String> {
     if container.is_none() {
       return Err(format!("{} isn't available. Is the drive signed in?", dir.display()));
     }
-    std::fs::create_dir_all(&dir).map_err(|e| describe(&dir, e))?;
+    if matches!(dir.file_name().and_then(|name| name.to_str()), Some("notes" | "attachments")) {
+      std::fs::create_dir_all(&dir).map_err(|e| describe(&dir, e))?;
+    } else if !dir.is_dir() {
+      return Ok(Vec::new());
+    }
     let mut entries = Vec::new();
     for entry in std::fs::read_dir(&dir).map_err(|e| describe(&dir, e))?.flatten() {
       let name = entry.file_name().to_string_lossy().into_owned();
@@ -571,5 +577,14 @@ mod tests {
     let gone = dir.join("signed-out-drive/lines/notes");
     assert!(sync_folder_list(gone.to_string_lossy().into_owned()).await.is_err());
     assert!(!dir.exists());
+    // Listing notes makes their folder; listing feeds, with nothing in them yet, doesn't make theirs.
+    let notes = dir.join("lines/notes");
+    std::fs::create_dir_all(&dir).unwrap();
+    assert!(sync_folder_list(notes.to_string_lossy().into_owned()).await.unwrap().is_empty());
+    assert!(notes.is_dir());
+    let feeds = dir.join("lines/feeds");
+    assert!(sync_folder_list(feeds.to_string_lossy().into_owned()).await.unwrap().is_empty());
+    assert!(!feeds.exists());
+    std::fs::remove_dir_all(&dir).unwrap();
   }
 }

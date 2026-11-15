@@ -17,7 +17,7 @@ The next note, @[Frankenstein], is one, as a link to it becomes. It's in the sid
 - **Rate it.** Right-click it → **Rate**, or once it's rated, click its stars: `rating: 4/5` is a property like any other. Settings → Library → **Ratings** puts each kind on a scale of its own (out of 10 or 100, thumbs, grades, or yours) and gives it more ratings than one, like a show's Story and Music.
 - **One undo puts the link back**, if it isn't what you wanted. Changed while it's looked up, the note is left as you wrote it.
 - **Mention it** anywhere: @[Frankenstein] was written by @[Frankenstein].author in @[Frankenstein].year. And `@type.book` on a line of its own is your reading list:
-- **Feeds and podcasts.** The + on the Library's heading subscribes to a blog, a site or a podcast: its posts are listed at the top of the Library under RSS Feeds, Atom Feeds, JSON Feeds or Podcast Feeds (or all together under Feeds: Settings → Library), and open read-only, as a note is drawn; a Hacker News post has its discussion under it, threaded. Save to Library keeps one. (In the browser only some feeds can be read; the lines app reads them all.)
+- **Feeds and podcasts.** The + on the Library's heading subscribes to a blog, a site or a podcast: its posts are listed at the top of the Library under RSS Feeds, Atom Feeds, JSON Feeds or Podcast Feeds (or all together under Feeds: Settings → Library), and open read-only, as a note is drawn; a Hacker News post has its discussion under it, threaded. Save to Library keeps one; Dismiss (E), or Not Interesting (N), takes one out of the list, so a feed can be kept at zero, and Show Dismissed brings one back. (In the browser only some feeds can be read; the lines app reads them all.)
 
 @type.book
 

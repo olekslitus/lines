@@ -30,14 +30,16 @@ mock.module("../../src/lib/windows/channel", () => ({ announce: async () => {}, 
 // A folder on the web is the browser's to give.
 mock.module("../../src/lib/sync/browserFolder", () => ({ BrowserFolderRemote: null, isBrowserFolder: () => false }));
 
-/** One device's on-device database. */
+/** One device's on-device database, and what sync keeps in its page's storage of the files beside the notes. */
 interface Database {
   notes: Map<string, Note>;
   sync: Map<string, SyncRecord>;
   attachments: Map<string, { id: string }>;
+  shared: string | null;
 }
 
-const empty = (): Database => ({ notes: new Map(), sync: new Map(), attachments: new Map() });
+const SHARED_KEY = "lines.sync.shared";
+const empty = (): Database => ({ notes: new Map(), sync: new Map(), attachments: new Map(), shared: null });
 let here = empty();
 
 /** One of the database's object stores, on the device that's open. */
@@ -89,6 +91,13 @@ mock.module("../../src/lib/plugins/registry.svelte", () => ({
 
 /** The folder's files by path, the same on every device, as the drive keeps them. */
 export const drive = new Map<string, { text: string; etag: string }>();
+/** Each file read from the folder, by path, in order. */
+export const reads: string[] = [];
+/** Each folder listed, and each file written (or tried), by path, in order. */
+export const listings: string[] = [];
+export const written: string[] = [];
+/** Files the drive lists but hasn't downloaded to this device yet (iCloud's placeholders), by path: read as nothing. */
+export const placeholders = new Set<string>();
 let writes = 0;
 
 /** Something to do just before the folder's next write, as another device could. */
@@ -100,12 +109,18 @@ mock.module("@tauri-apps/api/core", () => ({
   invoke: async (command: string, { dir, name, text, expected }: FolderArgs) => {
     const path = `${dir}/${name}`;
     if (command === "sync_folder_list") {
-      return [...drive]
+      listings.push(dir);
+      const files = [...drive].map(([file, { etag }]) => [file, etag] as const);
+      return [...files, ...[...placeholders].map((file) => [file, "placeholder"] as const)]
         .filter(([file]) => file.startsWith(`${dir}/`) && !file.slice(dir.length + 1).includes("/"))
-        .map(([file, { etag }]) => ({ name: file.slice(dir.length + 1), etag }));
+        .map(([file, etag]) => ({ name: file.slice(dir.length + 1), etag }));
     }
-    if (command === "sync_folder_read") return drive.get(path) ?? null;
+    if (command === "sync_folder_read") {
+      reads.push(path);
+      return placeholders.has(path) ? null : (drive.get(path) ?? null);
+    }
     if (command === "sync_folder_write") {
+      written.push(path);
       const write = beforeWrite.next;
       beforeWrite.next = undefined;
       write?.(path);
@@ -137,10 +152,13 @@ export const fileOf = (id: string) => `${FOLDER.path}/notes/${id}.md`;
 export class Device {
   #database = empty();
 
-  /** Starts lines here, with this device's notes. */
+  /** Starts lines here, with this device's notes, and what its sync last read of the files beside them. */
   async open() {
     await notes.flush();
+    here.shared = localStorage.getItem(SHARED_KEY);
     here = this.#database;
+    if (here.shared === null) localStorage.removeItem(SHARED_KEY);
+    else localStorage.setItem(SHARED_KEY, here.shared);
     await notes.load();
   }
 
@@ -156,6 +174,7 @@ export async function devices(count: number) {
   // Once the last test's passes are done.
   await sync.configure(null);
   drive.clear();
+  placeholders.clear();
   const all = Array.from({ length: count }, () => new Device());
   await all[0].open();
   await sync.configure(FOLDER);

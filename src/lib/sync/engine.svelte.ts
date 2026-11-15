@@ -58,6 +58,10 @@ async function connect(config: SyncConfig) {
  *
  * Tags' and types' icons and colors are one file, `library.json`, merged choice by choice (looks.ts);
  * what the Library's kinds are rated on another, `ratings.json`, merged the same way (library/ratings.ts).
+ * What's done with feeds' posts is a folder of small files, `feeds/`, a file for each feed
+ * (feeds/marks.ts): each is read only when its tag says it changed, merged by what keeps it
+ * (`SharedFolder`), and written only when what this device would write differs from what it read.
+ * With nothing to keep there (no feeds), the folder isn't listed, nor made.
  *
  * With end-to-end encryption on (see sealed.ts), the same happens through a SealedRemote. Turning
  * it on or off rewrites the whole remote, so it's never half one and half the other for long:
@@ -67,7 +71,11 @@ async function connect(config: SyncConfig) {
 const CONFIG_KEY = "lines.sync";
 /** Set after turning encryption off, until the encrypted copies are all removed. */
 const LEFTOVERS_KEY = "lines.sync.leftovers";
+/** Each file in a shared folder as last exchanged, by its key there: its tag and a hash of what it says, as written here. */
+const SHARED_KEY = "lines.sync.shared";
 const DEBOUNCE = 2_000;
+/** How long changes that can wait (marks on feeds' posts) wait to go up together, unless a pass comes sooner. */
+const LATER = 15_000;
 const INTERVAL = 60_000;
 const CONCURRENCY = 6;
 
@@ -219,6 +227,42 @@ async function merge(here: Note, there: Note, base: SyncRecord | undefined): Pro
   };
 }
 
+/** A folder of small files beside the notes, each merged with another device's by what keeps them, rather than as a note is. */
+export interface SharedFolder {
+  /** The folder, as `feeds/`. */
+  dir: string;
+  /** Whether what they are on this device has been read yet: until then they're left alone. */
+  ready(): boolean;
+  /** The names of the files that may be there, as far as this device knows: an encrypted one is found by its name. */
+  names(): string[];
+  /** The files there are here, by name, with what's in each now, written the same whenever what they say is. */
+  files(): Map<string, string>;
+  /**
+   * Takes in another device's version of one, and says what it says as this device would write it:
+   * it's written back only when this device's then differs, as it knows more.
+   */
+  merge(name: string, text: string): string;
+  /** Called on each change made here, to sync it. */
+  onChange(listener: () => void): void;
+}
+
+type SharedRecords = Record<string, { etag: string | null; hash: string }>;
+
+function sharedRecords(): SharedRecords {
+  try {
+    return JSON.parse(localStorage.getItem(SHARED_KEY) ?? "{}") ?? {};
+  } catch {
+    return {};
+  }
+}
+
+/** Whether the file at `key` is a drive's own copy of the one at `original` (`<name> 2.json`, `<name> (1).json`, `<name>-MacBook.json`…). */
+function isCopyOf(key: string, original: string) {
+  const dot = original.lastIndexOf(".");
+  const [stem, ext] = [original.slice(0, dot), original.slice(dot)];
+  return key !== original && key.endsWith(ext) && key.startsWith(stem) && /^[ -]./.test(key.slice(stem.length, -ext.length));
+}
+
 /** What the person calls where notes sync to: the drive or folder, or the bucket. */
 const placeName = (config: SyncConfig) => (isFolder(config) ? config.name : config.bucket);
 
@@ -244,6 +288,7 @@ class SyncEngine {
   #settingUp = false;
   /** The connection as last saved or read here, to tell when another tab changed it. */
   #saved: string | null = null;
+  #folders: SharedFolder[] = [];
 
   /** Reads the saved connection. Once lines is unlocked, if the app lock is on. */
   async load() {
@@ -269,6 +314,12 @@ class SyncEngine {
     return true;
   }
 
+  /** Syncs a folder of files beside the notes, from the next pass on. */
+  shareFolder(folder: SharedFolder) {
+    this.#folders.push(folder);
+    folder.onChange(() => this.#scheduleLater());
+  }
+
   start() {
     notes.onLocalChange(() => this.schedule());
     looks.onChange(() => this.schedule());
@@ -292,6 +343,7 @@ class SyncEngine {
     // that's queued behind the running pass.
     this.config = null;
     clearTimeout(this.#timer);
+    this.#timer = undefined;
     await (this.#queued ?? this.#running);
     let next = config && normalizeConfig(config);
     // The encryption key only means something where it came from.
@@ -302,6 +354,7 @@ class SyncEngine {
     await alone(async () => {
       await syncRecords.clear();
       localStorage.removeItem(LEFTOVERS_KEY);
+      localStorage.removeItem(SHARED_KEY);
       await this.#save(next);
     });
     this.config = next;
@@ -341,6 +394,7 @@ class SyncEngine {
       await this.#switch({ ...config, encryption: { id, key: toBase64(raw) } });
       await store.delete(root + LOOKS_FILE);
       await store.delete(root + RATINGS_FILE);
+      // The shared folders' plain files go on the next pass, once they're up encrypted.
     });
   }
 
@@ -368,6 +422,7 @@ class SyncEngine {
         const { remote } = await connect(config);
         await store.delete(await remote.fileKey!(root + LOOKS_FILE));
         await store.delete(await remote.fileKey!(root + RATINGS_FILE));
+        for (const folder of this.#folders) await pool((await store.list(root + folder.dir)).filter((object) => object.key.endsWith(SEALED)), (object) => store.delete(object.key));
         // Without the key file, other devices stop before they'd see notes go missing.
         await store.delete(root + KEY_FILE);
         localStorage.setItem(LEFTOVERS_KEY, "1");
@@ -404,6 +459,7 @@ class SyncEngine {
     if (!config || this.#paused) return;
     this.#paused = true;
     clearTimeout(this.#timer);
+    this.#timer = undefined;
     try {
       await (this.#queued ?? this.#running);
       await alone(async () => {
@@ -420,6 +476,7 @@ class SyncEngine {
   /** Switches to the same place with encryption on or off. Records are cleared, as when connecting. */
   async #switch(config: SyncConfig) {
     await syncRecords.clear();
+    localStorage.removeItem(SHARED_KEY);
     this.config = config;
     await this.#save(config);
     this.encryptionIssue = null;
@@ -429,6 +486,12 @@ class SyncEngine {
     if (!this.config) return;
     clearTimeout(this.#timer);
     this.#timer = setTimeout(() => void this.syncNow(), DEBOUNCE);
+  }
+
+  /** Syncs within a while, or with the pass already due: changes that can wait go up together. */
+  #scheduleLater() {
+    if (!this.config || this.#timer !== undefined) return;
+    this.#timer = setTimeout(() => void this.syncNow(), LATER);
   }
 
   /** Run a full pass that starts after this call, so it includes every change made so far. */
@@ -443,6 +506,7 @@ class SyncEngine {
     const config = this.config;
     if (!config || !notes.ready || this.#paused) return Promise.resolve();
     clearTimeout(this.#timer);
+    this.#timer = undefined;
     this.#running = alone(() => this.#run(config)).finally(() => (this.#running = null));
     return this.#running;
   }
@@ -667,6 +731,7 @@ class SyncEngine {
     }
     await this.#syncLooks(remote, root);
     await this.#syncRatings(remote, root);
+    for (const folder of this.#folders) if (folder.ready()) await this.#syncFolder(remote, store, root, folder, !!config.encryption);
     await this.#syncAttachments(remote, store, attachmentDir, !!config.encryption);
   }
 
@@ -689,6 +754,60 @@ class SyncEngine {
     const text = writeRatings(ratings.choices);
     if (text === there?.text) return;
     if ((await remote.put(key, text, there ? (there.etag ?? undefined) : null)) === false) this.schedule();
+  }
+
+  /**
+   * Brings in the files of a folder beside the notes that changed since they were last read here (by
+   * their tags, from one listing), and their drives' own copies, which then go; and writes each
+   * that's changed here, over the version read.
+   */
+  async #syncFolder(remote: Remote, store: Remote, root: string, folder: SharedFolder, encrypted: boolean) {
+    // Nothing that could be there (no feeds, nothing done with posts): not even listed.
+    if (!folder.names().length && !folder.files().size) return;
+    const dir = root + folder.dir;
+    const keyOf = async (name: string) => (await remote.fileKey?.(dir + name)) ?? dir + name;
+    const listed = await store.list(dir);
+    // Plain ones from before encryption, as notes' are; theirs are up encrypted by now.
+    if (encrypted) await pool(listed.filter((object) => !object.key.endsWith(SEALED)), (object) => store.delete(object.key));
+    const names = new Map<string, string>();
+    for (const name of new Set([...folder.names(), ...folder.files().keys()])) names.set(await keyOf(name), name);
+    const records = sharedRecords();
+    const there = new Map<string, RemoteObject>();
+    /** Files listed that can't be read yet (a drive's placeholder, not downloaded): read on a later pass, and not written over meanwhile. */
+    const waiting = new Set<string>();
+    for (const object of listed) {
+      const name = names.get(object.key);
+      if (name !== undefined) {
+        there.set(object.key, object);
+        if (records[object.key]?.etag === object.etag) continue;
+        const file = await remote.get(dir + name);
+        if (!file) {
+          waiting.add(object.key);
+          continue;
+        }
+        records[object.key] = { etag: file.etag ?? object.etag, hash: hash(folder.merge(name, file.text)) };
+        continue;
+      }
+      // A drive's own copy of one, kept beside it when it couldn't merge two versions: merged in, then taken out.
+      const original = [...names].find(([key]) => isCopyOf(object.key, key));
+      if (!original) continue;
+      const file = remote.getCopy ? await remote.getCopy(object.key, dir + original[1]) : await store.get(object.key);
+      if (file) folder.merge(original[1], file.text);
+      await store.delete(object.key);
+    }
+    for (const [name, text] of folder.files()) {
+      const key = await keyOf(name);
+      const record = records[key];
+      if (waiting.has(key) || record?.hash === hash(text)) continue;
+      // Over the version read, or as a new one: not over one written since (false), which the next pass merges in.
+      const etag = await remote.put(dir + name, text, there.has(key) ? (record?.etag ?? undefined) : null);
+      if (etag === false) {
+        this.schedule();
+        continue;
+      }
+      records[key] = { etag, hash: hash(text) };
+    }
+    localStorage.setItem(SHARED_KEY, JSON.stringify(records));
   }
 
   async #syncAttachments(remote: Remote, store: Remote, dir: string, encrypted: boolean) {

@@ -60,7 +60,8 @@ const chosenFile = (file: File, path: string): ExportedFile => ({
 /**
  * The files of the ZIP `name`, by their paths in it, but those that would unpack to too much
  * (`skipped`, with the ZIP if it can't be read at all). A ZIP of nothing but ZIPs (Notion splits a
- * large export so) is the files of those, unpacked in turn.
+ * large export so) is the files of those, unpacked in turn: each held to the same limits as any
+ * file in a ZIP, as it's unpacked into memory to be read.
  */
 async function unzipped(name: string, data: () => Promise<Uint8Array<ArrayBuffer>>, unpacking: Unpacking, skipped: string[]): Promise<ExportedFile[]> {
   let entries;
@@ -73,7 +74,10 @@ async function unzipped(name: string, data: () => Promise<Uint8Array<ArrayBuffer
   }
   if (entries.length && entries.every(([path]) => ZIP.test(path))) {
     const parts: ExportedFile[] = [];
-    for (const [path, entry] of entries) parts.push(...(await unzipped(path, () => entry.read(), unpacking, skipped)));
+    for (const [path, entry] of entries) {
+      if (unpacking.allows(entry)) parts.push(...(await unzipped(path, () => entry.read(), unpacking, skipped)));
+      else skipped.push(path);
+    }
     return parts;
   }
   return entries.flatMap(([path, entry]): ExportedFile[] => {

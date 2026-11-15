@@ -137,12 +137,12 @@ function clipped(text: string, from: number, name: string) {
  * `%%` outside code, math, HTML and links counts. A pair with a code or HTML block between, or text
  * an HTML comment can't hold (`-->`), is left as written.
  */
-function comments(vault: Vault, name: string, text: string, { kept, blocks, leaves, links }: Read) {
-  const wikis = between([...kept, ...links], 0, text.length).flatMap(({ from, to }) =>
+function comments(vault: Vault, name: string, text: string, { kept, urls, blocks, leaves, links }: Read) {
+  const wikis = between([...kept, ...urls, ...links], 0, text.length).flatMap(({ from, to }) =>
     [...text.slice(from, to).matchAll(WIKI)].map((match) => ({ from: from + match.index, to: from + match.index + match[0].length })),
   );
   const marks: number[] = [];
-  for (const { from, to } of between([...kept, ...links, ...wikis], 0, text.length)) {
+  for (const { from, to } of between([...kept, ...urls, ...links, ...wikis], 0, text.length)) {
     for (let at = text.indexOf("%%", from); at >= 0 && at + 2 <= to; at = text.indexOf("%%", at + 2)) marks.push(at);
   }
   const leafOf = (at: number) => leaves.find((leaf) => leaf.from <= at && at < leaf.to);
@@ -173,11 +173,11 @@ function comments(vault: Vault, name: string, text: string, { kept, blocks, leav
 /** The note's text but its properties, in Linedown. */
 function body(text: string, vault: Vault, name: string) {
   const read = readMarkdown(text);
-  const { kept, links, languages } = read;
+  const { kept, urls, links, languages } = read;
   for (const language of languages) if (/^dataview(?:js)?$/i.test(language)) vault.report.add("import.report.dataview", name);
   const notes = comments(vault, name, text, read);
   // What's text: not code, math, HTML, a comment, or a Markdown link (each changed as a whole).
-  const prose = between([...kept, ...notes.spans, ...links], 0, text.length);
+  const prose = between([...kept, ...urls, ...notes.spans, ...links], 0, text.length);
   const edits = [...notes.edits, ...wikiEdits(vault, name, text, prose)];
   for (const link of links) {
     if (within(link, notes.spans) || isElsewhere(link.address)) continue;

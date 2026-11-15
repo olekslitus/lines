@@ -6,6 +6,9 @@ import { linedownParser } from "../editor/syntax";
  * comment, wherever those are, in lists and quotes too.
  */
 
+/** A code fence's backticks or tildes, at a line's start. */
+export const FENCE_START = /^[ \t]*(`{3,}|~{3,})/;
+
 /** A part of a text, from `from` up to `to`. */
 export interface Span {
   from: number;
@@ -35,6 +38,8 @@ export interface Leaf extends Span {
 export interface Read {
   /** Code, math, HTML and comments, which an import leaves as they are. */
   kept: Span[];
+  /** Web addresses written as they are, `https://…`, which an import leaves alone too, where they aren't part of something it reads. */
+  urls: Span[];
   /** Code and HTML blocks, which a comment from another app can't run across. */
   blocks: Span[];
   /** Its paragraphs, headings and tables' cells, in order. */
@@ -45,12 +50,12 @@ export interface Read {
   languages: string[];
 }
 
-const KEPT = new Set(["InlineCode", "InlineMath", "Comment", "HTMLTag", "Autolink", "URL"]);
+const KEPT = new Set(["InlineCode", "InlineMath", "Comment", "HTMLTag", "Autolink"]);
 const BLOCKS = new Set(["FencedCode", "CodeBlock", "HTMLBlock", "CommentBlock", "MathBlock", "ProcessingInstructionBlock"]);
 const LEAVES = /^(?:Paragraph|ATXHeading\d|SetextHeading\d|TableCell)$/;
 
 export function readMarkdown(text: string): Read {
-  const read: Read = { kept: [], blocks: [], leaves: [], links: [], languages: [] };
+  const read: Read = { kept: [], urls: [], blocks: [], leaves: [], links: [], languages: [] };
   linedownParser.parse(text).iterate({
     enter(node) {
       if (LEAVES.test(node.name)) read.leaves.push({ from: node.from, to: node.to, top: node.node.parent?.name === "Document" });
@@ -60,8 +65,8 @@ export function readMarkdown(text: string): Read {
         if (node.name === "FencedCode") read.languages.push(/^[ \t]*[`~]+[ \t]*([^`\s]*)/.exec(text.slice(node.from, node.to))?.[1] ?? "");
         return false;
       }
-      if (KEPT.has(node.name)) {
-        read.kept.push({ from: node.from, to: node.to });
+      if (KEPT.has(node.name) || node.name === "URL") {
+        (node.name === "URL" ? read.urls : read.kept).push({ from: node.from, to: node.to });
         return false;
       }
       if (node.name !== "Link" && node.name !== "Image") return;

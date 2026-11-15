@@ -1,5 +1,6 @@
 import { aesKey, isLockedKey, lockKey, randomBytes, unlockKey, type Bytes, type LockedKey } from "../crypto";
 import { feeds } from "../feeds/feeds.svelte";
+import { lists } from "../library/lists.svelte";
 import { reading } from "../books/reading.svelte";
 import { player } from "../player/player.svelte";
 import { rewriteAttachments } from "../notes/attachments";
@@ -176,6 +177,7 @@ class AppLock {
     await rewriteAttachments();
     await feeds.rewrite();
     await sync.rewrite();
+    await lists.rewrite();
   }
 
   /* Locking after a while without use. */

@@ -91,6 +91,16 @@ async function inTurns<T, R>(items: T[], at: number, task: (item: T, index: numb
 /** Lets the list and the sidebar draw what's written (a hidden window's frames wait; this doesn't). */
 const breathe = () => new Promise((resolve) => setTimeout(resolve));
 
+/** The Library's note of `made`, dated `undated` if it isn't, its cover downloaded (kept with `keep()`, `keepCover`, once it's written). */
+export async function newLibraryNote({ item, status, more, created, updated }: NewLibraryNote, undated: number, signal: AbortSignal) {
+  const time = created ?? undated;
+  const id = crypto.randomUUID();
+  const written = await libraryNote(item, notes.entries, signal, { status });
+  const body = more ? `${written.text}\n${more.trim()}\n` : written.text;
+  const note: Note = { id, createdAt: time, updatedAt: Math.max(time, updated ?? time), body, pinned: false, trashed: false };
+  return { note, keep: () => keepCover(written, id) };
+}
+
 class Imports {
   state = $state<ImportState | null>(null);
   /** What the import last done wrote: each note it made, as made, and each it added to, before and after. */
@@ -164,7 +174,7 @@ class Imports {
     // Against the notes as they are now, not as they were when it was asked about.
     let work: ImportWork;
     try {
-      work = source.work(input);
+      work = await source.work(input);
     } catch (error) {
       console.error(`lines: the ${id} import couldn't start`, error);
       this.state = { id, kind: "done", added: 0, appended: 0, stopped: false, failed: true };
@@ -218,19 +228,15 @@ class Imports {
 
   /** The note for `made`, a library note's cover downloaded (kept with `keep()`, `keepCover`, once it's written). */
   async #make(made: NewNote, undated: number, signal: AbortSignal) {
+    if (!("body" in made)) return newLibraryNote(made, undated, signal);
     const time = made.created ?? undated;
-    const dated = { id: crypto.randomUUID(), createdAt: time, updatedAt: Math.max(time, made.updated ?? time) };
-    if ("body" in made) {
-      const { body, source, pinned = false, trashed = false } = made;
-      // New here, so to be sorted, as a note made here is; but not one that's in the Trash.
-      const inbox = prefs.newNotes === "inbox" && !trashed;
-      return { note: { ...dated, body, source, pinned, trashed, ...(inbox && { inbox }) } satisfies Note, keep: async () => {} };
-    }
-    const { item, status, more } = made;
-    const written = await libraryNote(item, notes.entries, signal, { status });
-    const body = more ? `${written.text}\n${more.trim()}\n` : written.text;
-    return { note: { ...dated, body, pinned: false, trashed: false } satisfies Note, keep: () => keepCover(written, dated.id) };
+    const { body, source, pinned = false, trashed = false } = made;
+    // New here, so to be sorted, as a note made here is; but not one that's in the Trash.
+    const inbox = prefs.newNotes === "inbox" && !trashed;
+    const note: Note = { id: crypto.randomUUID(), createdAt: time, updatedAt: Math.max(time, made.updated ?? time), body, source, pinned, trashed, ...(inbox && { inbox }) };
+    return { note, keep: async () => {} };
   }
+
 
   /** Stops the import under way between notes, keeping what it wrote, which Undo takes back; or one whose notes are still being sent. */
   stop() {

@@ -109,6 +109,8 @@ export interface Contributions {
   discussions?: DiscussionSource[];
   /** What the podcast player has for the episode in it: buttons beside its own, and what shows above it (a transcript). */
   playerParts?: PlayerPart[];
+  /** Sites that keep someone's list of what they watch (AniList, MyAnimeList), kept in step with the Library's notes once signed in to. */
+  lists?: ListSite[];
 }
 
 /**
@@ -119,6 +121,65 @@ export interface PlayerPart {
   id: string;
   buttons?: Component<{ episode: Episode }>;
   above?: Component<{ episode: Episode }>;
+}
+
+/**
+ * A site that keeps someone's list of what they watch or read, with where they've got to and what
+ * they thought of it, which the Library keeps in step with its notes of that kind, both ways, once
+ * signed in to (lib/library/lists.svelte.ts). Its account is this device's alone.
+ */
+export interface ListSite {
+  id: string;
+  /** As people know it: "AniList". */
+  name: string;
+  /** The kind its list is of (`anime`), and the property its notes keep its id for each in (`anilist`). */
+  kind: string;
+  key: string;
+  /** Why it can't be signed in to here, if it can't: this build has no client id for it, or it answers only the apps. */
+  unavailable?: string;
+  /**
+   * How it's signed in to: with a token the site shows once you've said yes there (`page`, where to
+   * say it), pasted into Settings; or in the browser, which comes back to lines by itself.
+   */
+  signIn: { page: string } | { browser: true };
+  /** Signs in, with the token pasted (or in the browser, for null): who's signed in, and how they score. Rejects with a ListError. */
+  connect(token: string | null, signal: AbortSignal): Promise<ListAccount>;
+  /** Everything on the list. Rejects with a ListError; may refresh the account's token as it asks. */
+  entries(account: ListAccount, signal: AbortSignal): Promise<ListEntry[]>;
+  /** Puts something on the list as `change` says (its status in lines' words, which it may have none for), saying what it has of it after. */
+  save(account: ListAccount, change: ListChange, signal: AbortSignal): Promise<Pick<ListEntry, "status" | "score" | "progress">>;
+}
+
+/** Who's signed in to a list's site, and how: kept on this device, encrypted under the app lock. */
+export interface ListAccount {
+  name: string;
+  token: string;
+  /** A token to get another with, and when this one runs out (ms), where the site has them. */
+  refresh?: string;
+  expires?: number;
+  /** How they score there (lib/library/lists.ts). */
+  scale: { max: number; step: number };
+  /** Their id there, where the site asks for the list by it. */
+  user?: number;
+}
+
+/** Something on a list: its id there (and other sites', where it knows them), where it's got to, its score (0, none) and progress, and when it last changed (ms). */
+export interface ListEntry {
+  id: number;
+  ids?: Record<string, number>;
+  status: string | null;
+  score: number;
+  progress: number;
+  updated: number;
+  /** What it is, for a note of it made from the list. */
+  item: LibraryItem;
+}
+
+export interface ListChange {
+  id: number;
+  status: string | null;
+  score: number;
+  progress: number;
 }
 
 /** A file chosen to import, read. */
@@ -151,7 +212,7 @@ export interface Import {
    * What importing `input` (what its panel gave `imports.start`, as it was sent between windows)
    * writes, worked out against the notes as they are when it starts.
    */
-  work(input: unknown): ImportWork;
+  work(input: unknown): ImportWork | Promise<ImportWork>;
 }
 
 /**
@@ -287,6 +348,8 @@ export interface LibraryKind {
    * Library; else as a link to its page (`LibraryItem.linked`), or as just its name.
    */
   mentions?: string[];
+  /** The property its notes' `progress` is counted out of (an anime's `episodes`, `progress: 12`), so its row shows how far through. */
+  counts?: string;
   /** Where it's got to, in order (the first is where it starts): what's written, and what's shown. None for kinds without (a podcast). */
   statuses?: { value: string; label: string }[];
   /**

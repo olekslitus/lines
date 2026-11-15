@@ -1,7 +1,8 @@
 import { t } from "../../lib/i18n/index.svelte";
-import type { LibraryItem, LibrarySource, Plugin } from "../../lib/plugins/types";
+import type { LibraryItem, LibrarySource, ListEntry, Plugin } from "../../lib/plugins/types";
 import { animeIn, animeOf } from "./anime";
 import { ask, MEDIA, type Media } from "./api";
+import { list } from "./list";
 import { lookupSeries, searchComics, seriesIn } from "./manga";
 
 export { animeIn, seriesIn };
@@ -10,7 +11,8 @@ export { animeIn, seriesIn };
  * AniList (anilist.co), an open catalog of anime and of manga, manhwa and manhua, asked without a key:
  * an anime or a series by a link to it (manga.ts says which links a series' are), and either searched
  * for in Add to Library, with their ids on AniList and MyAnimeList, so each is known on both. Only the
- * id in the link, or the words searched for, is sent. It answers web pages too.
+ * id in the link, or the words searched for, is sent. It answers web pages too. Signed in to, it keeps
+ * your anime list there in step with the Library (list.ts).
  */
 
 async function lookupAnime(id: number, signal: AbortSignal): Promise<LibraryItem | null> {
@@ -56,5 +58,19 @@ export const anilist = (): Plugin => ({
   icon: "book-image",
   enabledByDefault: true,
   requires: ["library"],
-  contributes: { librarySources: [source] },
+  contributes: {
+    librarySources: [source],
+    lists: [list],
+    imports: [
+      {
+        id: list.id,
+        into: "library",
+        name: "AniList",
+        note: t("library.list.anilist.note"),
+        panel: () => import("./AniListAccount.svelte"),
+        // The Library's lists, loaded once it's asked: they need the app around them.
+        work: async (input) => (await import("../../lib/library/lists.svelte")).lists.work(list.id, (input as { entries: ListEntry[] }).entries),
+      },
+    ],
+  },
 });

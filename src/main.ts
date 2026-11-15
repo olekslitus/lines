@@ -19,6 +19,7 @@ import { addBookFile, bookTypes, isBook } from "./lib/books/adding";
 import { reading } from "./lib/books/reading.svelte";
 import { feeds } from "./lib/feeds/feeds.svelte";
 import { imports } from "./lib/imports/imports.svelte";
+import { lists } from "./lib/library/lists.svelte";
 import { ratings } from "./lib/library/ratings.svelte";
 import { player } from "./lib/player/player.svelte";
 import { lock } from "./lib/lock/lock.svelte";
@@ -160,7 +161,7 @@ async function start() {
     if (lock.enabled) watchActivity();
   } else if (isSettingsWindow) {
     ui.settings = initialSection();
-    const synced = forwardToMain({ sync, lock, lockedNotes, notes, feeds, imports, ratings }, sync, (state) => {
+    const synced = forwardToMain({ sync, lock, lockedNotes, notes, feeds, imports, ratings, lists }, sync, (state) => {
       lock.settings = state.lock;
       noteKeys.settings = state.noteKeys;
     });
@@ -187,14 +188,15 @@ async function start() {
   );
   await sync.load();
   sync.start();
-  // Only the main window fetches feeds, as it syncs (what was done with their posts too), and plays episodes.
+  // Only the main window fetches feeds, as it syncs (what was done with their posts too), and plays episodes; and keeps lists on other sites in step.
   sync.shareFolder(feeds.marksFolder);
   void feeds.start().catch((error) => console.error("lines: couldn't read the feeds kept", error));
+  void lists.start().catch((error) => console.error("lines: couldn't keep lists in step", error));
   void player.load();
   // Settings, in its own window, asks this one to sync, lock and add notes.
   if (isTauri) {
     serveSettings(
-      { sync, lock, lockedNotes, notes, feeds, imports, ratings },
+      { sync, lock, lockedNotes, notes, feeds, imports, ratings, lists },
       () => ({
         config: sync.config,
         status: sync.status,

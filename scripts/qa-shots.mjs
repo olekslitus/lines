@@ -1291,6 +1291,43 @@ const SCENES = [
     },
   },
   {
+    id: "lists-signed-out",
+    title: "Settings → Library → AniList and MyAnimeList, signed out",
+    look: "AniList's group: its note, then Sign in with its note (say yes on AniList, paste the token), the token's field and Sign In (dimmed until something's typed) at its end, and Get Your Token on AniList quiet under it. MyAnimeList's: a note that it's only in the lines app (on the web). Both like Readwise's group below them.",
+    act: async (page) => {
+      await page.getByRole("button", { name: "Settings", exact: true }).click();
+      const dialog = page.getByRole("dialog");
+      await dialog.getByRole("navigation").getByText("Library", { exact: true }).click();
+      await dialog.getByRole("region", { name: "AniList" }).evaluate((group) => group.scrollIntoView({ block: "start" }));
+    },
+    shoot: "dialog",
+  },
+  {
+    id: "lists-import",
+    title: "Signed in to AniList: keeping the list in step, and importing it",
+    look: "Signed in as ada, with how it's going under it (in step at a time, or keeping it in step), Sync Now and Sign Out quiet at the row's end. Then what importing would do: 2 anime on the list, 1 in the Library already (quieter), Import 1 Anime focused and Cancel.",
+    act: async (page) => {
+      await page.route("https://graphql.anilist.co/", (route) => {
+        const { query } = JSON.parse(route.request().postData() ?? "{}");
+        const media = (id, title) => ({ id, idMal: id, format: "TV", episodes: 12, title: { english: title }, siteUrl: `https://anilist.co/anime/${id}` });
+        const data = query.includes("Viewer")
+          ? { Viewer: { id: 7, name: "ada", mediaListOptions: { scoreFormat: "POINT_10" } } }
+          : { MediaListCollection: { lists: [{ entries: [{ mediaId: 1, status: "CURRENT", score: 8, progress: 3, updatedAt: 1, media: media(1, "Frieren") }, { mediaId: 2, status: "PLANNING", score: 0, progress: 0, updatedAt: 1, media: media(2, "Mushishi") }] }] } };
+        return route.fulfill({ headers: { "access-control-allow-origin": "*" }, json: { data } });
+      });
+      await page.evaluate(() => window.testing.open("---\ntype: anime\nanilist: 1\nstatus: watching\n---\n# Frieren"));
+      await page.getByRole("button", { name: "Settings", exact: true }).click();
+      const dialog = page.getByRole("dialog");
+      await dialog.getByRole("navigation").getByText("Library", { exact: true }).click();
+      const group = dialog.getByRole("region", { name: "AniList" });
+      await group.getByLabel("Sign in").fill("tok");
+      await group.getByRole("button", { name: "Sign In", exact: true }).click();
+      await group.getByRole("button", { name: "Import 1 Anime" }).waitFor();
+      await group.evaluate((element) => element.scrollIntoView({ block: "start" }));
+    },
+    shoot: "dialog",
+  },
+  {
     id: "ratings-marks",
     title: "A rating in stars, and scores on lines of their own",
     look: "In the properties, rating's three and a half stars in the theme's yellow, the fourth filled to its middle, the fifth a faint outline, the size of the text and on its baseline like the values above; in the text, Score's six of seven and Half's two and a half, the same. Nothing jumps from the text around them. In the books' table, each rating as stars in one piece, filled in yellow as far as it goes (a half star half) and faint after, lined up with the cells' text.",
@@ -1940,6 +1977,8 @@ const SCENES = [
 
 const scenes = SCENES.filter((scene) => !only.length || only.some((word) => scene.id.includes(word)));
 
+// A client id on AniList, so its group of Settings → Library shows signing in.
+process.env.VITE_ANILIST_CLIENT_ID ??= "test";
 if (!args.includes("--no-build")) await build({ root, mode: "test", logLevel: "error", build: { outDir, emptyOutDir: true } });
 // A port of its own, as the browser tests' (tests/browser/setup.ts).
 const server = await preview({ root, mode: "test", logLevel: "error", build: { outDir }, preview: { host: "127.0.0.1", port: 0, open: false } });

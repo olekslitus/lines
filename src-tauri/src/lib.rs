@@ -10,6 +10,7 @@ mod folder_sync;
 mod fonts;
 mod local_links;
 mod lock;
+mod oauth;
 #[cfg(target_os = "macos")]
 mod quit;
 mod sf_symbols;
@@ -59,6 +60,8 @@ pub fn run() {
       lock::touch_id_keep,
       lock::touch_id_forget,
       lock::touch_id_unlock,
+      oauth::oauth_wait,
+      oauth::oauth_cancel,
       #[cfg(desktop)]
       updates::updates_status,
       #[cfg(desktop)]

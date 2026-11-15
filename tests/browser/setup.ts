@@ -19,6 +19,8 @@ declare global {
 let server: PreviewServer;
 
 beforeAll(async () => {
+  // A client id on AniList, so signing in there can be tried, against the tests' own AniList.
+  process.env.VITE_ANILIST_CLIENT_ID ??= "test";
   if (process.env.LINES_TEST_BUILD !== "0") await build({ root, mode: "test", logLevel: "error", build: { outDir, emptyOutDir: true } });
   // A port of its own on 127.0.0.1: "localhost" can be IPv4 or IPv6, so another worktree's server
   // on the same port number could answer this one's browser.

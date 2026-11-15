@@ -22,9 +22,12 @@ const answers = new Map<string, unknown>();
 const asked: string[] = [];
 /** The bodies sent, as JSON (AniList's queries and what they ask for). */
 const sent: { query: string; variables: Record<string, unknown> }[] = [];
+/** The forms sent (MyAnimeList's). */
+const forms: URLSearchParams[] = [];
 const answer = (url: string, init?: RequestInit) => {
   asked.push(init?.method === "HEAD" ? `HEAD ${url}` : url);
-  if (typeof init?.body === "string") sent.push(JSON.parse(init.body));
+  if (typeof init?.body === "string" && init.body.startsWith("{")) sent.push(JSON.parse(init.body));
+  if (typeof init?.body === "string" && !init.body.startsWith("{")) forms.push(new URLSearchParams(init.body));
   const found = [...answers].find(([start]) => url.startsWith(start))?.[1];
   if (found === undefined) return new Response("", { status: 404 });
   if (typeof found === "number") return new Response("", { status: found });
@@ -57,6 +60,7 @@ const { soundcloud, soundcloudIn } = await import("../../src/plugins/soundcloud"
 const { anilist, animeIn, seriesIn } = await import("../../src/plugins/anilist");
 const { paperItem } = await import("../../src/plugins/arxiv");
 const myanimelist = await import("../../src/plugins/myanimelist");
+const malList = (await import("../../src/plugins/myanimelist/list")).list;
 const bookmarks = await import("../../src/lib/library/bookmarks");
 const keys = await import("../../src/lib/library/keys");
 const { lookUpAny, pageResource } = await import("../../src/lib/library/lookup");
@@ -71,6 +75,7 @@ beforeEach(() => {
   answers.clear();
   asked.length = 0;
   sent.length = 0;
+  forms.length = 0;
 });
 
 describe("a note that's a link", () => {
@@ -1026,6 +1031,60 @@ describe("AniList and MyAnimeList", () => {
     expect(asked).toEqual(["https://api.jikan.moe/v4/anime/52991/full"]);
     answers.set("https://api.jikan.moe/v4/anime/1/full", 404);
     expect(await look(myanimelist.myanimelist, "https://myanimelist.net/anime/1")).toBeNull();
+  });
+});
+
+describe("MyAnimeList's list, kept in step", () => {
+  // Shaped as MyAnimeList's API documents its answers (api.myanimelist.net/v2); no account was asked.
+  const anime = (id: number, title: string, status: Record<string, unknown>) => ({
+    node: { id, title, alternative_titles: { en: `${title} (English)` }, media_type: "tv", num_episodes: 28, start_season: { year: 2023, season: "fall" }, studios: [{ name: "Madhouse" }] },
+    list_status: { score: 0, num_episodes_watched: 0, updated_at: "2026-11-13T10:00:00+00:00", ...status },
+  });
+  const account = () => ({ name: "ada", token: "old", refresh: "again", expires: Date.now() - 1, scale: { max: 10, step: 1 } });
+
+  test("the whole list, page by page, in lines' words, after refreshing a token that's run out", async () => {
+    answers.set("https://myanimelist.net/v1/oauth2/token", { access_token: "new", refresh_token: "again2", expires_in: 2_592_000 });
+    answers.set("https://api.myanimelist.net/v2/users/@me/animelist?offset=1000", { data: [anime(5114, "Hagane", { status: "on_hold", is_rewatching: true })] });
+    answers.set("https://api.myanimelist.net/v2/users/@me/animelist?", {
+      data: [anime(52991, "Sousou no Frieren", { status: "watching", score: 9, num_episodes_watched: 12 })],
+      paging: { next: "https://api.myanimelist.net/v2/users/@me/animelist?offset=1000" },
+    });
+    const signedIn = account();
+    const entries = await malList.entries(signedIn, new AbortController().signal);
+    expect(entries.map(({ id, status, score, progress, updated }) => [id, status, score, progress, updated])).toEqual([
+      [52991, "watching", 9, 12, Date.parse("2026-11-13T10:00:00Z")],
+      // Watching again is watching.
+      [5114, "watching", 0, 0, Date.parse("2026-11-13T10:00:00Z")],
+    ]);
+    expect(entries[0].item.properties).toEqual([
+      ["format", "TV"],
+      ["studio", "Madhouse"],
+      ["year", "2023"],
+      ["season", "Fall 2023"],
+      ["episodes", "28"],
+      ["mal", "52991"],
+    ]);
+    expect(entries[0].item.title).toBe("Sousou no Frieren (English)");
+    // Refreshed first, and kept on the account.
+    expect(asked[0]).toBe("https://myanimelist.net/v1/oauth2/token");
+    expect(forms[0].get("grant_type")).toBe("refresh_token");
+    expect([signedIn.token, signedIn.refresh]).toEqual(["new", "again2"]);
+  });
+
+  test("a change saved: its status in MyAnimeList's words, its score whole, its episodes", async () => {
+    answers.set("https://api.myanimelist.net/v2/anime/52991/my_list_status", { status: "completed", score: 8, num_episodes_watched: 28, updated_at: "2026-11-14T10:00:00+00:00" });
+    const saved = await malList.save({ ...account(), expires: Date.now() + 3_600_000 }, { id: 52991, status: "watched", score: 8, progress: 28 }, new AbortController().signal);
+    expect(saved).toEqual({ status: "watched", score: 8, progress: 28 });
+    expect(asked).toEqual(["https://api.myanimelist.net/v2/anime/52991/my_list_status"]);
+    expect(Object.fromEntries(forms[0])).toEqual({ status: "completed", score: "8", num_watched_episodes: "28" });
+  });
+
+  test("a token MyAnimeList won't take, nor refresh, is said as one to sign in again with; a 429 as one to wait", async () => {
+    answers.set("https://myanimelist.net/v1/oauth2/token", 400);
+    await expect(malList.entries(account(), new AbortController().signal)).rejects.toMatchObject({ reason: "token" });
+    answers.clear();
+    answers.set("https://api.myanimelist.net/v2/users/@me/animelist?", 429);
+    await expect(malList.entries({ ...account(), expires: Date.now() + 3_600_000 }, new AbortController().signal)).rejects.toMatchObject({ reason: "wait" });
   });
 });
 

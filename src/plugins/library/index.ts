@@ -89,6 +89,7 @@ const KINDS: LibraryKind[] = [
     subtitle: ["studio", "year"],
     ids: ["anilist", "mal"],
     cover: "tall",
+    counts: "episodes",
     statuses: WATCHED_LISTS,
   },
   {

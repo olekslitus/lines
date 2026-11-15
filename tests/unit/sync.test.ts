@@ -18,15 +18,15 @@ languages.push({ id: "latex", meta: (body) => ({ ...languages[0].meta!(""), titl
 const { code } = await import("../../src/plugins/code");
 languages.push(...(code().contributes.languages ?? []));
 
-/** Edits a note here and, later, on another device, and syncs them: the copy that makes, as it's written. */
-async function conflictedCopy(body: string, format?: string) {
+/** Edits a note here and, later, on another device (there to `elsewhere`), and syncs them: the copy that makes, as it's written. */
+async function conflictedCopy(body: string, format?: string, elsewhere = body) {
   const [here, there] = await devices(2);
   const now = Date.now();
   const id = crypto.randomUUID();
   await notes.insert({ id, body, format, createdAt: now, updatedAt: now, pinned: false, trashed: false });
   await here.sync();
   await there.sync();
-  notes.update(id, `${body}\n\nthere`);
+  notes.update(id, `${elsewhere}\n\nthere`);
   await there.sync();
   await here.open();
   notes.update(id, `${body}\n\nhere`);
@@ -56,6 +56,20 @@ describe("sync", () => {
   test("a code note's line of code is never marked, nor given a tag it didn't have (#include)", async () => {
     const body = "#include <stdio.h>\n\nint main(void) {}";
     expect(await conflictedCopy(body, "code-c")).toBe(`${body}\n\nthere`);
+  });
+
+  test("a feed's subscription's is a note of its own, not a second subscription to its feed: its feed: is taken off", async () => {
+    expect(await conflictedCopy("---\ntype: feed\nfeed: https://blog.example/feed\nstream: Work\n---\n# Blog")).toBe("---\ntype: feed\nstream: Work\n---\n# Blog (conflicted copy)\n\nthere");
+  });
+
+  test("a feed: that isn't a feed's link is the note's own, and kept in its copy", async () => {
+    expect(await conflictedCopy("---\nfeed: 120 ml at 3am\n---\n# Baby log")).toBe("---\nfeed: 120 ml at 3am\n---\n# Baby log (conflicted copy)\n\nthere");
+  });
+
+  test("a subscription whose feed's address was changed on one device keeps it in the copy: a second subscription, to keep or trash, so neither address is lost", async () => {
+    const copy = await conflictedCopy("---\ntype: feed\nfeed: https://blog.example/feed\n---\n# Blog", undefined, "---\ntype: feed\nfeed: https://blog.example/atom.xml\n---\n# Blog");
+    expect(copy).toBe("---\ntype: feed\nfeed: https://blog.example/atom.xml\n---\n# Blog (conflicted copy)\n\nthere");
+    expect(notes.entries.map(({ note }) => note.body.match(/feed: (.*)/)?.[1]).sort()).toEqual(["https://blog.example/atom.xml", "https://blog.example/feed"]);
   });
 
   test("a Markdown note's is marked on its title", async () => {

@@ -99,6 +99,8 @@ class UIState {
   tagPrompt = $state.raw<TagPrompt | null>(null);
   /** Where the box to subscribe to a feed opens, while it's open. */
   subscribePrompt = $state.raw<Omit<TagPrompt, "ids"> | null>(null);
+  /** The box a stream's name is typed in, while it's open: a new one for `feed`, or `rename`'s new name. */
+  streamPrompt = $state.raw<(Omit<TagPrompt, "ids"> & { feed?: string; rename?: string }) | null>(null);
   /**
    * The note whose PDF is being previewed, and what it goes straight on to once it's ready:
    * printing, exporting the PDF (printed, or saved from a typesetter), or offering PNG images.

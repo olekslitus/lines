@@ -8,6 +8,8 @@ import { ratings } from "../library/ratings.svelte";
 import { LOOKS_FILE, readLooks, writeLooks } from "../notes/looks";
 import { looks } from "../notes/looks.svelte";
 import { noteKeys } from "../notes/noteKeys.svelte";
+import { feedOf } from "../feeds/subscribed";
+import { frontMatter, setProperties } from "../notes/properties";
 import { TITLE_LINES } from "../notes/title";
 import { isBlank, notes, opened } from "../notes/store.svelte";
 import { syncRecords, type SyncRecord } from "../notes/storage";
@@ -137,7 +139,7 @@ function alone<T>(work: () => Promise<T>): Promise<T> {
  */
 const driveCopyOf = (name: string) => /^([0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})[ -]./i.exec(name)?.[1];
 
-function conflictCopy(note: Note): Note {
+function conflictCopy(note: Note, kept: Note | undefined): Note {
   // Not where the note came from: links and importing again find the note itself.
   const { source: _, ...rest } = note;
   const copy = { ...rest, id: crypto.randomUUID(), createdAt: Date.now(), pinned: false };
@@ -145,7 +147,19 @@ function conflictCopy(note: Note): Note {
   if (note.locked && !note.locked.open) {
     return { ...copy, locked: { ...note.locked, title: t("sync.conflicted", { title: note.locked.title || t("sync.untitled") }) } };
   }
-  return { ...copy, body: markConflicted(note), ...(note.locked ? { locked: { ...note.locked, sealed: "" } } : {}) };
+  return { ...copy, body: unsubscribed(markConflicted(note), kept), ...(note.locked ? { locked: { ...note.locked, sealed: "" } } : {}) };
+}
+
+/**
+ * A copy of a feed's subscription (feeds/subscribed.ts) is a note of its own, not a second
+ * subscription to the same feed: its `feed:` is taken off when the note it's a copy of (`kept`) has
+ * the same, which keeps it. Any other `feed:` stays: one that isn't a feed's link is the note's own
+ * (`feed: 120 ml at 3am`), and a feed's address changed on one device is a second subscription, the
+ * copy's, to keep or put in the Trash.
+ */
+function unsubscribed(body: string, kept: Note | undefined) {
+  const feed = feedOf(frontMatter(body)?.properties ?? []);
+  return feed && kept && feed === feedOf(frontMatter(kept.body)?.properties ?? []) ? setProperties(body, { feed: null }) : body;
 }
 
 /**
@@ -685,7 +699,7 @@ class SyncEngine {
           if (mergedText === fetched.text) await record(fetched.note, etag, fetched.text);
           else await upload(merged, etag);
         }
-        if (older) await notes.insert(conflictCopy(older));
+        if (older) await notes.insert(conflictCopy(older, merged));
       }
     });
 
@@ -716,7 +730,7 @@ class SyncEngine {
       if (!file) return;
       const copy = await opened({ ...deserialize(file.text, id), id });
       const note = notes.get(id)?.note;
-      if (!note || textOf(note) !== textOf(copy)) await notes.insert(conflictCopy(copy));
+      if (!note || textOf(note) !== textOf(copy)) await notes.insert(conflictCopy(copy, note));
       await remote.delete(keyOf(name));
     });
 

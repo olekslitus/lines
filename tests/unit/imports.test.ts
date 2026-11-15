@@ -3,6 +3,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { deflateRawSync } from "node:zlib";
 import { join, relative } from "node:path";
 import type { Exported } from "../../src/lib/imports/exported";
+import { baseOf } from "../../src/lib/imports/markdown";
 import type { NewNote } from "../../src/lib/imports/imports.svelte";
 import type { Tally } from "../../src/lib/imports/notes";
 import type { Entry } from "../../src/lib/notes/store.svelte";
@@ -23,6 +24,8 @@ const { readBear } = await import("../../src/plugins/bear/backup");
 const { readGraph } = await import("../../src/plugins/logseq/graph");
 const { readPage, writePage } = await import("../../src/plugins/logseq/outline");
 const { formatDay, readDay } = await import("../../src/plugins/logseq/dates");
+const { readNotion } = await import("../../src/plugins/notion/export");
+const { translate: translateNotion } = await import("../../src/plugins/notion/markdown");
 const { translate: translateBear } = await import("../../src/plugins/bear/markdown");
 const { translate } = await import("../../src/plugins/obsidian/markdown");
 const { attachmentPath, notesInput, notesWork, planNotes, Tally: Tallies, withTitle } = await import("../../src/lib/imports/notes");
@@ -542,6 +545,117 @@ describe("Logseq", () => {
     const day = { year: 2026, month: 11, day: 1 };
     expect(["MMM do, yyyy", "EEE, dd.MM.yyyy", "yyyy-MM-dd", "MMMM d'st'"].map((format) => formatDay(day, format))).toEqual(["Nov 1st, 2026", "Sun, 01.11.2026", "2026-11-01", "November 1st"]);
     expect([readDay("2026_11_01", "yyyy_MM_dd"), readDay("Nov 1st, 2026", "MMM do, yyyy"), readDay("2026_13_01", "yyyy_MM_dd")]).toEqual([day, null, null]);
+  });
+});
+
+/** Notion's export of the fixture, as a large one comes: a ZIP holding a ZIP of the pages. */
+const notion = await readNotion(
+  await exportedFrom([new File([zip([{ name: "Export-0a1b-Part-1.zip", data: new Uint8Array(await zipped("notion/Export", "part.zip").arrayBuffer()), modified: new Date(DAY) }])], "Export-0a1b.zip")]),
+);
+
+describe("Notion", () => {
+  const page = (name: string) => notion.notes.find((each) => each.name === name)!;
+  const paths = (body: string) => body.replace(/\.\.\/attachments\/\uE000(\d+)\uE000/g, (_, index) => `<${baseOf(notion.attachments[Number(index)].path)}>`);
+
+  test("a note of each page and database, titled without Notion's ids, sub-pages under their pages, from a ZIP of ZIPs", () => {
+    expect(notion.name).toBe("Export-0a1b");
+    expect(notion.notes.map(({ id, name, folders }) => [id, name, folders.join("/")]).sort()).toEqual([
+      ["1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d", "Home", ""],
+      ["2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e", "Plans", "Home"],
+      ["3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f", "Reading List", "Home"],
+      ["4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a", "Dune", "Home"],
+      ["5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b", "Walden", "Home"],
+    ]);
+    expect(notion.local).toBeFalsy();
+    // A link in a table keeps its bar escaped, so the table keeps its columns.
+    expect(page("Plans").body).toBe("# Plans\n\nBack to [[Home]], and a link to [nowhere](Gone%200000.md).\n\n| Page | Why |\n| --- | --- |\n| [[Home\\|the home page]] | It starts there |\n");
+  });
+
+  test("a database a table of its rows; each row a note of its type, its columns properties, relations links, dates as lines writes them", () => {
+    expect(page("Reading List").body).toBe("# Reading List\n\n@type.reading_list(Author, Status, Date read, Related)\n");
+    expect(page("Dune").body).toBe("---\ntype: Reading List\nAuthor: Frank Herbert\nStatus: Read\nDate read: 2024-11-14 21:30\nRelated: '[[Walden]]'\n---\n# Dune\n\nA desert planet.\n");
+    expect(page("Walden").body).toBe("---\ntype: Reading List\nAuthor: Henry David Thoreau\nStatus: Reading\n---\n# Walden\n");
+  });
+
+  test("its Markdown in Linedown: links to pages and databases, pictures and files, callouts, toggles; code and math as they are", () => {
+    expect(paths(page("Home").body)).toBe(
+      [
+        "# Home",
+        "",
+        "Welcome to the workspace. See [[Plans]] and the [[Reading List]].",
+        "",
+        "![photo](<photo.png>)",
+        "",
+        "[Report 2026.pdf](<Report 2026.pdf>)",
+        "",
+        ":::info",
+        "💡 Remember to **water** the plants.",
+        ":::",
+        "",
+        ":::warning",
+        "⚠️ Careful with the oven.",
+        ":::",
+        "",
+        "**More**",
+        "Hidden by default.",
+        "",
+        "- [ ] Open task",
+        "- [x] Done task",
+        "",
+        "```js",
+        'const link = "[x](Home%201a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d.md)";',
+        "```",
+        "",
+        "$$",
+        "E = mc^2",
+        "$$",
+        "",
+      ].join("\n"),
+    );
+    expect(said(notion.report)).toEqual({
+      missing: [1, "[nowhere](Gone%200000.md) (Plans)"],
+      toggles: [1, "More (Home)"],
+      unused: [1, "Home 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d/unused.png"],
+    });
+  });
+
+  /** An export of these files (by path), as Notion would write them. */
+  const exportOf = (files: Record<string, string>): Exported => ({
+    name: "Export",
+    files: Object.entries(files).map(([path, text]) => ({ path, size: text.length, text: async () => text, file: async () => new File([text], baseOf(path)) })),
+  });
+  const A = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  const B = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+  const C = "cccccccccccccccccccccccccccccccc";
+
+  test("columns and databases named with what keys and types can't have: renamed so they can, said so; one with nothing left lists its rows", async () => {
+    const tasks = await readNotion(
+      exportOf({
+        [`📋 Tasks ${A}_all.csv`]: "Name,Price ($),Done?,Est. hours,% done,📅 Due,Type,Done\nFix roof,12,Yes,3,50%,\"November 14, 2024\",Chore,No\n",
+        [`📋 Tasks ${A}/Fix roof ${B}.md`]: "# Fix roof\n\nPrice ($): 12\nDone?: Yes\nEst. hours: 3\n% done: 50%\n📅 Due: November 14, 2024\nType: Chore\nDone: No\n\nThe one by the door.\n",
+        [`📚 ${C}.csv`]: "Name\nDune\n",
+        [`📚 ${C}/Dune ${A.replace(/a/g, "d")}.md`]: "# Dune\n",
+      }),
+    );
+    const body = (name: string) => tasks.notes.find((note) => note.name === name)!.body;
+    expect(body("Fix roof")).toBe(
+      "---\ntype: Tasks\nPrice: 12\nDone: 'Yes'\nEst hours: 3\ndone 2: 50%\nDue: 2024-11-14\nType 2: Chore\nDone 3: 'No'\n---\n# Fix roof\n\nThe one by the door.\n",
+    );
+    expect(computeMeta(body("Fix roof")).properties.map((property) => property.key)).toEqual(["type", "Price", "Done", "Est hours", "done 2", "Due", "Type 2", "Done 3"]);
+    expect(body("📋 Tasks")).toBe("# 📋 Tasks\n\n@type.tasks(Price, Done, Est hours, done 2, Due, Type 2, Done 3)\n");
+    const { propertyOf, readTypeRef } = await import("../../src/lib/notes/properties");
+    // The table reads as one, of the type the rows have, its columns their properties.
+    const ref = readTypeRef("@type.tasks(Price, Done, Est hours, done 2, Due, Type 2, Done 3)")!;
+    const row = computeMeta(body("Fix roof"));
+    expect([ref.type, row.type, ref.columns!.map((key) => propertyOf(row.properties, key)?.value)]).toEqual(["tasks", "tasks", ["12", "Yes", "3", "50%", "2024-11-14", "Chore", "No"]]);
+    expect(body("📚")).toBe("# 📚\n\n- [[Dune]]\n");
+    expect(said(tasks.report)).toMatchObject({ untyped: [1, "📚"] });
+    expect(said(tasks.report).columns[0]).toBe(7);
+  });
+
+  test("a callout on one line closes there", () => {
+    const report = new Tallies();
+    expect(translateNotion("<aside>💡 Water the plants.</aside>\nAfter it.", { report, resolve: () => null }, "Note")).toBe(":::info\n💡 Water the plants.\n:::\n\nAfter it.");
   });
 });
 

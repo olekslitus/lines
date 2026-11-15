@@ -1,11 +1,10 @@
-import { markdownLanguage } from "@codemirror/lang-markdown";
 import type { SyntaxNode } from "@lezer/common";
 import type { MarkdownParser } from "@lezer/markdown";
 import { t } from "../i18n/index.svelte";
 import { CALLOUTS, calloutOf } from "../editor/cards";
 import { shortLink } from "../editor/shortLinks";
 import { valueText } from "../editor/objects";
-import { Card, headingSyntax, Highlight, Mention, Tag, TexMath, Underline } from "../editor/syntax";
+import { headingSyntax, linedownParser } from "../editor/syntax";
 import { tableData } from "../editor/typeTables";
 import { fenceCode, fenceLanguage, renderedInfo } from "../editor/rendered";
 import { isUnsplashPhoto } from "../editor/unsplash";
@@ -26,8 +25,6 @@ import { el, type Parts } from "./parts";
  * short list of properties at the top. What plugins add to Markdown prints as they say.
  */
 
-const linedown = (markdownLanguage.parser as MarkdownParser).configure([Tag, Highlight, Underline, Card, TexMath, Mention]);
-
 let withPlugins: { additions: MarkdownAddition[]; underlined: boolean; parser: MarkdownParser; printers: Map<string, MarkdownPrinter> } | undefined;
 
 /** The parser and printers with what plugins add to Markdown, and underlined headings or not (Settings → Editor), made again when those change. */
@@ -38,7 +35,7 @@ function additions() {
     withPlugins = {
       additions: added,
       underlined,
-      parser: linedown.configure([...headingSyntax(underlined), ...added.flatMap((addition) => addition.syntax ?? [])]),
+      parser: linedownParser.configure([...headingSyntax(underlined), ...added.flatMap((addition) => addition.syntax ?? [])]),
       printers: new Map(added.flatMap((addition) => Object.entries(addition.print ?? {}))),
     };
   }
@@ -70,7 +67,7 @@ export function markdownDocument(body: string, parts: Parts): HTMLElement {
     text = body.split("\n").slice(front.lines).join("\n");
     if (front.properties.length) {
       const list = el("dl", "doc-properties");
-      for (const { key, value } of front.properties) list.append(el("dt", "", key), el("dd", "", valueText(value)));
+      for (const { key, value } of front.properties) list.append(el("dt", "", key), el("dd", "", valueText(value, parts.note)));
       doc.append(list);
     }
   }
@@ -176,7 +173,7 @@ export function markdownDocument(body: string, parts: Parts): HTMLElement {
       case "Tag":
         return void into.appendChild(el("span", "doc-tag", slice(node.from, node.to)));
       case "Mention":
-        return void into.appendChild(el("span", "doc-mention", valueText(slice(node.from, node.to))));
+        return void into.appendChild(el("span", "doc-mention", valueText(slice(node.from, node.to), parts.note)));
       case "Escape":
         return plain(slice(node.from + 1, node.to), into);
       case "Entity": {

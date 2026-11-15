@@ -14,8 +14,9 @@ import type { SampleSet } from "./samples";
 import { normalizeTag, renameTagIn, renameTypeIn } from "./parse";
 import { nameOf } from "./properties";
 import { IndexedDBStorage, syncRecords, type NoteStorage } from "./storage";
-import { type Filter, isClosed, type Note, type NoteLock, type NoteMeta, type WrappedKey } from "./types";
+import { type Filter, isClosed, type Note, type NoteLock, type NoteMeta, type NoteSource, type WrappedKey } from "./types";
 import { WELCOME_NOTE } from "./welcome";
+import { lockedSource } from "../sync/format";
 
 export interface Entry {
   note: Note;
@@ -86,11 +87,11 @@ export async function opened(note: Note): Promise<Note> {
   return note;
 }
 
-/** A note as it's stored and synced: a locked one without its Markdown. */
+/** A note as it's stored and synced: a locked one without its Markdown, nor where it came from but a hash (`lockedSource`). */
 export function stored(note: Note): Note {
   if (!note.locked) return note;
   const { open: _, ...locked } = note.locked;
-  return { ...note, body: "", locked };
+  return { ...note, body: "", locked, ...(note.source && { source: lockedSource(note.source) }) };
 }
 
 function matchesTag(tags: string[], tag: string) {
@@ -122,6 +123,9 @@ const tagPathsOf = cached((meta: NoteMeta) => {
   }
   return [...paths];
 });
+
+/** An imported note's name there, as a link brought with a note of the same import finds it (`NotesStore.find`). */
+const importedKey = (source: NoteSource, name: string) => [source.app, source.collection?.id ?? "", nameOf(name)].join("\u0001");
 
 /** A note's title as a mention finds it. */
 const mentionNameOf = cached((meta: NoteMeta) => nameOf(meta.title));
@@ -310,6 +314,24 @@ class NotesStore {
   });
 
   /**
+   * Notes imported from another app, by the import they came with and the name they had there
+   * (`source`): links brought with them find them by it, once they're renamed here. Two of a name:
+   * the one edited last. Trashed notes aren't found.
+   */
+  #imported = $derived.by(() => {
+    const found = new Map<string, Entry>();
+    for (const entry of this.entries) {
+      const { source, trashed, updatedAt } = entry.note;
+      // A locked note's name there is kept only while it's open (`lockedSource`).
+      if (!source?.name || trashed) continue;
+      const key = importedKey(source, source.name);
+      const other = found.get(key);
+      if (!other || updatedAt > other.note.updatedAt) found.set(key, entry);
+    }
+    return found;
+  });
+
+  /**
    * What mentions and type tables show of other notes, as a string: their titles, icons, types and
    * properties. Typing that changes none of these leaves it the same, so editors don't redraw for it.
    */
@@ -389,9 +411,12 @@ class NotesStore {
     return this.#byId.get(id);
   }
 
-  /** The note a mention of `name` finds (see `objects`). */
-  find(name: string): Entry | undefined {
-    return this.objects.get(nameOf(name));
+  /**
+   * The note a mention of `name` finds (see `objects`); or, in a note imported from another app
+   * (`from`), the note imported with it that had that name there (`#imported`).
+   */
+  find(name: string, from?: Note): Entry | undefined {
+    return this.objects.get(nameOf(name)) ?? (from?.source ? this.#imported.get(importedKey(from.source, name)) : undefined);
   }
 
   /** The notes of a type (`@type.recipe` finds `recipe`; `_`, `-` and spaces alike), not trashed. */
@@ -825,9 +850,13 @@ class NotesStore {
     const { notesFromFiles } = await import("./import");
     const { notes, skipped } = await notesFromFiles(files);
     // A synced note's file keeps its id, unless a note here has it: an import never takes another's place.
+    // A copy isn't where the note came from, either: links and importing again find the note itself.
     const ids = new Set(this.entries.map((entry) => entry.note.id));
     for (const note of notes) {
-      if (ids.has(note.id)) note.id = crypto.randomUUID();
+      if (ids.has(note.id)) {
+        note.id = crypto.randomUUID();
+        delete note.source;
+      }
       ids.add(note.id);
       // New here, so to be sorted, as a note made here is.
       if (prefs.newNotes === "inbox") note.inbox = true;

@@ -35,7 +35,7 @@ import { prefs } from "../prefs.svelte";
 import { InlineMathWidget } from "./math";
 import { fenceCode } from "./rendered";
 import { followClick, openHref } from "./links";
-import { drawMention, frontMatterField, heldProperties, objectsChanged, openMention, openTag, valueText } from "./objects";
+import { drawMention, frontMatterField, heldProperties, objectsChanged, openMention, openTag, shownNote, valueText } from "./objects";
 import { normalizeTag } from "../notes/parse";
 import { cheer, viewSelectionInUse } from "./util";
 import { keyOf, typeOf } from "../notes/properties";
@@ -322,7 +322,7 @@ function build(view: EditorView): DecorationSet {
       const mark = MARKS[prefs.scores as Exclude<typeof prefs.scores, "off">];
       decos.push(Decoration.replace({ widget: new ScoreWidget(score, scale ?? { kind: "marks", of: score.of }, mark, prefs.icons) }).range(from, to));
     } else mark(from, to, "cm-lp-kv-value");
-    const plain = valueText(written);
+    const plain = valueText(written, shownNote(state));
     if (prefs.copyValues && plain) decos.push(Decoration.widget({ widget: new CopyWidget(plain, t("editor.copyValue", { value: plain })), side: 1 }).range(to));
   };
   /** Marks the value of each "Key: Value" line from `from` to `to`, with a copy button after it. */
@@ -502,7 +502,7 @@ function build(view: EditorView): DecorationSet {
             mark(node.from, node.to, "cm-lp-mention-source");
             return false;
           }
-          const drawn = drawMention(doc.sliceString(node.from, node.to));
+          const drawn = drawMention(doc.sliceString(node.from, node.to), state);
           if ("widget" in drawn) decos.push(Decoration.replace({ widget: drawn.widget }).range(node.from, node.to));
           else mark(node.from, node.to, "cm-lp-mention-missing", drawn.missing ? { title: drawn.missing } : undefined);
           return false;
@@ -757,7 +757,7 @@ export const openAtCursor: Command = (view) => {
   for (const side of [-1, 1] as const) {
     for (let node: SyntaxNode | null = syntaxTree(state).resolveInner(head, side); node; node = node.parent) {
       if (node.name === "Mention") {
-        openMention(state.sliceDoc(node.from, node.to));
+        openMention(state.sliceDoc(node.from, node.to), state);
         return true;
       }
       if (node.name === "Tag") {

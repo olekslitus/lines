@@ -146,6 +146,8 @@ export interface SyncRecord {
   inbox?: boolean;
   icon?: IconName;
   color?: PaletteColor;
+  /** The lines of its header a newer version wrote (`Note.header`), as they were then. */
+  header?: Record<string, string>;
 }
 
 export const syncRecords = new ObjectStore<SyncRecord>(SYNC);

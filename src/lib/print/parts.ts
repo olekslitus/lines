@@ -8,6 +8,7 @@ import { loadMath, type Macros, NO_MACROS } from "../editor/math";
 import { unsplashImage } from "../editor/unsplash";
 import { attachmentName, attachmentURL, getAttachment, imageSize } from "../notes/attachments";
 import { symbolPieces } from "../notes/symbols";
+import type { Note } from "../notes/types";
 import type { Cells, FileView, FindSheet, MathEngine, Renderer } from "../plugins/types";
 import { showFormulas } from "../sheets/formulas";
 
@@ -36,6 +37,9 @@ export function el<K extends keyof HTMLElementTagNameMap>(tag: K, className = ""
 }
 
 export class Parts {
+  /** The note printed, which its mentions find notes from (`notes.find`). */
+  constructor(readonly note?: Note) {}
+
   #pending: Promise<unknown>[] = [];
   #icons: Record<string, unknown>[] = [];
   #math: MathEngine | null | undefined;

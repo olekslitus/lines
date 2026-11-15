@@ -128,7 +128,7 @@
   async function layOut(paper: Paper) {
     if (!measure || !pagesEl) return;
     if (!doc) {
-      parts = new Parts();
+      parts = new Parts(note);
       doc = language.print(note.body, parts);
       measure.replaceChildren(doc);
       // Laid out once in the page before waiting, so the fonts it uses start loading.

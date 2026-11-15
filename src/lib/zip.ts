@@ -94,6 +94,10 @@ export function zip(entries: ZipEntry[]): Uint8Array<ArrayBuffer> {
 export interface ZippedFile {
   /** Its size unpacked, as the ZIP says. */
   size: number;
+  /** Its size as it's kept in the ZIP, packed. */
+  packed: number;
+  /** When it was last changed, as the ZIP says (ms; to two seconds, in local time, as ZIP keeps it). */
+  modified: number;
   /** Its bytes; rejects for one bigger than the ZIP says it is, or than the limit. */
   read(): Promise<Uint8Array<ArrayBuffer>>;
 }
@@ -120,46 +124,116 @@ async function inflate(stored: Uint8Array<ArrayBuffer>, size: number): Promise<U
   return new Uint8Array(await new Blob(chunks).arrayBuffer());
 }
 
+/** What 32 bits, or 16, hold at most: in a ZIP, a sign that ZIP64 keeps the real number elsewhere. */
+const FULL32 = 0xffffffff;
+const FULL16 = 0xffff;
+
 /**
- * The files in a ZIP by name (folders left out), stored or deflated, as nearly every ZIP has them;
- * each inflated by the browser's own DecompressionStream only when it's read, to no more than the
- * size the ZIP gives it, nor `limit`. Not ZIP64, nor encrypted files.
+ * Where a ZIP's central directory (its list of files) starts, and how many files it says it has:
+ * from its end record, which a comment of up to 64 KB can follow; or, past 65,535 files or 4 GB,
+ * from ZIP64's record, which a locator just before the end record points to.
  */
-export function zipEntries(data: Uint8Array<ArrayBuffer>, limit = LIMIT): Map<string, ZippedFile> {
-  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
-  // The end of the central directory, which a comment of up to 64 KB can follow.
+function directoryOf(view: DataView) {
   let end = -1;
-  for (let at = data.length - 22; at >= Math.max(0, data.length - 22 - 0xffff); at--) {
+  for (let at = view.byteLength - 22; at >= Math.max(0, view.byteLength - 22 - 0xffff); at--) {
     if (view.getUint32(at, true) === 0x06054b50) {
       end = at;
       break;
     }
   }
   if (end < 0) throw new Error("Not a ZIP file");
+  const locator = end - 20;
+  if (locator >= 0 && view.getUint32(locator, true) === 0x07064b50) {
+    const record = Number(view.getBigUint64(locator + 8, true));
+    if (record + 56 <= view.byteLength && view.getUint32(record, true) === 0x06064b50) {
+      const big = (at: number) => Number(view.getBigUint64(record + at, true));
+      return { count: big(32), start: big(48), zip64: true };
+    }
+  }
+  return { count: view.getUint16(end + 10, true), start: view.getUint32(end + 16, true), zip64: false };
+}
+
+/**
+ * The files in a ZIP by name (folders left out), stored or deflated, as nearly every ZIP has them;
+ * each inflated by the browser's own DecompressionStream only when it's read, to no more than the
+ * size the ZIP gives it, nor `limit`. ZIP64 too, for more than 65,535 files; not encrypted files.
+ * Every file in its central directory is listed, up to the record that ends it, however many it
+ * says it has; or it's said to be damaged: some apps write a count past 65,535 without ZIP64, as
+ * what's left over in 16 bits.
+ */
+export function zipEntries(data: Uint8Array<ArrayBuffer>, limit = LIMIT): Map<string, ZippedFile> {
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  const directory = directoryOf(view);
   const names = new TextDecoder();
   const files = new Map<string, ZippedFile>();
-  let at = view.getUint32(end + 16, true);
-  for (let count = view.getUint16(end + 10, true); count > 0; count--) {
-    if (view.getUint32(at, true) !== 0x02014b50) throw new Error("A damaged ZIP file");
+  let listed = 0;
+  let at = directory.start;
+  for (; at + 46 <= data.length && view.getUint32(at, true) === 0x02014b50; listed++) {
     const method = view.getUint16(at + 10, true);
-    const packed = view.getUint32(at + 20, true);
-    const size = view.getUint32(at + 24, true);
+    const time = view.getUint16(at + 12, true);
+    const day = view.getUint16(at + 14, true);
+    let packed = view.getUint32(at + 20, true);
+    let size = view.getUint32(at + 24, true);
     const nameLength = view.getUint16(at + 28, true);
-    const local = view.getUint32(at + 42, true);
+    const extraLength = view.getUint16(at + 30, true);
+    let local = view.getUint32(at + 42, true);
     const name = names.decode(data.subarray(at + 46, at + 46 + nameLength));
-    at += 46 + nameLength + view.getUint16(at + 30, true) + view.getUint16(at + 32, true);
+    // ZIP64 keeps what doesn't fit 32 bits in an extra field of its own (0x0001), in this order.
+    for (let field = at + 46 + nameLength, fields = field + extraLength; field + 4 <= fields; field += 4 + view.getUint16(field + 2, true)) {
+      if (view.getUint16(field, true) !== 1) continue;
+      let next = field + 4;
+      const big = () => {
+        const value = Number(view.getBigUint64(next, true));
+        next += 8;
+        return value;
+      };
+      if (size === FULL32) size = big();
+      if (packed === FULL32) packed = big();
+      if (local === FULL32) local = big();
+      break;
+    }
+    at += 46 + nameLength + extraLength + view.getUint16(at + 32, true);
     if (name.endsWith("/") || (method !== 0 && method !== 8)) continue;
     const start = local + 30 + view.getUint16(local + 26, true) + view.getUint16(local + 28, true);
     const stored = data.subarray(start, start + packed);
     files.set(name, {
       size,
+      packed,
+      modified: new Date((day >> 9) + 1980, ((day >> 5) & 15) - 1, day & 31, time >> 11, (time >> 5) & 63, (time & 31) * 2).getTime(),
       async read() {
-        if (size > limit || (method === 0 && packed !== size)) throw tooBig();
+        if (size > limit || stored.length < packed || (method === 0 && packed !== size)) throw tooBig();
         return method === 0 ? stored : inflate(stored, size);
       },
     });
   }
+  if (listed !== directory.count && (directory.zip64 || listed % (FULL16 + 1) !== directory.count)) throw new Error("A damaged ZIP file");
   return files;
+}
+
+/** The most the ZIPs of one thing chosen to import unpack to, all told, by default: about what a browser can hold at once. */
+export const UNPACKED = 2 * 1024 ** 3;
+/** How many times over a file bigger than `SMALL` can be packed: more is one made to fill memory, not a real file's. */
+const RATIO = 100;
+const SMALL = 1024 ** 2;
+
+/**
+ * What files from ZIPs chosen elsewhere may unpack to, so one made to fill memory (a little that
+ * unpacks to gigabytes) is stopped by what it says of itself, before anything is unpacked: each
+ * file is unpacked to no more than it says (`zipEntries`), so what they say is what they take.
+ */
+export class Unpacking {
+  #left: number;
+
+  constructor(total = UNPACKED) {
+    this.#left = total;
+  }
+
+  /** Whether `file` may be unpacked: no bigger than one can be, nor packed so tightly no real file is, nor past what's left; counted if so. */
+  allows(file: ZippedFile) {
+    if (file.size > LIMIT || (file.size > SMALL && file.size > file.packed * RATIO) || file.size > this.#left) return false;
+    this.#left -= file.size;
+    return true;
+  }
 }
 
 /** Every file in a ZIP by name, inflated (zipEntries). */

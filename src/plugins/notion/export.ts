@@ -26,9 +26,37 @@ const titleOf = (name: string) => name.replace(ID, "").trim() || name;
 interface Database {
   id: string;
   name: string;
+  /** Its name as a type of notes (`keyOf`); empty for one with nothing a type's name can have. */
+  type: string;
   columns: string[];
+  /** Its columns as its rows' properties' keys (`keysOf`), in the same order. */
+  keys: string[];
   folder: string;
   file: ExportedFile;
+}
+
+/**
+ * A name as a property's key or a type's name can have it: letters, digits, spaces, `_` and `-`,
+ * the rest left out (`Price ($)` → `Price`, `📚 Reading List` → `Reading List`).
+ */
+const keyOf = (name: string) =>
+  name
+    .normalize("NFC")
+    .replace(/[^\p{L}\p{N} _-]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^[- ]+/, "");
+
+/** A database's columns as keys, each its own (`Done 2` after `Done`), and none `type`, which says what a row is. */
+function keysOf(columns: string[]) {
+  const taken = new Set(["type"]);
+  return columns.map((column) => {
+    const base = keyOf(column) || "Column";
+    let key = base;
+    for (let n = 2; taken.has(key.toLowerCase()); n++) key = `${base} ${n}`;
+    taken.add(key.toLowerCase());
+    return key;
+  });
 }
 
 const MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
@@ -60,8 +88,16 @@ export async function readNotion({ name: exported, files }: Exported): Promise<S
     const id = idOf(file.path);
     if (!id || (databases.has(id) && !/_all\.csv$/i.test(file.path))) continue;
     const [columns = []] = parseCsv(await file.text());
-    databases.set(id, { id, name: titleOf(stem(file.path)), columns, folder: `${folderOf(file.path) ? `${folderOf(file.path)}/` : ""}${stem(file.path)}`, file });
+    const name = titleOf(stem(file.path));
+    databases.set(id, { id, name, type: keyOf(name), columns, keys: keysOf(columns), folder: `${folderOf(file.path) ? `${folderOf(file.path)}/` : ""}${stem(file.path)}`, file });
   }
+  for (const { name, type, columns, keys } of databases.values()) {
+    // Its title column is each row's title, not a property.
+    for (const [i, column] of columns.entries()) if (i && keys[i] !== column) report.add("import.report.columns", `${column} → ${keys[i]} (${name})`);
+    if (!type) report.add("import.report.untyped", name);
+  }
+  /** Each database's rows' names, for one that can't be a type, whose note lists them instead. */
+  const rows = new Map<Database, string[]>();
   const databaseOf = new Map([...databases.values()].map((database) => [lower(database.folder), database]));
 
   const pages = files.filter((file) => /\.md$/i.test(file.path));
@@ -119,16 +155,18 @@ export async function readNotion({ name: exported, files }: Exported): Promise<S
       let end = start;
       for (; end >= 0 && end < lines.length; end++) {
         const column = /^([^:\n]+): (.*)$/.exec(lines[end]);
-        if (!column || !database.columns.includes(column[1])) break;
-        const [, key, raw] = column;
+        const index = column ? database.columns.indexOf(column[1]) : -1;
+        if (!column || index < 0) break;
+        const [, label, raw] = column;
         const value = valueOf(raw, folder);
-        if (/^created( time)?$/i.test(key)) created ??= timeOf(value);
-        if (/^(last edited|updated)( time)?$/i.test(key)) updated ??= timeOf(value);
-        properties.push(`${key}: ${propertyValue(value)}`);
+        if (/^created( time)?$/i.test(label)) created ??= timeOf(value);
+        if (/^(last edited|updated)( time)?$/i.test(label)) updated ??= timeOf(value);
+        properties.push(`${database.keys[index]}: ${propertyValue(value)}`);
       }
       // And the blank line after them.
       if (start >= 0) text = [...lines.slice(0, start), ...lines.slice(end + (lines[end]?.trim() ? 0 : 1))].join("\n");
-      properties.unshift(`type: ${database.name}`);
+      if (database.type) properties.unshift(`type: ${propertyValue(database.type)}`);
+      rows.set(database, [...(rows.get(database) ?? []), name]);
     }
     const body = translate(
       text,
@@ -159,11 +197,13 @@ export async function readNotion({ name: exported, files }: Exported): Promise<S
   }
 
   for (const database of databases.values()) {
-    const columns = database.columns.slice(1);
+    const keys = database.keys.slice(1);
+    // A table of its rows, as a type's; or, for one that can't be a type, a list of them.
+    const table = database.type ? typeRefOf(lower(database.type), keys.length ? keys : null) : (rows.get(database) ?? []).map((row) => `- ${noteLink(row)}`).join("\n");
     notes.push({
       id: database.id,
       name: database.name,
-      body: `# ${database.name}\n\n${typeRefOf(lower(database.name), columns.length ? columns : null)}\n`,
+      body: `${withTitle(database.name, table)}\n`,
       folders: folderOf(database.file.path).split("/").filter(Boolean).map(titleOf),
       tags: [],
       created: database.file.modified,

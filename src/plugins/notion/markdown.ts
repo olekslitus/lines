@@ -42,10 +42,16 @@ function blocks(text: string, pages: Pages, name: string) {
     const aside = /^\s*<aside>\s*(.*)$/.exec(line);
     if (aside) {
       // Its text starts with its icon, after the tag or on the next line: the kind's said by the icon.
-      const first = aside[1].trim();
+      // On one line, `<aside>💡 Text</aside>`, it closes there too.
+      const closed = /<\/aside>\s*$/.test(aside[1]);
+      const first = aside[1].replace(/<\/aside>\s*$/, "").trim();
       const kind = KINDS.find(([icon]) => icon.test(first || (lines[i + 1] ?? "").trim()))?.[1] ?? "info";
       if (out.length && out.at(-1)!.trim()) out.push("");
       out.push(`:::${kind}`, ...(first ? [first] : []));
+      if (closed) {
+        out.push(":::");
+        if (lines[i + 1]?.trim()) out.push("");
+      }
       continue;
     }
     if (/^\s*<\/aside>\s*$/.test(line)) {

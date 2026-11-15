@@ -145,9 +145,9 @@ The code is in `src/plugins/logseq/`: `graph.ts` reads the graph, `outline.ts` i
 | A sub-page, in its page's folder | A note of its own, linked from its page as in Notion, tagged with the pages it's in (`#home`), as sub-pages are folders here |
 | A link to a page, `[Plan](Plan%201a2b….md)` | `[[Plan]]`, to the note, whatever the page is renamed to (Notion's ids are its own everywhere, so importing again knows each page) |
 | A database, `Reading List 3c4d….csv` and its folder of rows | A note titled Reading List, with a table of its rows (`@type.reading_list(Author, Status, …)`, [linedown.md](linedown.md#type-tables)) |
-| A database's row | A note of the type named after the database (`type: Reading List`), its columns its properties: relations as links to their pages, dates as lines writes them (`November 14, 2024 9:30 PM` → `2024-11-14 21:30`), the rest as written; its Created and Last edited columns its dates |
+| A database's row | A note of the type named after the database (`type: Reading List`), its columns its properties: relations as links to their pages, dates as lines writes them (`November 14, 2024 9:30 PM` → `2024-11-14 21:30`), the rest as written; its Created and Last edited columns its dates. A property's name and a type's have only letters, digits, spaces, `_` and `-`, so the rest is left out of them, and said so: `Price ($)` is `Price`, `📚 Reading List` the type `Reading List`; two that come out the same are told apart (`Done`, `Done 2`), and a column called Type is `Type 2`. A database whose name has nothing left is no type: its note lists its rows, and says so |
 | Pictures and files, in a page's folder | Kept in lines |
-| Callouts (`<aside>` 💡 …) | lines' callouts, info, or warning, error and question by their icon (⚠️, ❗, ❓), the icon kept as text |
+| Callouts (`<aside>` 💡 …, on one line or several) | lines' callouts, info, or warning, error and question by their icon (⚠️, ❗, ❓), the icon kept as text |
 | Toggles (`<details>`) | Their title in bold, what's in them under it, open (said so) |
 | To-dos, headings, lists, tables, code, equations | The same |
 

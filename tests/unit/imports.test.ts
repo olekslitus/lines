@@ -25,6 +25,7 @@ const { readGraph } = await import("../../src/plugins/logseq/graph");
 const { readPage, writePage } = await import("../../src/plugins/logseq/outline");
 const { formatDay, readDay } = await import("../../src/plugins/logseq/dates");
 const { readNotion } = await import("../../src/plugins/notion/export");
+const { translate: translateNotion } = await import("../../src/plugins/notion/markdown");
 const { translate: translateBear } = await import("../../src/plugins/bear/markdown");
 const { translate } = await import("../../src/plugins/obsidian/markdown");
 const { attachmentPath, notesInput, notesWork, planNotes, Tally: Tallies, withTitle } = await import("../../src/lib/imports/notes");
@@ -616,6 +617,45 @@ describe("Notion", () => {
       toggles: [1, "More (Home)"],
       unused: [1, "Home 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d/unused.png"],
     });
+  });
+
+  /** An export of these files (by path), as Notion would write them. */
+  const exportOf = (files: Record<string, string>): Exported => ({
+    name: "Export",
+    files: Object.entries(files).map(([path, text]) => ({ path, size: text.length, text: async () => text, file: async () => new File([text], baseOf(path)) })),
+  });
+  const A = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  const B = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+  const C = "cccccccccccccccccccccccccccccccc";
+
+  test("columns and databases named with what keys and types can't have: renamed so they can, said so; one with nothing left lists its rows", async () => {
+    const tasks = await readNotion(
+      exportOf({
+        [`📋 Tasks ${A}_all.csv`]: "Name,Price ($),Done?,Est. hours,% done,📅 Due,Type,Done\nFix roof,12,Yes,3,50%,\"November 14, 2024\",Chore,No\n",
+        [`📋 Tasks ${A}/Fix roof ${B}.md`]: "# Fix roof\n\nPrice ($): 12\nDone?: Yes\nEst. hours: 3\n% done: 50%\n📅 Due: November 14, 2024\nType: Chore\nDone: No\n\nThe one by the door.\n",
+        [`📚 ${C}.csv`]: "Name\nDune\n",
+        [`📚 ${C}/Dune ${A.replace(/a/g, "d")}.md`]: "# Dune\n",
+      }),
+    );
+    const body = (name: string) => tasks.notes.find((note) => note.name === name)!.body;
+    expect(body("Fix roof")).toBe(
+      "---\ntype: Tasks\nPrice: 12\nDone: 'Yes'\nEst hours: 3\ndone 2: 50%\nDue: 2024-11-14\nType 2: Chore\nDone 3: 'No'\n---\n# Fix roof\n\nThe one by the door.\n",
+    );
+    expect(computeMeta(body("Fix roof")).properties.map((property) => property.key)).toEqual(["type", "Price", "Done", "Est hours", "done 2", "Due", "Type 2", "Done 3"]);
+    expect(body("📋 Tasks")).toBe("# 📋 Tasks\n\n@type.tasks(Price, Done, Est hours, done 2, Due, Type 2, Done 3)\n");
+    const { propertyOf, readTypeRef } = await import("../../src/lib/notes/properties");
+    // The table reads as one, of the type the rows have, its columns their properties.
+    const ref = readTypeRef("@type.tasks(Price, Done, Est hours, done 2, Due, Type 2, Done 3)")!;
+    const row = computeMeta(body("Fix roof"));
+    expect([ref.type, row.type, ref.columns!.map((key) => propertyOf(row.properties, key)?.value)]).toEqual(["tasks", "tasks", ["12", "Yes", "3", "50%", "2024-11-14", "Chore", "No"]]);
+    expect(body("📚")).toBe("# 📚\n\n- [[Dune]]\n");
+    expect(said(tasks.report)).toMatchObject({ untyped: [1, "📚"] });
+    expect(said(tasks.report).columns[0]).toBe(7);
+  });
+
+  test("a callout on one line closes there", () => {
+    const report = new Tallies();
+    expect(translateNotion("<aside>💡 Water the plants.</aside>\nAfter it.", { report, resolve: () => null }, "Note")).toBe(":::info\n💡 Water the plants.\n:::\n\nAfter it.");
   });
 });
 

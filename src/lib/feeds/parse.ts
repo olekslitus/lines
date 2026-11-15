@@ -322,7 +322,15 @@ function audioOf(enclosures: { url: string | null; type: string | null }[], base
   return undefined;
 }
 
-/** Posts in the feed's order, each with an id of its own (a feed with two alike keeps the first). */
+/**
+ * What tells a post from the feed's others, the same in every fetch: its own id (a guid), or else its
+ * link and title, as an aggregator's posts with no guids share a link; or else its title, date and
+ * content.
+ */
+const idOf = (own: string | undefined, link: string | undefined, title: string | undefined, date: number | undefined, html: string) =>
+  own || (link ? `${link}\n${title ?? ""}` : `${title ?? ""}\n${date ?? ""}\n${fingerprint(html)}`);
+
+/** Posts in the feed's order, each once (a feed with two alike keeps the first). */
 function distinct(posts: Post[]): Post[] {
   const seen = new Set<string>();
   return posts.filter((post) => !seen.has(post.id) && seen.add(post.id));
@@ -356,7 +364,7 @@ function readItem(item: Element, base: string, ns: string | null): Post {
   const enclosures = children(item, "enclosure", ns).map((enclosure) => ({ url: enclosure.getAttribute("url"), type: enclosure.getAttribute("type") }));
   const comments = address(text(item, "comments", ns), base);
   return {
-    id: guidText || link || `${title}\n${date ?? ""}\n${fingerprint(html)}`,
+    id: idOf(guidText, link, title, date, html),
     title: title || excerptOf(html).slice(0, 80),
     link,
     comments,
@@ -440,7 +448,7 @@ function readAtom(root: Element, url: string): Feed {
       .filter((each) => each.getAttribute("rel") === "enclosure")
       .map((each) => ({ url: each.getAttribute("href"), type: each.getAttribute("type") }));
     return {
-      id: text(entry, "id", ns) || link || `${title}\n${date ?? ""}\n${fingerprint(html)}`,
+      id: idOf(text(entry, "id", ns), link, title, date, html),
       title: title || excerptOf(html).slice(0, 80),
       link,
       comments,
@@ -516,7 +524,7 @@ function readJson(feed: Fields, url: string): Feed {
     const seconds = attachments.find((file) => audio && address(file.url, base) === audio.url)?.seconds;
     const id = typeof item.id === "number" ? String(item.id) : textOf(item.id);
     return {
-      id: id || link || `${title}\n${date ?? ""}\n${fingerprint(html)}`,
+      id: idOf(id, link, title, date, html),
       title: title || excerptOf(html).slice(0, 80),
       link,
       author: jsonAuthors(item) ?? feedAuthor,

@@ -208,6 +208,8 @@ export interface Stored {
   calendarEdited: boolean;
   feedRefresh: FeedRefresh;
   feedsInSidebar: FeedsInSidebar;
+  /** A post opened in the Feeds is dismissed once another is opened or it's closed (feeds.svelte.ts). */
+  dismissOnRead: boolean;
   playbackRate: PlaybackRate;
   /** Books are read a page at a time, or scrolled (BookReader.svelte). */
   bookFlow: BookFlow;
@@ -406,6 +408,7 @@ const DEFAULTS: Stored = {
   calendarEdited: false,
   feedRefresh: 30,
   feedsInSidebar: "kind",
+  dismissOnRead: false,
   playbackRate: 1,
   bookFlow: "paginated",
   bookThemeColors: false,
@@ -572,6 +575,7 @@ function read(json?: string): Stored {
     calendarEdited: flag(raw.calendarEdited, DEFAULTS.calendarEdited),
     feedRefresh: oneOf(raw.feedRefresh, FEED_REFRESH, DEFAULTS.feedRefresh),
     feedsInSidebar: oneOf(raw.feedsInSidebar, FEEDS_IN_SIDEBAR, DEFAULTS.feedsInSidebar),
+    dismissOnRead: flag(raw.dismissOnRead, DEFAULTS.dismissOnRead),
     playbackRate: oneOf(raw.playbackRate, PLAYBACK_RATES, DEFAULTS.playbackRate),
     bookFlow: oneOf(raw.bookFlow, BOOK_FLOWS, DEFAULTS.bookFlow),
     bookThemeColors: flag(raw.bookThemeColors, DEFAULTS.bookThemeColors),
@@ -690,6 +694,7 @@ class Prefs {
   calendarEdited = $state(this.#initial.calendarEdited);
   feedRefresh = $state<FeedRefresh>(this.#initial.feedRefresh);
   feedsInSidebar = $state<FeedsInSidebar>(this.#initial.feedsInSidebar);
+  dismissOnRead = $state(this.#initial.dismissOnRead);
   playbackRate = $state<PlaybackRate>(this.#initial.playbackRate);
   bookFlow = $state<BookFlow>(this.#initial.bookFlow);
   bookThemeColors = $state(this.#initial.bookThemeColors);
@@ -901,6 +906,7 @@ class Prefs {
       calendarEdited: this.calendarEdited,
       feedRefresh: this.feedRefresh,
       feedsInSidebar: this.feedsInSidebar,
+      dismissOnRead: this.dismissOnRead,
       playbackRate: this.playbackRate,
       bookFlow: this.bookFlow,
       bookThemeColors: this.bookThemeColors,
@@ -1021,6 +1027,7 @@ class Prefs {
     this.calendarEdited = next.calendarEdited;
     this.feedRefresh = next.feedRefresh;
     this.feedsInSidebar = next.feedsInSidebar;
+    this.dismissOnRead = next.dismissOnRead;
     this.playbackRate = next.playbackRate;
     this.bookFlow = next.bookFlow;
     this.bookThemeColors = next.bookThemeColors;

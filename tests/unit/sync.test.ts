@@ -1,8 +1,10 @@
-import { beforeAll, describe, expect, test } from "bun:test";
-import { beforeWrite, devices, drive, editElsewhere, FOLDER, fileOf, languages, notes, serialize, sync } from "./sync";
+import { afterEach, beforeAll, describe, expect, test } from "bun:test";
+import type { MarkField, Marks } from "../../src/lib/feeds/marks";
+import { beforeWrite, type Device, devices, drive, editElsewhere, FOLDER, fileOf, languages, listings, notes, placeholders, reads, serialize, sync, written } from "./sync";
 // After ./sync, which sets up the page they run in and the notes' storage in memory: imported first,
 // a module would read a page that isn't there, or bind the real storage (IndexedDB) before it's replaced.
 const { latexContent, markTitle } = await import("../../src/plugins/latex/text");
+const { latestOf, marked, markKey, mergeFeed, readShard, shardOf, sharedMarks, stateOf, tidyFeed } = await import("../../src/lib/feeds/marks");
 const { looks, tagLooks, typeLooks } = await import("../../src/lib/notes/looks.svelte");
 const { ratings } = await import("../../src/lib/library/ratings.svelte");
 const { writeLooks } = await import("../../src/lib/notes/looks");
@@ -466,6 +468,59 @@ describe("sync, of what the Library's kinds are rated on", () => {
   });
 });
 
+describe("sync, of a folder of small files beside the notes: what was done with feeds' posts", () => {
+  test("each file goes up when it changed here, comes in only when its tag says it changed there, and a drive's copy of one is merged in and taken out", async () => {
+    const files = new Map([
+      ["a.json", "A1"],
+      ["b.json", "B1"],
+    ]);
+    const merged: [string, string][] = [];
+    let ready = true;
+    sync.shareFolder({ dir: "feeds/", ready: () => ready, names: () => [...files.keys()], files: () => files, merge: (name, text) => (merged.push([name, text]), text), onChange: () => {} });
+    const [device] = await devices(1);
+    const path = (name: string) => `${FOLDER.path}/feeds/${name}`;
+    const folderReads = () => reads.filter((read) => read.includes("/feeds/"));
+    await device.sync();
+    expect([drive.get(path("a.json"))?.text, drive.get(path("b.json"))?.text]).toEqual(["A1", "B1"]);
+
+    // Nothing changed: nothing read, nothing written.
+    reads.length = 0;
+    const tags = [drive.get(path("a.json"))!.etag, drive.get(path("b.json"))!.etag];
+    await device.sync();
+    expect(folderReads()).toEqual([]);
+    expect([drive.get(path("a.json"))!.etag, drive.get(path("b.json"))!.etag]).toEqual(tags);
+
+    // Changed here: only that one goes up.
+    files.set("b.json", "B2");
+    await device.sync();
+    expect([drive.get(path("a.json"))!.etag, drive.get(path("b.json"))!.text]).toEqual([tags[0], "B2"]);
+
+    // Changed there: only that one is read, and merged.
+    drive.set(path("a.json"), { text: "A-elsewhere", etag: "elsewhere" });
+    reads.length = 0;
+    await device.sync();
+    expect(folderReads()).toEqual([path("a.json")]);
+    expect(merged).toEqual([["a.json", "A-elsewhere"]]);
+
+    // A drive's own copy of one, kept beside it: merged in, then taken out of the folder.
+    drive.set(path("a 2.json"), { text: "A-copy", etag: "copy" });
+    await device.sync();
+    expect(merged.at(-1)).toEqual(["a.json", "A-copy"]);
+    expect(drive.has(path("a 2.json"))).toBe(false);
+
+    // Encrypted: under names that hide them, the plain ones gone; still read only when changed.
+    await sync.encrypt("correct horse battery");
+    await sync.syncNow();
+    const stored = [...drive.keys()].filter((key) => key.includes("/feeds/"));
+    expect(stored).toHaveLength(2);
+    expect(stored.every((key) => /\/feeds\/[0-9a-f]{32}\.enc$/.test(key))).toBe(true);
+    reads.length = 0;
+    await device.sync();
+    expect(folderReads()).toEqual([]);
+    ready = false;
+  });
+});
+
 describe("sync, once every synced note was deleted on another device", () => {
   /** A note synced to two devices and deleted for good on the other; one written here since. */
   async function deletedElsewhere() {
@@ -534,5 +589,142 @@ describe("mentions of notes imported from another app", () => {
     expect(notes.find("Plan", from("links"))?.note.id).toBe("plan-2");
     await notes.insert({ id: "titled", body: "# Plan", createdAt: 1, updatedAt: 1, pinned: false, trashed: false });
     expect(notes.find("Plan", from("links"))?.note.id).toBe("titled");
+  });
+});
+
+describe("sync of what was done with feeds' posts, a file for each feed, between devices", () => {
+  const FEED = "https://news.example/rss";
+  const DAY = 86_400_000;
+  const file = () => `${FOLDER.path}/feeds/${shardOf(FEED)}`;
+  const writesOfFeeds = () => written.filter((path) => path.includes("/feeds/"));
+
+  /** A device's marks, as feeds/feeds.svelte.ts keeps them, shared through the engine as it shares them (marks.ts' sharedMarks). */
+  class Reader {
+    marks: Marks = {};
+    constructor(
+      readonly device: Device,
+      readonly feeds: string[] = [FEED],
+    ) {}
+
+    /** Marks a post of the feed, now (or at `now`). */
+    mark(id: string, fields: MarkField[], now?: number) {
+      const own = this.marks[FEED] ?? { posts: {} };
+      const key = markKey(id);
+      this.marks = { ...this.marks, [FEED]: { ...own, posts: { ...own.posts, [key]: marked(own.posts[key], fields, latestOf(own), now) } } };
+    }
+
+    /** Fetches the feed, finding these posts in it, at `at`, as the app does. */
+    fetch(ids: string[], at = Date.now()) {
+      const own = this.marks[FEED];
+      if (own) this.marks = { ...this.marks, [FEED]: tidyFeed(own, new Set(ids.map(markKey)), at) };
+    }
+  }
+
+  let reading: Reader | null = null;
+  sync.shareFolder({
+    ...sharedMarks({
+      marks: () => reading!.marks,
+      feeds: () => reading!.feeds,
+      take: (there) => {
+        for (const [feed, marks] of Object.entries(there)) reading!.marks = { ...reading!.marks, [feed]: mergeFeed(reading!.marks[feed], marks) };
+      },
+    }),
+    ready: () => reading !== null,
+    onChange: () => {},
+  });
+
+  afterEach(() => {
+    reading = null;
+  });
+
+  /** A sync pass on this reader's device. */
+  async function pass(reader: Reader) {
+    reading = reader;
+    await reader.device.sync();
+  }
+
+  async function readers() {
+    const [mac, phone] = await devices(2);
+    return [new Reader(mac), new Reader(phone)];
+  }
+
+  test("two devices, a post read and then dismissed on one, another dismissed on the other: each writes its feed's file once, then never again", async () => {
+    const [mac, phone] = await readers();
+    // The inbox's way: read, then dismissed.
+    mac.mark("p", ["read"]);
+    mac.mark("p", ["done"]);
+    mac.mark("q", ["read"]);
+    await pass(mac);
+    await pass(phone);
+    phone.mark("q", ["uninteresting"]);
+    await pass(phone);
+    await pass(mac);
+    // The Mac has what the phone did, field by field.
+    expect(stateOf(mac.marks[FEED].posts[markKey("q")])).toEqual({ read: true, dismissed: "uninteresting" });
+    written.length = 0;
+    for (const reader of [mac, phone, mac, phone]) await pass(reader);
+    expect(writesOfFeeds()).toEqual([]);
+  });
+
+  test("a device that never fetches the feed lets go of what the one that does let go, and neither writes it back", async () => {
+    const [mac, web] = await readers();
+    const now = Date.now();
+    // Months ago, a post read; it's long gone from the feed. Another, read lately, is still in it.
+    mac.mark("old", ["read"], now - 200 * DAY);
+    mac.mark("new", ["read"], now - DAY);
+    await pass(mac);
+    await pass(web);
+    expect(Object.keys(web.marks[FEED].posts)).toHaveLength(2);
+
+    // The Mac fetches the feed: the old post's mark goes, and the file says so.
+    mac.fetch(["new"], now);
+    expect(Object.keys(mac.marks[FEED].posts)).toEqual([markKey("new")]);
+    written.length = 0;
+    await pass(mac);
+    expect(writesOfFeeds()).toEqual([file()]);
+
+    // The web app, which never fetches, lets it go too, and writes nothing back; nor does anyone after.
+    written.length = 0;
+    await pass(web);
+    expect(Object.keys(web.marks[FEED].posts)).toEqual([markKey("new")]);
+    for (const reader of [mac, web, mac, web]) await pass(reader);
+    expect(writesOfFeeds()).toEqual([]);
+
+    // Another fetch a quarter of an hour later, as another Mac's: nothing to say, nothing written.
+    mac.fetch(["new"], now + 15 * 60_000);
+    await pass(mac);
+    await pass(web);
+    expect(writesOfFeeds()).toEqual([]);
+
+    // Something new on the web app goes up, as ever.
+    web.mark("new", ["done"]);
+    await pass(web);
+    expect(writesOfFeeds()).toEqual([file()]);
+  });
+
+  test("a file the drive hasn't downloaded yet isn't written over: it's read on a later pass, without passes in between", async () => {
+    const [mac, phone] = await readers();
+    phone.mark("p", ["done"]);
+    await pass(phone);
+    // On the Mac, the phone's file is there but not downloaded (an iCloud placeholder), and the Mac marked another post.
+    placeholders.add(file());
+    mac.mark("q", ["read"]);
+    written.length = 0;
+    await pass(mac);
+    expect(writesOfFeeds()).toEqual([]);
+    // Downloaded: read, merged, and the Mac's mark goes up with the phone's.
+    placeholders.delete(file());
+    await pass(mac);
+    expect(writesOfFeeds()).toEqual([file()]);
+    expect(Object.keys(readShard(drive.get(file())!.text)[FEED].posts).sort()).toEqual([markKey("p"), markKey("q")].sort());
+  });
+
+  test("with no feeds, nothing done with posts: the folder isn't even listed", async () => {
+    const [device] = await devices(1);
+    const nobody = new Reader(device, []);
+    listings.length = 0;
+    await pass(nobody);
+    expect(listings.some((dir) => dir.endsWith("/feeds"))).toBe(false);
+    expect([...drive.keys()].some((path) => path.includes("/feeds/"))).toBe(false);
   });
 });

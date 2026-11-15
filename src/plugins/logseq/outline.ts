@@ -1,4 +1,4 @@
-import { FENCE_START } from "../../lib/imports/markdown";
+import { between, edited, editsIn, FENCE_START, readMarkdown } from "../../lib/imports/markdown";
 
 /*
  * A Logseq page as Logseq writes it: an outline, every line a block (`- …`), blocks under blocks
@@ -31,8 +31,11 @@ export function readPage(text: string): Page {
   const lines = text.split("\n");
   const page: Page = { properties: [], loose: [], blocks: [] };
   let i = 0;
-  for (; i < lines.length && !BULLET.test(lines[i]); i++) {
-    const property = PROPERTY.exec(lines[i].trim());
+  // Lines before the first block; a `- ` in code among them isn't one.
+  for (let fence = ""; i < lines.length && (fence || !BULLET.test(lines[i])); i++) {
+    const opening = FENCE_START.exec(lines[i]);
+    if (opening) fence = fence ? (opening[1][0] === fence[0] && opening[1].length >= fence.length ? "" : fence) : opening[1];
+    const property = !fence && !opening && PROPERTY.exec(lines[i].trim());
     if (property) page.properties.push([property[1], property[2].trim()]);
     else if (lines[i].trim() || page.loose.length) page.loose.push(lines[i]);
   }
@@ -63,15 +66,18 @@ export function readPage(text: string): Page {
     const opening = FENCE_START.exec(own);
     if (opening) fence = fence ? (opening[1][0] === fence[0] && opening[1].length >= fence.length ? "" : fence) : opening[1];
   }
-  // A page's properties written as its first block, as older versions did.
+  // A page's properties written as its first block, as older versions did: its property lines are
+  // the page's, and any other lines in it stay, as its text.
   const first = page.blocks[0];
   if (!page.properties.length && first && PROPERTY.test(first.first) && !first.children.length) {
-    page.properties = [first.first, ...first.more].flatMap((line) => {
-      const property = PROPERTY.exec(line.trim());
-      return property ? [[property[1], property[2].trim()] as [string, string]] : [];
-    });
-    page.properties.push(...first.properties);
-    page.blocks.shift();
+    const lines = [first.first, ...first.more];
+    const leading = lines.findIndex((line) => !PROPERTY.test(line.trim()));
+    const count = leading < 0 ? lines.length : leading;
+    page.properties = [...lines.slice(0, count).map((line) => PROPERTY.exec(line.trim())!).map(([, key, value]): [string, string] => [key, value.trim()]), ...first.properties];
+    const rest = lines.slice(count);
+    while (rest.length && !rest[0].trim()) rest.shift();
+    if (rest.length) page.blocks[0] = { first: rest[0], more: rest.slice(1), properties: [], children: [] };
+    else page.blocks.shift();
   }
   return page;
 }
@@ -100,6 +106,8 @@ const isParagraph = (block: Block) =>
  * block with nothing under it. Otherwise they're an outline, kept as a list.
  */
 function isProse(blocks: Block[]) {
+  // Prose writes a block's own lines only: one with blocks under it is never prose.
+  if (blocks.some((block) => !block.children.every(isEmpty))) return false;
   const text = blocks.filter((block) => !HEADING.test(block.first));
   if (text.length === 1 && !text[0].children.length && !TASK.test(text[0].first) && !shownProperties(text[0]).length) return true;
   return text.length > 0 && text.every(isParagraph);
@@ -161,8 +169,9 @@ function section(blocks: Block[], written: Written): string[] {
 
 /** A page's blocks as lines writes a note's text, but its title and properties. */
 export function writePage(page: Page, written: Written): string {
-  const text = [...(page.loose.length ? [...page.loose, ""] : []), ...section(page.blocks, written)];
-  return text.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  const text = [...(page.loose.length ? [...page.loose, ""] : []), ...section(page.blocks, written)].join("\n");
+  // Runs of blank lines made one, but in code, whose blank lines are its own.
+  return edited(text, editsIn(text, between(readMarkdown(text).blocks, 0, text.length), /\n{3,}/g, () => "\n\n")).trim();
 }
 
 /** A block with nothing in it, nor under it: Logseq leaves one where nothing's been written yet. */

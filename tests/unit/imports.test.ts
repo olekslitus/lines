@@ -341,6 +341,10 @@ describe("what's chosen to import", () => {
     const unpacking = new Unpacking(10 * MB);
     expect([6 * MB, 6 * MB, [2 * MB, MB / 100], [1000, 1], 3 * MB].map((size) => unpacking.allows(Array.isArray(size) ? file(size[0], size[1]) : file(size)))).toEqual([true, false, false, true, true]);
     expect(new Unpacking().allows(file(300 * MB))).toBe(false);
+    // A ZIP in a ZIP of ZIPs is held to the same limits.
+    const bomb = zip([{ name: "zeros.md", data: new Uint8Array(2 * MB), modified: new Date(DAY) }]);
+    const parts = await exportedFrom([new File([deflated({ "Part-1.zip": zipOf({ "Workspace/A.md": "a" }), "Part-2.zip": bomb })], "Export.zip")]);
+    expect([parts.name, parts.files.map((each) => each.path), parts.skipped]).toEqual(["Workspace", ["A.md"], ["Part-2.zip"]]);
   });
 
   test("a Bear backup: a note that would unpack to too much is left out and said so; TextPacks in a folder are a bundle each", async () => {
@@ -514,6 +518,24 @@ describe("Logseq", () => {
     expect(page.properties).toEqual([["title", "Old"]]);
     expect(writePage(page, { property: () => {}, task: () => {} })).toBe("- First\n  more of it\n  - Under\n    ```\n    - not a block\n    ```\n- Second");
     expect(readPage("- tags:: a, b\n- Text").properties).toEqual([["tags", "a, b"]]);
+  });
+
+  test("nothing of a page is lost: blank lines in code, a heading's blocks, the first block's text, a bullet in code at the top", () => {
+    const write = (text: string) => writePage(readPage(text), { property: () => {}, task: () => {} });
+    // Code keeps its blank lines; between blocks, one is enough.
+    expect(write("- A paragraph that is long enough to read as prose, ending here.\n  ```\n  one\n\n\n  two\n  ```")).toBe(
+      "A paragraph that is long enough to read as prose, ending here.\n```\none\n\n\ntwo\n```",
+    );
+    // A heading with a property, among paragraphs, keeps the blocks under it.
+    expect(write("- ## Plans\n  owner:: Ada\n  - Under it\n- A paragraph that is long enough to read as prose, ending here.")).toBe(
+      "- ## Plans\n  owner:: Ada\n  - Under it\n- A paragraph that is long enough to read as prose, ending here.",
+    );
+    // Properties written as the first block: the page's; the text after them, the block's.
+    const first = readPage("- type:: book\n  author:: Ada\n  A note about it.");
+    expect([first.properties, first.blocks.map((block) => block.first)]).toEqual([[["type", "book"], ["author", "Ada"]], ["A note about it."]]);
+    // A page without bullets: a `- ` in its code isn't a block.
+    const loose = readPage("Notes\n```\n- not a block\n```\n");
+    expect([loose.blocks.length, loose.loose]).toEqual([0, ["Notes", "```", "- not a block", "```", ""]]);
   });
 
   test("journals' days, read from their files' names and titled as the graph says", () => {

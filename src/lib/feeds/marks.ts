@@ -119,14 +119,15 @@ export function marked(mark: Mark | undefined, fields: MarkField[], floor: numbe
 const lastOf = (mark: Mark) => Math.max(...ALL.map((field) => mark[field] ?? 0));
 
 /**
- * Whether a mark says otherwise than its feed's Dismiss All would of a post it covers (restored, or
- * marked unread, or not interesting, since): kept while the cut-off stands, however old, or the post
- * would be dismissed by it again. Which posts it covers is their dates', which marks don't keep.
+ * Whether a mark keeps a post it covers out of its feed's Dismiss All (restored, or marked unread,
+ * since): kept while the cut-off stands, however old, or the post would be dismissed (or read) by it
+ * again. One that only says why (not interesting) goes as any does: the cut-off dismisses its post
+ * anyway. Which posts it covers is their dates', which marks don't keep.
  */
 function against(mark: Mark, cleared: Cleared | undefined): boolean {
   if (!cleared?.before) return false;
   const { read, dismissed } = stateOf({ ...mark, done: Math.max(mark.done ?? 0, cleared.at) });
-  return read === false || dismissed !== "done";
+  return read === false || dismissed === null;
 }
 
 /** A feed's marks without those from before its horizon (but those against its Dismiss All); the same object if none are. */

@@ -75,7 +75,9 @@ export function merge(kept: readonly KeptPost[], fetched: readonly Post[], now: 
   const changed: { key: string; html: string }[] = [];
   const posts: KeptPost[] = fetched.map(({ html, ...post }, i) => {
     listed.add(post.id);
-    const was = before.get(post.id);
+    // Or kept under its link alone, as a post with no guid was before its title was part of its id.
+    const was = before.get(post.id) ?? (post.link && post.id.startsWith(`${post.link}\n`) ? before.get(post.link) : undefined);
+    if (was) listed.add(was.id);
     const key = was?.key ?? newKey();
     if (post.approximate && was) {
       // A guessed date doesn't move one known, nor does content it hasn't take the place of what's kept.

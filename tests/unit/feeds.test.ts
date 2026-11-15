@@ -88,6 +88,13 @@ describe("keeping posts", () => {
     expect(merge(first.posts, [post("a", 1, "<p>edited</p>")], 300).changed.map((each) => each.key)).toEqual([first.posts[0].key]);
   });
 
+  test("a post with no guid, kept under its link alone before its title was part of its id, is the same post: its key, read and dismissed", () => {
+    const link = "https://a.example/story";
+    const was: KeptPost = { ...kept(link, 1, true), link, dismissed: "done" };
+    const { posts } = merge([was], [{ ...post(`${link}\nFirst take`, 1), link, title: "First take" }], 100, counting());
+    expect(posts.map(({ id, key, read, dismissed }) => [id, key, read, dismissed])).toEqual([[`${link}\nFirst take`, `key-${link}`, true, "done"]]);
+  });
+
   test("posts a feed no longer lists are kept, newest first", () => {
     const { posts } = merge([kept("old", 1, true), kept("older", 0, false)], [post("new", 5)], 100);
     expect(posts.map((each) => each.id)).toEqual(["new", "old", "older"]);
@@ -213,11 +220,11 @@ describe("marks, what was done with posts, as devices sync them", () => {
     expect(mergeFeed(merged, { posts: {}, gone: 1 }).gone).toBe(DAY);
   });
 
-  test("a post restored after Dismiss All keeps its mark, however old, while the cut-off stands: else it would be dismissed again", () => {
+  test("a post restored (or marked unread) after Dismiss All keeps its mark, however old, while the cut-off stands: else it would be dismissed again; one only not interesting goes, as the cut-off dismisses it anyway", () => {
     const cleared = { before: 100, at: 200, set: 200 };
     const marks: FeedMarks = { posts: { restored: { restored: 300, unread: 300 }, uninteresting: { uninteresting: 300 }, read: { read: 300 }, before: { restored: 150 } }, cleared };
     const later = mergeFeed(marks, { posts: {}, gone: 50 * DAY });
-    expect(Object.keys(later.posts).sort()).toEqual(["restored", "uninteresting"]);
+    expect(Object.keys(later.posts).sort()).toEqual(["restored"]);
     expect(stateOf(withCleared(later.posts.restored, 50, cleared)!)).toEqual({ read: false, dismissed: null });
     // Dismiss All again: it's covered by the new cut-off, so it goes.
     expect(mergeFeed(later, { posts: {}, cleared: { before: 400, at: 500, set: 500 } }).posts).toEqual({});

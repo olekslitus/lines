@@ -88,10 +88,15 @@ describe("which way a change goes", () => {
     expect(settle({ note: { ...last.note, rating: "4/5" }, site: { ...last.site, score: 8 } }, last, at, scales)).toEqual({ note: {}, site: null });
   });
 
-  test("never exchanged: the site's comes first, however newer the note, and the note fills in what the site hasn't; a score taken out on the site takes the rating out of the note", () => {
+  test("never exchanged: the site's status comes first, however newer the note, but the note's rating and progress, which are the person's own; each fills in what the other hasn't; a score taken out on the site takes the rating out of the note", () => {
     expect(settle({ note: { status: "to watch", rating: "3/5" }, site: { status: "watching", score: 8, progress: 3 } }, undefined, { note: 2, site: 1 }, scales)).toEqual({
-      note: { status: "watching", rating: "4/5", progress: "3" },
-      site: null,
+      note: { status: "watching", progress: "3" },
+      site: { status: "watching", score: 6, progress: 3 },
+    });
+    // Older than the site's, the note's rating and progress still carry.
+    expect(settle({ note: { status: "to watch", rating: "3/5", progress: "7" }, site: { status: "watching", score: 8, progress: 3 } }, undefined, { note: 1, site: 2 }, scales)).toEqual({
+      note: { status: "watching" },
+      site: { status: "watching", score: 6, progress: 7 },
     });
     expect(settle({ note: { status: "watched", rating: "4.5/5", progress: "12" }, site: { status: null, score: 0, progress: 0 } }, undefined, { note: 1, site: 2 }, scales)).toEqual({
       note: {},

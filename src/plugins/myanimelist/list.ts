@@ -134,6 +134,7 @@ export const list: ListSite = {
   key: "mal",
   unavailable: !isTauri ? t("library.list.appsOnly", { name: "MyAnimeList" }) : !CLIENT ? t("library.list.notInBuild", { name: "MyAnimeList" }) : undefined,
   signIn: { browser: true },
+  scale: { max: 10, step: 1 },
 
   async connect(_token, signal) {
     const verifier = random(96);
@@ -150,7 +151,6 @@ export const list: ListSite = {
     if (query.get("state") !== state || !query.get("code")) throw new ListError("token", "MyAnimeList didn't say yes");
     const account: ListAccount = {
       name: "",
-      scale: { max: 10, step: 1 },
       ...(await tokens({ grant_type: "authorization_code", code: query.get("code")!, redirect_uri: REDIRECT, code_verifier: verifier }, signal)),
     };
     account.name = (await ask<{ name: string }>(account, `${API}/users/@me`, signal)).name;
@@ -170,7 +170,12 @@ export const list: ListSite = {
 
   async save(account, change, signal) {
     const status = STATUSES.find(([here]) => here === change.status)?.[1];
-    const form = new URLSearchParams({ ...(status && { status }), score: String(Math.round(change.score)), num_watched_episodes: String(change.progress) });
+    // What isn't sent isn't changed: a rating given while rewatching leaves it rewatching.
+    const form = new URLSearchParams({
+      ...(status && { status }),
+      ...(change.score !== undefined && { score: String(Math.round(change.score)) }),
+      ...(change.progress !== undefined && { num_watched_episodes: String(change.progress) }),
+    });
     const saved = await ask<ListStatus>(account, `${API}/anime/${change.id}/my_list_status`, signal, {
       method: "PATCH",
       headers: { "content-type": "application/x-www-form-urlencoded" },

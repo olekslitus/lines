@@ -27,24 +27,29 @@ const entryOf = (mediaId: number, idMal: number, title: string, status: string, 
   media: { id: mediaId, idMal, format: "TV", episodes: 28, title: { english: title }, siteUrl: `https://anilist.co/anime/${mediaId}`, studios: { nodes: [{ name: "MADHOUSE" }] } },
 });
 
-/** AniList as the test's: whoever `tok` is, `ada`, scoring out of 10, and her list; what was saved to it. */
-async function aniList(page: App["page"]) {
-  const list = [
-    entryOf(154587, 52991, "Frieren: Beyond Journey's End", "CURRENT", 8, 5, now - 3600),
-    entryOf(5114, 5114, "Fullmetal Alchemist: Brotherhood", "COMPLETED", 10, 64, now - 86400),
+/** AniList as the test's: whoever `tok` is, `ada`, and her list (`list`, scores out of 100, as lines asks for them); what was saved to it. */
+async function aniList(
+  page: App["page"],
+  list = [
+    entryOf(154587, 52991, "Frieren: Beyond Journey's End", "CURRENT", 80, 5, now - 3600),
+    entryOf(5114, 5114, "Fullmetal Alchemist: Brotherhood", "COMPLETED", 100, 64, now - 86400),
     entryOf(1, 1, "Cowboy Bebop", "COMPLETED", 0, 26, now - 86400),
-  ];
+  ],
+) {
   const saved: Record<string, unknown>[] = [];
   await page.route("https://graphql.anilist.co/", async (route: Route) => {
     const { query, variables } = JSON.parse(route.request().postData() ?? "{}");
     const signedIn = route.request().headers().authorization === "Bearer tok";
     if (/Viewer|MediaListCollection|SaveMediaListEntry/.test(query) && !signedIn) return route.fulfill({ status: 401, headers: CORS, json: { errors: [{ message: "Invalid token", status: 401 }] } });
-    if (query.includes("Viewer")) return route.fulfill({ headers: CORS, json: { data: { Viewer: { id: 7, name: "ada", mediaListOptions: { scoreFormat: "POINT_10" } } } } });
+    if (query.includes("Viewer")) return route.fulfill({ headers: CORS, json: { data: { Viewer: { id: 7, name: "ada" } } } });
     if (query.includes("MediaListCollection")) return route.fulfill({ headers: CORS, json: { data: { MediaListCollection: { lists: [{ entries: list }] } } } });
     if (query.includes("SaveMediaListEntry")) {
       saved.push(variables);
-      const entry = list.find((each) => each.mediaId === variables.id)!;
-      Object.assign(entry, { ...(variables.status && { status: variables.status }), score: variables.score, progress: variables.progress, updatedAt: Math.floor(Date.now() / 1000) });
+      let entry = list.find((each) => each.mediaId === variables.id);
+      if (!entry) list.push((entry = entryOf(variables.id, 0, `Anime ${variables.id}`, "PLANNING", 0, 0, now)));
+      // What isn't sent isn't changed.
+      const { id: _, ...change } = variables;
+      Object.assign(entry, change, { updatedAt: Math.floor(Date.now() / 1000) });
       return route.fulfill({ headers: CORS, json: { data: { SaveMediaListEntry: entry } } });
     }
     return route.fulfill({ status: 400, headers: CORS, json: { errors: [{ message: "Unexpected" }] } });
@@ -85,7 +90,7 @@ test("signed in to AniList, the list is imported as notes, and a change on eithe
   // At once, what importing would do.
   await group.getByText("3 anime on your AniList list").waitFor();
   await group.getByText("2 are in the Library already, kept in step as they are").waitFor();
-  // Meanwhile the one there is in step: its status, rating (8 of 10 is 4 of 5 stars) and progress came from AniList, which changed later.
+  // Meanwhile the one there is in step: its status, rating (80 of 100 is 4 of 5 stars) and progress came from AniList, as the note had no rating or progress of its own.
   await page.waitForFunction((id) => window.testing.notes.get(id)?.note.body.includes("\nstatus: watching\nrating: 4/5\nprogress: 5\n"), frieren);
   // The one from MyAnimeList has its AniList id now, and what the list says of it (no rating there, so none here).
   await page.waitForFunction((id) => window.testing.notes.get(id)?.note.body.includes("\nanilist: 1\nstatus: watched\nprogress: 26\n"), bebop);
@@ -97,7 +102,7 @@ test("signed in to AniList, the list is imported as notes, and a change on eithe
   expect(await bodyOf(page, fma)).toStartWith("---\ntype: anime\nformat: TV\nstudio: MADHOUSE\nepisodes: 28\nanilist: 5114\nmal: 5114\nrating: 5/5\nprogress: 64\nlink: https://anilist.co/anime/5114\nstatus: watched\n---\n# Fullmetal Alchemist: Brotherhood");
   await app.closeSettings();
 
-  // Rated here: a moment later, on AniList, on its scale.
+  // Rated here: a moment later, on AniList, out of 100, and only that.
   await page.evaluate((id) => window.testing.notes.select(id), frieren);
   await page.waitForFunction(() => window.testing.text()?.includes("# Frieren"));
   await page.evaluate(() => window.testing.place());
@@ -105,7 +110,7 @@ test("signed in to AniList, the list is imported as notes, and a change on eithe
   await page.waitForFunction(() => window.testing.text()?.includes("\nrating: 5/5\n"));
   const deadline = Date.now() + 15_000;
   while (!saved.length && Date.now() < deadline) await page.waitForTimeout(200);
-  expect(saved).toEqual([{ id: 154587, status: "CURRENT", score: 10, progress: 5, format: "POINT_10" }]);
+  expect(saved).toEqual([{ id: 154587, score: 100 }]);
 
   // Watched to the end on AniList: in the note once it's asked again.
   Object.assign(list[0], { status: "COMPLETED", progress: 28, updatedAt: Math.floor(Date.now() / 1000) + 5 });
@@ -113,4 +118,67 @@ test("signed in to AniList, the list is imported as notes, and a change on eithe
   await again.getByRole("region", { name: "AniList" }).getByRole("button", { name: "Sync Now" }).click();
   await page.waitForFunction((id) => window.testing.notes.get(id)?.note.body.includes("\nstatus: watched\nrating: 5/5\nprogress: 28\n"), frieren);
   expect(saved).toHaveLength(1);
+});
+
+test("what's taken off the list isn't put back, what's in the Trash or locked isn't made again, and nothing's made before sync's first pass", async () => {
+  app = await openApp();
+  const { page } = app;
+  const later = now + 60;
+  const { list, saved } = await aniList(page, [entryOf(1, 1, "Cowboy Bebop", "CURRENT", 0, 3, now - 60), entryOf(30, 19, "Monster", "CURRENT", 0, 10, now - 60)]);
+  const anime = (id: number, title: string, trashed = false) =>
+    page.evaluate(
+      async ({ id, title, trashed }) => {
+        const note = crypto.randomUUID();
+        await window.testing.notes.insert({ id: note, body: `---\ntype: anime\nanilist: ${id}\n---\n# ${title}\n`, createdAt: 1000, updatedAt: 1000, pinned: false, trashed });
+        return note;
+      },
+      { id, title, trashed },
+    );
+  const bebop = await anime(1, "Cowboy Bebop");
+  const monster = await anime(30, "Monster");
+  const naruto = await anime(20, "Naruto", true);
+  const bodies = () => page.evaluate(() => window.testing.notes.entries.map(({ note }) => [note.id, note.trashed, note.body] as const));
+  const pass = () => page.evaluate(() => window.testing.lists.syncNow());
+
+  await page.evaluate(() => window.testing.lists.signIn("anilist", { name: "ada", token: "tok", user: 7 }));
+  await page.waitForFunction((id) => window.testing.notes.get(id)?.note.body.includes("\nstatus: watching\nprogress: 10\n"), monster);
+  // Monster is locked once it's in step, and shut.
+  await page.evaluate(async (id) => {
+    const { noteKeys, notes } = window.testing;
+    noteKeys.save({ key: (await noteKeys.create("a password")).key, touchId: false });
+    notes.lock(id);
+    await notes.closeLocked();
+  }, monster);
+  const before = await bodies();
+
+  // On AniList: Cowboy Bebop taken off the list, Monster watched, and Naruto, whose note is in the Trash, put on it.
+  list.splice(0, 1);
+  Object.assign(list[0], { status: "COMPLETED", updatedAt: later });
+  list.push(entryOf(20, 20, "Naruto", "CURRENT", 0, 1, later));
+  await pass();
+  await pass();
+  // Nothing made, nothing changed: Cowboy Bebop's note stays a note, Monster's stays shut, and Naruto's stays in the Trash.
+  expect(await bodies()).toEqual(before);
+  // Nor is Cowboy Bebop put back on the list…
+  expect(saved).toEqual([]);
+  // …until it's changed here.
+  await page.evaluate((id) => window.testing.notes.setText(id, (body) => body.replace("progress: 3", "progress: 4")), bebop);
+  await pass();
+  expect(saved).toEqual([{ id: 1, status: "CURRENT", score: 0, progress: 4 }]);
+
+  // Before lines' own sync has been through once, something put on the list isn't made a note: another device may have made it.
+  await page.evaluate(() => {
+    const { sync } = window.testing;
+    sync.syncNow = async () => {};
+    sync.config = { kind: "folder", path: "/nowhere", name: "nowhere" } as typeof sync.config;
+    sync.lastSynced = null;
+  });
+  list.push(entryOf(40, 40, "Mushishi", "PLANNING", 0, 0, later));
+  await pass();
+  const mushishi = () => page.evaluate(() => window.testing.notes.entries.filter(({ meta }) => meta.title === "Mushishi").length);
+  expect(await mushishi()).toBe(0);
+  await page.evaluate(() => (window.testing.sync.lastSynced = Date.now()));
+  await pass();
+  expect(await mushishi()).toBe(1);
+  expect(await page.evaluate((id) => window.testing.notes.get(id)?.note.trashed, naruto)).toBe(true);
 });

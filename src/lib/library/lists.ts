@@ -92,7 +92,8 @@ const FIELDS = [
  * Which way each of an entry's status, rating and progress goes, now that the note says `note` and
  * the site has `site`, against what they were when `last` exchanged. A side that changed alone
  * carries; where both did, the later (`times`, ms); where they read alike, nothing. Never exchanged
- * yet, the site's carries where it has one. `scale` is the note's kind's, `site` the site's.
+ * yet, the site's status carries where it has one, and the note's rating and progress where it has
+ * them. `scale` is the note's kind's, `site` the site's.
  */
 export function settle(
   now: { note: Said; site: Held },
@@ -112,9 +113,10 @@ export function settle(
     const siteChanged = !last || last.site[held] !== value;
     // Neither changed, but they don't read alike (the kind's scale changed since): left as they are.
     if (!noteChanged && !siteChanged) continue;
-    // The first time, what the site has comes first, and the note fills in only what it hasn't: a note
-    // made from a link, which starts `to watch`, mustn't undo a list kept for years.
-    const fromNote = last ? noteChanged && (!siteChanged || times.note > times.site) : !value;
+    // The first time, the site's status comes first: a note made from a link starts `to watch`, and
+    // mustn't undo a list kept for years. But no note starts with a rating or progress: one it has
+    // is the person's own.
+    const fromNote = last ? noteChanged && (!siteChanged || times.note > times.site) : held === "status" ? !value : written !== undefined;
     // A rating written that doesn't fit the kind's scale (`great` in stars) says nothing to the site: it keeps its score.
     if (fromNote && held === "score" && written !== undefined && !toSite(written, scales.scale, scales.site)) continue;
     if (!fromNote) {

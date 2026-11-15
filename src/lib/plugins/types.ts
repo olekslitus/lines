@@ -142,11 +142,13 @@ export interface ListSite {
    * say it), pasted into Settings; or in the browser, which comes back to lines by itself.
    */
   signIn: { page: string } | { browser: true };
-  /** Signs in, with the token pasted (or in the browser, for null): who's signed in, and how they score. Rejects with a ListError. */
+  /** How lines reads and writes its scores (lib/library/lists.ts): AniList's out of 100, whatever format someone shows theirs in there. */
+  scale: { max: number; step: number };
+  /** Signs in, with the token pasted (or in the browser, for null): who's signed in. Rejects with a ListError. */
   connect(token: string | null, signal: AbortSignal): Promise<ListAccount>;
   /** Everything on the list. Rejects with a ListError; may refresh the account's token as it asks. */
   entries(account: ListAccount, signal: AbortSignal): Promise<ListEntry[]>;
-  /** Puts something on the list as `change` says (its status in lines' words, which it may have none for), saying what it has of it after. */
+  /** Puts something on the list, or changes it there, as `change` says (its status in lines' words, which it may have none for), saying what it has of it after. */
   save(account: ListAccount, change: ListChange, signal: AbortSignal): Promise<Pick<ListEntry, "status" | "score" | "progress">>;
 }
 
@@ -157,8 +159,6 @@ export interface ListAccount {
   /** A token to get another with, and when this one runs out (ms), where the site has them. */
   refresh?: string;
   expires?: number;
-  /** How they score there (lib/library/lists.ts). */
-  scale: { max: number; step: number };
   /** Their id there, where the site asks for the list by it. */
   user?: number;
 }
@@ -175,11 +175,12 @@ export interface ListEntry {
   item: LibraryItem;
 }
 
+/** What to change of something on a list, by its id there: what's left out stays as it is (AniList's watching again, MyAnimeList's rewatching). */
 export interface ListChange {
   id: number;
-  status: string | null;
-  score: number;
-  progress: number;
+  status?: string | null;
+  score?: number;
+  progress?: number;
 }
 
 /** A file chosen to import, read. */

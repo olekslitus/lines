@@ -5,6 +5,7 @@ import { type Entry, isClosed, notes } from "../notes/store.svelte";
 import { plugins } from "../plugins/registry.svelte";
 import type { ListAccount, ListEntry, ListSite } from "../plugins/types";
 import { prefs } from "../prefs.svelte";
+import { sync } from "../sync/engine.svelte";
 import { type Exchanged, fromSite, type Held, ListError, type Said, settle, toSite } from "./lists";
 import { OVERALL, ratings } from "./ratings.svelte";
 import { libraryNoteOf } from "./same";
@@ -34,10 +35,18 @@ export interface Problem {
   until?: number;
 }
 
-/** A signed-in site as kept: its account, what was last exchanged for each entry (by its id there), and since when what's put on the list becomes a note. */
+/** What was last exchanged for an entry, and with which note (`id`): one locked shut or in the Trash is still its note. */
+type Last = Exchanged & { id?: string };
+
+/**
+ * A signed-in site as kept: its account, what was last exchanged for each entry (by its id there),
+ * the entries taken off the list there (what their notes said then, which they're not put back on it
+ * for), and since when what's put on the list becomes a note.
+ */
 interface Kept {
   account: ListAccount;
-  records: Record<string, Exchanged>;
+  records: Record<string, Last>;
+  removed?: Record<string, Said>;
   since: number;
   synced?: number;
   problem?: Problem;
@@ -59,15 +68,37 @@ function saidOf({ meta }: Entry): Said {
 
 const heldOf = ({ status, score, progress }: Held): Held => ({ status, score, progress });
 
-/** The notes of a site's kind there are to keep in step (not trashed, nor locked shut), by their id there. */
+/** What of `wanted` differs from what the site has: all that's sent, so what isn't changed stays as it is there. */
+const changeOf = (has: Held, wanted: Held): Partial<Held> => Object.fromEntries(Object.entries(wanted).filter(([key, value]) => has[key as keyof Held] !== value));
+
+/** Whether a note still says what it said when its entry was taken off the list. */
+const alike = (a: Said, b: Said) => a.status === b.status && a.rating === b.rating && a.progress === b.progress;
+
+/** An entry's ids, as its kind's notes keep them: `anilist:154587`, and another site's it knows. */
+const idsOf = (site: ListSite, entry: ListEntry) => [`${site.key}:${entry.id}`, ...Object.entries(entry.ids ?? {}).map(([key, id]) => `${key}:${id}`)];
+
+/**
+ * The notes of a site's kind there are to keep in step (not trashed, nor locked shut), by their id
+ * there; and the ids the kind's notes in the Trash have (`mal:52991`), which an entry isn't made a note
+ * of again, nor kept in step with.
+ */
 function notesOf(site: ListSite) {
   const byId = new Map<number, Entry>();
+  const trashed = new Set<string>();
+  const keys = plugins.libraryKind(site.kind)?.ids ?? [site.key];
   for (const entry of notes.entries) {
-    if (entry.meta.type !== site.kind || entry.note.trashed || isClosed(entry.note)) continue;
+    if (entry.meta.type !== site.kind || isClosed(entry.note)) continue;
+    if (entry.note.trashed) {
+      for (const key of keys) {
+        const value = propertyOf(entry.meta.properties, key)?.value.trim();
+        if (value) trashed.add(`${key}:${value}`);
+      }
+      continue;
+    }
     const id = Number(propertyOf(entry.meta.properties, site.key)?.value);
     if (id > 0 && !byId.has(id)) byId.set(id, entry);
   }
-  return byId;
+  return { byId, trashed };
 }
 
 /** The note (same.ts) of an entry, that hasn't its id there yet: by another site's id it knows (AniList knows MyAnimeList's), or by its link. */
@@ -79,8 +110,8 @@ function findNote(site: ListSite, entry: ListEntry): Entry | undefined {
 }
 
 /** The note an entry becomes: what it is, its id, and its status, rating and progress, as the list has them. */
-function newNoteOf(site: ListSite, account: ListAccount, entry: ListEntry): NewLibraryNote {
-  const rating = fromSite(entry.score, ratings.scaleOf(site.kind), account.scale);
+function newNoteOf(site: ListSite, entry: ListEntry): NewLibraryNote {
+  const rating = fromSite(entry.score, ratings.scaleOf(site.kind), site.scale);
   const known = new Set(entry.item.properties.map(([key]) => key));
   const properties: [string, string][] = [
     ...entry.item.properties,
@@ -96,7 +127,9 @@ class Lists {
   state = $state<Record<string, ListState>>({});
   #kept: Record<string, Kept> = {};
   #running = new Map<string, Promise<void>>();
-  #again = new Set<string>();
+  /** The pass to run after the one running, by site, and the sites someone asked of meanwhile (Sync Now). */
+  #next = new Map<string, Promise<void>>();
+  #asked = new Set<string>();
   /** Each kept note's status, rating and progress as last seen, and when they last changed here: what's settled, and which side's later. */
   #seen = new Map<string, string>();
   #touched = new Map<string, number>();
@@ -166,8 +199,12 @@ class Lists {
     return Promise.all(Object.keys(this.#kept).map((id) => this.sync(id, asked)));
   }
 
-  /** In the main window, once notes are loaded: each list in step now, as often as feeds are fetched, and soon after a change here. */
-  async start() {
+  /**
+   * In the main window, once notes are loaded: each list in step once sync's first pass is done
+   * (`synced`, which brings in what other devices made of the lists), as often as feeds are fetched,
+   * and soon after a change here.
+   */
+  async start(synced: Promise<void>) {
     await this.load();
     this.#notice();
     notes.onLocalChange(() => this.#notice());
@@ -179,6 +216,7 @@ class Lists {
         return () => clearInterval(timer);
       });
     });
+    await synced;
     await this.#syncAll(false);
   }
 
@@ -189,7 +227,7 @@ class Lists {
     for (const id of Object.keys(this.#kept)) {
       const site = this.site(id);
       if (!site) continue;
-      for (const entry of notesOf(site).values()) {
+      for (const entry of notesOf(site).byId.values()) {
         const said = JSON.stringify(saidOf(entry));
         const was = this.#seen.get(entry.note.id);
         this.#seen.set(entry.note.id, said);
@@ -203,17 +241,27 @@ class Lists {
     this.#soon = setTimeout(() => void this.#syncAll(false), SOON);
   }
 
-  /** Keeps one list in step; one pass at a time, another after it if asked meanwhile. `asked`: now, even if the site said to wait. */
+  /**
+   * Keeps one list in step, one pass at a time: asked while one's running, the next, which starts
+   * after it, and is shared by whatever asks meanwhile. `asked`: now, even if the site said to wait.
+   */
   sync(id: string, asked = false): Promise<void> {
     const running = this.#running.get(id);
     if (running) {
-      this.#again.add(id);
-      return running;
+      if (asked) this.#asked.add(id);
+      let next = this.#next.get(id);
+      if (!next) {
+        next = running.then(() => {
+          this.#next.delete(id);
+          return this.sync(id, this.#asked.delete(id));
+        });
+        this.#next.set(id, next);
+      }
+      return next;
     }
     const pass = this.#pass(id, asked).finally(() => {
       this.#running.delete(id);
       this.#show();
-      if (this.#again.delete(id)) void this.sync(id);
     });
     this.#running.set(id, pass);
     this.#show();
@@ -226,36 +274,38 @@ class Lists {
     if (!site || !kept || site.unavailable || kept.problem?.reason === "token") return;
     if (!asked && kept.problem?.until && kept.problem.until > Date.now()) return;
     const signal = new AbortController().signal;
-    const scales = { scale: ratings.scaleOf(site.kind), site: kept.account.scale };
+    const scales = { scale: ratings.scaleOf(site.kind), site: site.scale };
     try {
       const entries = await site.entries(kept.account, signal);
-      const byId = notesOf(site);
+      const { byId, trashed } = notesOf(site);
       const onList = new Set<number>();
       const made: ListEntry[] = [];
+      // Not before lines' own sync has brought in this session what other devices made, nor while the
+      // list's import is making notes of it: either way a note would be made twice.
+      const making = (!sync.config || sync.lastSynced !== null) && !(imports.state?.id === id && imports.state.kind === "importing");
       for (const entry of entries) {
         onList.add(entry.id);
-        let note = byId.get(entry.id);
-        if (!note) {
-          note = findNote(site, entry);
-          if (note) this.#write(note, { [site.key]: String(entry.id) });
-        }
-        if (!note) {
-          // Not while the list's import is making notes of it, which would be made twice.
-          if (entry.updated > kept.since && !(imports.state?.id === id && imports.state.kind === "importing")) made.push(entry);
-          continue;
-        }
-        await this.#settle(site, kept, note, entry, scales, signal);
+        if (kept.removed) delete kept.removed[entry.id];
+        const note = this.#noteOf(site, kept, entry, byId, trashed);
+        if (note === "kept") continue;
+        if (note) await this.#settle(site, kept, note, entry, scales, signal);
+        else if (making && entry.updated > kept.since) made.push(entry);
       }
-      // What the Library has of its kind that isn't on the list: put on it, unless it was and was taken off there, which the note outlives.
+      // What the Library has of its kind that isn't on the list: put on it, unless it was and was taken
+      // off there, which the note outlives, until its status, rating or progress changes here.
       for (const [entryId, note] of byId) {
         if (onList.has(entryId)) continue;
+        const said = saidOf(note);
         if (kept.records[entryId]) {
           delete kept.records[entryId];
+          (kept.removed ??= {})[entryId] = said;
           continue;
         }
-        const said = saidOf(note);
+        const removed = kept.removed?.[entryId];
+        if (removed && alike(removed, said)) continue;
+        if (kept.removed) delete kept.removed[entryId];
         const saved = await site.save(kept.account, { id: entryId, status: said.status ?? null, score: toSite(said.rating, scales.scale, scales.site), progress: Number(said.progress) || 0 }, signal);
-        kept.records[entryId] = { note: said, site: heldOf(saved) };
+        kept.records[entryId] = { note: said, site: heldOf(saved), id: note.note.id };
       }
       for (const entry of made) await this.#make(site, kept, entry, signal);
       kept.synced = Date.now();
@@ -274,19 +324,37 @@ class Lists {
     }
   }
 
+  /**
+   * The note of an entry: by its id there; or the note it was last exchanged with, which is left as it
+   * is (`kept`) while it's locked shut or in the Trash, as one in the Trash with its ids is; or one of
+   * the same thing (same.ts), which takes its id there. None, if the Library hasn't one in any state.
+   */
+  #noteOf(site: ListSite, kept: Kept, entry: ListEntry, byId: Map<number, Entry>, trashed: Set<string>): Entry | "kept" | undefined {
+    const found = byId.get(entry.id);
+    if (found) return found;
+    const recorded = kept.records[entry.id]?.id;
+    const was = recorded ? notes.get(recorded) : undefined;
+    if (was && (was.note.trashed || isClosed(was.note))) return "kept";
+    if (idsOf(site, entry).some((each) => trashed.has(each))) return "kept";
+    const same = was?.meta.type === site.kind ? was : findNote(site, entry);
+    if (same) this.#write(same, { [site.key]: String(entry.id) });
+    return same;
+  }
+
   /** Makes an entry and its note alike, whichever way each of its status, rating and progress goes, and keeps what they are now. */
   async #settle(site: ListSite, kept: Kept, note: Entry, entry: ListEntry, scales: Parameters<typeof settle>[3], signal: AbortSignal) {
     const said = saidOf(note);
     const times = { note: Math.max(note.note.updatedAt, this.#touched.get(note.note.id) ?? 0), site: entry.updated };
     const settled = settle({ note: said, site: heldOf(entry) }, kept.records[entry.id], times, scales);
-    const held = settled.site ? heldOf(await site.save(kept.account, { id: entry.id, ...settled.site }, signal)) : heldOf(entry);
+    const change = settled.site && changeOf(heldOf(entry), settled.site);
+    const held = change ? heldOf(await site.save(kept.account, { id: entry.id, ...change }, signal)) : heldOf(entry);
     const changes = Object.entries(settled.note);
     if (changes.length) {
       this.#write(note, Object.fromEntries(changes.map(([key, value]) => [key === "rating" ? OVERALL : key, value])));
     }
     const now: Said = { ...said };
     for (const [key, value] of changes) now[key as keyof Said] = value ?? undefined;
-    kept.records[entry.id] = { note: now, site: held };
+    kept.records[entry.id] = { note: now, site: held, id: note.note.id };
     this.#seen.set(note.note.id, JSON.stringify(now));
   }
 
@@ -297,11 +365,11 @@ class Lists {
 
   /** A note of something put on the list since you signed in. */
   async #make(site: ListSite, kept: Kept, entry: ListEntry, signal: AbortSignal) {
-    const { note, keep } = await newLibraryNote(newNoteOf(site, kept.account, entry), entry.updated || Date.now(), signal);
+    const { note, keep } = await newLibraryNote(newNoteOf(site, entry), entry.updated || Date.now(), signal);
     await notes.insert(note);
     await keep();
     const made = notes.get(note.id);
-    if (made) kept.records[entry.id] = { note: saidOf(made), site: heldOf(entry) };
+    if (made) kept.records[entry.id] = { note: saidOf(made), site: heldOf(entry), id: note.id };
   }
 
   /**
@@ -313,17 +381,23 @@ class Lists {
     const site = this.site(id);
     const kept = this.#kept[id];
     if (!site || !kept) return { add: [], append: [] };
-    const byId = notesOf(site);
-    const add = entries.filter((entry) => !byId.has(entry.id) && !findNote(site, entry)).map((entry) => newNoteOf(site, kept.account, entry));
+    const add = entries.filter((entry) => !this.#there(site, kept, entry, notesOf(site))).map((entry) => newNoteOf(site, entry));
     return { add, append: [] };
   }
 
   /** How many of `entries` the Library has a note of already (Settings says, before importing). */
   there(id: string, entries: ListEntry[]): number {
     const site = this.site(id);
-    if (!site) return 0;
-    const byId = notesOf(site);
-    return entries.filter((entry) => byId.has(entry.id) || findNote(site, entry)).length;
+    const kept = this.#kept[id];
+    if (!site || !kept) return 0;
+    const found = notesOf(site);
+    return entries.filter((entry) => this.#there(site, kept, entry, found)).length;
+  }
+
+  /** Whether the Library has a note of an entry, in any state: in the Trash or locked shut too. */
+  #there(site: ListSite, kept: Kept, entry: ListEntry, { byId, trashed }: ReturnType<typeof notesOf>) {
+    const recorded = kept.records[entry.id]?.id;
+    return byId.has(entry.id) || (!!recorded && !!notes.get(recorded)) || idsOf(site, entry).some((each) => trashed.has(each)) || !!findNote(site, entry);
   }
 }
 

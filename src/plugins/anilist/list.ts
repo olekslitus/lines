@@ -1,5 +1,5 @@
 import { t } from "../../lib/i18n/index.svelte";
-import type { ListAccount, ListEntry, ListSite } from "../../lib/plugins/types";
+import type { ListEntry, ListSite } from "../../lib/plugins/types";
 import { animeOf } from "./anime";
 import { ask, MEDIA, type Media } from "./api";
 
@@ -22,16 +22,6 @@ const STATUSES = [
 ] as const;
 const statusOf = (status: string | null | undefined) => (status === "REPEATING" ? "watching" : (STATUSES.find(([, there]) => there === status)?.[0] ?? null));
 
-/** How someone scores on AniList, as they chose there: out of 100, 10 (by tenths, or whole), 5, or 3 (smileys). */
-const FORMATS: Record<string, ListAccount["scale"]> = {
-  POINT_100: { max: 100, step: 1 },
-  POINT_10_DECIMAL: { max: 10, step: 0.1 },
-  POINT_10: { max: 10, step: 1 },
-  POINT_5: { max: 5, step: 1 },
-  POINT_3: { max: 3, step: 1 },
-};
-const formatOf = (scale: ListAccount["scale"]) => Object.entries(FORMATS).find(([, each]) => each.max === scale.max && each.step === scale.step)?.[0] ?? "POINT_100";
-
 interface ListItem {
   mediaId: number;
   status?: string | null;
@@ -41,7 +31,8 @@ interface ListItem {
   media?: Media | null;
 }
 
-const ENTRY = `mediaId status score(format: $format) progress updatedAt media { ${MEDIA} description(asHtml: false) }`;
+/** Scores are read and written out of 100 (AniList keeps them so), whichever format someone shows theirs in, which they can change there whenever. */
+const ENTRY = `mediaId status score(format: POINT_100) progress updatedAt media { ${MEDIA} description(asHtml: false) }`;
 
 function entryOf(item: ListItem): ListEntry | null {
   const anime = item.media && animeOf(item.media);
@@ -64,22 +55,18 @@ export const list: ListSite = {
   key: "anilist",
   unavailable: CLIENT ? undefined : t("library.list.notInBuild", { name: "AniList" }),
   signIn: { page: `https://anilist.co/api/v2/oauth/authorize?client_id=${encodeURIComponent(CLIENT ?? "")}&response_type=token` },
+  scale: { max: 100, step: 1 },
 
   async connect(token, signal) {
     const given = token?.trim() ?? "";
-    const { Viewer } = await ask<{ Viewer: { id: number; name: string; mediaListOptions?: { scoreFormat?: string } } }>(
-      "query { Viewer { id name mediaListOptions { scoreFormat } } }",
-      {},
-      signal,
-      given,
-    );
-    return { name: Viewer.name, token: given, user: Viewer.id, scale: FORMATS[Viewer.mediaListOptions?.scoreFormat ?? ""] ?? FORMATS.POINT_100 };
+    const { Viewer } = await ask<{ Viewer: { id: number; name: string } }>("query { Viewer { id name } }", {}, signal, given);
+    return { name: Viewer.name, token: given, user: Viewer.id };
   },
 
   async entries(account, signal) {
     const { MediaListCollection } = await ask<{ MediaListCollection: { lists: { entries: ListItem[] }[] } }>(
-      `query ($user: Int, $format: ScoreFormat) { MediaListCollection(userId: $user, type: ANIME) { lists { entries { ${ENTRY} } } } }`,
-      { user: account.user, format: formatOf(account.scale) },
+      `query ($user: Int) { MediaListCollection(userId: $user, type: ANIME) { lists { entries { ${ENTRY} } } } }`,
+      { user: account.user },
       signal,
       account.token,
     );
@@ -96,10 +83,11 @@ export const list: ListSite = {
 
   async save(account, change, signal) {
     const status = STATUSES.find(([here]) => here === change.status)?.[1];
+    // What isn't sent isn't changed: a rating given while watching again (REPEATING) leaves it that.
     const { SaveMediaListEntry } = await ask<{ SaveMediaListEntry: ListItem }>(
-      `mutation ($id: Int, $status: MediaListStatus, $score: Float, $progress: Int, $format: ScoreFormat) {
-        SaveMediaListEntry(mediaId: $id, status: $status, score: $score, progress: $progress) { ${ENTRY} } }`,
-      { id: change.id, ...(status && { status }), score: change.score, progress: change.progress, format: formatOf(account.scale) },
+      `mutation ($id: Int, $status: MediaListStatus, $score: Int, $progress: Int) {
+        SaveMediaListEntry(mediaId: $id, status: $status, scoreRaw: $score, progress: $progress) { ${ENTRY} } }`,
+      { id: change.id, ...(status && { status }), ...(change.score !== undefined && { score: Math.round(change.score) }), ...(change.progress !== undefined && { progress: change.progress }) },
       signal,
       account.token,
     );

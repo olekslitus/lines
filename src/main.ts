@@ -187,11 +187,11 @@ async function start() {
     console.error("lines: couldn't clean up attachments", error),
   );
   await sync.load();
-  sync.start();
+  const synced = sync.start();
   // Only the main window fetches feeds, as it syncs (what was done with their posts too), and plays episodes; and keeps lists on other sites in step.
   sync.shareFolder(feeds.marksFolder);
   void feeds.start().catch((error) => console.error("lines: couldn't read the feeds kept", error));
-  void lists.start().catch((error) => console.error("lines: couldn't keep lists in step", error));
+  void lists.start(synced).catch((error) => console.error("lines: couldn't keep lists in step", error));
   void player.load();
   // Settings, in its own window, asks this one to sync, lock and add notes.
   if (isTauri) {

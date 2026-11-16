@@ -59,6 +59,8 @@ export type WindowMessage =
   | { type: "sync-ask" }
   /** How an import is doing in the main window (imports/imports.svelte.ts). */
   | { type: "import-state"; state: import("../imports/imports.svelte").ImportState | null }
+  /** How keeping lists on other sites in step is going in the main window (library/lists.svelte.ts). */
+  | { type: "lists-state"; state: Record<string, import("../library/lists.svelte").ListState> }
   /** A spreadsheet's grid started or stopped writing a formula where a reference can go (plugins/spreadsheet/pointing.svelte.ts). */
   | { type: "sheet-writer"; writing: boolean; note: string }
   /** Cells pointed at in another window for it, in the sheet called `sheet`. */

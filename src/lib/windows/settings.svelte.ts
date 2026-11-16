@@ -3,6 +3,7 @@ import { t } from "../i18n/index.svelte";
 import type { LockSettings } from "../lock/lock.svelte";
 import type { NotesPassword } from "../notes/noteKeys.svelte";
 import { imports } from "../imports/imports.svelte";
+import { lists } from "../library/lists.svelte";
 import { isDesktopApp } from "../platform";
 import { prefs, type SettingsOpens } from "../prefs.svelte";
 import { sectionOf, type SettingsSection } from "../components/settings/sections";
@@ -98,6 +99,7 @@ const FORWARDED: Record<string, string[]> = {
   feeds: ["importOpml"],
   imports: ["receive", "start", "stop", "undo", "clear"],
   ratings: ["rename"],
+  lists: ["signIn", "signOut", "syncNow", "entries"],
 };
 
 /**
@@ -149,6 +151,8 @@ export async function forwardToMain(targets: Record<string, Target>, sync: SyncS
       else call.reject(new Error(message.error));
     } else if (message.type === "import-state") {
       imports.state = message.state;
+    } else if (message.type === "lists-state") {
+      lists.state = message.state;
     } else if (message.type === "sync-state") {
       Object.assign(sync, message.state);
       heard();
@@ -164,14 +168,17 @@ export async function forwardToMain(targets: Record<string, Target>, sync: SyncS
 export function serveSettings(targets: Record<string, Target>, syncState: () => SyncState, lockState: () => LockState) {
   const tell = () => void announce({ type: "sync-state", state: syncState() });
   const tellImport = () => void announce({ type: "import-state", state: $state.snapshot(imports.state) });
+  const tellLists = () => void announce({ type: "lists-state", state: $state.snapshot(lists.state) });
   $effect.root(() => {
     $effect(tell);
     $effect(tellImport);
+    $effect(tellLists);
   });
   void onAnnounce(async (message) => {
     if (message.type === "sync-ask") {
       tell();
       tellImport();
+      tellLists();
     }
     if (message.type === "open-settings") ui.settings = sectionOf(message.section);
     if (message.type !== "call" || !FORWARDED[message.target]?.includes(message.method)) return;

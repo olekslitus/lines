@@ -36,6 +36,7 @@ With the app lock on, the notes and attachments in `lines` and everything in `li
 | `lines.mutedWords` | The words and phrases hidden in every feed (Settings → Library → Feed filters), and when they were set; they sync as `feeds/muted.json`. Not encrypted by the app lock |
 | `lines.sync` | Where notes sync to: the folder (its name and an id for its handle) or the bucket and its keys. Encrypted while the app lock is on |
 | `lines.sync.shared` | The tag and a hash of each file of feeds' marks as last exchanged with the sync folder or bucket, so only those changed are read or written (by the one tab that syncs them) |
+| `lines.lists` | Accounts on AniList and MyAnimeList (who, and their tokens), and for each anime on the list what was last exchanged with the site, both sides, and with which note; and what was taken off the list there, which isn't put back. This device's own: never synced. Encrypted while the app lock is on |
 | `lines.sync.leftovers` | Set only while encrypted copies are being removed after turning end-to-end encryption off |
 | `lines.seeded` | That the welcome note or feature tour has been added once, so deleting them doesn't bring them back |
 | `lines.unsaved.<id>` | A note typed in just before the page went (a tab closed or reloaded, lines quit), until it's in `lines`: stored at the next start unless what's there is newer. Never a locked note, nor anything while the app lock is on |

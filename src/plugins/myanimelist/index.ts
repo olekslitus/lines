@@ -2,7 +2,8 @@ import { t } from "../../lib/i18n/index.svelte";
 import { known, names, seasonOf, yearOf } from "../../lib/library/text";
 import { getJson } from "../../lib/library/web";
 import { pacing } from "../../lib/pacing";
-import type { LibraryItem, LibrarySource, Plugin } from "../../lib/plugins/types";
+import type { LibraryItem, LibrarySource, ListEntry, Plugin } from "../../lib/plugins/types";
+import { list } from "./list";
 
 /*
  * MyAnimeList (myanimelist.net): an anime by a link to it there, asked of Jikan (jikan.moe), the
@@ -87,5 +88,19 @@ export const myanimelist = (): Plugin => ({
   icon: "tv-minimal-play",
   enabledByDefault: true,
   requires: ["library"],
-  contributes: { librarySources: [source] },
+  contributes: {
+    librarySources: [source],
+    lists: [list],
+    imports: [
+      {
+        id: list.id,
+        into: "library",
+        name: "MyAnimeList",
+        note: t("library.list.myanimelist.note"),
+        panel: () => import("./MyAnimeListAccount.svelte"),
+        // The Library's lists, loaded once it's asked: they need the app around them.
+        work: async (input) => (await import("../../lib/library/lists.svelte")).lists.work(list.id, (input as { entries: ListEntry[] }).entries),
+      },
+    ],
+  },
 });

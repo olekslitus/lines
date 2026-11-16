@@ -334,7 +334,8 @@ class SyncEngine {
     folder.onChange(() => this.#scheduleLater());
   }
 
-  start() {
+  /** Syncs from now on, whenever there's something to; resolves once the first pass is done, however it went. */
+  start(): Promise<void> {
     notes.onLocalChange(() => this.schedule());
     looks.onChange(() => this.schedule());
     ratings.onChange(() => this.schedule());
@@ -344,7 +345,7 @@ class SyncEngine {
       if (!this.lastSynced || Date.now() - this.lastSynced > 15_000) void this.syncNow();
     });
     setInterval(() => void this.syncNow(), INTERVAL);
-    void this.syncNow();
+    return this.syncNow();
   }
 
   /**

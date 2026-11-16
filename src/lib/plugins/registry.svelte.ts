@@ -104,6 +104,7 @@ class Plugins {
   readonly linkActions = $derived(this.#from("linkActions"));
   readonly imports = $derived(this.#from("imports"));
   readonly discussions = $derived(this.#from("discussions"));
+  readonly lists = $derived(this.#from("lists"));
   readonly playerParts = $derived(this.#from("playerParts"));
 
   constructor() {

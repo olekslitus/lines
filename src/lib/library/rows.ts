@@ -23,6 +23,12 @@ export interface ShelfRow {
 
 const rows = new WeakMap<Note, ShelfRow | null>();
 
+/** How far through something counted is (`progress: 12` of `episodes: 28`), where both are counts. */
+function countedOf(progress: string | undefined, of: string | false | undefined) {
+  const [done, all] = [Number(progress), Number(of)];
+  return Number.isInteger(done) && all > 0 ? Math.min(1, done / all) : null;
+}
+
 /**
  * What something of a kind is by and from, as its row says it: its kind's `subtitle` properties,
  * joined (`Frank Herbert · 1965`); one its kind writes as a mention (an episode's podcast,
@@ -49,7 +55,7 @@ export function shelfRow({ note, meta }: { note: Note; meta: NoteMeta }): ShelfR
           cover: coverOf(note.body),
           subtitle: subtitleOf(kind, value),
           status: written ? (kind.statuses?.find((status) => status.value === written.toLowerCase()) ?? { value: written, label: written }) : undefined,
-          progress: unfinished(progressOf(value("progress"))),
+          progress: unfinished(progressOf(value("progress")) ?? countedOf(value("progress"), kind.counts && value(kind.counts))),
         }
       : null;
     rows.set(note, row);

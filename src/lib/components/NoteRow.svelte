@@ -723,10 +723,10 @@
             {@render details()}
             {#if shelf.progress !== null}
               {@const percent = Math.floor(shelf.progress * 100)}
-              <!-- How far through a book it is, as reading it wrote. -->
+              <!-- How far through a book it is, as reading it wrote, or how much of something counted (an anime's episodes). -->
               <span class="mt-1 block h-[3px] w-full max-w-36 overflow-hidden rounded-full bg-line">
                 <span class="block h-full rounded-full bg-accent" style:width="{percent}%"></span>
-                <span class="sr-only">{t("books.progress", { percent })}</span>
+                <span class="sr-only">{t(shelf.kind.counts ? "library.progress" : "books.progress", { percent })}</span>
               </span>
             {/if}
           </span>

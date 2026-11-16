@@ -9,6 +9,7 @@ import { iconPicture } from "../lib/pictures";
 import { isFeed, NotAFeed, readFeed } from "../lib/feeds/parse";
 import { htmlToText } from "../lib/feeds/text";
 import { readBookmarks } from "../lib/library/bookmarks";
+import { lists } from "../lib/library/lists.svelte";
 import { readTranscript, sentences } from "../plugins/feeds/transcripts";
 import { lock } from "../lib/lock/lock.svelte";
 import { attachmentNames, saveAttachment } from "../lib/notes/attachments";
@@ -24,6 +25,7 @@ import { sidebarLayout } from "../lib/sidebarLayout.svelte";
 import { customThemes } from "../lib/themes/custom.svelte";
 import { themeDrafts } from "../lib/themes/drafts.svelte";
 import { presets, writePresetFile } from "../lib/themes/presets.svelte";
+import { sync } from "../lib/sync/engine.svelte";
 import { readThread } from "../plugins/hacker-news/thread";
 
 /*
@@ -60,6 +62,9 @@ const testing = {
   lock,
   /** What the Library's kinds are rated on, and reading another device's `ratings.json`, as sync does. */
   ratings,
+  /** Lists on other sites kept in step (lib/library/lists.svelte.ts), and lines' own sync, whose first pass they wait for. */
+  lists,
+  sync,
   readRatings,
   panes,
   sidebarLayout,

@@ -1,6 +1,6 @@
 # Library
 
-Books, comics, movies, shows, videos, music, podcasts, articles and papers, kept in lines as notes. Each is an ordinary Markdown note with a `type` (`book`, `movie`…), so it's searched, mentioned, synced and exported like any other, and listed in the sidebar's **Library**, a row for each kind with something in it, its notes with their covers and where you've got to.
+Books, comics, movies, shows, anime, videos, music, podcasts, articles and papers, kept in lines as notes. Each is an ordinary Markdown note with a `type` (`book`, `movie`…), so it's searched, mentioned, synced and exported like any other, and listed in the sidebar's **Library**, a row for each kind with something in it, its notes with their covers and where you've got to.
 
 ## A note that's just a link
 
@@ -58,7 +58,7 @@ Added on purpose (a link pasted into Add to Library, or a link's menu → Add to
 
 ## Add to Library
 
-The + on the Library's heading in the sidebar opens Add to Library (with feeds on, it's in the +'s menu, beside Subscribe to a Feed): choose what to search for (Books, Comics, Movies, Shows, Music, Podcasts, Papers, as the sources on can search), and type a title, or a name with it. The catalogs answer as you type, each result with its cover, who made it and when; ↓ moves into them, and ↵ or a click adds the one chosen. Paste a link there instead to look it up as a note that's just a link is. Something the Library has a note of already, by its link, opens that note rather than making another. **Blank** starts one of the kind chosen to fill in by hand. What's added is filed on its shelf, not in the Inbox.
+The + on the Library's heading in the sidebar opens Add to Library (with feeds on, it's in the +'s menu, beside Subscribe to a Feed): choose what to search for (Books, Comics, Movies, Shows, Anime, Music, Podcasts, Papers, as the sources on can search), and type a title, or a name with it. The catalogs answer as you type, each result with its cover, who made it and when; ↓ moves into them, and ↵ or a click adds the one chosen. Paste a link there instead to look it up as a note that's just a link is. Something the Library has a note of already, by its link, opens that note rather than making another. **Blank** starts one of the kind chosen to fill in by hand. What's added is filed on its shelf, not in the Inbox.
 
 What's chosen is a new note on its shelf, opened at once with what the search said of it, then filled in from its page (its cover, and what it's about) as one change, which ⌘Z takes back.
 
@@ -67,6 +67,7 @@ What's chosen is a new note on its shelf, opened at once with what the search sa
 | Books | Open Library | Yes |
 | Comics | AniList: manga, manhwa and manhua (light novels left out, as they're books) | Yes |
 | Movies, Shows | Wikidata, with posters from Wikipedia | Yes |
+| Anime | AniList (none for adults only) | Yes |
 | Music (songs and albums) | MusicBrainz, covers from the Cover Art Archive | Yes |
 | Podcasts | Apple's iTunes Search | Yes |
 | Papers | arXiv | No |
@@ -116,6 +117,7 @@ link: https://doc.rust-lang.org/book/
 | `comic` | Comics | author, artist, format (`manga`, `manhwa`, `manhua`, `webtoon`, `comic` or `graphic novel`), year, chapters, anilist, myanimelist (their ids there, so it's one note however it's added) | to read, reading, read |
 | `movie` | Movies | director, year, runtime, genre | to watch, watching, watched |
 | `show` | Shows | creator, year, seasons, genre | to watch, watching, watched |
+| `anime` | Anime | format, studio, year, season, episodes, anilist, mal | to watch, watching, watched, on hold, dropped |
 | `video` | Videos | channel (a mention of the channel's note while it's in the Library, else a link to its page on YouTube, or its name), published, duration | to watch, watching, watched |
 | `song` | Music | artist, album, year, duration | to listen, listening, listened |
 | `album` | Music | artist, year, tracks | to listen, listening, listened |
@@ -169,7 +171,8 @@ Each source is a plugin, which can be turned off in Settings → Plugins, and ot
 | YouTube | youtube.com and youtu.be videos, Shorts; channels (`/@handle`, `/channel/UC…`, `/c/name`, `/user/name`, any of their tabs, and their feeds) | the video's link, to YouTube's oEmbed; in the apps, the video's page; a channel's page (its Videos tab) | Videos: yes, their title, channel and picture; when one came out, how long it is and what it's about only in the apps. Channels only in the apps: YouTube doesn't let web pages read its pages or feeds |
 | Open Library | openlibrary.org books, and an ISBN in a link (a bookshop's, or Amazon's, whose number for a book is its ISBN-10) | the book's id or ISBN | Yes |
 | Wikidata | IMDb, The Movie Database, Letterboxd, Wikipedia and Wikidata links to films, series, comics and books | the id in the link (or the page's title) to Wikidata, and the item's page title to Wikipedia, for its summary and poster | Yes |
-| AniList | anilist.co manga, MyAnimeList's (myanimelist.net/manga), and in the apps MangaDex's, through the AniList id MangaDex has for it | the id in the link, to AniList's GraphQL API (and a MangaDex id to MangaDex's API) | Yes; MangaDex's links only in the apps: MangaDex doesn't let web pages ask it |
+| AniList | anilist.co anime and manga, MyAnimeList's manga (myanimelist.net/manga), and in the apps MangaDex's, through the AniList id MangaDex has for it | the id in the link, or what's searched for, to AniList's GraphQL API (and a MangaDex id to MangaDex's API) | Yes; MangaDex's links only in the apps: MangaDex doesn't let web pages ask it |
+| MyAnimeList | myanimelist.net anime | the id in the link, to [Jikan](https://jikan.moe), an open API that reads MyAnimeList for apps without an account | Yes, as Jikan lets web pages ask it |
 | MusicBrainz | musicbrainz.org songs and albums, and Spotify, Apple Music, Bandcamp, Deezer and Tidal links it knows (most albums, fewer songs); covers from the Cover Art Archive | the id in the link, or the link | Yes |
 | SoundCloud | soundcloud.com tracks, and someone's sounds when they're a podcast (SoundCloud's feed of them has any) | the link, to SoundCloud's oEmbed; in the apps the track's page, for its length, and the person's feed | Tracks: title, artist, cover, what it's about. Someone's podcast only in the apps: SoundCloud doesn't let web pages read their feed. A set (an album or a playlist, which SoundCloud doesn't say) isn't looked up |
 | Apple Podcasts | podcasts.apple.com podcasts, and their latest 200 episodes | the podcast's and episode's ids, to Apple's iTunes Search API; the podcast's feed, for what it's about | Yes; what a podcast is about only where its feed lets web pages read it (few do) |
@@ -180,6 +183,8 @@ Each source is a plugin, which can be turned off in Settings → Plugins, and ot
 Web Pages reads what a page says about itself for search engines and for links shared elsewhere: its JSON-LD (schema.org's Book, Movie, TVSeries, VideoObject, MusicRecording, MusicAlbum, PodcastSeries, PodcastEpisode, Article, BlogPosting, NewsArticle, ScholarlyArticle…), its Open Graph tags (`og:type` of `video.movie`, `music.song`, `book`, `article`…), and an oEmbed it points to. That covers most sites: Letterboxd, Goodreads, Spotify, Bandcamp, Substack, blogs and news. The page is only read, never run or shown. IMDb doesn't answer apps, so its links are looked up through Wikidata.
 
 **A comic, not a book.** Most sites of manga, manhwa and webtoons describe a series as a `Book`, so Web Pages looks closer at a book, or at a page that says of nothing what it is. It's a comic if the page says so (schema.org's ComicSeries, ComicIssue or ComicStory; an Open Graph type of a webtoon or a webcomic, as WEBTOON's and Tapas' are), or if it's a series on a site of comics (WEBTOON, Tapas, MangaDex, MangaUpdates, MyAnimeList's and AniList's manga). Otherwise two of these must agree: what its own description calls it (its JSON-LD `genre`, `keywords` or `additionalType`: Manga, Manhwa, Webtoon, Comics, Graphic Novel…), what the page labels it (the label after its **Type**, or **Format**: "MANHWA"), and where it is (a `/comic/`, `/comics/`, `/manga/`, `/manhwa/`, `/manhua/` or `/webtoon/` in its address). So a scanlation site's `/series/comic/…` page labelled Manhwa is a manhwa, while a book about comics (only its genre says comics), a novel a site keeps under `/comic/` (only its address), or a shop's book with Manga in its menu (only a menu's label, not its Type) stay books. One labelled a novel (a light novel, a web novel; MyAnimeList's `Type:` too), or whose title files it among novels (Tapas' "Tapas Web Novels", which gives its novels its comics' Open Graph type), is never a comic. Its `format` is what the page says, most particular first: its Type, its description, its Open Graph type, its site's (WEBTOON's and Tapas' are webtoons), its address, else `comic`.
+
+An anime looked up on AniList has its ids on both sites, `anilist` and `mal` (AniList knows MyAnimeList's); one looked up on MyAnimeList has its `mal`. Either id finds its note, however it was added: a MyAnimeList link to an anime added from AniList opens that note. A comic keeps MyAnimeList's id as `myanimelist`, apart from an anime's `mal`: MyAnimeList numbers manga and anime each from 1, so its anime 1 isn't its manga 1. AniList numbers them together, so `anilist` is either's. Its title is its English one where it has one, else as it's written in Latin letters (`Sousou no Frieren`); its season, `Fall 2023`; its format as AniList and MyAnimeList say it (TV, Movie, OVA, ONA, Special…). AniList is asked every two seconds at most, for anime and comics alike (it asks for no more than 30 requests a minute while it's busy), and Jikan once a second (it asks for three a second and sixty a minute).
 
 Only what's needed is sent: the link, or an id read from it. Nothing from your notes. In the apps, lines says it's `lines/<version> (https://github.com/overtio/lines)` to the services it asks, as MusicBrainz and Wikimedia ask apps to; nothing about you. MusicBrainz is asked once a second at most, and arXiv every three seconds, as they ask.
 

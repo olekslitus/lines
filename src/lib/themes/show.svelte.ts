@@ -171,6 +171,8 @@ function showTheme() {
   // Tint the browser's and phone's status bar to match.
   const bg = root.style.getPropertyValue("--bg") || theme[own].bg;
   document.querySelector('meta[name="theme-color"]:not([media])')?.setAttribute("content", bg);
+  // The Android app draws under the system's bars; their icons are told which scheme shows (MainActivity.kt).
+  (window as { linesSystemBars?: { setDark(dark: boolean): void } }).linesSystemBars?.setDark(shown === "dark");
 }
 
 /** Headings in the theme's colors for them, the accent, or a color of your own (Settings → Typography; editor.css). */

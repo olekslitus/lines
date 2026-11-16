@@ -112,7 +112,8 @@ jobs:
         working-directory: src-tauri
         run: cargo test --locked
 
-  # The phone and tablet apps' native side, so it keeps compiling: Clippy for the iOS simulator.
+  # The phone and tablet apps' native side, so it keeps compiling: Clippy for the iOS simulator and
+  # Android.
   # Building the apps themselves (Xcode, Gradle) is left to a person: the README's Mobile section.
   mobile:
     name: rust (${{ matrix.target }})
@@ -122,6 +123,8 @@ jobs:
         include:
           - target: aarch64-apple-ios-sim
             os: macos-latest
+          - target: aarch64-linux-android
+            os: ubuntu-latest
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -139,6 +142,13 @@ jobs:
         with:
           workspaces: src-tauri
           key: ${{ matrix.target }}
+      - name: The NDK's compiler, for the C in Rust crates
+        if: matrix.target == 'aarch64-linux-android'
+        run: |
+          bin="$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          echo "CC_aarch64_linux_android=$bin/aarch64-linux-android24-clang" >> "$GITHUB_ENV"
+          echo "AR_aarch64_linux_android=$bin/llvm-ar" >> "$GITHUB_ENV"
+          echo "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$bin/aarch64-linux-android24-clang" >> "$GITHUB_ENV"
       - name: Clippy
         working-directory: src-tauri
         run: cargo clippy --target ${{ matrix.target }} --all-targets --locked -- -D warnings

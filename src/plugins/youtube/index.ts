@@ -4,7 +4,11 @@ import { t } from "../../lib/i18n/index.svelte";
 import { clock, dayOf, isoSeconds, known } from "../../lib/library/text";
 import { getJson, LookupError, pageInApps, request } from "../../lib/library/web";
 import type { Embed, LibraryItem, LibraryKind, LibrarySource, Plugin } from "../../lib/plugins/types";
+import { asked } from "./asked.svelte";
 import { type Channel, channelAsFeed, channelFeed, channelPage, channelPath, feedChannel, readChannelPage } from "./channel";
+import { type PlaylistInput, planPlaylist } from "./import";
+import { playlistIn } from "./playlist";
+import { isTakeoutPlaylist } from "./takeout";
 
 /*
  * YouTube: its videos, from YouTube's oEmbed (their title, channel and picture), which web pages may
@@ -182,6 +186,13 @@ const player: Embed = {
   },
 };
 
+/** A channel's page as the Library links to it, from the link oEmbed gives (by handle). */
+export const channelLink = (author: string | undefined) => {
+  const url = webLink(author ?? null);
+  const path = url && channelPath(url);
+  return path ? `https://www.youtube.com/${path}` : undefined;
+};
+
 export const youtube = (): Plugin => ({
   id: "youtube",
   name: "YouTube",
@@ -189,5 +200,39 @@ export const youtube = (): Plugin => ({
   icon: "square-play",
   enabledByDefault: true,
   requires: ["library"],
-  contributes: { libraryKinds: [CHANNEL], librarySources: [source], markdown: [{ embeds: [player] }] },
+  contributes: {
+    libraryKinds: [CHANNEL],
+    librarySources: [source],
+    markdown: [{ embeds: [player] }],
+    imports: [
+      {
+        id: "youtube",
+        into: "library",
+        name: "YouTube",
+        note: t("plugins.youtube.importNote"),
+        panel: () => import("./YouTubeImport.svelte"),
+        files: { extensions: ["csv"], recognizes: isTakeoutPlaylist },
+        // Against the notes as they are as it starts (the store, which this module doesn't load before then).
+        work: async (input) => {
+          const { libraryNoteOf } = await import("../../lib/library/same");
+          return planPlaylist(input as PlaylistInput, (link) => libraryNoteOf({ type: "video", link })).work;
+        },
+      },
+    ],
+    linkActions: [
+      {
+        label: t("plugins.youtube.importPlaylist"),
+        icon: "import",
+        offers: (link) => {
+          const url = webLink(link.href);
+          return !!url && playlistIn(url) !== null;
+        },
+        run: (_, link) => {
+          asked.playlist = link.href;
+          void import("../../lib/windows/settings.svelte").then(({ openSettings }) => openSettings("library"));
+        },
+      },
+    ],
+  },
 });
+

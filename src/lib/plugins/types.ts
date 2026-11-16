@@ -211,7 +211,7 @@ export interface Import {
   files?: { extensions: string[]; recognizes(text: string): boolean };
   /**
    * What importing `input` (what its panel gave `imports.start`, as it was sent between windows)
-   * writes, worked out against the notes as they are when it starts.
+   * writes, worked out against the notes as they are when it starts (`notes`).
    */
   work(input: unknown): ImportWork | Promise<ImportWork>;
 }
@@ -284,6 +284,8 @@ export interface LinkAction {
   icon: IconName;
   /** Whether it changes the note: if so, a note that can't be changed doesn't offer it. */
   edits?: boolean;
+  /** Whether it's offered for `link`; for every link if it doesn't say. */
+  offers?(link: WebLink): boolean;
   run(view: EditorView, link: WebLink): void;
 }
 

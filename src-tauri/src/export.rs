@@ -1,16 +1,14 @@
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use tauri::{ipc::InvokeBody, AppHandle, Manager};
+use tauri::{AppHandle, Manager};
 
 /// Saves an export (the raw request body) to the Downloads folder, or the app's Documents folder
 /// on iOS, without overwriting anything. Returns the path.
 /// The file name comes, percent-encoded, in the `x-file-name` header.
 #[tauri::command]
 pub async fn save_export(app: AppHandle, request: tauri::ipc::Request<'_>) -> Result<String, String> {
-  let InvokeBody::Raw(bytes) = request.body() else {
-    return Err("Expected the file's contents".into());
-  };
+  let bytes = crate::body::bytes(request.body()).ok_or("Expected the file's contents")?;
   let requested = request
     .headers()
     .get("x-file-name")
@@ -27,7 +25,6 @@ pub async fn save_export(app: AppHandle, request: tauri::ipc::Request<'_>) -> Re
   #[cfg(not(target_os = "ios"))]
   let dir = paths.download_dir().or_else(|_| paths.document_dir());
   let dir = dir.map_err(|e| e.to_string())?;
-  let bytes = bytes.clone();
   tauri::async_runtime::spawn_blocking(move || {
     std::fs::create_dir_all(&dir)?;
     write_new(&dir, &name, &bytes)

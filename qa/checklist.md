@@ -3,7 +3,7 @@
 Go through this before every release, on each platform you ship: the Mac app, the web app (Chrome and Safari), and a phone width (or the phone apps). Tick items as you go. If something's wrong, note it under the item.
 
 :::i
-Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Apps]** the desktop and phone apps, **[Web]** web only, **[Touch]** phones and tablets, **[Chromium]** Chrome and Edge. Everything else applies everywhere. ⌘ is Ctrl and ⌥ is Alt on Windows and Linux.
+Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Apps]** the desktop and phone apps, **[Web]** web only, **[Touch]** phones and tablets, **[iOS]** and **[Android]** their apps, **[Chromium]** Chrome and Edge. Everything else applies everywhere. ⌘ is Ctrl and ⌥ is Alt on Windows and Linux.
 :::
 
 #qa/checklist
@@ -762,7 +762,7 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] Importing a note's file from a sync folder (`lines/notes/<id>.md`) brings the note back as it was: its text without lines' header, pinned or in the trash, its dates, icon and format, locked (opening with its password); importing it again, or with that note still here, adds a second note rather than replace it
 - [ ] A LaTeX note exports as a .tex file wrapped in \documentclass … \end{document}, and compiles with pdflatex; the share menu says Copy LaTeX and Download LaTeX
 - [ ] Closed locked notes are left out, and the panel says how many
-- [ ] [Web] It downloads; [Desktop] it saves to Downloads and Show in Finder works; [iOS] it's in the Files app, On My iPhone (or iPad) → lines
+- [ ] [Web] It downloads; [Desktop] it saves to Downloads and Show in Finder works; [iOS] it's in the Files app, On My iPhone (or iPad) → lines; [Android] it saves, and says where
 
 ## 18a. PDF
 
@@ -801,6 +801,8 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] Medium (700–999 px): the sidebar is a drawer over the list
 - [ ] Narrow (under 700 px): one pane at a time; Back returns to the list
 - [ ] Narrow: a new note slides in with its editor showing, ready to type in; [iOS] the screen isn't left blank
+- [ ] [Android] Back closes a dialog or menu, then the sidebar drawer, then the open note; from the list it leaves lines
+- [ ] [Android] lines starts below the status bar, on a tablet too; behind the status and navigation bars is the theme's background, their icons light over a dark theme (lines set to Dark on a light system too); the keyboard never covers the line being typed
 - [ ] Focus mode (⇧⌘\ or the toolbar button) shows just the note; not on phones
 - [ ] Trashed notes show Restore and Delete Forever instead of the toolbar
 - [ ] [Mac] The window drags by its toolbars and starts without a flash

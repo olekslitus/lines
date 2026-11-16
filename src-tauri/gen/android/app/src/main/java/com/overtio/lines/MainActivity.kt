@@ -1,11 +1,15 @@
 package com.overtio.lines
 
+import android.graphics.Color
 import android.os.Bundle
+import android.view.View
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : TauriActivity() {
   // lines' pages are one page, with no history to go back through: Back asks lines instead.
@@ -14,6 +18,16 @@ class MainActivity : TauriActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
+    // Edge to edge, the web view would lie under the status bar, the navigation bar and the
+    // keyboard, and it tells the page only of a camera's cutout. So lines is kept clear of them
+    // all, and what shows behind the bars is the page's background (SystemBars.setColors).
+    ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
+      val clear = insets.getInsets(
+        WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime()
+      )
+      view.setPadding(clear.left, clear.top, clear.right, clear.bottom)
+      WindowInsetsCompat.CONSUMED
+    }
   }
 
   override fun onWebViewCreate(webView: WebView) {
@@ -32,12 +46,14 @@ class MainActivity : TauriActivity() {
     })
   }
 
-  // lines draws under the status and navigation bars, so their icons follow the colors it shows,
-  // which can be dark while the system is light, and change while it's open (themes/show.svelte.ts).
+  // The bars show lines' background, and their icons follow it: it can be dark while the system is
+  // light, and change while lines is open (themes/show.svelte.ts).
   inner class SystemBars {
     @JavascriptInterface
-    fun setDark(dark: Boolean) {
+    fun setColors(background: String, dark: Boolean) {
+      val color = runCatching { Color.parseColor(background) }.getOrNull()
       runOnUiThread {
+        if (color != null) findViewById<View>(android.R.id.content).setBackgroundColor(color)
         WindowCompat.getInsetsController(window, window.decorView).apply {
           isAppearanceLightStatusBars = !dark
           isAppearanceLightNavigationBars = !dark

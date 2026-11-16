@@ -8,8 +8,8 @@ interface Window {
   EyeDropper?: new () => { open(): Promise<{ sRGBHex: string }> };
   /** Goes back a step, for the system's Back: whether there was one to go (App.svelte). */
   linesBack?: () => boolean;
-  /** The Android app's status and navigation bars, whose icons follow the scheme shown (MainActivity.kt). */
-  linesSystemBars?: { setDark(dark: boolean): void };
+  /** The Android app's status and navigation bars: the page's background behind them, their icons light on a dark one (MainActivity.kt). */
+  linesSystemBars?: { setColors(background: string, dark: boolean): void };
 }
 
 /** The messages each of Settings' sections shows, by its id, for its search, each with the part it's in (vite.config.ts). */

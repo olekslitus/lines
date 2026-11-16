@@ -1,5 +1,5 @@
 /** Where lines' source is. */
-export const REPO = "https://github.com/overtio/lines";
+export const REPO = "https://github.com/olekslitus/lines";
 
 /** This build's version (package.json's). lines is in alpha: early, changing, not yet for work that matters. */
 export const VERSION = __APP_VERSION__;

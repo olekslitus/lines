@@ -16,7 +16,7 @@ use tauri_plugin_http::reqwest;
 use tauri_plugin_updater::{Update, UpdaterExt};
 use time::{Duration, OffsetDateTime};
 
-const RELEASES: &str = "https://api.github.com/repos/overtio/lines/releases?per_page=30";
+const RELEASES: &str = "https://api.github.com/repos/olekslitus/lines/releases?per_page=30";
 /// The asset each release describes its packages and their signatures in (release.yml writes it).
 const MANIFEST: &str = "latest.json";
 const EVENT: &str = "updates";
@@ -305,7 +305,7 @@ mod tests {
       published_at: Some(published),
       assets: vec![Asset {
         name: MANIFEST.into(),
-        browser_download_url: format!("https://github.com/overtio/lines/releases/download/{tag}/latest.json").parse().unwrap(),
+        browser_download_url: format!("https://github.com/olekslitus/lines/releases/download/{tag}/latest.json").parse().unwrap(),
       }],
     }
   }

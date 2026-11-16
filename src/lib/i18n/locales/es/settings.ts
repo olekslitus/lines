@@ -532,7 +532,7 @@ export default {
 
   "settings.version": "Versión {version}",
   "settings.tagline": "Notas bonitas y sencillas, guardadas primero en tu dispositivo.",
-  "settings.madeBy": "Creado por Oleksandr Litus en Overtio.",
+  "settings.madeBy": "Creado por Oleksandr Litus.",
   "settings.source": "Código fuente en GitHub",
   "settings.reportIssue": "Informar de un problema",
   "settings.license": "Licencia",

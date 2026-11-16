@@ -526,7 +526,7 @@ function go() {
   return 1;
 }
 ```
-Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
 #### 38. Typing practice (typing block), then arXiv links
 

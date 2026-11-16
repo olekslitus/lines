@@ -62,7 +62,7 @@ On a MacBook Pro (M1 Pro, macOS 27), headless, with Playwright 1.64 (WebKit 27.2
 | LaTeX, arrow keys (p95) | 496 | 20 | 28 | 23 |
 | Script memory after loading |  |  | 287 MB | 24 MB |
 
-Every measure is within its budget in Chromium. In WebKit, three can miss, now and then, and `bun run bench` shows them as known misses rather than failing: the first few keys after jumping to the end of the 12,000-line note (up to 100 ms, [#126](https://github.com/overtio/lines/issues/126)), and a key in the list's search that changes which rows are drawn, or a frame while scrolling when a spreadsheet block is first drawn (35–60 ms, [#133](https://github.com/overtio/lines/issues/133)).
+Every measure is within its budget in Chromium. In WebKit, three can miss, now and then, and `bun run bench` shows them as known misses rather than failing: the first few keys after jumping to the end of the 12,000-line note (up to 100 ms, [#126](https://github.com/olekslitus/lines/issues/126)), and a key in the list's search that changes which rows are drawn, or a frame while scrolling when a spreadsheet block is first drawn (35–60 ms, [#133](https://github.com/olekslitus/lines/issues/133)).
 
 Headless browsers aren't the Mac app's web view, and this isn't an iPhone: the numbers compare changes, and show where lines stands, rather than promise times on every device.
 

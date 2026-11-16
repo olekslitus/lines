@@ -1,6 +1,6 @@
 # Secrets
 
-API keys, tokens and passwords can be kept out of notes, in one locked note, and used by name anywhere: `{{github}}`. ([#166](https://github.com/overtio/lines/issues/166))
+API keys, tokens and passwords can be kept out of notes, in one locked note, and used by name anywhere: `{{github}}`. ([#166](https://github.com/olekslitus/lines/issues/166))
 
 ## Where they're kept
 

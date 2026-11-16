@@ -600,7 +600,7 @@ After it, on a new page.
 <div style="page-break-after: always"></div>
 
 And another.
-Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
 #### 38. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then arXiv links
 

@@ -337,13 +337,13 @@ GitHub's mark, then the reference as GitHub writes it:
 
 | URL | Drawn as |
 |---|---|
-| `https://github.com/overtio` | `@overtio` |
-| `https://github.com/overtio/lines` | `overtio/lines` |
-| `…/issues/12`, `…/pull/34`, `…/discussions/5` | `overtio/lines#12` |
-| `…/commit/6781dd7f00ba`, `…/pull/34/commits/6781dd7f00ba` | `overtio/lines@6781dd7` |
-| `…/tree/main`, `…/releases/tag/v1.0`, `…/compare/v1.0...main` | `overtio/lines@main`, `@v1.0`, `@v1.0...main` |
-| `…/blob/main/src/app.ts#L10-L20` | `overtio/lines › app.ts:10-20` |
-| Anything else in a repository, like `…/actions` | `overtio/lines › actions` |
+| `https://github.com/olekslitus` | `@olekslitus` |
+| `https://github.com/olekslitus/lines` | `olekslitus/lines` |
+| `…/issues/12`, `…/pull/34`, `…/discussions/5` | `olekslitus/lines#12` |
+| `…/commit/6781dd7f00ba`, `…/pull/34/commits/6781dd7f00ba` | `olekslitus/lines@6781dd7` |
+| `…/tree/main`, `…/releases/tag/v1.0`, `…/compare/v1.0...main` | `olekslitus/lines@main`, `@v1.0`, `@v1.0...main` |
+| `…/blob/main/src/app.ts#L10-L20` | `olekslitus/lines › app.ts:10-20` |
+| Anything else in a repository, like `…/actions` | `olekslitus/lines › actions` |
 
 - Only `github.com` (and `www.github.com`). GitHub's own pages (`github.com/settings`, `/orgs`, `/marketplace`…), `gist.github.com` and links inside code stay as they are.
 
@@ -413,7 +413,7 @@ A note can start with properties: `key: value` lines between two `---` lines, as
 type: person
 fullname: Oleksandr Litus
 email: oleks@example.com
-company: @Overtio
+company: @Acme
 ---
 # Oleks
 ```
@@ -434,7 +434,7 @@ company: @Overtio
 `@Name` mentions another note: it's drawn as that note's title, with its icon, and ⌘-click opens it, as it does a link. So does ⌥↵ with the cursor on it, and on a link or an attached file. Settings → Editor → Links sets what a click, ⌘-click and ⇧⌘-click do on links, tags and mentions: edit, open, copy a link's address, or open a mentioned note in a new tab, a background tab or a floating window. `@Name.key` is the value of one of its properties.
 
 ```markdown
-Call @Oleks about the contract; @Oleks.fullname signs for @Overtio.
+Call @Oleks about the contract; @Oleks.fullname signs for @Acme.
 Ask @[Ada Lovelace] for her @[Ada Lovelace].email.
 ```
 

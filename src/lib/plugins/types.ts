@@ -557,7 +557,7 @@ export interface ShortLinks {
   id: string;
   /** The mark in front, as SVG markup drawn in the text's color (`fill="currentColor"`). */
   mark: string;
-  /** How a link reads in short (`overtio/lines#12`), or null for one that stays as it is. */
+  /** How a link reads in short (`olekslitus/lines#12`), or null for one that stays as it is. */
   text(url: URL): string | null;
 }
 

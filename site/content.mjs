@@ -8,9 +8,9 @@ import { basename, join, posix } from "node:path";
  */
 
 export const ROOT = join(import.meta.dir, "..");
-export const REPO = "https://github.com/overtio/lines";
+export const REPO = "https://github.com/olekslitus/lines";
 /** Where the website is published (website.yml); links to it in the Markdown become relative. */
-export const SITE = "https://overtio.github.io/lines/";
+export const SITE = "https://oreksu.com/lines/";
 
 /** In docs/, but not documentation: a dated snapshot of the code. */
 const UNLISTED = new Set(["docs/AUDIT.md"]);

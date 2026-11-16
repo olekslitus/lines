@@ -6,42 +6,42 @@ Each kind of GitHub and arXiv link. Check: each one shows as written in code aft
 
 #### 1. GitHub: bare URLs
 
-- https://github.com/overtio → `@overtio`
-- https://github.com/overtio/lines → `overtio/lines`
-- https://github.com/overtio/lines.git → `overtio/lines`
-- https://github.com/overtio/lines/issues/12 → `overtio/lines#12`
-- https://github.com/overtio/lines/pull/34/files → `overtio/lines#34`
-- https://github.com/overtio/lines/discussions/5 → `overtio/lines#5`
-- https://github.com/overtio/lines/commit/6781dd7f00ba → `overtio/lines@6781dd7`
-- https://github.com/overtio/lines/pull/34/commits/abcdef1234567 → `overtio/lines@abcdef1`
-- https://github.com/overtio/lines/tree/main → `overtio/lines@main`
-- https://github.com/overtio/lines/releases/tag/v1.0.0 → `overtio/lines@v1.0.0`
-- https://github.com/overtio/lines/compare/v1.0...main → `overtio/lines@v1.0...main`
-- https://github.com/overtio/lines/blob/main/src/lib/editor/shortLinks.ts#L10-L20 → `overtio/lines › shortLinks.ts:10-20`
-- https://github.com/overtio/lines/tree/main/docs → `overtio/lines › docs`
-- https://github.com/overtio/lines/actions → `overtio/lines › actions`
-- www.github.com/overtio/lines → `overtio/lines`
+- https://github.com/olekslitus → `@olekslitus`
+- https://github.com/olekslitus/lines → `olekslitus/lines`
+- https://github.com/olekslitus/lines.git → `olekslitus/lines`
+- https://github.com/olekslitus/lines/issues/12 → `olekslitus/lines#12`
+- https://github.com/olekslitus/lines/pull/34/files → `olekslitus/lines#34`
+- https://github.com/olekslitus/lines/discussions/5 → `olekslitus/lines#5`
+- https://github.com/olekslitus/lines/commit/6781dd7f00ba → `olekslitus/lines@6781dd7`
+- https://github.com/olekslitus/lines/pull/34/commits/abcdef1234567 → `olekslitus/lines@abcdef1`
+- https://github.com/olekslitus/lines/tree/main → `olekslitus/lines@main`
+- https://github.com/olekslitus/lines/releases/tag/v1.0.0 → `olekslitus/lines@v1.0.0`
+- https://github.com/olekslitus/lines/compare/v1.0...main → `olekslitus/lines@v1.0...main`
+- https://github.com/olekslitus/lines/blob/main/src/lib/editor/shortLinks.ts#L10-L20 → `olekslitus/lines › shortLinks.ts:10-20`
+- https://github.com/olekslitus/lines/tree/main/docs → `olekslitus/lines › docs`
+- https://github.com/olekslitus/lines/actions → `olekslitus/lines › actions`
+- www.github.com/olekslitus/lines → `olekslitus/lines`
 
 #### 2. GitHub: other ways of writing them
 
-- <https://github.com/overtio/lines/issues/3> (angle brackets) → `overtio/lines#3`
-- [https://github.com/overtio/lines/issues/4](https://github.com/overtio/lines/issues/4) (text is the URL) → `overtio/lines#4`
-- [the parser bug](https://github.com/overtio/lines/issues/7) → the mark, then "the parser bug"
+- <https://github.com/olekslitus/lines/issues/3> (angle brackets) → `olekslitus/lines#3`
+- [https://github.com/olekslitus/lines/issues/4](https://github.com/olekslitus/lines/issues/4) (text is the URL) → `olekslitus/lines#4`
+- [the parser bug](https://github.com/olekslitus/lines/issues/7) → the mark, then "the parser bug"
 
 #### 3. GitHub: not shortened
 
 - https://github.com stays a plain link
 - https://github.com/settings/profile stays a plain link
-- https://gist.github.com/overtio/1 stays a plain link
-- https://example.com/overtio/lines stays a plain link
-- `https://github.com/overtio/lines` in code stays code
+- https://gist.github.com/olekslitus/1 stays a plain link
+- https://example.com/olekslitus/lines stays a plain link
+- `https://github.com/olekslitus/lines` in code stays code
 
 #### 4. In a table
 
 | Link | Shows |
 | --- | --- |
-| https://github.com/overtio/lines/issues/12 | `overtio/lines#12` |
-| [docs](https://github.com/overtio/lines/tree/main/docs) | the mark, then docs |
+| https://github.com/olekslitus/lines/issues/12 | `olekslitus/lines#12` |
+| [docs](https://github.com/olekslitus/lines/tree/main/docs) | the mark, then docs |
 | https://arxiv.org/abs/2006.11239 | `arXiv:2006.11239` |
 | [DDPM](https://arxiv.org/abs/2006.11239) | the cap, then DDPM |
 

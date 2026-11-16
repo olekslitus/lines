@@ -452,7 +452,7 @@ Home -> cabin <- back, a <-> b, x => y, p <=> q, 1 <= 2 >= 0 != 3. Stays: --> !=
 flowchart LR
   A[Small] --> B[Diagram]
 ```
-Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
 #### 38. Diagram (240 px wide), then arXiv links
 

@@ -377,7 +377,7 @@ Home -> cabin <- back, a <-> b, x => y, p <=> q, 1 <= 2 >= 0 != 3. Stays: --> !=
 #### 37. GitHub links in a callout
 
 :::i
-Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 :::
 
 #### 38. arXiv links in a callout

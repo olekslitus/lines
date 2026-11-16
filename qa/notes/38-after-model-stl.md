@@ -2006,7 +2006,7 @@ endloop
 endfacet
 endsolid pyramid
 ```
-Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
 #### 38. 3D model (stl block), then arXiv links
 

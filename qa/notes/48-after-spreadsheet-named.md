@@ -600,7 +600,7 @@ Rent, $1200, 2026-01-05
 ```csv
 Total, =costs!B2*2
 ```
-Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
 #### 38. Named spreadsheet (csv name=), and a formula in another block using it, then arXiv links
 

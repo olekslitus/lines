@@ -588,7 +588,7 @@ export default {
   // About.
   "settings.version": "Version {version}",
   "settings.tagline": "Beautiful, simple, local-first notes.",
-  "settings.madeBy": "Made by Oleksandr Litus at Overtio.",
+  "settings.madeBy": "Made by Oleksandr Litus.",
   "settings.source": "Source on GitHub",
   "settings.reportIssue": "Report an issue",
   "settings.license": "License",

@@ -12,7 +12,7 @@ import { ico, png } from "../browser/files";
 import { stubApp } from "./stubs";
 
 stubApp();
-mock.module("../../src/lib/release", () => ({ VERSION: "0.0.0", REPO: "https://github.com/overtio/lines" }));
+mock.module("../../src/lib/release", () => ({ VERSION: "0.0.0", REPO: "https://github.com/olekslitus/lines" }));
 const { encodingOf, readAtMost } = await import("../../src/lib/feeds/fetch");
 const { linkOf, looksLikeFeed, usualFeeds } = await import("../../src/lib/feeds/find");
 const { formatAgo } = await import("../../src/lib/format");

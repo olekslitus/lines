@@ -341,7 +341,7 @@ Home -> cabin <- back, a <-> b, x => y, p <=> q, 1 <= 2 >= 0 != 3. Stays: --> !=
 #### 37. Attached 3D model (STL), then GitHub links
 
 [Bracket.stl](attachment:bracket.stl)
-Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
 #### 38. Attached 3D model (STL), then arXiv links
 

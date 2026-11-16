@@ -121,7 +121,7 @@ const rust = [...crates.values()].sort((a, b) => a.name.localeCompare(b.name));
 const header = `Third-party notices for lines
 
 lines is free software under the GNU Affero General Public License v3.0
-(https://github.com/overtio/lines/blob/main/LICENSE). It is built on the open
+(https://github.com/olekslitus/lines/blob/main/LICENSE). It is built on the open
 source packages below; their licenses follow.
 
 Theme colors, all MIT: Solarized (c) Ethan Schoonover; Nord (c) Arctic Ice

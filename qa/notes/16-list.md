@@ -378,7 +378,7 @@ Each element in a list item. Check: it draws as it does on its own, sits inside 
 
 - List item
 
-  Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+  Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
 #### 38. arXiv links in a list item
 

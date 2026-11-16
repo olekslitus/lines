@@ -586,6 +586,7 @@ What isn't done yet is in [secrets.md](secrets.md#not-yet).
 - Cloud drive folders (iCloud Drive and the others) can't be picked for sync; an S3 bucket can.
 - An attachment can't be opened in another app yet.
 - Exports are saved in lines' Documents on iPhone and iPad, which the Files app shows under On My iPhone (or iPad) → lines. On Android they're saved in lines' own folder (`Android/data/com.overtio.lines/files/Download`), which the Files app doesn't show, not yet in Downloads. Neither has a share sheet to send them elsewhere.
+- Android's backup leaves lines out, to the cloud and to a new phone alike: its storage holds the notes and, without the app lock, the keys sync uses, in plain text. On a new or reset phone notes come back through sync, not from Android's backup.
 - TeX's PDF is shown at its own size on iPhone, wider than the screen.
 - On iPhone there's no swipe from the edge to go back to the list; the Back button does it. On Android the system's Back closes what's open, then the sidebar, then the note.
 - No floating notes or other windows, menus, Touch ID or updates in the app: they're the desktop's. Updates are to come from the App Store and Google Play.

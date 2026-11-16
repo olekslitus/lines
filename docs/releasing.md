@@ -33,6 +33,14 @@ The desktop apps update themselves from these releases (`src-tauri/src/updates.r
 - **Only installed apps.** Development builds (`bun run tauri dev`, debug builds) don't look for updates. An app built locally with `bun run tauri build` does, and updates to the next release once it has waited long enough.
 - **Privacy.** A check asks GitHub for the list of releases; nothing about notes or settings is sent. With Update automatically off there are no checks; lines looks only when asked. Turning it off also drops a version already downloaded, which is then offered with Install and restart rather than installed at quit.
 
+### The identifier
+
+lines' identifier is `com.olekslitus.lines` (`tauri.conf.json`); up to 0.6 it was `com.overtio.lines`. It names the app's data folders, so the first start under the new one copies its notes over ([storage.md](storage.md#from-comovertiolines)), and installs update in place across the change:
+
+- **macOS**: the updater replaces `lines.app` where it is; only its bundle identifier changes.
+- **Windows**: the MSI upgrades the one installed because its upgrade code is the one Tauri derived from the product name, `lines`, pinned in `bundle.windows.wix.upgradeCode` so that renaming lines can't change it. The NSIS installer finds the one installed by its uninstall key, `…\Uninstall\lines`, and the folder it's in under `Software\overtio\lines`: the publisher's name, which Tauri took from the identifier's second part. `bundle.publisher` keeps it `overtio`; changing it would leave a setup run over an older install unable to find (and uninstall) it, and an update to a folder chosen when installing put in the default one instead.
+- **Linux**: the `.deb` and `.rpm` packages are named `lines` and the AppImage is replaced where it is, none of them by the identifier.
+
 ### The signing key
 
 `release.yml` has Tauri make and sign the update packages (`createUpdaterArtifacts`) with a private key kept in the repository's secrets, `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`; its public half is in `tauri.conf.json`. Local builds make no update packages and need neither.

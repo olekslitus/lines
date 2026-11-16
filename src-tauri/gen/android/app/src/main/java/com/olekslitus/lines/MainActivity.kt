@@ -1,4 +1,4 @@
-package com.overtio.lines
+package com.olekslitus.lines
 
 import android.graphics.Color
 import android.os.Bundle

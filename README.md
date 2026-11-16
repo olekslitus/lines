@@ -175,7 +175,7 @@ Also on the website: [overtio.github.io/lines/docs](https://overtio.github.io/li
 | [Importing](docs/importing.md) | Bringing notes in from other apps (Obsidian, Bear, Logseq, Notion, Evernote): what to export, what comes across and what doesn't |
 | [Plugins](docs/plugins.md) | How lines is made of plugins, turning them off, and writing one |
 | [Sync](docs/sync.md) | How sync and encryption work |
-| [Storage](docs/storage.md) | Where the web app keeps your notes, and for how long |
+| [Storage](docs/storage.md) | Where the web app and the desktop apps keep your notes, and for how long |
 | [Accessibility](docs/accessibility.md) | Keyboard and screen reader use, and how it's checked |
 | [Limitations](docs/limitations.md) | What doesn't work yet, and what hasn't been tried on real devices |
 | [What's new](CHANGELOG.md) | What changed in each release |
@@ -223,7 +223,7 @@ rustup target add aarch64-apple-ios aarch64-apple-ios-sim
 bun run tauri ios build --target aarch64-sim --debug --no-sign
 xcrun simctl boot "iPhone 17"
 xcrun simctl install "iPhone 17" src-tauri/gen/apple/build/arm64-sim/lines.app
-xcrun simctl launch "iPhone 17" com.overtio.lines
+xcrun simctl launch "iPhone 17" com.olekslitus.lines
 
 # Or run it with the dev server, reloading as you change things
 bun run tauri ios dev "iPhone 17"
@@ -253,7 +253,7 @@ adb install src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-univ
 bun run tauri android dev
 ```
 
-An emulator to run it on: `avdmanager create avd -n phone -k "system-images;android-36;google_apis;arm64-v8a" -d pixel_8`, then `$ANDROID_HOME/emulator/emulator -avd phone`. A debug build's web view can be inspected from Chrome (`chrome://inspect`). The debug app is `com.overtio.lines.debug`, so it installs beside a release one. A release APK or app bundle has to be signed with a keystore of your own.
+An emulator to run it on: `avdmanager create avd -n phone -k "system-images;android-36;google_apis;arm64-v8a" -d pixel_8`, then `$ANDROID_HOME/emulator/emulator -avd phone`. A debug build's web view can be inspected from Chrome (`chrome://inspect`). The debug app is `com.olekslitus.lines.debug`, so it installs beside a release one. A release APK or app bundle has to be signed with a keystore of your own.
 
 </details>
 

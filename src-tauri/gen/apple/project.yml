@@ -1,6 +1,6 @@
 name: lines
 options:
-  bundleIdPrefix: com.overtio.lines
+  bundleIdPrefix: com.olekslitus.lines
   deploymentTarget:
     iOS: 15.0
 fileGroups: [../../src]
@@ -11,7 +11,7 @@ settingGroups:
   app:
     base:
       PRODUCT_NAME: lines
-      PRODUCT_BUNDLE_IDENTIFIER: com.overtio.lines
+      PRODUCT_BUNDLE_IDENTIFIER: com.olekslitus.lines
 targetTemplates:
   app:
     type: application

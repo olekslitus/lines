@@ -1,6 +1,6 @@
 # Where lines keeps your data on the web
 
-This covers the web app, including the demo at https://overtio.github.io/lines/app/. Everything stays in the browser, on the visitor's computer. The site's host (GitHub Pages) only serves the app's files, and the app never sends notes anywhere. The exception is sync, when someone sets it up: to a folder they choose, or to their own S3 bucket (not offered on the demo website).
+This covers the web app (and, [below](#in-the-desktop-apps), where the desktop apps keep the same), including the demo at https://overtio.github.io/lines/app/. Everything stays in the browser, on the visitor's computer. The site's host (GitHub Pages) only serves the app's files, and the app never sends notes anywhere. The exception is sync, when someone sets it up: to a folder they choose, or to their own S3 bucket (not offered on the demo website).
 
 All of it can be inspected in the browser's developer tools (in Chrome: Application â†’ Storage).
 
@@ -68,6 +68,28 @@ For notes that should last, use **Save to a folder**, or export them (Settings â
 ## Shared with other sites on the same domain
 
 Browsers keep storage apart by domain, not by path. The demo is at `overtio.github.io/lines/app/`, so its storage belongs to `overtio.github.io` and is shared with every other GitHub Pages site under the overtio account: any of them could read the `lines` database and the `lines.*` keys. That's fine for a demo. Before hosting anything else there, or encouraging people to keep real notes on the demo site, move it to a domain of its own (for example a custom domain for the Pages site).
+
+## In the desktop apps
+
+The apps keep the same databases and keys, in their web view's storage, in a folder named for lines' identifier, `com.olekslitus.lines`:
+
+| System | Folder |
+|---|---|
+| macOS | `~/Library/WebKit/com.olekslitus.lines/` (WebKit's) |
+| Windows | `%LOCALAPPDATA%\com.olekslitus.lines\` (WebView2's, in `EBWebView`) |
+| Linux | `~/.local/share/com.olekslitus.lines/` (WebKitGTK's) |
+
+Besides those, an update being downloaded and copies of attachments opened in other apps are in lines' cache folder (`~/Library/Caches/com.olekslitus.lines/` on a Mac, the folder above on Windows, `~/.cache/com.olekslitus.lines/` on Linux), and with Touch ID on, its keys are in the Mac's login keychain as "lines app lock".
+
+### From com.overtio.lines
+
+Up to 0.6, lines was `com.overtio.lines`, and its folders were named for that. The first time a later version starts, before its window opens, it copies the old web view folder to the new one (`src-tauri/src/moved.rs`):
+
+- only if the new folder is empty: data already there is never overwritten;
+- once: it then leaves a `moved-from-com.overtio.lines` file in its local data folder (`~/Library/Application Support/com.olekslitus.lines/` on a Mac, the folders above on Windows and Linux), and doesn't copy again even if the new folder is deleted;
+- whole or not at all: the copy is made beside the new folder and renamed into place once it's complete. If it fails, lines opens anyway, and tries again next time while the new folder is still empty.
+
+The old folder is left as it was, so going back to 0.6 finds the notes as they were. Once the new version shows your notes, it can be deleted. Uninstalling lines on Windows with its data deletes only the new one. The cache folders and the Mac's preferences (`com.overtio.lines.plist`, which only remembers panels' positions) aren't copied, and the keychain's entries keep their name. Development builds don't copy anything: they keep their data apart from the installed app's.
 
 ## What the host sees
 

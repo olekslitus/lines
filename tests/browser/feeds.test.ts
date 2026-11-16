@@ -292,6 +292,13 @@ describe("transcripts", () => {
 });
 
 describe("HTML as Markdown", () => {
+  test("a list right in a list is under the item before it, and nothing in a list outside an item is left out", async () => {
+    expect(await markdown("<ul><li>One</li><ul><li>Under one</li><ol><li>Deeper</li></ol></ul><li>Two</li>Loose words<div>A div</div></ul>")).toBe(
+      "- One\n  - Under one\n    1. Deeper\n- Two\n- Loose words\n- A div",
+    );
+    expect(await markdown("<ul><ul><li>Nothing before it</li></ul><li>After</li></ul>")).toBe("- Nothing before it\n- After");
+  });
+
   test("keeps what lines draws, escapes what it would read as its own, and drops the rest", async () => {
     const html = `
       <h1>Title</h1>

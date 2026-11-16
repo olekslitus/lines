@@ -40,9 +40,26 @@ export function saysMore(html: string, base: string, own: (string | undefined)[]
   return !!plainText(body.innerHTML) || !!body.querySelector("img, video, audio, iframe");
 }
 
-/** HTML as Markdown, its relative links and pictures read from `base`. */
-export function htmlToMarkdown(html: string, base?: string): string {
-  return new Writer(base).blocks(parseHtml(html)).join("\n\n").trim();
+/** What the Markdown of an element's content is: its blocks, or its words on one line. */
+export interface MarkdownOf {
+  blocks(element: Element): string[];
+  line(element: Element): string;
+}
+
+/**
+ * What a kind of HTML of its own (Evernote's) makes of its own elements, as Markdown it made safe:
+ * a block's (null for one it leaves as HTML has it), or an element's within a line.
+ */
+export interface OwnElements {
+  block?(element: Element, markdown: MarkdownOf): string[] | null;
+  inline?(element: Element, markdown: MarkdownOf): string | null;
+  /** Whether a list's item is a task, and done (Evernote's checklists); null for one that isn't. */
+  task?(item: Element): boolean | null;
+}
+
+/** HTML as Markdown, its relative links and pictures read from `base`, and elements of its own as `own` says. */
+export function htmlToMarkdown(html: string, base?: string, own?: OwnElements): string {
+  return new Writer(base, own).blocks(parseHtml(html)).join("\n\n").trim();
 }
 
 /** A text node's words, escaped as a line of text is (notes/escape.ts), with a space kept at either end that had one: it parts them from what's beside them. */
@@ -58,8 +75,11 @@ const escapeUnder = (line: string) => line.replace(/^(\||[=-]+\s*$)/, "\\$1");
 /** HTML's whitespace as the page shows it: one space. */
 const collapse = (text: string) => text.replace(/\s+/g, " ");
 
-class Writer {
-  constructor(private base?: string) {}
+class Writer implements MarkdownOf {
+  constructor(
+    private base?: string,
+    private own?: OwnElements,
+  ) {}
 
   /**
    * The Markdown of a node within a line: its text escaped, or an element's inline Markdown. A block
@@ -70,6 +90,8 @@ class Writer {
     if (!(node instanceof Element)) return node.nodeType === Node.TEXT_NODE ? escapeText(node.textContent ?? "") : "";
     const name = node.localName;
     if (SKIPPED.has(name)) return "";
+    const own = this.own?.inline?.(node, this);
+    if (own != null) return own;
     if (name === "pre") return ` ${inlineCode(collapse(node.textContent ?? "").trim())} `;
     // An embedded player is a link, which a line can hold.
     if (name === "iframe" || name === "video" || name === "audio") return this.block(node)!.join(" ");
@@ -99,6 +121,8 @@ class Writer {
   block(element: Element): string[] | null {
     const name = element.localName;
     if (SKIPPED.has(name)) return [];
+    const own = this.own?.block?.(element, this);
+    if (own) return own;
     if (BLOCKS.has(name) || name === "li") return this.blocks(element);
     const heading = /^h([1-6])$/.exec(name);
     if (heading) {
@@ -193,19 +217,42 @@ class Writer {
     }
   }
 
-  /** A list, the lists in its items nested under them. */
+  /**
+   * A list, the lists in its items nested under them, and a list right in it (as Evernote writes one)
+   * under the item before it. Anything else in it, outside an item, is an item of its own: never left out.
+   */
   list(element: Element): string {
     const ordered = element.localName === "ol";
     let number = Number(element.getAttribute("start")) || 1;
-    const items: string[] = [];
-    for (const item of element.children) {
-      if (item.localName !== "li") continue;
+    const items: { marker: string; text: string }[] = [];
+    const add = (text: string, task: boolean | null = null) => {
+      if (!text && task === null) return;
       const marker = ordered ? `${number++}. ` : "- ";
-      const nested = [...item.children].some((child) => child.localName === "ul" || child.localName === "ol");
-      const text = (nested ? this.#tight(item) : this.blocks(item).join("\n\n")).replace(/\n(?=.)/g, `\n${" ".repeat(marker.length)}`);
-      if (text) items.push(marker + text);
+      items.push({ marker, text: `${task === null ? "" : `[${task ? "x" : " "}] `}${text}` });
+    };
+    for (const node of element.childNodes) {
+      if (!(node instanceof Element)) {
+        add(node.nodeType === Node.TEXT_NODE ? escapeText(node.textContent ?? "").trim() : "");
+        continue;
+      }
+      if (SKIPPED.has(node.localName)) continue;
+      if (node.localName === "ul" || node.localName === "ol") {
+        const nested = this.list(node);
+        const last = items.at(-1);
+        if (!nested) continue;
+        if (last) last.text += `\n${nested}`;
+        else items.push({ marker: "", text: nested });
+        continue;
+      }
+      if (node.localName !== "li") {
+        add(this.blocks(node).join("\n\n"));
+        continue;
+      }
+      const nested = [...node.children].some((child) => child.localName === "ul" || child.localName === "ol");
+      add(nested ? this.#tight(node) : this.blocks(node).join("\n\n"), this.own?.task?.(node) ?? null);
     }
-    return items.join("\n");
+    // An item's lines after its first, and the lists under it, indented past its marker.
+    return items.map(({ marker, text }) => marker + text.replace(/\n(?=.)/g, `\n${" ".repeat(marker.length)}`)).join("\n");
   }
 
   /** A list item with a list in it: its own text, then the list right under it. */

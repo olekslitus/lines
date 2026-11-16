@@ -26,6 +26,8 @@ const { readPage, writePage } = await import("../../src/plugins/logseq/outline")
 const { formatDay, readDay } = await import("../../src/plugins/logseq/dates");
 const { readNotion } = await import("../../src/plugins/notion/export");
 const { translate: translateNotion } = await import("../../src/plugins/notion/markdown");
+const { md5 } = await import("../../src/plugins/evernote/md5");
+const { timeOf } = await import("../../src/plugins/evernote/enex");
 const { translate: translateBear } = await import("../../src/plugins/bear/markdown");
 const { translate } = await import("../../src/plugins/obsidian/markdown");
 const { attachmentPath, notesInput, notesWork, planNotes, Tally: Tallies, withTitle } = await import("../../src/lib/imports/notes");
@@ -656,6 +658,24 @@ describe("Notion", () => {
   test("a callout on one line closes there", () => {
     const report = new Tallies();
     expect(translateNotion("<aside>💡 Water the plants.</aside>\nAfter it.", { report, resolve: () => null }, "Note")).toBe(":::info\n💡 Water the plants.\n:::\n\nAfter it.");
+  });
+});
+
+describe("Evernote", () => {
+  // Its notes' text is HTML, read in a page (tests/browser/imports.test.ts); what needs no page is here.
+  test("a file is found by its MD5, as Evernote names it in a note's text", () => {
+    const text = (value: string) => new TextEncoder().encode(value);
+    expect([md5(text("")), md5(text("abc")), md5(text("The quick brown fox jumps over the lazy dog"))]).toEqual([
+      "d41d8cd98f00b204e9800998ecf8427e",
+      "900150983cd24fb0d6963f7d28e17f72",
+      "9e107d9d372bb6826bd81d3542a419d6",
+    ]);
+    // Across the 64-byte blocks MD5 works in.
+    expect(md5(text("x".repeat(56)))).toBe("668a72d5ba17f08e62dabcafad6db14b");
+  });
+
+  test("its times, as it writes them", () => {
+    expect([timeOf("20241114T093005Z"), timeOf("2024-11-14"), timeOf(null)]).toEqual([Date.UTC(2024, 10, 14, 9, 30, 5), undefined, undefined]);
   });
 });
 

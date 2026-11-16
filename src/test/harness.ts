@@ -27,6 +27,10 @@ import { themeDrafts } from "../lib/themes/drafts.svelte";
 import { presets, writePresetFile } from "../lib/themes/presets.svelte";
 import { sync } from "../lib/sync/engine.svelte";
 import { readThread } from "../plugins/hacker-news/thread";
+import type { ExportedFile } from "../lib/imports/exported";
+import { Tally } from "../lib/imports/notes";
+import { readNotebook } from "../plugins/evernote/enex";
+import { Unpacking } from "../lib/zip";
 
 /*
  * What the browser tests (tests/browser/) use inside the page, in builds made with `--mode test`
@@ -56,6 +60,13 @@ const testing = {
   player,
   /** Reading feeds, their HTML and OPML (lib/feeds/), bookmarks files (lib/library/bookmarks.ts), transcripts (plugins/feeds/transcripts.ts) and sites' icons, as lines does. */
   reading: { readFeed, isFeed, NotAFeed, NoFeed, htmlToMarkdown, saysMore, readOpml, readBookmarks, readTranscript, sentences, siteIcon, iconPicture },
+  /** Reading an Evernote notebook's .enex (plugins/evernote/), which needs the page's DOMParser: its notes, the paths of their files, and the report; its files allowed `total` bytes all told. */
+  readEnex(notebook: string, xml: string, total?: number) {
+    const report = new Tally();
+    const attachments: ExportedFile[] = [];
+    const notes = readNotebook(notebook, xml, attachments, report, new Unpacking(total));
+    return { notes, attachments: attachments.map((file) => file.path), report: Object.fromEntries([...report.kinds].map(([kind, { count, examples }]) => [kind, [count, ...examples]])) };
+  },
   /** Reading a discussion: its comments' HTML (lib/feeds/text.ts), and Hacker News' threads (plugins/hacker-news/). */
   discussions: { htmlToText, readThread },
   /** The app lock, to turn on as Settings does. */

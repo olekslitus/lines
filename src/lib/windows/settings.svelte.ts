@@ -2,8 +2,9 @@ import { tick } from "svelte";
 import { t } from "../i18n/index.svelte";
 import type { LockSettings } from "../lock/lock.svelte";
 import type { NotesPassword } from "../notes/noteKeys.svelte";
-import { imports } from "../imports/imports.svelte";
-import { lists } from "../library/lists.svelte";
+// Types only: the objects are the `targets` each window gives, so this module (and its tests) don't load the notes store or sync.
+import type { imports } from "../imports/imports.svelte";
+import type { lists } from "../library/lists.svelte";
 import { isDesktopApp } from "../platform";
 import { prefs, type SettingsOpens } from "../prefs.svelte";
 import { sectionOf, type SettingsSection } from "../components/settings/sections";
@@ -150,9 +151,9 @@ export async function forwardToMain(targets: Record<string, Target>, sync: SyncS
       if (message.error === undefined) call.resolve(message.result);
       else call.reject(new Error(message.error));
     } else if (message.type === "import-state") {
-      imports.state = message.state;
+      (targets.imports as typeof imports).state = message.state;
     } else if (message.type === "lists-state") {
-      lists.state = message.state;
+      (targets.lists as typeof lists).state = message.state;
     } else if (message.type === "sync-state") {
       Object.assign(sync, message.state);
       heard();
@@ -167,8 +168,8 @@ export async function forwardToMain(targets: Record<string, Target>, sync: SyncS
 /** In the main window: does what the Settings window asks, and tells it how sync and an import are doing. */
 export function serveSettings(targets: Record<string, Target>, syncState: () => SyncState, lockState: () => LockState) {
   const tell = () => void announce({ type: "sync-state", state: syncState() });
-  const tellImport = () => void announce({ type: "import-state", state: $state.snapshot(imports.state) });
-  const tellLists = () => void announce({ type: "lists-state", state: $state.snapshot(lists.state) });
+  const tellImport = () => void announce({ type: "import-state", state: $state.snapshot((targets.imports as typeof imports).state) });
+  const tellLists = () => void announce({ type: "lists-state", state: $state.snapshot((targets.lists as typeof lists).state) });
   $effect.root(() => {
     $effect(tell);
     $effect(tellImport);

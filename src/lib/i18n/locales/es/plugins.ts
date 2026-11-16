@@ -159,6 +159,7 @@ export default {
   "plugins.bear.description": "Para pasarte desde Bear: sus notas, con sus etiquetas, enlaces, imágenes y archivos, fijadas y fechas, desde su copia de seguridad o lo que exporta, en Ajustes → Exportar e importar.",
   "plugins.logseq.description": "Para pasarte desde Logseq: las páginas y diarios de un grafo, con sus esquemas, propiedades, tareas, referencias y recursos, desde Ajustes → Exportar e importar.",
   "plugins.notion.description": "Para pasarte desde Notion: las páginas, bases de datos, enlaces, imágenes y archivos de su exportación en Markdown y CSV, desde Ajustes → Exportar e importar.",
+  "plugins.evernote.description": "Para pasarte desde Evernote: los archivos .enex de sus libretas, con los archivos, listas, etiquetas y fechas de sus notas, desde Ajustes → Exportar e importar.",
   "plugins.pdfReader": "Lector de PDF",
   "plugins.pdfReader.description": "Lee los PDF guardados con libros y artículos de la Biblioteca, en el lugar de la nota: páginas en los colores del tema, índice, búsqueda y citas guardadas en la nota. Usa pdf.js de Mozilla.",
   "plugins.epubReader": "Lector de EPUB",

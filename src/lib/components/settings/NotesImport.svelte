@@ -21,8 +21,8 @@
   type Props = {
     /** The import's id, as its plugin gives it. */
     id: string;
-    /** The buttons that choose what to import, as the app exports it: a folder ("Choose Vault Folder…"), or a file of `accept`'s kinds. */
-    choices: { label: string; folder?: boolean; accept?: string }[];
+    /** The buttons that choose what to import, as the app exports it: a folder ("Choose Vault Folder…"), or files of `accept`'s kinds (one, or as `multiple` as it exports, as Evernote's notebooks). */
+    choices: { label: string; folder?: boolean; accept?: string; multiple?: boolean }[];
     /** What the export chosen holds, as its import reads it. */
     read: (exported: Exported) => Promise<Source>;
     onclose?: () => void;
@@ -114,7 +114,7 @@
 
 <CardBlock class="items-start">
   <div class="flex flex-wrap items-center gap-1.5">
-    {#each choices as { label, folder, accept }, i (label)}
+    {#each choices as { label, folder, accept, multiple }, i (label)}
       <Button
         icon={folder ? "folder" : "import"}
         busy={reading === i}
@@ -127,7 +127,7 @@
       {#if folder}
         <input bind:this={pickers[i]} type="file" webkitdirectory class="hidden" onchange={(event) => chosen(i, event.currentTarget)} />
       {:else}
-        <input bind:this={pickers[i]} type="file" {accept} class="hidden" onchange={(event) => chosen(i, event.currentTarget)} />
+        <input bind:this={pickers[i]} type="file" {accept} {multiple} class="hidden" onchange={(event) => chosen(i, event.currentTarget)} />
       {/if}
     {/each}
   </div>

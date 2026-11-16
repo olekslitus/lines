@@ -1,6 +1,6 @@
 # Where lines keeps your data on the web
 
-This covers the web app (and, [below](#in-the-desktop-apps), where the desktop apps keep the same), including the demo at https://overtio.github.io/lines/app/. Everything stays in the browser, on the visitor's computer. The site's host (GitHub Pages) only serves the app's files, and the app never sends notes anywhere. The exception is sync, when someone sets it up: to a folder they choose, or to their own S3 bucket (not offered on the demo website).
+This covers the web app, including the demo at https://overtio.github.io/lines/app/. Everything stays in the browser, on the visitor's computer. The site's host (GitHub Pages) only serves the app's files, and the app never sends notes anywhere. The exception is sync, when someone sets it up: to a folder they choose, or to their own S3 bucket (not offered on the demo website).
 
 All of it can be inspected in the browser's developer tools (in Chrome: Application → Storage).
 

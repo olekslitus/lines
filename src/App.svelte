@@ -189,6 +189,27 @@
     feeds.open = null;
   }
 
+  /**
+   * The system's Back (Android's gesture and button, MainActivity.kt): closes the dialog or menu on
+   * top as Esc does, else the sidebar drawer, else goes back to the list on a phone. Whether it did
+   * any of them; if not, Android leaves lines.
+   */
+  window.linesBack = () => {
+    if (document.querySelector(':is([role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"])[data-state="open"]')) {
+      (document.activeElement ?? document.body).dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+      return true;
+    }
+    if (ui.sidebarOpen && ui.layout !== "wide") {
+      ui.sidebarOpen = false;
+      return true;
+    }
+    if (narrow && (selected || post)) {
+      back();
+      return true;
+    }
+    return false;
+  };
+
   const focusKey = isApple ? "⇧⌘\\" : "Ctrl+Shift+\\";
 
   /** Where there's no note: what to do, or what went wrong. */

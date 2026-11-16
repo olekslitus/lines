@@ -45,6 +45,9 @@ targets:
       path: lines_iOS/Info.plist
       properties:
         LSRequiresIPhoneOS: true
+        # Exports are saved in the app's Documents, which the Files app shows under On My iPhone (src/export.rs).
+        LSSupportsOpeningDocumentsInPlace: true
+        UIFileSharingEnabled: true
         UILaunchStoryboardName: LaunchScreen
         UIRequiredDeviceCapabilities: [arm64, metal]
         UISupportedInterfaceOrientations:

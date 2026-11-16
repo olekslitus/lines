@@ -759,7 +759,7 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] Importing a note's file from a sync folder (`lines/notes/<id>.md`) brings the note back as it was: its text without lines' header, pinned or in the trash, its dates, icon and format, locked (opening with its password); importing it again, or with that note still here, adds a second note rather than replace it
 - [ ] A LaTeX note exports as a .tex file wrapped in \documentclass … \end{document}, and compiles with pdflatex; the share menu says Copy LaTeX and Download LaTeX
 - [ ] Closed locked notes are left out, and the panel says how many
-- [ ] [Web] It downloads; [Desktop] it saves to Downloads and Show in Finder works
+- [ ] [Web] It downloads; [Desktop] it saves to Downloads and Show in Finder works; [iOS] it's in the Files app, On My iPhone (or iPad) → lines
 
 ## 18a. PDF
 
@@ -770,6 +770,7 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] LaTeX (lines): the paper example has its title block, abstract, numbered sections, theorems and equations, "Section 2" and "(1)" where it \ref's them, a numbered table, references and its footnote at the end; lines join into paragraphs
 - [ ] Print… opens the print dialog showing the same pages, one per sheet, with nothing of the app; Save as PDF there names the file after the note
 - [ ] [iOS] There's no Print… button
+- [ ] [iOS] On iPhone the pages' text is at its size, as on a computer: no lines run into each other
 - [ ] Share → Print… (the last item) opens the preview on lines' pages (a LaTeX note too, even with TeX chosen) and goes straight on to the print dialog; [iOS] the share menu has no Print…
 - [ ] Share → Export as PDF… opens the preview and goes straight on to print (lines) or save (TeX)
 - [ ] Save PNG (lines' pages) offers One Image (the whole note as one tall picture, no page numbers) and One per Page ("3 images, in a ZIP"; a one-page note saves a single PNG). [Web] It downloads "<title>.png" or "<title>.zip"; [Desktop] it saves to Downloads with Show in Finder. The images are twice the page's size, with bullets, numbers, callout icons, code colors, diagrams, math and images as on the pages
@@ -796,6 +797,7 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] Tab reaches each edge (named "Sidebar width" / "Note list width" with its width): ← and → resize by 10 px, ⇧ by 50, Home and End go to the narrowest and widest, Enter back to the usual width
 - [ ] Medium (700–999 px): the sidebar is a drawer over the list
 - [ ] Narrow (under 700 px): one pane at a time; Back returns to the list
+- [ ] Narrow: a new note slides in with its editor showing, ready to type in; [iOS] the screen isn't left blank
 - [ ] Focus mode (⇧⌘\ or the toolbar button) shows just the note; not on phones
 - [ ] Trashed notes show Restore and Delete Forever instead of the toolbar
 - [ ] [Mac] The window drags by its toolbars and starts without a flash

@@ -1,9 +1,9 @@
-import { htmlToMarkdown, type OwnElements } from "../../lib/feeds/markdown";
+import { htmlToMarkdown, type MarkdownOf, type OwnElements } from "../../lib/feeds/markdown";
 import { t } from "../../lib/i18n/index.svelte";
 import type { Exported, ExportedFile } from "../../lib/imports/exported";
 import { attachmentPath, type Source, type SourceNote, Tally, withTitle } from "../../lib/imports/notes";
 import { attachmentType } from "../../lib/notes/attachments";
-import { propertyValue } from "../../lib/notes/escape";
+import { escapeMarkdownText, propertyValue } from "../../lib/notes/escape";
 import { UNPACKED, Unpacking } from "../../lib/zip";
 import { md5 } from "./md5";
 
@@ -15,8 +15,8 @@ import { md5 } from "./md5";
  * (`<en-media>`, by their MD5) as attachments, its checklists as tasks, its code blocks and
  * highlights, and an encrypted part as text saying so, kept as Evernote encrypted it.
  *
- * An .enex is read as XML with no DOCTYPE, so nothing in it is fetched (an external entity) or
- * multiplied (entities made of entities, "billion laughs"): what one declares makes it unreadable.
+ * An .enex that declares entities isn't read at all, so nothing in it is fetched (an external
+ * entity) or multiplied (entities made of entities, "billion laughs"): Evernote's declare none.
  * Its files are held to what any import unpacks (zip.ts's `Unpacking`), and decoded from base64
  * only to find their MD5, then again when they're kept.
  */
@@ -44,11 +44,70 @@ function bytesOf(base64: string) {
 /** How many bytes base64 of this length holds. */
 const sizeOf = (base64: string) => Math.floor((base64.length * 3) / 4) - (base64.endsWith("==") ? 2 : base64.endsWith("=") ? 1 : 0);
 
-/** An .enex's XML without its DOCTYPE, and whatever that declares: Evernote's names a DTD, which nothing needs. */
-const withoutDoctype = (xml: string) => xml.replace(/<!DOCTYPE[^[>]*(?:\[[\s\S]*?\]\s*)?>/i, "");
+/**
+ * Whether an .enex declares entities, outside its notes' text (CDATA, which is never read as XML's):
+ * what XML would expand as it's read, from elsewhere or entities of entities, so such a file isn't
+ * read at all. Evernote declares none.
+ */
+function declaresEntities(xml: string) {
+  for (let at = xml.indexOf("<!ENTITY"); at >= 0; at = xml.indexOf("<!ENTITY", at + 1)) {
+    const cdata = xml.lastIndexOf("<![CDATA[", at);
+    if (cdata < 0 || xml.lastIndexOf("]]>", at) > cdata) return true;
+  }
+  return false;
+}
 
-/** What a note's style says of it, Evernote writing its own as CSS: `--en-todo:true`. */
-const says = (element: Element, property: string, value = "true") => new RegExp(`--en-${property}\\s*:\\s*${value}`, "i").test(element.getAttribute("style") ?? "");
+/** What a note's style says of it, Evernote writing its own as CSS: `--en-todo:true` (`-en-codeblock:true`, in older notes). */
+const says = (element: Element, property: string, value = "true") => new RegExp(`(?:^|[;\\s])--?en-${property}\\s*:\\s*${value}`, "i").test(element.getAttribute("style") ?? "");
+
+/** A code block's lines: each line element's text, and text right in it, a `<br>` ending a line. */
+function codeLines(block: Element): string[] {
+  const lines: string[] = [];
+  let line = "";
+  for (const node of block.childNodes) {
+    if (node instanceof Element && node.localName === "br") {
+      lines.push(line);
+      line = "";
+    } else if (node instanceof Element && (node.localName === "div" || node.localName === "p")) {
+      if (line) lines.push(line);
+      line = "";
+      lines.push(...codeLines(node));
+    } else line += node.textContent ?? "";
+  }
+  if (line || !lines.length) lines.push(...line.split("\n"));
+  return lines;
+}
+
+/** Whether a checkbox, `<en-todo>`, is ticked. */
+const ticked = (box: Element) => box.getAttribute("checked") === "true";
+
+/** A list item's first checkbox of its own, not one in a list under it. */
+const boxOf = (item: Element) => [...item.querySelectorAll("en-todo")].find((box) => box.parentElement!.closest("li") === item);
+
+/**
+ * An element's content as lines, each checkbox in it starting a task of its own (`[x] `) wherever it
+ * is, in a span or after a `<br>`, and each `<br>` a line: the inline elements a box is in are read
+ * through, their words kept.
+ */
+function taskLines(element: Element, markdown: MarkdownOf): string[] {
+  const lines: { task: boolean | null; nodes: Node[] }[] = [{ task: null, nodes: [] }];
+  const walk = (parent: Node) => {
+    for (const node of parent.childNodes) {
+      if (node instanceof Element && node.localName === "en-todo") lines.push({ task: ticked(node), nodes: [] });
+      else if (node instanceof Element && node.localName === "br") lines.push({ task: null, nodes: [] });
+      else if (node instanceof Element && node.querySelector("en-todo, br")) walk(node);
+      else lines.at(-1)!.nodes.push(node);
+    }
+  };
+  walk(element);
+  const holder = element.ownerDocument.createElement("div");
+  return lines.flatMap(({ task, nodes }) => {
+    holder.replaceChildren(...nodes.map((node) => node.cloneNode(true)));
+    const text = markdown.line(holder);
+    if (task === null) return text ? [text] : [];
+    return [`- [${task ? "x" : " "}] ${text}`];
+  });
+}
 
 /** A note's files, by their MD5, and which its text shows. */
 interface Files {
@@ -61,18 +120,22 @@ function enml(files: Files, report: Tally, title: string): OwnElements {
   return {
     block(element, markdown) {
       if (element.localName === "div" && says(element, "codeblock")) {
-        const lines = [...element.children].length ? [...element.children].map((line) => line.textContent ?? "") : (element.textContent ?? "").split("\n");
-        const code = lines.join("\n");
+        const code = codeLines(element).join("\n");
         const fence = "`".repeat(Math.max(3, ...[...code.matchAll(/`+/g)].map((run) => run[0].length + 1)));
         return [`${fence}\n${code}\n${fence}`];
       }
-      // A checklist, as Evernote 10 writes one, or a line starting with a box, as earlier versions did.
-      if (element.localName === "ul" && says(element, "todo")) {
-        return [[...element.children].map((item) => `- [${says(item, "checked") ? "x" : " "}] ${markdown.line(item)}`).join("\n")];
+      // Checkboxes, as earlier versions wrote checklists: each starts a task, wherever it is. Not in a list's item, which the list asks about (`task`).
+      if ((element.localName === "div" || element.localName === "p") && !element.closest("li") && element.querySelector("en-todo")) {
+        const lines = taskLines(element, markdown);
+        return lines.length ? [lines.join("\n")] : [];
       }
-      const box = element.localName === "div" && element.firstElementChild?.localName === "en-todo" && !element.firstChild?.textContent?.trim() ? element.firstElementChild : null;
-      if (box) return [`- [${box.getAttribute("checked") === "true" ? "x" : " "}] ${markdown.line(element)}`];
       return null;
+    },
+    // A checklist's item, as Evernote 10 writes one; or an item starting with a box.
+    task(item) {
+      if (says(item.parentElement!, "todo")) return says(item, "checked");
+      const box = boxOf(item);
+      return box ? ticked(box) : null;
     },
     inline(element, markdown) {
       switch (element.localName) {
@@ -92,7 +155,8 @@ function enml(files: Files, report: Tally, title: string): OwnElements {
         }
         case "en-crypt": {
           report.add("import.report.encrypted", title);
-          const hint = element.getAttribute("hint")?.trim();
+          // Its hint is only words: never a link, a tag or anything else.
+          const hint = escapeMarkdownText(element.getAttribute("hint") ?? "").join(" ").trim();
           return ` ${t(hint ? "import.evernote.encryptedHint" : "import.evernote.encrypted", { hint: hint ?? "" })} \`${(element.textContent ?? "").replace(/\s+/g, "")}\` `;
         }
         case "span":
@@ -113,7 +177,8 @@ const tightTasks = (markdown: string) => markdown.replace(/^(- \[[ x]\] .*)\n\n(
 
 /** The notes of one notebook's .enex, its name the notebook's. */
 export function readNotebook(notebook: string, xml: string, attachments: ExportedFile[], report: Tally, unpacking = new Unpacking()): SourceNote[] {
-  const document = new DOMParser().parseFromString(withoutDoctype(xml), "application/xml");
+  if (declaresEntities(xml)) throw new Error(`${notebook} declares entities, which lines doesn't expand`);
+  const document = new DOMParser().parseFromString(xml, "application/xml");
   if (document.querySelector("parsererror")) throw new Error(`${notebook} isn't an .enex file lines can read`);
   return [...document.querySelectorAll("en-export > note")].map((note) => {
     const own = (name: string) => note.querySelector(`:scope > ${name}`)?.textContent ?? "";

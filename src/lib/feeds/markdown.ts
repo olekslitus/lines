@@ -53,6 +53,8 @@ export interface MarkdownOf {
 export interface OwnElements {
   block?(element: Element, markdown: MarkdownOf): string[] | null;
   inline?(element: Element, markdown: MarkdownOf): string | null;
+  /** Whether a list's item is a task, and done (Evernote's checklists); null for one that isn't. */
+  task?(item: Element): boolean | null;
 }
 
 /** HTML as Markdown, its relative links and pictures read from `base`, and elements of its own as `own` says. */
@@ -215,19 +217,42 @@ class Writer implements MarkdownOf {
     }
   }
 
-  /** A list, the lists in its items nested under them. */
+  /**
+   * A list, the lists in its items nested under them, and a list right in it (as Evernote writes one)
+   * under the item before it. Anything else in it, outside an item, is an item of its own: never left out.
+   */
   list(element: Element): string {
     const ordered = element.localName === "ol";
     let number = Number(element.getAttribute("start")) || 1;
-    const items: string[] = [];
-    for (const item of element.children) {
-      if (item.localName !== "li") continue;
+    const items: { marker: string; text: string }[] = [];
+    const add = (text: string, task: boolean | null = null) => {
+      if (!text && task === null) return;
       const marker = ordered ? `${number++}. ` : "- ";
-      const nested = [...item.children].some((child) => child.localName === "ul" || child.localName === "ol");
-      const text = (nested ? this.#tight(item) : this.blocks(item).join("\n\n")).replace(/\n(?=.)/g, `\n${" ".repeat(marker.length)}`);
-      if (text) items.push(marker + text);
+      items.push({ marker, text: `${task === null ? "" : `[${task ? "x" : " "}] `}${text}` });
+    };
+    for (const node of element.childNodes) {
+      if (!(node instanceof Element)) {
+        add(node.nodeType === Node.TEXT_NODE ? escapeText(node.textContent ?? "").trim() : "");
+        continue;
+      }
+      if (SKIPPED.has(node.localName)) continue;
+      if (node.localName === "ul" || node.localName === "ol") {
+        const nested = this.list(node);
+        const last = items.at(-1);
+        if (!nested) continue;
+        if (last) last.text += `\n${nested}`;
+        else items.push({ marker: "", text: nested });
+        continue;
+      }
+      if (node.localName !== "li") {
+        add(this.blocks(node).join("\n\n"));
+        continue;
+      }
+      const nested = [...node.children].some((child) => child.localName === "ul" || child.localName === "ol");
+      add(nested ? this.#tight(node) : this.blocks(node).join("\n\n"), this.own?.task?.(node) ?? null);
     }
-    return items.join("\n");
+    // An item's lines after its first, and the lists under it, indented past its marker.
+    return items.map(({ marker, text }) => marker + text.replace(/\n(?=.)/g, `\n${" ".repeat(marker.length)}`)).join("\n");
   }
 
   /** A list item with a list in it: its own text, then the list right under it. */

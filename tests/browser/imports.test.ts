@@ -310,12 +310,41 @@ describe("Evernote", () => {
     // Entities made of entities ("billion laughs"), or one read from elsewhere: never expanded, so the file can't be read.
     const laughs = `<?xml version="1.0"?><!DOCTYPE en-export [<!ENTITY a "ha"><!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;"><!ENTITY c "&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;">]><en-export><note><title>&c;</title></note></en-export>`;
     const outside = `<?xml version="1.0"?><!DOCTYPE en-export [<!ENTITY x SYSTEM "file:///etc/passwd">]><en-export><note><title>&x;</title></note></en-export>`;
-    for (const xml of [laughs, outside]) expect(String(await read(xml))).toMatch(/isn't an \.enex file lines can read/);
+    // Nor past a DOCTYPE in a comment before it, nor one that would make megabytes: refused before it's read, at once.
+    const commented = `<?xml version="1.0"?><!-- <!DOCTYPE en-export> --><!DOCTYPE en-export [<!ENTITY a "ha">]><en-export><note><title>&a;</title></note></en-export>`;
+    const large = `<?xml version="1.0"?><!DOCTYPE en-export [<!ENTITY a "${"ha".repeat(50_000)}">]><en-export><note><title>${"&a;".repeat(100)}</title></note></en-export>`;
+    const started = Date.now();
+    for (const xml of [laughs, outside, commented, large]) expect(String(await read(xml))).toMatch(/declares entities/);
+    expect(Date.now() - started).toBeLessThan(2000);
     // Its files past what's left are left out, and said so; a picture in a table keeps the table's columns.
     const table = enex.replace('<table><tr><td>Item</td>', '<table><tr><td><en-media hash="884697b1b2bb4136e34ee5669e4030b6" type="image/png" width="300"/></td>');
     const held = (await read(table, 100)) as Exclude<Awaited<ReturnType<typeof read>>, string>;
     expect([held.attachments, held.report["import.report.skipped"]]).toEqual([["Work/Plan/photo.png", "Work/Plan/Report 2026.pdf"], [1, "Work/Untitled/File.png"]]);
     expect(held.notes[0].body).toContain("\n| ![\\|300](../attachments/\uE0000\uE000) | Cost |\n");
+  });
+
+  test("checklists nested, in lists or not, boxes anywhere in a line, older code blocks, and a hint that's only words", async () => {
+    app = await openApp();
+    const note = (content: string) =>
+      `<?xml version="1.0"?><en-export><note><title>Lists</title><created>20240301T090000Z</created><content><![CDATA[<en-note>${content}</en-note>]]></content></note></en-export>`;
+    const body = async (content: string) => (await app.page.evaluate((xml) => window.testing.readEnex("Work", xml), note(content))).notes[0].body.replace(/^# Lists\n\n/, "");
+    // A checklist in a checklist, in an item, and in a bullet list: tasks still, nested, ticked as they were.
+    expect(await body('<ul style="--en-todo:true;"><li style="--en-checked:true;">Done</li><ul style="--en-todo:true;"><li style="--en-checked:false;">Under it</li></ul><li style="--en-checked:false;">Open<ul style="--en-todo:true;"><li style="--en-checked:true;">In it</li></ul></li></ul>')).toBe(
+      "- [x] Done\n  - [ ] Under it\n- [ ] Open\n  - [x] In it\n",
+    );
+    expect(await body('<ul><li>Bullet</li><ul style="--en-todo:true;"><li style="--en-checked:true;">Task under it</li></ul><li><en-todo checked="true"/>A task in a bullet list</li></ul>')).toBe(
+      "- Bullet\n  - [x] Task under it\n- [x] A task in a bullet list\n",
+    );
+    // Boxes not first in their line: in a span, after words, several split by line breaks.
+    expect(await body('<div>Before <span><en-todo checked="true"/>in a span</span></div><div><en-todo/>one<br/><en-todo checked="true"/>two<br/>plain</div>')).toBe(
+      "Before\n- [x] in a span\n- [ ] one\n- [x] two\nplain\n",
+    );
+    // Older code blocks (`-en-codeblock`), and text right in one beside its lines.
+    expect(await body('<div style="-en-codeblock:true;">first<div>second</div>third</div>')).toBe("```\nfirst\nsecond\nthird\n```\n");
+    // A hint's words are only words.
+    expect(await body('<en-crypt hint="[x](https://evil.example) #tag">RU5D</en-crypt>')).toBe(
+      "🔒 Encrypted in Evernote (hint: \\[x](https://evil.example) \\#tag), as it was: `RU5D`\n",
+    );
   });
 
   test("imported from its .enex: the notebook a tag, its files kept; then nothing new", async () => {

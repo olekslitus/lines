@@ -168,7 +168,7 @@ Notion's Markdown export doesn't say when a page was made, so pages are dated wh
 | Tags | Tags (`big ideas` as `#big-ideas`) |
 | Its text (ENML, Evernote's HTML) | Linedown, read as lines reads a feed's HTML ([library.md](library.md#feeds)), where nothing in it runs or loads: paragraphs, headings, bold, italics, links (to the web and mail), lists, quotes, tables, pictures from the web. Scripts, forms and the like are left out, and its words are only words (a `#` in them isn't a tag) |
 | Its files (`<en-media>`, found by their MD5) | Kept in lines, pictures at their width; a file its text doesn't show, under it |
-| Checklists, old (`<en-todo>`) and new | Tasks, ticked where they were |
+| Checklists, old (`<en-todo>`) and new | Tasks, ticked where they were: each box a task wherever it is in a line, checklists nested as they were, in bullet lists too |
 | Code blocks | Code blocks |
 | Highlights | `==highlights==` |
 | Author, source URL | `author:` and `url:` properties |
@@ -177,5 +177,5 @@ Notion's Markdown export doesn't say when a page was made, so pages are dated wh
 
 Evernote's .enex has no id for a note, so importing again knows a note by its notebook, title and when it was made, whichever notebooks are chosen with it.
 
-**Read safely:** an .enex is XML read without its DOCTYPE, so nothing it declares is fetched from elsewhere or multiplied ("billion laughs"): a file that declares any is said not to be readable. Its files, in base64, are held to the same limits as a ZIP's ([above](#zips-and-how-big-an-export-can-be)): 256 MB each, 2 GB all told, any past that left out and said so. An .enex over 2 GB, or one that can't be read, is left out and said so, when other notebooks are chosen with it. In a table, a picture's width keeps the table's columns (`![\|300](…)`). The code is in `src/plugins/evernote/`: `enex.ts` reads a notebook, `md5.ts` names its files as Evernote does.
+**Read safely:** an .enex that declares entities (outside its notes' text) isn't read at all, so nothing is fetched from elsewhere or multiplied ("billion laughs"); Evernote's own declare none, and one that does is said not to be readable. Its files, in base64, are held to the same limits as a ZIP's ([above](#zips-and-how-big-an-export-can-be)): 256 MB each, 2 GB all told, any past that left out and said so. An .enex over 2 GB, or one that can't be read, is left out and said so, when other notebooks are chosen with it. In a table, a picture's width keeps the table's columns (`![\|300](…)`). The code is in `src/plugins/evernote/`: `enex.ts` reads a notebook, `md5.ts` names its files as Evernote does.
 

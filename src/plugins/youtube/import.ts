@@ -1,6 +1,6 @@
 import { readAtMost } from "../../lib/feeds/fetch";
 import { t } from "../../lib/i18n/index.svelte";
-import type { ImportWork } from "../../lib/imports/imports.svelte";
+import type { ImportWork, NewLibraryNote } from "../../lib/imports/imports.svelte";
 import { clock, known } from "../../lib/library/text";
 import { dayOf } from "../../lib/notes/calendar";
 import { getJson, LookupError, request } from "../../lib/library/web";
@@ -95,7 +95,7 @@ export function playlistVideoItem(video: PlaylistVideo, playlist: string): Libra
 
 /** What importing a playlist does: what it writes, and how many of its videos are new, are added to, and are there with it already. */
 export interface PlaylistPlan {
-  work: ImportWork;
+  work: ImportWork<NewLibraryNote>;
   adding: number;
   joining: number;
   there: number;
@@ -108,7 +108,7 @@ export interface PlaylistPlan {
  */
 export function planPlaylist(input: PlaylistInput, noteOf: NoteOfVideo): PlaylistPlan {
   const playlist = nameOf(input.playlist);
-  const work: ImportWork = { add: [], append: [], change: [] };
+  const work: ImportWork<NewLibraryNote> = { add: [], append: [], change: [] };
   let there = 0;
   let missing = 0;
   for (const video of input.videos) {

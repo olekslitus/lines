@@ -2,7 +2,7 @@
 
 **Calm, local-first notes in plain Markdown.** Type Markdown and see it formatted as you write. Your notes stay on your device, as ordinary text you can open anywhere.
 
-**[Try it in your browser →](https://oreksu.com/lines/app/)** No account, nothing to install. Or download the apps for Mac, Windows and Linux from [the website](https://oreksu.com/lines/#download), which also has [the docs](https://oreksu.com/lines/docs/).
+**[Try it in your browser →](https://olekslitus.com/lines/app/)** No account, nothing to install. Or download the apps for Mac, Windows and Linux from [the website](https://olekslitus.com/lines/#download), which also has [the docs](https://olekslitus.com/lines/docs/).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/images/app-dark.webp">
@@ -23,7 +23,7 @@
 
 ## Features
 
-The [web app](https://oreksu.com/lines/app/) opens with a tour: one short note per feature, to read and play with.
+The [web app](https://olekslitus.com/lines/app/) opens with a tour: one short note per feature, to read and play with.
 
 ### Writing
 
@@ -159,7 +159,7 @@ Press <kbd>⌘/</kbd> to see them all. On Windows and Linux, use <kbd>Ctrl</kbd>
 
 ## Documentation
 
-Also on the website: [oreksu.com/lines/docs](https://oreksu.com/lines/docs/).
+Also on the website: [olekslitus.com/lines/docs](https://olekslitus.com/lines/docs/).
 
 ### Using lines
 

@@ -2,6 +2,15 @@
 
 What changed in each release of lines. Written by `bun scripts/release.mjs prepare` from the commits since the release before (docs/releasing.md).
 
+## [0.6.0](https://github.com/overtio/lines/compare/v0.5.0...v0.6.0) (2026-11-16)
+
+### Features
+
+- **native:** build and run lines on Android phones and tablets ([#365](https://github.com/overtio/lines/pull/365))
+- **native:** build and run lines on iPhone and iPad ([#363](https://github.com/overtio/lines/pull/363))
+- **library:** import a YouTube playlist, or Watch Later from Google Takeout ([#361](https://github.com/overtio/lines/pull/361))
+- **import:** bring notes over from Evernote's .enex export ([#360](https://github.com/overtio/lines/pull/360))
+
 ## [0.5.0](https://github.com/overtio/lines/compare/v0.4.2...v0.5.0) (2026-11-16)
 
 ### Features

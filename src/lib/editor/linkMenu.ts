@@ -45,7 +45,7 @@ export const linkMenu = EditorView.domEventHandlers({
     event.preventDefault();
     const at = fromKeys ? view.coordsAtPos(link.to) : null;
     const element = (event.target as Element).closest<HTMLElement>(".cm-lp-link");
-    const actions = plugins.linkActions.filter((action) => !(action.edits && view.state.readOnly));
+    const actions = plugins.linkActions.filter((action) => !(action.edits && view.state.readOnly) && (action.offers?.(link) ?? true));
     ui.openMenu({
       x: at ? at.left : event.clientX,
       y: at ? at.bottom : event.clientY,

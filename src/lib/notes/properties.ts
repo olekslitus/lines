@@ -71,6 +71,21 @@ export function frontMatter(text: string): FrontMatter | null {
   return null;
 }
 
+/** A property's values as written, each on its own: a YAML list's items, or its one value. */
+export function itemsOf(text: string, property: Property): string[] {
+  const [first, ...more] = text.split("\n", property.end).slice(property.line - 1);
+  const value = PROPERTY.exec(first)?.[2];
+  const items = value ? [unquote(value)] : [];
+  for (const line of more) {
+    const continued = CONTINUED.exec(line);
+    if (!continued) continue;
+    // An item of a list, or an indented line going on with the one before.
+    if (continued[1] !== undefined || !items.length) items.push(unquote(continued[1] ?? continued[2]));
+    else items[items.length - 1] += ` ${unquote(continued[2])}`;
+  }
+  return items;
+}
+
 /**
  * A value as it reads: its quotes taken off (a single-quoted one's doubled `''` a quote again, as
  * YAML has it), and a `#` or `@` kept from being a tag or mention (`\#`, escape.ts) just that.
@@ -192,31 +207,34 @@ export function renameKey(body: string, from: string, to: string, only?: (value:
   return lines.join("\n");
 }
 
+/** A property's lines: `key: value`, or a list's items each on a line of its own. */
+const propertyLines = (key: string, value: string | string[]) => (typeof value === "string" ? [`${key}: ${value}`] : [`${key}:`, ...value.map((item) => `  - ${item}`)]);
+
 /**
  * The note with its properties changed: each key set to its value (as written, on the line it was
- * on, keeping how its key was written), or taken out where the value is null. Of a key written more
- * than once, the first is changed, or the one on `line`. New ones go at the end of the properties,
- * which are made if the note has none.
+ * on, keeping how its key was written; several, as a YAML list), or taken out where the value is
+ * null. Of a key written more than once, the first is changed, or the one on `line`. New ones go at
+ * the end of the properties, which are made if the note has none.
  */
-export function setProperties(body: string, changes: Record<string, string | null>, line?: number): string {
+export function setProperties(body: string, changes: Record<string, string | string[] | null>, line?: number): string {
   const front = frontMatter(body);
   const lines = body.split("\n");
   const added: string[] = [];
   const found = new Map<string, Property>();
   for (const property of front?.properties ?? []) if (!found.has(keyOf(property.key)) || property.line === line) found.set(keyOf(property.key), property);
-  const edits: { property: Property; value: string | null }[] = [];
+  const edits: { property: Property; written: string[] }[] = [];
   for (const [key, value] of Object.entries(changes)) {
     const property = found.get(keyOf(key));
-    if (property) edits.push({ property, value });
-    else if (value !== null) added.push(`${key}: ${value}`);
+    if (property) edits.push({ property, written: value === null ? [] : propertyLines(property.key, value) });
+    else if (value !== null) added.push(...propertyLines(key, value));
   }
   // From the bottom up, so the lines above keep their numbers.
-  for (const { property, value } of edits.sort((a, b) => b.property.line - a.property.line)) {
-    lines.splice(property.line - 1, property.end - property.line + 1, ...(value === null ? [] : [`${property.key}: ${value}`]));
+  for (const { property, written } of edits.sort((a, b) => b.property.line - a.property.line)) {
+    lines.splice(property.line - 1, property.end - property.line + 1, ...written);
   }
   if (!added.length) return lines.join("\n");
   if (!front) return ["---", ...added, "---", ...lines].join("\n");
-  const removed = edits.reduce((sum, { property, value }) => sum + (property.end - property.line + 1) - (value === null ? 0 : 1), 0);
+  const removed = edits.reduce((sum, { property, written }) => sum + (property.end - property.line + 1) - written.length, 0);
   lines.splice(front.lines - 1 - removed, 0, ...added);
   return lines.join("\n");
 }

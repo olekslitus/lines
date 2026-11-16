@@ -130,6 +130,13 @@ The home page and the docs at https://overtio.github.io/lines/ (`site/`):
 - A GIF is kept as its address on GIPHY, like an Unsplash photo: it needs the internet to show, and isn't in exports or sync as a picture. With reduced motion, GIFs from GIPHY show still, but other animated images in notes still play.
 - They're in Markdown notes only. A LaTeX note can't compile a picture from the web anyway.
 
+## YouTube playlists
+
+- A playlist is read from YouTube's own pages, which change as YouTube likes: one it can't read any more fails, saying so, and imports nothing. Only the apps can read them; on the web, only Takeout's files can be imported.
+- 5,000 videos at most from a playlist, YouTube's own limit; a Takeout file's are looked up one by one, five a second, so a long Watch Later takes a while (2,000 videos, about seven minutes).
+- Takeout says nothing of a video but its id: what's known of one is what oEmbed says (title, channel and picture), not its length or when it came out. Look Up Details, or the video's link in a note, fills in more in the apps.
+- A playlist read by its link from a link's menu with Settings in a window of its own opens Settings without the link: paste it there.
+
 ## Spotify, SoundCloud and YouTube
 
 - The players are the sites' own, in a frame. Spotify's plays 30 seconds of a song, an episode or a show to anyone not logged in to Spotify in that browser, and in the apps to everyone (the frame can't see a login made elsewhere, and WebKit has none of the protection, Widevine, Spotify's whole songs need in other browsers; not tried in the apps). Nothing of Spotify's plays through lines' own player, nor does SoundCloud's but for someone's podcast feed.

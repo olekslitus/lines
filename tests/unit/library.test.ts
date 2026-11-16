@@ -39,7 +39,7 @@ stubApp({ isTauri: false, webFetch: async () => async (url: string, init?: Reque
 
 const text = await import("../../src/lib/library/text");
 const { escapeMarkdown, propertyValue } = await import("../../src/lib/notes/escape");
-const { frontMatter, mentionOf, nameOf, readMention } = await import("../../src/lib/notes/properties");
+const { frontMatter, itemsOf, mentionOf, nameOf, propertyOf, readMention, setProperties } = await import("../../src/lib/notes/properties");
 const { computeMeta, extractTags } = await import("../../src/lib/notes/parse");
 const { plainLine } = await import("../../src/lib/notes/stats");
 const { pacing, withTimeout } = await import("../../src/lib/pacing");
@@ -50,7 +50,21 @@ const { readPage, decodeEntities } = await import("../../src/lib/library/page");
 const { itemOfPage } = await import("../../src/plugins/web-pages/read");
 const { webPages } = await import("../../src/plugins/web-pages");
 const { youtube, youtubeId } = await import("../../src/plugins/youtube");
-const { agoDate, channelAsFeed, channelPath, feedChannel, readChannelPage } = await import("../../src/plugins/youtube/channel");
+const { channelAsFeed, channelPath, feedChannel, readChannelPage } = await import("../../src/plugins/youtube/channel");
+const { agoDate } = await import("../../src/plugins/youtube/data");
+const { playlistIn, readPlaylistPage, readPlaylistMore } = await import("../../src/plugins/youtube/playlist");
+const { isTakeoutPlaylist, readTakeout } = await import("../../src/plugins/youtube/takeout");
+const { lookUpTakeout, planPlaylist, readPlaylist } = await import("../../src/plugins/youtube/import");
+const { channelLink, youtubeId: videoIdOf } = await import("../../src/plugins/youtube");
+
+/** The note of a video among `entries`, by any link to it: as the Library's same-check finds one (library/same.ts, which needs the notes store). */
+const videoNoteIn =
+  (entries: { note: { id: string }; meta: ReturnType<typeof computeMeta> }[]) =>
+  (link: string) =>
+    entries.find(({ meta }) => {
+      const there = meta.properties.find(({ key }) => key === "link")?.value;
+      return there && videoIdOf(new URL(there)) === videoIdOf(new URL(link));
+    });
 const { openLibrary, bookIn, isIsbn } = await import("../../src/plugins/open-library");
 const { wikidata, itemIn } = await import("../../src/plugins/wikidata");
 const { musicbrainz, musicIn } = await import("../../src/plugins/musicbrainz");
@@ -530,6 +544,180 @@ describe("YouTube", () => {
     expect(feed?.posts.map((post) => post.id)).toEqual(["yt:video:tidepool003", "yt:video:tidepool002", "yt:video:tidepool001"]);
     expect(await source.feedInstead!(new URL("https://example.com/feed.xml"), new AbortController().signal)).toBeNull();
     expect(asked.filter((url) => !url.startsWith("https://www.youtube.com/oembed"))).toEqual(["https://www.youtube.com/@tidepools/videos", `https://www.youtube.com/channel/${CHANNEL}/videos`]);
+  });
+});
+
+describe("YouTube playlists", () => {
+  const feedFixture = (name: string) => readFileSync(new URL(`../browser/feeds/${name}`, import.meta.url), "utf8");
+  const NOW = Date.UTC(2026, 10, 14, 12);
+  const signal = new AbortController().signal;
+
+  test("knows a playlist's link, and a video's in one; not a Mix, Watch Later or Liked, which only their owner sees", () => {
+    for (const link of ["https://www.youtube.com/playlist?list=PLtidepools0000000000001", "https://m.youtube.com/watch?v=tidepool002&list=PLtidepools0000000000001&index=2", "https://youtu.be/tidepool002?list=PLtidepools0000000000001"]) {
+      expect(playlistIn(new URL(link)), link).toBe("PLtidepools0000000000001");
+    }
+    for (const link of ["https://www.youtube.com/watch?v=tidepool002&list=RDtidepool002", "https://www.youtube.com/playlist?list=WL", "https://www.youtube.com/playlist?list=LL", "https://www.youtube.com/watch?v=tidepool002", "https://example.com/playlist?list=PLtidepools0000000000001"]) {
+      expect(playlistIn(new URL(link)), link).toBeNull();
+    }
+  });
+
+  test("a playlist's page, and what YouTube's API gives after it, in either way it writes its videos; those gone counted, not listed", () => {
+    const page = readPlaylistPage(feedFixture("youtube-playlist.html"), "https://www.youtube.com/playlist?list=PLtidepools0000000000001", NOW);
+    expect({ ...page, videos: page.videos.map(({ id, title, channel, duration }) => ({ id, title, channel, duration })) }).toEqual({
+      title: "Tide pools",
+      videos: [
+        { id: "tidepool002", title: "Anemones at low tide", channel: { name: "Tide Pool Science", link: "https://www.youtube.com/@tidepools" }, duration: 724 },
+        { id: "kelplab0001", title: "Kelp forests, slowly", channel: { name: "Kelp Lab", link: "https://www.youtube.com/@kelplab" }, duration: 1300 },
+      ],
+      gone: 1,
+      next: "tidepools-page-2",
+      client: "2.20261112.10.00",
+    });
+    const more = readPlaylistMore(JSON.parse(feedFixture("youtube-playlist-more.json")), NOW);
+    expect(more.videos.map(({ id, channel, duration }) => [id, channel?.name, duration])).toEqual([
+      ["tidepool003", "Tide Pool Science", 3956],
+      ["kelplab0001", undefined, 1300],
+    ]);
+    expect([more.gone, more.next]).toEqual([1, null]);
+    expect(() => readPlaylistPage("<html><title>Before you continue</title></html>", "https://consent.youtube.com/m", NOW)).toThrow();
+  });
+
+  test("reads a playlist a page at a time from YouTube, as its own page asks for more, each video once", async () => {
+    answers.set("https://www.youtube.com/playlist?list=PLtidepools0000000000001", feedFixture("youtube-playlist.html"));
+    answers.set("https://www.youtube.com/youtubei/v1/browse", JSON.parse(feedFixture("youtube-playlist-more.json")));
+    const read: number[] = [];
+    const playlist = await readPlaylist("PLtidepools0000000000001", signal, ({ read: count }) => read.push(count));
+    expect(playlist.playlist).toBe("Tide pools");
+    expect(playlist.videos.map(({ id }) => id)).toEqual(["tidepool002", "kelplab0001", "tidepool003"]);
+    expect(playlist.gone).toBe(2);
+    expect(read).toEqual([2, 3]);
+    expect(asked).toEqual(["https://www.youtube.com/playlist?list=PLtidepools0000000000001", "https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"]);
+    expect(playlist.unfinished).toBeUndefined();
+  });
+
+  test("stops reading when YouTube's answer has nothing new in it, or asks for a part it's given already, and says so", async () => {
+    /** YouTube's answer after the first page with these of its videos, and then the part after it, `next`. */
+    const answerWith = (ids: string[], next: string) => {
+      const more = JSON.parse(feedFixture("youtube-playlist-more.json"));
+      const action = more.onResponseReceivedActions[0].appendContinuationItemsAction;
+      action.continuationItems = [
+        ...action.continuationItems.filter(({ playlistVideoRenderer }: { playlistVideoRenderer: { videoId: string } }) => ids.includes(playlistVideoRenderer.videoId)),
+        { continuationItemRenderer: { continuationEndpoint: { continuationCommand: { token: next } } } },
+      ];
+      return more;
+    };
+    answers.set("https://www.youtube.com/playlist?list=PLtidepools0000000000001", feedFixture("youtube-playlist.html"));
+    // Nothing that wasn't on the first page, and another part after it.
+    answers.set("https://www.youtube.com/youtubei/v1/browse", answerWith(["kelplab0001"], "tidepools-page-3"));
+    const same = await readPlaylist("PLtidepools0000000000001", signal, () => {});
+    expect([same.videos.length, same.unfinished, asked.length]).toEqual([2, true, 2]);
+    // Something new, and then the part it's just given again.
+    asked.length = 0;
+    answers.set("https://www.youtube.com/youtubei/v1/browse", answerWith(["tidepool003"], "tidepools-page-2"));
+    const again = await readPlaylist("PLtidepools0000000000001", signal, () => {});
+    expect([again.videos.map(({ id }) => id), again.unfinished, asked.length]).toEqual([["tidepool002", "kelplab0001", "tidepool003"], true, 2]);
+  });
+
+  test("a Watch Later from Google Takeout, in either shape it's written; its name from the file, or from its name", () => {
+    const later = feedFixture("takeout-watch-later.csv");
+    const older = feedFixture("takeout-older.csv");
+    expect([isTakeoutPlaylist(later), isTakeoutPlaylist(older), isTakeoutPlaylist("Name,Email\nAda,ada@example.com\n")]).toEqual([true, true, false]);
+    expect(readTakeout(later, "Watch later-videos.csv")).toEqual({
+      title: "Watch later",
+      videos: [
+        { id: "tidepool003", added: Date.UTC(2026, 10, 10, 8, 15) },
+        { id: "tidepooldl1", added: Date.UTC(2026, 9, 2, 19) },
+        { id: "tidepool002", added: Date.UTC(2026, 8, 21, 12, 30) },
+        { id: "tidepoolpv1", added: Date.UTC(2026, 7, 1, 7, 45) },
+      ],
+    });
+    expect(readTakeout(older, "playlist.csv")).toEqual({
+      title: "Tides, crabs and kelp",
+      videos: [
+        { id: "tidepool001", added: Date.UTC(2026, 10, 10, 8, 15) },
+        { id: "tidepool002", added: Date.UTC(2025, 0, 5, 21) },
+      ],
+    });
+  });
+
+  test("Takeout's videos the Library hasn't are looked up, one gone or private counted; those it has aren't asked about", async () => {
+    answers.set(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent("https://www.youtube.com/watch?v=tidepool003")}`, { title: "How hermit crabs trade shells", author_name: "Tide Pool Science", author_url: "https://www.youtube.com/@tidepools" });
+    answers.set(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent("https://www.youtube.com/watch?v=tidepoolpv1")}`, 401);
+    const takeout = readTakeout(feedFixture("takeout-watch-later.csv"), "Watch later-videos.csv");
+    const there = [{ note: { id: "a" }, meta: computeMeta("---\ntype: video\nlink: https://youtu.be/tidepool002\n---\n# Anemones\n") }];
+    const input = await lookUpTakeout(takeout, "Watch later", videoNoteIn(there) as never, channelLink, signal, () => {});
+    expect(input.videos.map(({ id, title, channel }) => [id, title, channel?.link])).toEqual([
+      ["tidepool003", "How hermit crabs trade shells", "https://www.youtube.com/@tidepools"],
+      ["tidepool002", "", undefined],
+    ]);
+    expect(input.gone).toBe(2);
+    expect(asked.some((url) => url.includes("tidepool002"))).toBe(false);
+  });
+
+  test("importing makes a note of each video the Library hasn't, adds the playlist to each it has, and leaves those with it", () => {
+    const entry = (id: string, body: string) => ({ note: { id, body, trashed: false }, meta: computeMeta(body) });
+    const notesThere = [
+      entry("a", "---\ntype: video\nlink: https://youtu.be/tidepool002\nplaylist: Watch later\n---\n# Anemones\n"),
+      entry("b", "---\ntype: video\nlink: https://www.youtube.com/watch?v=tidepool003\nplaylist: Watch later\n---\n# Crabs\n"),
+    ];
+    const plan = planPlaylist(
+      {
+        playlist: "Tide pools",
+        gone: 0,
+        videos: [
+          { id: "tidepool002", title: "Anemones at low tide" },
+          { id: "kelplab0001", title: "Kelp forests, slowly", channel: { name: "Kelp Lab", link: "https://www.youtube.com/@kelplab" }, duration: 1300, added: Date.UTC(2026, 10, 1, 12) },
+        ],
+      },
+      videoNoteIn(notesThere) as never,
+    );
+    expect([plan.adding, plan.joining, plan.there]).toEqual([1, 1, 0]);
+    expect(plan.work.change!.map(({ id, properties }) => [id, properties(notesThere[0].note.body)])).toEqual([["a", { playlist: ["Watch later", "Tide pools"] }]]);
+    expect(plan.work.add[0]).toEqual({
+      item: {
+        type: "video",
+        title: "Kelp forests, slowly",
+        link: "https://www.youtube.com/watch?v=kelplab0001",
+        properties: [["channel", "Kelp Lab"], ["duration", "21:40"], ["playlist", "Tide pools"], ["added", "2026-11-01"]],
+        linked: { channel: "https://www.youtube.com/@kelplab" },
+        cover: "https://i.ytimg.com/vi/kelplab0001/mqdefault.jpg",
+      },
+      created: Date.UTC(2026, 10, 1, 12),
+    });
+    // Imported again: nothing new, nothing to add to.
+    const again = planPlaylist({ playlist: "Watch later", gone: 0, videos: [{ id: "tidepool002", title: "" }] }, videoNoteIn(notesThere) as never);
+    expect([again.adding, again.joining, again.there]).toEqual([0, 0, 1]);
+  });
+
+  test("a playlist's name with a comma, or spaces, in it is one name, in a list once there are more: imported again, nothing changes", () => {
+    const entry = (id: string, body: string) => ({ note: { id, body, trashed: false }, meta: computeMeta(body) });
+    const notesThere = [entry("a", "---\ntype: video\nlink: https://youtu.be/tidepool002\nplaylist: Watch later\n---\n# Anemones\n")];
+    const input = {
+      playlist: "Tides, crabs  and kelp",
+      gone: 0,
+      videos: [
+        { id: "tidepool002", title: "Anemones at low tide" },
+        { id: "kelplab0001", title: "Kelp forests, slowly" },
+      ],
+    };
+    const plan = planPlaylist(input, videoNoteIn(notesThere) as never);
+    const { id, properties } = plan.work.change![0];
+    const joined = setProperties(notesThere[0].note.body, properties(notesThere[0].note.body));
+    expect(joined).toBe("---\ntype: video\nlink: https://youtu.be/tidepool002\nplaylist:\n  - Watch later\n  - Tides, crabs and kelp\n---\n# Anemones\n");
+    expect(itemsOf(joined, propertyOf(frontMatter(joined)!.properties, "playlist")!)).toEqual(["Watch later", "Tides, crabs and kelp"]);
+    const made = text.libraryNoteText(plan.work.add[0].item);
+    expect(made).toContain("\nplaylist: Tides, crabs and kelp\n");
+    // Written so by then (typed, or from another device): nothing's changed.
+    expect(properties(joined)).toEqual({});
+    const after = [entry(id, joined), entry("b", made)];
+    const again = planPlaylist(input, videoNoteIn(after) as never);
+    expect([again.adding, again.joining, again.there]).toEqual([0, 0, 2]);
+  });
+
+  test("a video of Takeout's the Library had, so not looked up, whose note's gone by Import, isn't made untitled: the report says so", () => {
+    const plan = planPlaylist({ playlist: "Watch later", gone: 0, videos: [{ id: "tidepool002", title: "" }, { id: "kelplab0001", title: "Kelp forests, slowly" }] }, () => undefined);
+    expect(plan.work.add.map(({ item }) => item.title)).toEqual(["Kelp forests, slowly"]);
+    expect(plan.work.report).toEqual(["plugins.youtube.missing"]);
   });
 });
 

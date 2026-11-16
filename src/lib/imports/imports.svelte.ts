@@ -1,5 +1,6 @@
 import { keepCover } from "../library/covers";
 import { libraryNote } from "../library/note";
+import { setProperties } from "../notes/properties";
 import { notes } from "../notes/store.svelte";
 import type { Note, NoteSource } from "../notes/types";
 import { plugins } from "../plugins/registry.svelte";
@@ -50,12 +51,23 @@ export interface Addition {
   text: string;
 }
 
-/** What an import writes: notes it makes, and what it adds to notes there (each note once). */
+/**
+ * Properties an import sets on a note there (a video's `playlist`), each value as written (several
+ * as a list), worked out from the note's text as it is when they're written: so what's been typed in
+ * it, or come with sync, since the import was worked out is kept.
+ */
+export interface Change {
+  id: string;
+  properties: (body: string) => Record<string, string | string[] | null>;
+}
+
+/** What an import writes: notes it makes, and what it adds to notes there or changes in their properties (each note once). */
 export interface ImportWork<Made extends NewNote = NewNote> {
   /** What didn't come across as it was, a line each, said with what it did. */
   report?: string[];
   add: Made[];
   append: Addition[];
+  change?: Change[];
 }
 
 /** How an import's going, or how it went, by its `id`. */
@@ -180,8 +192,13 @@ class Imports {
       this.state = { id, kind: "done", added: 0, appended: 0, stopped: false, failed: true };
       return;
     }
-    const { add, append, report } = work;
-    const total = add.length + append.length;
+    const { add, append, change = [], report } = work;
+    // What's added to notes there, or changed in their properties: as an edit of each one's text.
+    const edits = [
+      ...append.map(({ id: note, text }) => ({ note, edit: (before: string) => `${before.trimEnd()}\n\n${text.trim()}\n` })),
+      ...change.map(({ id: note, properties }) => ({ note, edit: (before: string) => setProperties(before, properties(before)) })),
+    ];
+    const total = add.length + edits.length;
     if (!total) {
       this.state = { id, kind: "done", added: 0, appended: 0, stopped: false, failed: false };
       return;
@@ -205,14 +222,22 @@ class Imports {
         progress();
         await breathe();
       }
-      for (let i = 0; i < append.length && !signal.aborted; i++) {
-        const { id: note, text } = append[i];
-        const before = notes.get(note)?.note.body;
-        if (before === undefined) continue;
-        const after = `${before.trimEnd()}\n\n${text.trim()}\n`;
-        // Something added to, not changed by hand: the list keeps it where it is.
-        notes.setText(note, after, { keepDate: true });
-        wrote.appended.push({ id: note, before, after });
+      for (let i = 0; i < edits.length && !signal.aborted; i++) {
+        const { note, edit } = edits[i];
+        // Not one locked or trashed since the import was worked out.
+        const current = notes.get(note)?.note;
+        if (!current || current.locked || current.trashed) continue;
+        // Edited as it is when it's written (with what's being typed in it), not as it was. Something
+        // added to, not changed by hand: the list keeps it where it is.
+        notes.setText(
+          note,
+          (before) => {
+            const after = edit(before);
+            if (after !== before) wrote.appended.push({ id: note, before, after });
+            return after;
+          },
+          { keepDate: true },
+        );
         if ((i + 1) % BATCH === 0) {
           progress();
           await breathe();

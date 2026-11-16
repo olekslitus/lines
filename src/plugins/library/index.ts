@@ -97,7 +97,7 @@ const KINDS: LibraryKind[] = [
     name: t("library.video"),
     label: t("library.videos"),
     icon: "square-play",
-    properties: ["channel", "published", "duration"],
+    properties: ["channel", "published", "duration", "playlist", "added"],
     subtitle: ["channel", "duration"],
     mentions: ["channel"],
     cover: "wide",

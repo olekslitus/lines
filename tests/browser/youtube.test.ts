@@ -260,7 +260,103 @@ test("on the web, where YouTube doesn't let pages read it, subscribing to a chan
   const field = page.getByRole("textbox", { name: "Link to a feed, a site or a podcast on Apple Podcasts" });
   await field.fill(HANDLE);
   await field.press("Enter");
-  await page.getByText("This feed’s site doesn’t let web pages read it. The desktop apps can.").waitFor();
+  await page.getByRole("dialog", { name: "Subscribe to a feed" }).getByText("This feed’s site doesn’t let web pages read it. The desktop apps can.").waitFor();
   expect(await page.evaluate(() => window.testing.feeds.subscriptions.length)).toBe(0);
   app.errors.length = 0;
 });
+
+/** What each video's oEmbed says, by its id; one missing isn't there any more (404), and `private` won't say (401). */
+const EMBEDS: Record<string, { title: string; author_name: string; author_url: string } | "private"> = {
+  tidepool002: { title: "Anemones at low tide", author_name: "Tide Pool Science", author_url: HANDLE },
+  tidepool003: { title: "How hermit crabs trade shells", author_name: "Tide Pool Science", author_url: HANDLE },
+  kelplab0001: { title: "Kelp forests, slowly", author_name: "Kelp Lab", author_url: "https://www.youtube.com/@kelplab" },
+  tidepoolpv1: "private",
+};
+
+/** Answers YouTube for an import: oEmbed for each video, a playlist's page, and what its API gives after it. The addresses asked. */
+async function servePlaylist(page: Page) {
+  const asked: string[] = [];
+  await answerPictures(page);
+  await page.route(
+    (url) => url.hostname === "www.youtube.com",
+    (route: Route) => {
+      const url = new URL(route.request().url());
+      asked.push(`${route.request().method()} ${url.pathname}${url.pathname === "/oembed" ? ` ${new URL(url.searchParams.get("url")!).searchParams.get("v")}` : ""}`);
+      if (url.pathname === "/oembed") {
+        const embed = EMBEDS[new URL(url.searchParams.get("url")!).searchParams.get("v")!];
+        if (!embed) return route.fulfill({ status: 404, headers: CORS, body: "" });
+        return embed === "private" ? route.fulfill({ status: 401, headers: CORS, body: "" }) : route.fulfill({ headers: CORS, json: embed });
+      }
+      if (url.pathname === "/playlist") return route.fulfill({ headers: CORS, contentType: "text/html", body: fixture("youtube-playlist.html") });
+      if (url.pathname === "/youtubei/v1/browse") return route.fulfill({ headers: CORS, contentType: "application/json", body: fixture("youtube-playlist-more.json") });
+      return route.fulfill({ status: 404, headers: CORS, body: "" });
+    },
+  );
+  return asked;
+}
+
+/** The Library's video notes: their titles and properties, by title. */
+const videos = (page: Page) =>
+  page.evaluate(() =>
+    Object.fromEntries(
+      window.testing.notes.entries
+        .filter(({ note, meta }) => meta.type === "video" && !note.trashed)
+        .map(({ meta }) => [meta.title, Object.fromEntries(meta.properties.map(({ key, value }) => [key, value]))]),
+    ),
+  );
+
+test("Watch Later from Google Takeout: each video the Library hasn't looked up, those deleted or private left out; imported again, nothing's added", async () => {
+  app = await openApp({ timezone: "UTC" });
+  const { page } = app;
+  const asked = await servePlaylist(page);
+  const settings = await app.settings("Library");
+  const choose = () => settings.locator("input[type=file][accept*='.csv']").setInputFiles({ name: "Watch later-videos.csv", mimeType: "text/csv", buffer: Buffer.from(fixture("takeout-watch-later.csv")) });
+  await choose();
+  await settings.getByText("4 videos in Watch later.").waitFor();
+  await settings.getByText("2 are new to the Library.").waitFor();
+  await settings.getByText("2 were deleted or made private: left out.").waitFor();
+  await settings.getByRole("button", { name: "Import", exact: true }).click();
+  await settings.getByText("Added 2 videos.").waitFor();
+  expect(await videos(page)).toEqual({
+    "How hermit crabs trade shells": { type: "video", channel: "[Tide Pool Science](https://www.youtube.com/@tidepools)", playlist: "Watch later", added: "2026-11-10", link: "https://www.youtube.com/watch?v=tidepool003", status: "to watch" },
+    "Anemones at low tide": { type: "video", channel: "[Tide Pool Science](https://www.youtube.com/@tidepools)", playlist: "Watch later", added: "2026-09-21", link: "https://www.youtube.com/watch?v=tidepool002", status: "to watch" },
+  });
+  expect(asked.filter((each) => each.startsWith("GET /oembed")).sort()).toEqual(["GET /oembed tidepool002", "GET /oembed tidepool003", "GET /oembed tidepooldl1", "GET /oembed tidepoolpv1"]);
+
+  // Again: nothing new, and only the two gone asked about.
+  asked.length = 0;
+  await settings.getByRole("button", { name: "Undo Import" }).waitFor();
+  await choose();
+  await settings.getByText("2 are in the Library with it already: left as they are.").waitFor();
+  expect(await settings.getByRole("button", { name: "Import", exact: true }).count()).toBe(0);
+  expect(asked.sort()).toEqual(["GET /oembed tidepooldl1", "GET /oembed tidepoolpv1"]);
+  // The browser says each gone video's answer (404, 401) failed to load: only those.
+  expect(app.errors.every((error) => /status of 40[14]/.test(error))).toBe(true);
+  app.errors.length = 0;
+});
+
+test("a playlist by its link, from a link's menu: read a page at a time, a video there already given the playlist too", async () => {
+  app = await openApp({ timezone: "UTC" });
+  const { page } = app;
+  const asked = await servePlaylist(page);
+  await app.open("---\ntype: video\nlink: https://youtu.be/tidepool002\nplaylist: Watch later\nstatus: watched\n---\n# Anemones at low tide\n");
+  await app.open("# To watch\n\nThe [tide pools](https://www.youtube.com/playlist?list=PLtidepools0000000000001) one.\n");
+  await page.locator(".cm-content .cm-lp-link").click({ button: "right" });
+  await page.getByRole("menuitem", { name: "Import Playlist…" }).click();
+  const settings = page.getByRole("dialog", { name: "Settings" });
+  await settings.getByText("5 videos in Tide pools.").waitFor();
+  await settings.getByText("1 is in the Library already: Tide pools is added to its playlists.").waitFor();
+  await settings.getByText("2 were deleted or made private: left out.").waitFor();
+  expect(asked).toEqual(["GET /playlist", "POST /youtubei/v1/browse"]);
+  await settings.getByRole("button", { name: "Import", exact: true }).click();
+  await settings.getByText("Added 2 videos. Added the playlist to 1 video there already.").waitFor();
+  const found = await videos(page);
+  expect(found["Anemones at low tide"]).toMatchObject({ playlist: "Watch later, Tide pools", status: "watched" });
+  expect(found["Kelp forests, slowly"]).toMatchObject({ channel: "[Kelp Lab](https://www.youtube.com/@kelplab)", playlist: "Tide pools", duration: "21:40" });
+  expect(found["How hermit crabs trade shells"]).toMatchObject({ channel: "[Tide Pool Science](https://www.youtube.com/@tidepools)", duration: "1:05:56" });
+  // Undo takes back what it made, and what it added the playlist to.
+  await settings.getByRole("button", { name: "Undo Import" }).click();
+  await page.waitForFunction(() => window.testing.notes.entries.filter(({ note, meta }) => meta.type === "video" && !note.trashed).length === 1);
+  expect((await videos(page))["Anemones at low tide"]).toMatchObject({ playlist: "Watch later" });
+});
+

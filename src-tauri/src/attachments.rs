@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU32, Ordering};
 
-use tauri::{ipc::InvokeBody, AppHandle, Manager};
+use tauri::{AppHandle, Manager};
 
 use crate::folder_sync::{percent_decode, valid_name};
 
@@ -30,15 +30,12 @@ const RUNS: &[&str] = &[
 /// comes in `x-name` and the name to show, percent-encoded, in `x-file-name`.
 #[tauri::command]
 pub async fn open_attachment(app: AppHandle, request: tauri::ipc::Request<'_>) -> Result<(), String> {
-  let InvokeBody::Raw(bytes) = request.body() else {
-    return Err("Expected the file's contents".into());
-  };
+  let bytes = crate::body::bytes(request.body()).ok_or("Expected the file's contents")?;
   let header = |key: &str| request.headers().get(key).and_then(|value| value.to_str().ok()).map(str::to_owned);
   let name = header("x-name").filter(|name| valid_name(name)).ok_or("Not an attachment")?;
   let shown = header("x-file-name").and_then(|name| percent_decode(&name)).unwrap_or_else(|| name.clone());
   let folder = app.path().app_cache_dir().map_err(|e| e.to_string())?.join("attachments").join(stem(&name));
   let path = folder.join(file_name(&shown, &name));
-  let bytes = bytes.clone();
   tauri::async_runtime::spawn_blocking(move || write_once(&path, &bytes).map(|_| path))
     .await
     .map_err(|e| e.to_string())?

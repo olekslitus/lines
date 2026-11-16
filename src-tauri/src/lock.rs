@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 
 use tauri::{
-  ipc::{InvokeBody, Request, Response},
+  ipc::{Request, Response},
   State,
 };
 
@@ -28,10 +28,7 @@ impl Unlocked {
 
 #[tauri::command]
 pub fn lock_share(state: State<'_, Unlocked>, request: Request<'_>) -> Result<(), String> {
-  let InvokeBody::Raw(bytes) = request.body() else {
-    return Err("Expected the key".into());
-  };
-  state.set(Some(bytes.clone()));
+  state.set(Some(crate::body::bytes(request.body()).ok_or("Expected the key")?));
   Ok(())
 }
 

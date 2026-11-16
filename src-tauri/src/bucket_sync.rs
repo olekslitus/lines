@@ -9,7 +9,7 @@ use std::sync::OnceLock;
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
-use tauri::ipc::{InvokeBody, Request, Response};
+use tauri::ipc::{Request, Response};
 use tauri_plugin_http::reqwest::{self, header, Url};
 
 use crate::folder_sync::percent_decode;
@@ -52,17 +52,8 @@ pub async fn sync_bucket_transfer(request: Request<'_>) -> Result<Response, Fail
     .and_then(percent_decode)
     .ok_or_else(|| Failure::unsent("Missing request"))?;
   let signed = serde_json::from_str(&signed).map_err(Failure::unsent)?;
-  transfer(client(), signed, file(request.body())?).await.map(Response::new)
-}
-
-/// The file in the request body: its bytes, or from Android, where Tauri's IPC sends every body as
-/// JSON, a number for each.
-fn file(body: &InvokeBody) -> Result<Vec<u8>, Failure> {
-  match body {
-    // Copied: Tauri only lends a command its body, and the request needs one of its own.
-    InvokeBody::Raw(bytes) => Ok(bytes.clone()),
-    InvokeBody::Json(numbers) => Vec::deserialize(numbers).map_err(Failure::unsent),
-  }
+  let file = crate::body::bytes(request.body()).ok_or_else(|| Failure::unsent("Expected the file's contents"))?;
+  transfer(client(), signed, file).await.map(Response::new)
 }
 
 async fn transfer(client: &reqwest::Client, signed: Signed, file: Vec<u8>) -> Result<Vec<u8>, Failure> {
@@ -240,12 +231,5 @@ mod tests {
     }
     let deleted = send("DELETE", "https://s3.example.com/notes/attachments/a.png", Vec::new());
     assert_eq!(deleted, Err(Failure::unsent("Not a transfer: DELETE")));
-  }
-
-  #[test]
-  fn reads_the_file_as_android_sends_it() {
-    assert_eq!(file(&InvokeBody::Raw(vec![0, 7, 255])), Ok(vec![0, 7, 255]));
-    assert_eq!(file(&InvokeBody::Json(serde_json::json!([0, 7, 255]))), Ok(vec![0, 7, 255]));
-    assert_eq!(file(&InvokeBody::Json(serde_json::json!([]))), Ok(Vec::new()));
   }
 }

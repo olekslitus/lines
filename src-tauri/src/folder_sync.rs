@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
 
 use serde::Serialize;
-use tauri::ipc::{InvokeBody, Request, Response};
+use tauri::ipc::{Request, Response};
 use tauri::{AppHandle, Manager};
 
 /// A synced cloud folder found on this computer.
@@ -248,13 +248,10 @@ fn read_file(path: &Path) -> Result<Option<Vec<u8>>, String> {
 /// `x-dir` and `x-name` headers.
 #[tauri::command]
 pub async fn sync_folder_write_file(request: Request<'_>) -> Result<(), String> {
-  let InvokeBody::Raw(bytes) = request.body() else {
-    return Err("Expected the file's contents".into());
-  };
+  let bytes = crate::body::bytes(request.body()).ok_or("Expected the file's contents")?;
   let header = |key: &str| request.headers().get(key).and_then(|value| value.to_str().ok()).map(str::to_owned);
   let dir = header("x-dir").and_then(|dir| percent_decode(&dir)).ok_or("Missing folder")?;
   let name = header("x-name").ok_or("Missing file name")?;
-  let bytes = bytes.clone();
   blocking(move || write_atomic(&file(&dir, &name)?, &bytes).map(|_| ())).await
 }
 

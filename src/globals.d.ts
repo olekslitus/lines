@@ -6,6 +6,10 @@ interface Window {
   EXCALIDRAW_ASSET_PATH?: string | string[];
   /** Picks a color from anywhere on the screen: Chromium's, which TypeScript's DOM types don't have yet. */
   EyeDropper?: new () => { open(): Promise<{ sRGBHex: string }> };
+  /** Goes back a step, for the system's Back: whether there was one to go (App.svelte). */
+  linesBack?: () => boolean;
+  /** The Android app's status and navigation bars: the page's background behind them, their icons light on a dark one (MainActivity.kt). */
+  linesSystemBars?: { setColors(background: string, dark: boolean): void };
 }
 
 /** The messages each of Settings' sections shows, by its id, for its search, each with the part it's in (vite.config.ts). */

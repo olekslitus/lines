@@ -2,6 +2,7 @@ use tauri::Manager;
 
 mod addresses;
 mod attachments;
+mod body;
 mod bucket_sync;
 mod devtools;
 mod drag_out;

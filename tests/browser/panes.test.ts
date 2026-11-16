@@ -250,3 +250,24 @@ test("on a phone, a new note slides in with its editor in view: the panes can't 
   });
   expect(shifted).toBe(0);
 });
+
+test("on a phone, the system's Back closes Settings, then the sidebar, then the note; then it's left to the system", async () => {
+  app = await openApp({ width: 390 });
+  const { page } = app;
+  await app.open("Some text");
+  const back = () => page.evaluate(() => window.linesBack!());
+  const inert = (pane: string) => page.locator(`[data-pane=${pane}]`).evaluate((element) => (element as HTMLElement).inert);
+  await page.keyboard.press(`${mod()}+\\`);
+  await page.waitForFunction(() => !(document.querySelector("[data-pane=sidebar]") as HTMLElement).inert);
+  await page.locator("[data-pane=sidebar]").getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("dialog").waitFor();
+  expect(await back()).toBe(true);
+  await page.getByRole("dialog").waitFor({ state: "hidden" });
+  expect(await inert("sidebar")).toBe(false);
+  expect(await back()).toBe(true);
+  expect(await inert("sidebar")).toBe(true);
+  expect(await inert("list")).toBe(true);
+  expect(await back()).toBe(true);
+  expect(await inert("list")).toBe(false);
+  expect(await back()).toBe(false);
+});

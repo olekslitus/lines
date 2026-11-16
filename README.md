@@ -212,7 +212,7 @@ In a debug build of the desktop app, <kbd>F12</kbd> (or View → Developer Tools
 <details>
 <summary><b>Mobile</b></summary>
 
-The Xcode project is in `src-tauri/gen/apple`; there's no need to run `tauri ios init` again. CI checks that the native side compiles for the iOS simulator; the app itself is built by hand. What doesn't work on phones yet is in [limitations.md](docs/limitations.md#the-iphone-ipad-and-android-apps).
+The Xcode project is in `src-tauri/gen/apple` and the Android Studio one in `src-tauri/gen/android`; there's no need to run `tauri ios init` or `tauri android init` again. CI checks that the native side compiles for the iOS simulator and Android; the apps themselves are built by hand. What doesn't work on phones yet is in [limitations.md](docs/limitations.md#the-iphone-ipad-and-android-apps).
 
 **iOS** needs Xcode with the iOS platform its SDK is for (Xcode → Settings → Components, or `xcodebuild -downloadPlatform iOS`), CocoaPods (`brew install cocoapods`; Tauri's CLI adds XcodeGen and libimobiledevice itself), and Rust's iOS targets:
 
@@ -230,6 +230,30 @@ bun run tauri ios dev "iPhone 17"
 ```
 
 A debug build's web view can be inspected from Safari (Develop → Simulator). An iPhone or iPad of your own needs your Apple development team: set `APPLE_DEVELOPMENT_TEAM` in your shell, not in `tauri.conf.json`, then `bun run tauri ios dev --host` with the device connected.
+
+**Android** needs JDK 17, the Android SDK with its NDK (Android Studio installs them, or the command-line tools do), and Rust's Android targets. On a Mac without Android Studio:
+
+```sh
+brew install openjdk@17
+brew install --cask android-commandlinetools
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+export ANDROID_HOME=$HOME/Library/Android/sdk
+export NDK_HOME=$ANDROID_HOME/ndk/28.2.13676358
+export PATH=$ANDROID_HOME/platform-tools:$PATH   # adb
+yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
+sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-37.0" "build-tools;36.0.0" "ndk;28.2.13676358" \
+  "emulator" "system-images;android-36;google_apis;arm64-v8a"
+rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+
+# A debug APK for an arm64 phone or emulator, then onto it
+bun run tauri android build --debug --apk --target aarch64
+adb install src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
+
+# Or run it with the dev server, on a running emulator or a phone with USB debugging
+bun run tauri android dev
+```
+
+An emulator to run it on: `avdmanager create avd -n phone -k "system-images;android-36;google_apis;arm64-v8a" -d pixel_8`, then `$ANDROID_HOME/emulator/emulator -avd phone`. A debug build's web view can be inspected from Chrome (`chrome://inspect`). The debug app is `com.overtio.lines.debug`, so it installs beside a release one. A release APK or app bundle has to be signed with a keystore of your own.
 
 </details>
 

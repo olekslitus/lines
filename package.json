@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json && tsc -p tests/tsconfig.json && tsc -p tools/tsconfig.json",
     "lint": "oxlint --deny-warnings",
-    "test": "bun test --preload ./tests/unit/setup.ts tests/unit",
+    "test": "bun test --isolate --preload ./tests/unit/setup.ts tests/unit",
     "test:browser": "bun test --preload ./tests/browser/setup.ts --timeout 30000 tests/browser",
     "bench": "bun scripts/bench.mjs",
     "notices": "bun scripts/notices.mjs",

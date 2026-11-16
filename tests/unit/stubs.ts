@@ -5,9 +5,9 @@ import type { Import } from "../../src/lib/plugins/types";
 /*
  * What a module imports for the app, which a unit test outside a page doesn't have: messages (as
  * their keys), the platform (a page that isn't the app's, nothing in it doing anything) and the
- * plugins (none on: they read the page's storage). Mocks are the whole run's, every file's, so each
- * test that needs them asks for all of them here, with its own `platform` in place of any; a module
- * mocked again later has the same exports.
+ * plugins (none on: they read the page's storage). Each test file runs with modules and mocks of its
+ * own (`--isolate`, package.json), whatever ran before it, so a file that needs these asks for all of
+ * them here, with its own `platform` in place of any; a module mocked again later has the same exports.
  */
 
 const platformPath = new URL("../../src/lib/platform.ts", import.meta.url).pathname;

@@ -1,10 +1,11 @@
 import { readAtMost } from "../../lib/feeds/fetch";
+import { t } from "../../lib/i18n/index.svelte";
 import type { ImportWork } from "../../lib/imports/imports.svelte";
 import { clock, known } from "../../lib/library/text";
 import { dayOf } from "../../lib/notes/calendar";
 import { getJson, LookupError, request } from "../../lib/library/web";
 import { propertyValue } from "../../lib/notes/escape";
-import { propertyOf } from "../../lib/notes/properties";
+import { frontMatter, itemsOf, propertyOf } from "../../lib/notes/properties";
 import type { Entry } from "../../lib/notes/store.svelte";
 import { pacing, pause } from "../../lib/pacing";
 import type { LibraryItem } from "../../lib/plugins/types";
@@ -32,11 +33,16 @@ export interface PlaylistVideo extends ListedVideo {
   added?: number;
 }
 
-/** What an import of a playlist gives `imports.start`: its name, its videos, the latest added first, and how many it lists that are gone. */
+/**
+ * What an import of a playlist gives `imports.start`: its name, its videos, the latest added first
+ * (one of Takeout's the Library has, untitled: it wasn't looked up), how many it lists that are
+ * gone, and whether YouTube stopped answering sensibly before its end (`unfinished`).
+ */
 export interface PlaylistInput {
   playlist: string;
   videos: PlaylistVideo[];
   gone: number;
+  unfinished?: boolean;
 }
 
 /** How reading a playlist is getting on: how many of its videos are read, of how many there are where that's known. */
@@ -51,12 +57,24 @@ export type NoteOfVideo = (link: string) => Entry | undefined;
 /** A video's link, by its id. */
 export const videoLink = (id: string) => `https://www.youtube.com/watch?v=${id}`;
 
-/** A note's playlists, as its `playlist` lists them (`Watch later, Physics`). */
-const playlistsOf = (entry: Entry) =>
-  (propertyOf(entry.meta.properties, "playlist")?.value ?? "")
-    .split(",")
-    .map((name) => name.trim())
-    .filter(Boolean);
+/** A playlist's name as it's compared and written: on one line, its spaces one each. */
+const nameOf = (name: string) => name.replace(/\s+/g, " ").trim();
+
+/** The playlists a note's `playlist` names: its one value, or each of its list's items (a name may have a comma in it). */
+function playlistsIn(body: string): string[] {
+  const property = propertyOf(frontMatter(body)?.properties ?? [], "playlist");
+  return property ? itemsOf(body, property).map(nameOf).filter(Boolean) : [];
+}
+
+/** A note's `playlist` with `playlist` in it, as it is when it's written (nothing, where it's there already); several as a list. */
+const joining =
+  (playlist: string) =>
+  (body: string): Record<string, string | string[]> => {
+    const names = playlistsIn(body);
+    if (names.includes(playlist)) return {};
+    const all = [...names, playlist].map(propertyValue);
+    return { playlist: all.length === 1 ? all[0] : all };
+  };
 
 /** A video as the Library keeps one from a playlist: what the playlist says of it, without asking about it again. */
 export function playlistVideoItem(video: PlaylistVideo, playlist: string): LibraryItem {
@@ -83,16 +101,24 @@ export interface PlaylistPlan {
   there: number;
 }
 
-/** What importing `input` writes, against the notes there are (`noteOf`): each video's note made, or its `playlist` added to. */
-export function planPlaylist({ playlist, videos }: PlaylistInput, noteOf: NoteOfVideo): PlaylistPlan {
+/**
+ * What importing `input` writes, against the notes there are (`noteOf`): each video's note made, or
+ * its `playlist` added to. One of Takeout's that wasn't looked up, as the Library had it, but whose
+ * note has gone since (to the Trash) is left out, and the report says so: it has no title to make one.
+ */
+export function planPlaylist(input: PlaylistInput, noteOf: NoteOfVideo): PlaylistPlan {
+  const playlist = nameOf(input.playlist);
   const work: ImportWork = { add: [], append: [], change: [] };
   let there = 0;
-  for (const video of videos) {
+  let missing = 0;
+  for (const video of input.videos) {
     const entry = noteOf(videoLink(video.id));
-    if (!entry) work.add.push({ item: playlistVideoItem(video, playlist), created: video.added });
-    else if (playlistsOf(entry).includes(playlist)) there++;
-    else work.change!.push({ id: entry.note.id, properties: { playlist: propertyValue([...playlistsOf(entry), playlist].join(", ")) } });
+    if (entry && playlistsIn(entry.note.body).includes(playlist)) there++;
+    else if (entry) work.change!.push({ id: entry.note.id, properties: joining(playlist) });
+    else if (video.title.trim()) work.add.push({ item: playlistVideoItem(video, playlist), created: video.added });
+    else missing++;
   }
+  if (missing) work.report = [t("plugins.youtube.missing", { count: missing })];
   return { work, adding: work.add.length, joining: work.change!.length, there };
 }
 
@@ -107,8 +133,16 @@ export async function readPlaylist(id: string, signal: AbortSignal, progress: (r
   const page = readPlaylistPage(new TextDecoder().decode(await readAtMost(response.body, PAGE_BYTES)), response.url || playlistPage(id));
   const videos = new Map(page.videos.map((video) => [video.id, video]));
   let { gone, next } = page;
+  let unfinished = false;
+  /** The pages asked for: one asked for again would go round for ever. */
+  const asked = new Set<string>();
   progress({ read: videos.size });
   while (next && page.client && videos.size < MOST) {
+    if (asked.has(next)) {
+      unfinished = true;
+      break;
+    }
+    asked.add(next);
     await pause(PAGE_SPACING, signal);
     const answer = await request("https://www.youtube.com/youtubei/v1/browse?prettyPrint=false", signal, {
       method: "POST",
@@ -117,13 +151,18 @@ export async function readPlaylist(id: string, signal: AbortSignal, progress: (r
     });
     if (!answer.ok) throw new LookupError(`www.youtube.com answered ${answer.status}`);
     const more = readPlaylistMore(await answer.json());
+    const read = videos.size;
     for (const video of more.videos) if (!videos.has(video.id)) videos.set(video.id, video);
     gone += more.gone;
-    // An answer that says what's next but lists nothing new would go round for ever.
-    next = more.videos.length ? more.next : null;
     progress({ read: videos.size });
+    next = more.next;
+    // An answer that says what's next but has nothing new in it would go round for ever too.
+    if (next && videos.size === read) {
+      unfinished = true;
+      break;
+    }
   }
-  return { playlist: page.title, videos: [...videos.values()].slice(0, MOST), gone };
+  return { playlist: page.title, videos: [...videos.values()].slice(0, MOST), gone, ...(unfinished && { unfinished }) };
 }
 
 interface OEmbed {
@@ -152,7 +191,7 @@ export async function lookUpTakeout(
   const asking = takeout.videos.filter(({ id }) => !noteOf(videoLink(id))).length;
   for (const { id, added } of takeout.videos.slice(0, MOST)) {
     if (noteOf(videoLink(id))) {
-      // Known: its note's there, and only the playlist is added to it.
+      // Known: its note's there, and only the playlist is added to it (planPlaylist leaves it out if it's gone by then).
       videos.push({ id, title: "", added });
       continue;
     }

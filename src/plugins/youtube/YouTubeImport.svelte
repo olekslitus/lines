@@ -39,7 +39,7 @@
   onDestroy(() => controller?.abort());
 
   const count = (n: number) => n.toLocaleString(locale);
-  /** What importing would do, a line each: what was found, then what's new, what's added to, what's there, what's gone. */
+  /** What importing would do, a line each: what was found, then what's new, what's added to, what's there, what's gone, and whether YouTube gave it all. */
   const lines = $derived.by(() => {
     if (!found) return [];
     const { input, plan } = found;
@@ -49,6 +49,7 @@
       ...(plan.joining ? [t("plugins.youtube.joining", { count: plan.joining, playlist: input.playlist })] : []),
       ...(plan.there ? [t("plugins.youtube.there", { count: plan.there })] : []),
       ...(input.gone ? [t("plugins.youtube.gone", { count: input.gone })] : []),
+      ...(input.unfinished ? [t("plugins.youtube.unfinished")] : []),
     ];
   });
   const writes = $derived(found ? found.plan.adding + found.plan.joining : 0);

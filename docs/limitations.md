@@ -135,7 +135,6 @@ The home page and the docs at https://overtio.github.io/lines/ (`site/`):
 - A playlist is read from YouTube's own pages, which change as YouTube likes: one it can't read any more fails, saying so, and imports nothing. Only the apps can read them; on the web, only Takeout's files can be imported.
 - 5,000 videos at most from a playlist, YouTube's own limit; a Takeout file's are looked up one by one, five a second, so a long Watch Later takes a while (2,000 videos, about seven minutes).
 - Takeout says nothing of a video but its id: what's known of one is what oEmbed says (title, channel and picture), not its length or when it came out. Look Up Details, or the video's link in a note, fills in more in the apps.
-- A video's `playlist` lists names with commas between them: a playlist whose name has a comma reads as two.
 - A playlist read by its link from a link's menu with Settings in a window of its own opens Settings without the link: paste it there.
 
 ## Spotify, SoundCloud and YouTube

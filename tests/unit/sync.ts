@@ -74,20 +74,23 @@ const markdown = { id: "markdown", name: "Markdown", extensions: ["md"], meta: c
 /** The languages notes can be in: Markdown, and any a test adds. */
 export const languages: Partial<NoteLanguage>[] = [markdown];
 const language = (id?: string) => languages.find((each) => each.id === id) ?? markdown;
-mock.module("../../src/lib/plugins/registry.svelte", () => ({
-  DEFAULT_LANGUAGE: "markdown",
-  plugins: {
-    get languages() {
-      return languages;
+/** The plugins the notes store asks: these languages, and `importers`. Again in a test file that's stubbed them since (stubApp), when this was loaded by another first. */
+export const stubPlugins = () =>
+  mock.module("../../src/lib/plugins/registry.svelte", () => ({
+    DEFAULT_LANGUAGE: "markdown",
+    plugins: {
+      get languages() {
+        return languages;
+      },
+      language,
+      meta: (id: string | undefined, body: string) => language(id).meta!(body),
+      libraryKind: () => undefined,
+      get imports() {
+        return importers;
+      },
     },
-    language,
-    meta: (id: string | undefined, body: string) => language(id).meta!(body),
-    libraryKind: () => undefined,
-    get imports() {
-      return importers;
-    },
-  },
-}));
+  }));
+stubPlugins();
 
 /** The folder's files by path, the same on every device, as the drive keeps them. */
 export const drive = new Map<string, { text: string; etag: string }>();

@@ -39,7 +39,7 @@ stubApp({ isTauri: false, webFetch: async () => async (url: string, init?: Reque
 
 const text = await import("../../src/lib/library/text");
 const { escapeMarkdown, propertyValue } = await import("../../src/lib/notes/escape");
-const { frontMatter, mentionOf, nameOf, readMention } = await import("../../src/lib/notes/properties");
+const { frontMatter, itemsOf, mentionOf, nameOf, propertyOf, readMention, setProperties } = await import("../../src/lib/notes/properties");
 const { computeMeta, extractTags } = await import("../../src/lib/notes/parse");
 const { plainLine } = await import("../../src/lib/notes/stats");
 const { pacing, withTimeout } = await import("../../src/lib/pacing");
@@ -592,6 +592,30 @@ describe("YouTube playlists", () => {
     expect(playlist.gone).toBe(2);
     expect(read).toEqual([2, 3]);
     expect(asked).toEqual(["https://www.youtube.com/playlist?list=PLtidepools0000000000001", "https://www.youtube.com/youtubei/v1/browse?prettyPrint=false"]);
+    expect(playlist.unfinished).toBeUndefined();
+  });
+
+  test("stops reading when YouTube's answer has nothing new in it, or asks for a part it's given already, and says so", async () => {
+    /** YouTube's answer after the first page with these of its videos, and then the part after it, `next`. */
+    const answerWith = (ids: string[], next: string) => {
+      const more = JSON.parse(feedFixture("youtube-playlist-more.json"));
+      const action = more.onResponseReceivedActions[0].appendContinuationItemsAction;
+      action.continuationItems = [
+        ...action.continuationItems.filter(({ playlistVideoRenderer }: { playlistVideoRenderer: { videoId: string } }) => ids.includes(playlistVideoRenderer.videoId)),
+        { continuationItemRenderer: { continuationEndpoint: { continuationCommand: { token: next } } } },
+      ];
+      return more;
+    };
+    answers.set("https://www.youtube.com/playlist?list=PLtidepools0000000000001", feedFixture("youtube-playlist.html"));
+    // Nothing that wasn't on the first page, and another part after it.
+    answers.set("https://www.youtube.com/youtubei/v1/browse", answerWith(["kelplab0001"], "tidepools-page-3"));
+    const same = await readPlaylist("PLtidepools0000000000001", signal, () => {});
+    expect([same.videos.length, same.unfinished, asked.length]).toEqual([2, true, 2]);
+    // Something new, and then the part it's just given again.
+    asked.length = 0;
+    answers.set("https://www.youtube.com/youtubei/v1/browse", answerWith(["tidepool003"], "tidepools-page-2"));
+    const again = await readPlaylist("PLtidepools0000000000001", signal, () => {});
+    expect([again.videos.map(({ id }) => id), again.unfinished, asked.length]).toEqual([["tidepool002", "kelplab0001", "tidepool003"], true, 2]);
   });
 
   test("a Watch Later from Google Takeout, in either shape it's written; its name from the file, or from its name", () => {
@@ -648,7 +672,7 @@ describe("YouTube playlists", () => {
       videoNoteIn(notesThere) as never,
     );
     expect([plan.adding, plan.joining, plan.there]).toEqual([1, 1, 0]);
-    expect(plan.work.change).toEqual([{ id: "a", properties: { playlist: "Watch later, Tide pools" } }]);
+    expect(plan.work.change!.map(({ id, properties }) => [id, properties(notesThere[0].note.body)])).toEqual([["a", { playlist: ["Watch later", "Tide pools"] }]]);
     expect(plan.work.add[0]).toEqual({
       item: {
         type: "video",
@@ -663,6 +687,37 @@ describe("YouTube playlists", () => {
     // Imported again: nothing new, nothing to add to.
     const again = planPlaylist({ playlist: "Watch later", gone: 0, videos: [{ id: "tidepool002", title: "" }] }, videoNoteIn(notesThere) as never);
     expect([again.adding, again.joining, again.there]).toEqual([0, 0, 1]);
+  });
+
+  test("a playlist's name with a comma, or spaces, in it is one name, in a list once there are more: imported again, nothing changes", () => {
+    const entry = (id: string, body: string) => ({ note: { id, body, trashed: false }, meta: computeMeta(body) });
+    const notesThere = [entry("a", "---\ntype: video\nlink: https://youtu.be/tidepool002\nplaylist: Watch later\n---\n# Anemones\n")];
+    const input = {
+      playlist: "Tides, crabs  and kelp",
+      gone: 0,
+      videos: [
+        { id: "tidepool002", title: "Anemones at low tide" },
+        { id: "kelplab0001", title: "Kelp forests, slowly" },
+      ],
+    };
+    const plan = planPlaylist(input, videoNoteIn(notesThere) as never);
+    const { id, properties } = plan.work.change![0];
+    const joined = setProperties(notesThere[0].note.body, properties(notesThere[0].note.body));
+    expect(joined).toBe("---\ntype: video\nlink: https://youtu.be/tidepool002\nplaylist:\n  - Watch later\n  - Tides, crabs and kelp\n---\n# Anemones\n");
+    expect(itemsOf(joined, propertyOf(frontMatter(joined)!.properties, "playlist")!)).toEqual(["Watch later", "Tides, crabs and kelp"]);
+    const made = text.libraryNoteText(plan.work.add[0].item);
+    expect(made).toContain("\nplaylist: Tides, crabs and kelp\n");
+    // Written so by then (typed, or from another device): nothing's changed.
+    expect(properties(joined)).toEqual({});
+    const after = [entry(id, joined), entry("b", made)];
+    const again = planPlaylist(input, videoNoteIn(after) as never);
+    expect([again.adding, again.joining, again.there]).toEqual([0, 0, 2]);
+  });
+
+  test("a video of Takeout's the Library had, so not looked up, whose note's gone by Import, isn't made untitled: the report says so", () => {
+    const plan = planPlaylist({ playlist: "Watch later", gone: 0, videos: [{ id: "tidepool002", title: "" }, { id: "kelplab0001", title: "Kelp forests, slowly" }] }, () => undefined);
+    expect(plan.work.add.map(({ item }) => item.title)).toEqual(["Kelp forests, slowly"]);
+    expect(plan.work.report).toEqual(["plugins.youtube.missing"]);
   });
 });
 

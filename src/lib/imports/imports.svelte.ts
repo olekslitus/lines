@@ -51,10 +51,14 @@ export interface Addition {
   text: string;
 }
 
-/** Properties an import sets on a note there (a video's `playlist`), each value as written. */
+/**
+ * Properties an import sets on a note there (a video's `playlist`), each value as written (several
+ * as a list), worked out from the note's text as it is when they're written: so what's been typed in
+ * it, or come with sync, since the import was worked out is kept.
+ */
 export interface Change {
   id: string;
-  properties: Record<string, string>;
+  properties: (body: string) => Record<string, string | string[] | null>;
 }
 
 /** What an import writes: notes it makes, and what it adds to notes there or changes in their properties (each note once). */
@@ -192,7 +196,7 @@ class Imports {
     // What's added to notes there, or changed in their properties: as an edit of each one's text.
     const edits = [
       ...append.map(({ id: note, text }) => ({ note, edit: (before: string) => `${before.trimEnd()}\n\n${text.trim()}\n` })),
-      ...change.map(({ id: note, properties }) => ({ note, edit: (before: string) => setProperties(before, properties) })),
+      ...change.map(({ id: note, properties }) => ({ note, edit: (before: string) => setProperties(before, properties(before)) })),
     ];
     const total = add.length + edits.length;
     if (!total) {
@@ -220,14 +224,20 @@ class Imports {
       }
       for (let i = 0; i < edits.length && !signal.aborted; i++) {
         const { note, edit } = edits[i];
-        // As the note is now: not one locked or trashed since the import was worked out.
+        // Not one locked or trashed since the import was worked out.
         const current = notes.get(note)?.note;
         if (!current || current.locked || current.trashed) continue;
-        const before = current.body;
-        const after = edit(before);
-        // Something added to, not changed by hand: the list keeps it where it is.
-        notes.setText(note, after, { keepDate: true });
-        wrote.appended.push({ id: note, before, after });
+        // Edited as it is when it's written (with what's being typed in it), not as it was. Something
+        // added to, not changed by hand: the list keeps it where it is.
+        notes.setText(
+          note,
+          (before) => {
+            const after = edit(before);
+            if (after !== before) wrote.appended.push({ id: note, before, after });
+            return after;
+          },
+          { keepDate: true },
+        );
         if ((i + 1) % BATCH === 0) {
           progress();
           await breathe();

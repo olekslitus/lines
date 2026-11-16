@@ -145,6 +145,8 @@ export default {
   "plugins.youtube.joining": "{count, plural, one {# ya está en la Biblioteca: se añade {playlist} a sus listas.} other {# ya están en la Biblioteca: se añade {playlist} a sus listas.}}",
   "plugins.youtube.there": "{count, plural, one {# ya está en la Biblioteca con ella: se deja como está.} other {# ya están en la Biblioteca con ella: se dejan como están.}}",
   "plugins.youtube.gone": "{count, plural, one {# se eliminó o se hizo privado: se omite.} other {# se eliminaron o se hicieron privados: se omiten.}}",
+  "plugins.youtube.unfinished": "YouTube dejó de dar el resto a medio camino, así que estos son los que dio. Vuelve a buscarla más tarde para el resto.",
+  "plugins.youtube.missing": "{count, plural, one {# vídeo no se añadió: su nota fue a la Papelera después de leer el archivo. Vuelve a importar el archivo para buscarlo y añadirlo.} other {# vídeos no se añadieron: sus notas fueron a la Papelera después de leer el archivo. Vuelve a importar el archivo para buscarlos y añadirlos.}}",
   "plugins.youtube.import": "Importar",
   "plugins.youtube.added": "{count, plural, =0 {No se añadió ningún vídeo.} one {Se añadió # vídeo.} other {Se añadieron # vídeos.}}",
   "plugins.youtube.joined": "{count, plural, one {Se añadió la lista a # vídeo que ya estaba.} other {Se añadió la lista a # vídeos que ya estaban.}}",

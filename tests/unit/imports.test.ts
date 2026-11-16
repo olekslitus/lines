@@ -812,4 +812,37 @@ describe("the import itself", () => {
     await imports.start("test", { notes: [] }, "last");
     expect(given).toEqual([[], [], ["Fresh", "Fresh too"]]);
   });
+
+  test("a note added to, or its properties changed, as it is when it's written: what was typed in it since is kept", async () => {
+    const { notes, stubPlugins } = await import("./sync");
+    stubPlugins();
+    const { importers } = await import("./stubs");
+    const { imports } = await import("../../src/lib/imports/imports.svelte");
+    const { planPlaylist } = await import("../../src/plugins/youtube/import");
+    const video = "---\ntype: video\nlink: https://youtu.be/tidepool002\nplaylist: Watch later\n---\n# Anemones\n";
+    await notes.insert({ id: "video", body: video, createdAt: 1, updatedAt: 1, pinned: false, trashed: false }, { id: "book", body: "# Book\n", createdAt: 1, updatedAt: 1, pinned: false, trashed: false });
+    // What's typed in the open editors once the import's worked out, handed over as it's written.
+    const typed = new Map<string, string>();
+    const unregister = notes.registerFlusher(() => {
+      for (const [id, body] of typed) notes.update(id, body);
+      typed.clear();
+    });
+    importers.push({
+      id: "typing",
+      work: () => {
+        const work = planPlaylist({ playlist: "Tide pools", gone: 0, videos: [{ id: "tidepool002", title: "Anemones at low tide" }] }, () => notes.get("video"));
+        typed.set("video", video.replace("playlist: Watch later\n", "playlist:\n  - Watch later\n  - Physics\n") + "\nTyped meanwhile.\n");
+        typed.set("book", "# Book\n\nTyped too.\n");
+        return { ...work.work, append: [{ id: "book", text: "From the import." }] };
+      },
+    });
+    try {
+      await imports.start("typing", {});
+    } finally {
+      unregister();
+    }
+    expect(notes.get("video")?.note.body).toBe("---\ntype: video\nlink: https://youtu.be/tidepool002\nplaylist:\n  - Watch later\n  - Physics\n  - Tide pools\n---\n# Anemones\n\nTyped meanwhile.\n");
+    expect(notes.get("book")?.note.body).toBe("# Book\n\nTyped too.\n\nFrom the import.\n");
+    expect(imports.state).toMatchObject({ kind: "done", appended: 2 });
+  });
 });

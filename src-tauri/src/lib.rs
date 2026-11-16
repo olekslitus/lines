@@ -32,7 +32,7 @@ pub fn run() {
   let builder = builder.plugin(tauri_plugin_dialog::init());
   #[cfg(target_os = "macos")]
   let builder = builder.manage(quit::Quitting::default());
-  builder
+  let builder = builder
     .invoke_handler(tauri::generate_handler![
       addresses::host_is_public,
       attachments::open_attachment,
@@ -82,16 +82,19 @@ pub fn run() {
       devtools::set_inspectable(webview, webview.is_devtools_open());
       #[cfg(not(debug_assertions))]
       let _ = webview;
-    })
-    .on_menu_event(|app, event| {
-      if event.id() == devtools::MENU_ID {
-        devtools::toggle_focused(app);
-      }
-      #[cfg(target_os = "macos")]
-      if event.id() == quit::MENU_ID {
-        quit::quit(app);
-      }
-    })
+    });
+  // Phones and tablets have no menu bar.
+  #[cfg(desktop)]
+  let builder = builder.on_menu_event(|app, event| {
+    if event.id() == devtools::MENU_ID {
+      devtools::toggle_focused(app);
+    }
+    #[cfg(target_os = "macos")]
+    if event.id() == quit::MENU_ID {
+      quit::quit(app);
+    }
+  });
+  builder
     .register_uri_scheme_protocol(sf_symbols::SCHEME, |_ctx, request| sf_symbols::handle(request))
     .setup(|app| {
       // The main window starts hidden and shows itself once its look is applied, so it never

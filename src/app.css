@@ -558,6 +558,12 @@
     overscroll-behavior: none;
   }
 
+  /* Text at the sizes it's given: WebKit on iPhone enlarged what it took to be too small to read, so
+     lines' PDF pages, drawn small to fit, had their lines run into each other. */
+  html {
+    text-size-adjust: 100%;
+  }
+
   body {
     background: var(--bg);
     color: var(--text);

@@ -162,6 +162,7 @@ mod tests {
     assert_eq!(stem(name), "3f9c0a1b2c3d4e5f60718293a4b5c6d7");
   }
 
+  #[cfg(desktop)]
   #[test]
   fn shows_what_runs_instead_of_opening_it() {
     let dir = std::env::temp_dir().join(format!("lines-runs-test-{}", std::process::id()));

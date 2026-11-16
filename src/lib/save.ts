@@ -1,6 +1,6 @@
 import { speak } from "./a11y";
 import { t } from "./i18n/index.svelte";
-import { isDesktopApp, revealFile, saveFile } from "./platform";
+import { isDesktopApp, revealFile, saveFile, shownPath } from "./platform";
 
 /**
  * Saves a file someone asked for (a note as a file, a 3D model to print): downloaded on the web,
@@ -10,7 +10,7 @@ import { isDesktopApp, revealFile, saveFile } from "./platform";
 export async function saveAndShow(filename: string, write: () => Promise<Uint8Array<ArrayBuffer>>, type: string) {
   try {
     const path = await saveFile(filename, await write(), type);
-    speak(path ? t("print.savedTo", { path }) : t("print.downloaded", { filename }));
+    speak(path ? t("print.savedTo", { path: shownPath(path) }) : t("print.downloaded", { filename }));
     if (path && isDesktopApp) await revealFile(path);
   } catch (error) {
     console.error("lines: couldn't save a file", error);

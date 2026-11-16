@@ -1,9 +1,10 @@
 //! The Web Inspector, for debug builds only: off until you turn it on with View → Developer Tools
 //! or F12, so right-clicking never offers "Inspect Element". Release builds don't include it.
 
-use tauri::{Manager, Runtime, Webview, WebviewWindow};
+use tauri::{Runtime, Webview, WebviewWindow};
 
 /// The View menu item's id.
+#[cfg(desktop)]
 pub const MENU_ID: &str = "devtools";
 
 /// Opens the inspector for `window`, or closes it if it's open.
@@ -24,7 +25,8 @@ pub fn toggle_devtools<R: Runtime>(window: WebviewWindow<R>) {
 }
 
 /// Toggles the inspector for whichever window is in front.
-pub fn toggle_focused<R: Runtime, M: Manager<R>>(app: &M) {
+#[cfg(desktop)]
+pub fn toggle_focused<R: Runtime, M: tauri::Manager<R>>(app: &M) {
   if let Some(window) = app.webview_windows().into_values().find(|w| w.is_focused().unwrap_or(false)) {
     toggle_devtools(window);
   }

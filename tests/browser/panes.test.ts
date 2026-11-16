@@ -235,3 +235,18 @@ test("Swap exchanges a note below with the open one: each shows in the other's p
   await page.getByRole("region", { name: /Hello/ }).waitFor();
   await page.waitForFunction(() => window.testing.text() === "# Lines\n\nSimple.");
 });
+
+test("on a phone, a new note slides in with its editor in view: the panes can't scroll sideways", async () => {
+  app = await openApp({ width: 390 });
+  const { page } = app;
+  await page.getByRole("button", { name: "New note", exact: true }).click();
+  await page.waitForFunction(() => document.activeElement?.closest(".editor-pane"));
+  await page.waitForFunction(() => document.querySelector(".editor-pane")!.getBoundingClientRect().x === 0);
+  // What WebKit on iPhone did to show the editor taking focus off-screen: there's nothing to scroll.
+  const shifted = await page.evaluate(() => {
+    const panes = document.querySelector(".app")!;
+    panes.scrollLeft = 390;
+    return panes.scrollLeft;
+  });
+  expect(shifted).toBe(0);
+});

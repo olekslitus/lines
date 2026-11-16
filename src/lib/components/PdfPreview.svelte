@@ -5,7 +5,7 @@
   import { t } from "../i18n/index.svelte";
   import { fileName } from "../notes/fileName";
   import type { Entry } from "../notes/store.svelte";
-  import { canPrint, isApple, revealFile, saveFile } from "../platform";
+  import { canPrint, isApple, isDesktopApp, revealFile, saveFile, shownPath } from "../platform";
   import { plugins } from "../plugins/registry.svelte";
   import type { TypesetResult } from "../plugins/types";
   import { prefs, type Paper } from "../prefs.svelte";
@@ -194,7 +194,7 @@
       if (typesetting.state !== "done") return;
       void saveFile(`${filename}.pdf`, typesetting.pdf, "application/pdf").then((path) => {
         saved = { path, filename: `${filename}.pdf` };
-        speak(path ? t("print.savedTo", { path }) : t("print.downloaded", { filename: `${filename}.pdf` }));
+        speak(path ? t("print.savedTo", { path: shownPath(path) }) : t("print.downloaded", { filename: `${filename}.pdf` }));
       });
     } else if (laidOut && canPrint) window.print();
   }
@@ -218,7 +218,7 @@
           : [`${filename}.zip`, zip(images.map((data, i) => ({ name: `${filename} ${i + 1}.png`, data, modified }))), "application/zip"];
       const path = await saveFile(name, data, type);
       saved = { path, filename: name };
-      speak(path ? t("print.savedTo", { path }) : t("print.downloaded", { filename: name }));
+      speak(path ? t("print.savedTo", { path: shownPath(path) }) : t("print.downloaded", { filename: name }));
     } catch (error) {
       console.error("lines: couldn't make the images", error);
       imageFailed = true;
@@ -262,8 +262,8 @@
 </script>
 
 {#snippet savedMessage(file: { path: string | null; filename: string })}
-  {file.path ? t("print.savedTo", { path: file.path }) : t("print.downloaded", { filename: file.filename })}
-  {#if file.path}
+  {file.path ? t("print.savedTo", { path: shownPath(file.path) }) : t("print.downloaded", { filename: file.filename })}
+  {#if file.path && isDesktopApp}
     <Button variant="quiet" onclick={() => void revealFile(file.path!)}>{isApple ? t("settings.showInFinder") : t("settings.showInFolder")}</Button>
   {/if}
 {/snippet}

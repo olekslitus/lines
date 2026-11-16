@@ -95,7 +95,7 @@ The home page and the docs at https://overtio.github.io/lines/ (`site/`):
 - Feeds that need signing in aren't read. Of JSON Feed, a feed's further pages (`next_url`), `tags`, `language` and WebSub `hubs` aren't read, nor `expired`: a feed that says it's finished is still asked whether it changed, as any feed is.
 - A feed subscribed to before lines kept what it's written in is listed with RSS Feeds (or Podcast Feeds, if its note is a podcast's) until it's next fetched, which it is at start; one that can't be fetched stays there.
 - **A post's discussion (Hacker News')** is only to read: voting and replying need a Hacker News account, and it has no API for either. It comes from Algolia's copy of the thread, which leaves out comments deleted or taken down and every reply under them (none to a few percent of a big thread's; the count at its end says how many), can be minutes behind on a new story, and has replies oldest first, not as Hacker News ranks them (only the first comments are ranked, by the official API). ⌘F finds words in the post, not in its discussion. "3 hours ago" is worked out when the thread loads. Other sites' discussions (Lobsters, Reddit) aren't read yet, and a post saved to the Library doesn't show its discussion.
-- Fetching feeds hasn't been tried in the Mac, Windows, Linux, iOS or Android apps yet: the apps fetch through Rust (`webFetch`, with conditional requests of their own), which the browser tests don't reach.
+- Fetching feeds has been tried only in the iOS simulator, not yet in the Mac, Windows, Linux or Android apps: the apps fetch through Rust (`webFetch`, with conditional requests of their own), which the browser tests don't reach.
 
 ## The podcast player
 
@@ -578,6 +578,17 @@ What isn't done yet is in [secrets.md](secrets.md#not-yet).
 - Notes locked with different passwords (after "Forgot password", or on two devices before they synced) stay separate. Typing a password opens every note it fits.
 - Conflict copies of a locked note that isn't open get "(conflicted copy)" in their visible title only.
 - Face ID on iPhone isn't done.
+
+## The iPhone, iPad and Android apps
+
+- Run only in the iOS 27.2 simulator (iPhone 17, iPad Air 11-inch), from a debug build: not yet on a real iPhone or iPad, nor through TestFlight or the App Store. A device build needs an Apple development team, and a release one its certificates and provisioning.
+- The notes, the list and sidebar, search, Settings, the Library and feeds, LaTeX notes with TeX's PDF, and light and dark were tried there; typing was sent to the page by script, not from the simulator's keyboard, so input methods, dictation and autocorrect haven't been tried.
+- Cloud drive folders (iCloud Drive and the others) can't be picked for sync; an S3 bucket can.
+- An attachment can't be opened in another app yet.
+- Exports are saved in lines' Documents, which the Files app shows under On My iPhone (or iPad) → lines; there's no share sheet to send them elsewhere.
+- TeX's PDF is shown at its own size on iPhone, wider than the screen.
+- There's no swipe from the edge to go back to the list; the Back button does it.
+- No floating notes or other windows, menus, Touch ID or updates in the app: they're the desktop's. Updates are to come from the App Store.
 
 ## Future work
 

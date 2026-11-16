@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 
 use tauri::{ipc::InvokeBody, AppHandle, Manager};
 
-/// Saves an export (the raw request body) to the Downloads folder, or the app's Documents
-/// folder where there is no Downloads (iOS), without overwriting anything. Returns the path.
+/// Saves an export (the raw request body) to the Downloads folder, or the app's Documents folder
+/// on iOS, without overwriting anything. Returns the path.
 /// The file name comes, percent-encoded, in the `x-file-name` header.
 #[tauri::command]
 pub async fn save_export(app: AppHandle, request: tauri::ipc::Request<'_>) -> Result<String, String> {
@@ -21,10 +21,12 @@ pub async fn save_export(app: AppHandle, request: tauri::ipc::Request<'_>) -> Re
   let name = PathBuf::from(Path::new(&requested).file_name().ok_or("Invalid file name")?);
 
   let paths = app.path();
-  let dir = paths
-    .download_dir()
-    .or_else(|_| paths.document_dir())
-    .map_err(|e| e.to_string())?;
+  // lines' Documents is its folder in the Files app (Info.plist); a Downloads there would be hidden.
+  #[cfg(target_os = "ios")]
+  let dir = paths.document_dir();
+  #[cfg(not(target_os = "ios"))]
+  let dir = paths.download_dir().or_else(|_| paths.document_dir());
+  let dir = dir.map_err(|e| e.to_string())?;
   let bytes = bytes.clone();
   tauri::async_runtime::spawn_blocking(move || {
     std::fs::create_dir_all(&dir)?;

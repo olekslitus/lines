@@ -75,6 +75,9 @@ export function downloadText(filename: string, text: string, type = "text/markdo
   download(filename, text, `${type};charset=utf-8`);
 }
 
+/** The iPhone and iPad app. */
+const isIOSApp = isTauri && isApple && isMobile;
+
 /**
  * Saves a file: a normal download on the web, or straight into Downloads in the apps (Documents
  * on iPhone), never overwriting. Returns the saved path in the apps, null on the web.
@@ -132,6 +135,11 @@ export async function openPath(path: string): Promise<"opened" | "missing" | "fa
     console.error(`Couldn't open ${path}:`, error);
     return "failed";
   }
+}
+
+/** Where a file `saveFile` saved is, as people would look for it: on iPhone, in lines' folder in Files. */
+export function shownPath(path: string) {
+  return isIOSApp ? `lines/${path.split("/").pop()}` : path;
 }
 
 /** Shows a saved file in Finder (or the system's file manager). */

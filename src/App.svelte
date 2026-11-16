@@ -551,10 +551,12 @@
 
 <svelte:window onkeydown={onKeydown} onkeydowncapture={onKeydownCapture} bind:innerWidth={windowWidth} />
 
-<!-- `data-sidebar` and `data-first` say which pane leaves room for the Mac app's window buttons (app.css). -->
+<!-- `data-sidebar` and `data-first` say which pane leaves room for the Mac app's window buttons (app.css).
+     Clipped rather than hidden, so it isn't a scroller: WebKit on iPhone scrolled it sideways to show
+     a new note's editor taking focus while it was still sliding in from off-screen, leaving it blank. -->
 <div
   class={[
-    "app relative grid h-full overflow-hidden",
+    "app relative grid h-full overflow-clip",
     narrow ? "grid-cols-[100%_100%]" : "transition-[grid-template-columns] duration-320 ease-sheet",
     // Dragging a pane's edge: the columns follow the pointer at once, and text isn't selected.
     resizing && "cursor-col-resize transition-none! select-none",

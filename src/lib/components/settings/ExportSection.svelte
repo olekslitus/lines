@@ -7,7 +7,7 @@
   import { importable } from "../../notes/import";
   import type { SampleSet } from "../../notes/samples";
   import { isClosed, notes } from "../../notes/store.svelte";
-  import { isApple, isDesktopApp, isSite, revealFile, saveFile } from "../../platform";
+  import { isApple, isDesktopApp, isSite, revealFile, saveFile, shownPath } from "../../platform";
   import { plugins } from "../../plugins/registry.svelte";
   import type { Import, ImportFile } from "../../plugins/types";
   import { sync } from "../../sync/engine.svelte";
@@ -200,7 +200,7 @@
         <Icon name="check" size={15} class="shrink-0 text-success" />
         <span class="min-w-0 flex-1 [overflow-wrap:anywhere]">
           {#if saved.path}
-            {savedText[0]}<code class="font-mono text-xs">{saved.path}</code>{savedText[1]}
+            {savedText[0]}<code class="font-mono text-xs">{shownPath(saved.path)}</code>{savedText[1]}
           {:else}
             {t("settings.downloaded", { filename: saved.filename })}
           {/if}

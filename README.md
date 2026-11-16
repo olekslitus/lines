@@ -212,17 +212,24 @@ In a debug build of the desktop app, <kbd>F12</kbd> (or View → Developer Tools
 <details>
 <summary><b>Mobile</b></summary>
 
-Set up the native projects once, then run on a simulator or device:
+The Xcode project is in `src-tauri/gen/apple`; there's no need to run `tauri ios init` again. CI checks that the native side compiles for the iOS simulator; the app itself is built by hand. What doesn't work on phones yet is in [limitations.md](docs/limitations.md#the-iphone-ipad-and-android-apps).
+
+**iOS** needs Xcode with the iOS platform its SDK is for (Xcode → Settings → Components, or `xcodebuild -downloadPlatform iOS`), CocoaPods (`brew install cocoapods`; Tauri's CLI adds XcodeGen and libimobiledevice itself), and Rust's iOS targets:
 
 ```sh
-# iOS (needs Xcode)
-bun run tauri ios init
-bun run tauri ios dev
+rustup target add aarch64-apple-ios aarch64-apple-ios-sim
 
-# Android (needs Android Studio, the SDK and NDK)
-bun run tauri android init
-bun run tauri android dev
+# Build for the simulator, then install and open it there
+bun run tauri ios build --target aarch64-sim --debug --no-sign
+xcrun simctl boot "iPhone 17"
+xcrun simctl install "iPhone 17" src-tauri/gen/apple/build/arm64-sim/lines.app
+xcrun simctl launch "iPhone 17" com.overtio.lines
+
+# Or run it with the dev server, reloading as you change things
+bun run tauri ios dev "iPhone 17"
 ```
+
+A debug build's web view can be inspected from Safari (Develop → Simulator). An iPhone or iPad of your own needs your Apple development team: set `APPLE_DEVELOPMENT_TEAM` in your shell, not in `tauri.conf.json`, then `bun run tauri ios dev --host` with the device connected.
 
 </details>
 

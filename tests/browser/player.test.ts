@@ -21,10 +21,17 @@ afterEach(async () => {
 /** How each of the podcast's episodes' sound is answered: as it is, a few seconds late, or not at all. */
 type Answer = (url: URL) => "ok" | "slow" | "fail";
 
+/**
+ * The podcast's feed, its episodes' sound the WAV the test answers with. Linked as MP3s, WebKit on
+ * Linux (GStreamer) looks for an MP3's tags at the end and in the middle of the file while its start
+ * is still coming, and now and then never plays on from there: playing, but stuck at 0:00.
+ */
+const feed = readFileSync(new URL("./feeds/podcast.rss", import.meta.url), "utf8").replaceAll(".mp3", ".wav").replaceAll("audio/mpeg", "audio/wav");
+
 async function subscribeToPodcast(app: App, { length = 3000, answer = (() => "ok") as Answer } = {}) {
   const page = app.page;
   const cors = { "access-control-allow-origin": "*" };
-  await page.route((url) => url.href === PODCAST, (route) => route.fulfill({ body: readFileSync(new URL("./feeds/podcast.rss", import.meta.url), "utf8"), contentType: "application/rss+xml", headers: cors }));
+  await page.route((url) => url.href === PODCAST, (route) => route.fulfill({ body: feed, contentType: "application/rss+xml", headers: cors }));
   const audio = wav(length);
   await page.route(
     (url) => url.hostname === "traffic.megaphone.fm",
@@ -163,7 +170,9 @@ test("Mark as Played on the episode playing puts the player away, and it stays p
   await subscribeToPodcast(app, { length: 60_000 });
   const [first] = await keys(app);
   await playRow(app, 0);
-  await page.waitForFunction(() => window.testing.player.playing && window.testing.player.time > 1);
+  await playing(app);
+  await page.evaluate(() => window.testing.player.seek(30));
+  await page.waitForFunction((key) => window.testing.player.positions.get(key)?.at === 30, first);
   await page.locator(".note-list [data-post]").first().click({ button: "right" });
   await page.getByRole("menuitem", { name: "Mark as Played" }).click();
   await page.getByRole("region", { name: "Podcast player" }).waitFor({ state: "detached" });
@@ -499,7 +508,9 @@ test("writing the time with nothing in the player says so, after the cursor and 
   await notice.waitFor({ state: "detached" });
 
   await page.keyboard.type(" /time");
-  await page.locator(".cm-tooltip-autocomplete").getByText("Time in the Episode").waitFor();
+  // Chosen in the menu, which has caught up with "/time": the one for "/t" lists it too, and Enter
+  // there, while the menu's being worked out again, starts a new line.
+  await page.locator(".cm-tooltip-autocomplete [aria-selected=true]").getByText("Time in the Episode").waitFor();
   await page.keyboard.press("Enter");
   await notice.waitFor();
   expect(await app.text()).toBe("# Notes\n\nNotes ");

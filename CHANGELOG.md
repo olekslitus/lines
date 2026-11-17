@@ -6,7 +6,7 @@ What changed in each release of lines. Written by `bun scripts/release.mjs prepa
 
 ### Features
 
-- **native:** lines is com.olekslitus.lines, and brings its notes along from com.overtio.lines ([#369](https://github.com/olekslitus/lines/pull/369))
+- **native:** lines is com.olekslitus.lines, and brings its notes along from its old identifier ([#369](https://github.com/olekslitus/lines/pull/369))
 
 ### Fixes
 

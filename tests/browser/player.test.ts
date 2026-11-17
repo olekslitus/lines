@@ -507,6 +507,29 @@ test("writing the time with nothing in the player says so, after the cursor and 
   await notice.waitFor({ state: "detached", timeout: 6000 });
 });
 
+test("said again before the first has gone, that nothing's playing stays its own while", async () => {
+  app = await openApp();
+  const page = app.page;
+  const notice = page.locator(".cm-content .cm-time-notice");
+  await app.open("# Notes\n\n");
+  await page.clock.install();
+  await page.locator(".cm-content").click();
+  await page.keyboard.press(`${mod()}+End`);
+  const { time } = await playerKeys(app);
+  await page.keyboard.press(time);
+  await notice.waitFor();
+  await page.clock.fastForward(3000);
+  await page.keyboard.type("Notes");
+  await notice.waitFor({ state: "detached" });
+  await page.keyboard.press(time);
+  await notice.waitFor();
+  // The first's while is up, not the second's.
+  await page.clock.fastForward(2000);
+  expect(await notice.count()).toBe(1);
+  await page.clock.fastForward(3000);
+  await notice.waitFor({ state: "detached" });
+});
+
 test("Enter writes no time where a list's item only looks like one, in code, math, HTML or the properties, nor while another episode is in the player", async () => {
   app = await openApp();
   const page = app.page;

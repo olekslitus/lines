@@ -81,16 +81,6 @@ The apps keep the same databases and keys, in their web view's storage, in a fol
 
 Besides those, an update being downloaded and copies of attachments opened in other apps are in lines' cache folder (`~/Library/Caches/com.olekslitus.lines/` on a Mac, the folder above on Windows, `~/.cache/com.olekslitus.lines/` on Linux), and with Touch ID on, its keys are in the Mac's login keychain as "lines app lock".
 
-### From com.overtio.lines
-
-Up to 0.6, lines was `com.overtio.lines`, and its folders were named for that. The first time a later version starts, before its window opens, it copies the old web view folder to the new one (`src-tauri/src/moved.rs`):
-
-- only if the new folder is empty: data already there is never overwritten;
-- once: it then leaves a `moved-from-com.overtio.lines` file in its local data folder (`~/Library/Application Support/com.olekslitus.lines/` on a Mac, the folders above on Windows and Linux), and doesn't copy again even if the new folder is deleted;
-- whole or not at all: the copy is made beside the new folder and renamed into place once it's complete. If it fails, lines opens anyway, and tries again next time while the new folder is still empty.
-
-The old folder is left as it was, so going back to 0.6 finds the notes as they were. Once the new version shows your notes, it can be deleted. Uninstalling lines on Windows with its data deletes only the new one. The cache folders and the Mac's preferences (`com.overtio.lines.plist`, which only remembers panels' positions) aren't copied, and the keychain's entries keep their name. Development builds don't copy anything: they keep their data apart from the installed app's.
-
 ## What the host sees
 
 GitHub Pages sees ordinary request logs, as for any site: IP address, browser, and which files were loaded. It never sees what's written in the notes.

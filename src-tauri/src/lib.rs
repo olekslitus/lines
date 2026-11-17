@@ -11,8 +11,6 @@ mod folder_sync;
 mod fonts;
 mod local_links;
 mod lock;
-#[cfg(desktop)]
-mod moved;
 mod oauth;
 #[cfg(target_os = "macos")]
 mod quit;
@@ -23,9 +21,6 @@ mod window_style;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-  let context = tauri::generate_context!();
-  #[cfg(desktop)]
-  moved::bring_along(&context.config().identifier);
   let builder = tauri::Builder::default()
     .plugin(tauri_plugin_opener::init())
     .plugin(tauri_plugin_http::init())
@@ -127,7 +122,7 @@ pub fn run() {
       }
       Ok(())
     })
-    .build(context)
+    .build(tauri::generate_context!())
     .expect("error while building tauri application")
     .run(|app, event| {
       #[cfg(desktop)]

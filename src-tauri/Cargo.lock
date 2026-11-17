@@ -2178,7 +2178,6 @@ name = "lines"
 version = "0.7.0"
 dependencies = [
  "block2",
- "dirs",
  "log",
  "objc2",
  "objc2-app-kit",

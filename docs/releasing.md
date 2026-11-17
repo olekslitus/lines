@@ -35,10 +35,10 @@ The desktop apps update themselves from these releases (`src-tauri/src/updates.r
 
 ### The identifier
 
-lines' identifier is `com.olekslitus.lines` (`tauri.conf.json`); up to 0.6 it was `com.overtio.lines`. It names the app's data folders, so the first start under the new one copies its notes over ([storage.md](storage.md#from-comovertiolines)), and installs update in place across the change:
+lines' identifier is `com.olekslitus.lines` (`tauri.conf.json`). It names the app's data folders ([storage.md](storage.md#in-the-desktop-apps)), so changing it starts lines over with no notes. It changed once, in 0.7, which copied the notes over from the old one's folders; later versions don't, so an install from before 0.7 should update to 0.7 first, or its notes stay behind. Updates replace the app in place:
 
-- **macOS**: the updater replaces `lines.app` where it is; only its bundle identifier changes.
-- **Windows**: the MSI upgrades the one installed because its upgrade code is the one Tauri derived from the product name, `lines`, pinned in `bundle.windows.wix.upgradeCode` so that renaming lines can't change it. The NSIS installer finds the one installed by its uninstall key, `…\Uninstall\lines`, and the folder it's in under `Software\overtio\lines`: the publisher's name, which Tauri took from the identifier's second part. `bundle.publisher` keeps it `overtio`; changing it would leave a setup run over an older install unable to find (and uninstall) it, and an update to a folder chosen when installing put in the default one instead.
+- **macOS**: the updater replaces `lines.app` where it is.
+- **Windows**: the MSI upgrades the one installed because its upgrade code is the one Tauri derived from the product name, `lines`, pinned in `bundle.windows.wix.upgradeCode` so that renaming lines can't change it. The NSIS installer finds the one installed by its uninstall key, `…\Uninstall\lines`, and the folder it's in under `Software\<publisher>\lines`. The publisher is the identifier's second part, `olekslitus`, since the release after 0.7; an install from before that was under another name, so an update of it goes to the default folder rather than one chosen when installing, and if a setup run over it stops on "unable to uninstall", uninstall the old lines first.
 - **Linux**: the `.deb` and `.rpm` packages are named `lines` and the AppImage is replaced where it is, none of them by the identifier.
 
 ### The signing key

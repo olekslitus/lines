@@ -207,9 +207,11 @@ function writeTime(view: EditorView, from: number, to: number) {
   if (!time) {
     // A "/time" typed goes either way; the note says why nothing took its place.
     view.dispatch({ changes: { from, to }, selection: { anchor: from }, effects: sayNothing.of(from), userEvent: "delete" });
+    const said = view.state.field(nothingPlaying);
     speak(t("player.nothingPlaying"));
+    // Unless it's been said again since, which stays its own while.
     setTimeout(() => {
-      if (view.dom.isConnected && view.state.field(nothingPlaying, false)?.size) view.dispatch({ effects: sayNothing.of(null) });
+      if (view.dom.isConnected && view.state.field(nothingPlaying, false) === said) view.dispatch({ effects: sayNothing.of(null) });
     }, SAID_FOR);
     return;
   }

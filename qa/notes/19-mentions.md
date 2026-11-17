@@ -26,7 +26,7 @@ Mentions of other notes and their properties. Check each line against what it sa
 #### 4. Not mentions
 
 - ada@example.org is an email address
-- overtio/lines@main is not a mention
+- olekslitus/lines@main is not a mention
 - \@[QA · Ada] (escaped) stays text
 - `@[QA · Ada]` in code stays code
 - A sentence ending after @[QA · Ada]. The full stop isn't a property: typing it opens the properties menu, and Enter then starts a new line.

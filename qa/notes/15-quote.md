@@ -304,7 +304,7 @@ Each element in a quote. Check: it draws as it does on its own, sits inside the 
 
 #### 37. GitHub links in a quote
 
-> Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+> Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
 #### 38. arXiv links in a quote
 

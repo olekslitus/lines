@@ -2,7 +2,7 @@
 
 **Calm, local-first notes in plain Markdown.** Type Markdown and see it formatted as you write. Your notes stay on your device, as ordinary text you can open anywhere.
 
-**[Try it in your browser →](https://overtio.github.io/lines/app/)** No account, nothing to install. Or download the apps for Mac, Windows and Linux from [the website](https://overtio.github.io/lines/#download), which also has [the docs](https://overtio.github.io/lines/docs/).
+**[Try it in your browser →](https://olekslitus.com/lines/app/)** No account, nothing to install. Or download the apps for Mac, Windows and Linux from [the website](https://olekslitus.com/lines/#download), which also has [the docs](https://olekslitus.com/lines/docs/).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/images/app-dark.webp">
@@ -23,7 +23,7 @@
 
 ## Features
 
-The [web app](https://overtio.github.io/lines/app/) opens with a tour: one short note per feature, to read and play with.
+The [web app](https://olekslitus.com/lines/app/) opens with a tour: one short note per feature, to read and play with.
 
 ### Writing
 
@@ -58,7 +58,7 @@ The [web app](https://overtio.github.io/lines/app/) opens with a tour: one short
 - **API requests.** Write requests in an ` ```http ` block (`/request`) and send them from the note, a lighter Postman or Bruno: variables, one request using another's response, curl commands pasted in or copied out. The `.http` format JetBrains' IDEs, VS Code and Visual Studio read, so a whole note of requests opens there too, or [Hurl](https://hurl.dev)'s, whose captures and asserts check each response. See [docs/requests.md](docs/requests.md).
 - **Terminal recordings** from [asciinema](https://asciinema.org) play right in the note, in your theme's colors. Paste a recording's link, or drop in a `.cast` file.
 - **Spotify and SoundCloud** links on a line of their own play in the note with the site's own player, which loads only when you press play, so nothing reaches the site before. It takes turns with lines' podcast player. Spotify plays 30-second previews without a Spotify login.
-- **GitHub and arXiv links** read short, like `overtio/lines#12` with GitHub's mark, or `arXiv:1706.03762`.
+- **GitHub and arXiv links** read short, like `olekslitus/lines#12` with GitHub's mark, or `arXiv:1706.03762`.
 
 ### LaTeX notes
 
@@ -159,7 +159,7 @@ Press <kbd>⌘/</kbd> to see them all. On Windows and Linux, use <kbd>Ctrl</kbd>
 
 ## Documentation
 
-Also on the website: [overtio.github.io/lines/docs](https://overtio.github.io/lines/docs/).
+Also on the website: [olekslitus.com/lines/docs](https://olekslitus.com/lines/docs/).
 
 ### Using lines
 
@@ -291,7 +291,7 @@ The website workflow reads them from the repository's secrets `UNSPLASH_ACCESS_K
 Keeping an anime list in step with AniList or MyAnimeList (Settings → Library) needs lines' client id with each, set when building: `VITE_ANILIST_CLIENT_ID` and `VITE_MAL_CLIENT_ID` in `.env.local`. The release and website workflows read them from the repository's secrets `ANILIST_CLIENT_ID` and `MAL_CLIENT_ID`. Without one, that site's group in Settings says it isn't in this build. To make them:
 
 - **AniList**: [anilist.co/settings/developer](https://anilist.co/settings/developer) → Create New Client, named lines, with the redirect URL `https://anilist.co/api/v2/oauth/pin` (AniList then shows the token to paste into lines, which works the same in the apps and on the web). Its ID is the client id; its secret isn't needed.
-- **MyAnimeList**: [myanimelist.net/apiconfig](https://myanimelist.net/apiconfig) → Create ID, App Type **other** (an app without a secret, which signs in with PKCE), App Redirect URL `http://127.0.0.1:45291/myanimelist` (where the apps listen as you sign in), and a homepage, `https://github.com/overtio/lines`. Its Client ID is the client id.
+- **MyAnimeList**: [myanimelist.net/apiconfig](https://myanimelist.net/apiconfig) → Create ID, App Type **other** (an app without a secret, which signs in with PKCE), App Redirect URL `http://127.0.0.1:45291/myanimelist` (where the apps listen as you sign in), and a homepage, `https://github.com/olekslitus/lines`. Its Client ID is the client id.
 </details>
 
 <details>
@@ -545,10 +545,10 @@ What's planned next. Known limits of what's already there are in [docs/limitatio
 - [ ] Choose the format new notes start in
 - [ ] Plugins that add to LaTeX notes, as they can to Markdown ones
 - [ ] Sync which plugins are on
-- [ ] [HyperFormula](https://github.com/overtio/lines/issues/1) as a formula engine to choose instead of IronCalc
-- [ ] [SQLite files](https://github.com/overtio/lines/issues/2): their tables, and SQL query blocks, read-only
+- [ ] [HyperFormula](https://github.com/olekslitus/lines/issues/1) as a formula engine to choose instead of IronCalc
+- [ ] [SQLite files](https://github.com/olekslitus/lines/issues/2): their tables, and SQL query blocks, read-only
 - [ ] 3D models: OpenSCAD's customizer (sliders for a model's numbers), measuring, section views, fonts for `text()` and libraries such as BOSL2
-- [ ] [API requests](https://github.com/overtio/lines/issues/165): environments, test runs with a report, and Bruno, Postman and OpenAPI import; [Hurl](https://github.com/overtio/lines/issues/167) with the `hurl` program where it's installed
+- [ ] [API requests](https://github.com/olekslitus/lines/issues/165): environments, test runs with a report, and Bruno, Postman and OpenAPI import; [Hurl](https://github.com/olekslitus/lines/issues/167) with the `hurl` program where it's installed
 
 **Research papers**
 - [ ] More sources for `/paper`: Semantic Scholar, OpenAlex (which, unlike arXiv, takes requests from web pages, so the website could search too), PubMed, bioRxiv
@@ -584,8 +584,8 @@ What's planned next. Known limits of what's already there are in [docs/limitatio
 - [ ] Episodes downloaded to listen to offline
 
 **Notes**
-- [ ] Notebooks to file Inbox notes into, nested, beside tags ([#75](https://github.com/overtio/lines/issues/75))
-- [ ] Calendar: events across several days drawn across the hours, todos with due dates, your calendars' events and meeting notes from them, and a feed of your dates for other calendar apps ([#77](https://github.com/overtio/lines/issues/77))
+- [ ] Notebooks to file Inbox notes into, nested, beside tags ([#75](https://github.com/olekslitus/lines/issues/75))
+- [ ] Calendar: events across several days drawn across the hours, todos with due dates, your calendars' events and meeting notes from them, and a feed of your dates for other calendar apps ([#77](https://github.com/olekslitus/lines/issues/77))
 - [ ] Backlinks: the notes that mention this one
 - [ ] Renaming a note updates the mentions of it
 - [x] Import from Obsidian: notes, folders as tags, links, pictures and files, callouts, pins and daily notes

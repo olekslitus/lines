@@ -526,7 +526,7 @@ Rent, 1200
 Food, 450.50
 Total, =SUM(B2:B3)
 ```
-Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
 #### 38. Spreadsheet (csv block), then arXiv links
 

@@ -3,7 +3,7 @@ import type { Plugin } from "../../lib/plugins/types";
 import { GITHUB_MARK } from "../../lib/release";
 import { githubText } from "./links";
 
-/** Links to GitHub, drawn short with GitHub's mark, the way GitHub writes them: overtio/lines#12. */
+/** Links to GitHub, drawn short with GitHub's mark, the way GitHub writes them: olekslitus/lines#12. */
 export const github = (): Plugin => ({
   id: "github",
   name: "GitHub",

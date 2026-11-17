@@ -600,7 +600,7 @@ Home -> cabin <- back, a <-> b, x => y, p <=> q, 1 <= 2 >= 0 != 3. Stays: --> !=
   { name: "ack", wave: "1.....|01.", node: ".a......b" }
 ], edge: ["a~>b t1"] }
 ```
-Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
 #### 38. Timing diagram (wavedrom block), then arXiv links
 

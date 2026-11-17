@@ -158,6 +158,6 @@ From the title, Return, Tab or ↓ goes into the grid.
 
 - **Spreadsheets** draws ` ```csv ` blocks in Markdown notes as spreadsheets, and adds `/spreadsheet`. Off, they're code blocks.
 - **Spreadsheet Notes** is the format, off at first (above), and needs Spreadsheets. Off, spreadsheet notes show as their text, and CSV and Excel files aren't imported as spreadsheets.
-- **Formulas (IronCalc)** is the engine. Off, formulas in tables and spreadsheets show as written, and spreadsheets don't download as values or as Excel workbooks. Another engine could take its place: [HyperFormula is being considered](https://github.com/overtio/lines/issues/1) as one to turn on instead.
+- **Formulas (IronCalc)** is the engine. Off, formulas in tables and spreadsheets show as written, and spreadsheets don't download as values or as Excel workbooks. Another engine could take its place: [HyperFormula is being considered](https://github.com/olekslitus/lines/issues/1) as one to turn on instead.
 
 How it's built: the CSV is read and written by `src/lib/sheets/`, the engine by `src/plugins/ironcalc/`, and both plugins, the blocks, the note format and their grid, by `src/plugins/spreadsheet/`. What's not there yet is in [limitations.md](limitations.md#spreadsheets).

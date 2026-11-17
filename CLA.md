@@ -20,7 +20,7 @@ This agreement is between you and Oleksandr Litus, who maintains lines (the "Mai
 ### 1. Definitions
 
 - **"You"** means you, the person agreeing to this. If you contribute on behalf of an organization, "You" also means that organization, and you confirm you may agree for it.
-- **"lines"** means the software at https://github.com/overtio/lines and everything made from it: its apps, its website, and its documentation.
+- **"lines"** means the software at https://github.com/olekslitus/lines and everything made from it: its apps, its website, and its documentation.
 - **"Contribution"** means any work of authorship You Submit to lines: code, documentation, translations, images, designs, and changes to existing work, including text in an issue or a pull request that's meant to become part of lines.
 - **"Submit"** means sending a Contribution to the Maintainer or the project for inclusion in lines, by a pull request, a patch, an issue, or any other way. Something You mark plainly as "not a contribution" isn't Submitted.
 

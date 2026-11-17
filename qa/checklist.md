@@ -392,7 +392,7 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 
 ## 11. Sidebar, tags and search
 
-- [ ] Above the sync button: "Alpha 0.1.0" (the version in package.json), with a tooltip saying it's an early version; the GitHub mark opens github.com/overtio/lines (in the browser, from the apps); screen readers hear the explanation and "Source on GitHub"; Settings → Layout → Version and GitHub in the sidebar off hides both and their row (the list reaches the sync button), on brings them back; off, a downloaded update's restart button still shows there
+- [ ] Above the sync button: "Alpha 0.1.0" (the version in package.json), with a tooltip saying it's an early version; the GitHub mark opens github.com/olekslitus/lines (in the browser, from the apps); screen readers hear the explanation and "Source on GitHub"; Settings → Layout → Version and GitHub in the sidebar off hides both and their row (the list reaches the sync button), on brings them back; off, a downloaded update's restart button still shows there
 - [ ] Inbox is first in the sidebar, with its count: a new note (the button, ⌘N, ⌥N, a mention's Create, made under a tag, a type or on the Calendar) and imported files go to it, and are in Notes too; the list's title is "Inbox"; empty, it says "Nothing to sort." A note's menu has Mark as Filed (out of the Inbox, gone from its list) or, out of it, Move to Inbox; several picked notes have it in their menu and the bar above the list (an archive or inbox icon), and a screen reader hears "Filed 3 notes"; a trashed Inbox note isn't listed in it, and restored, it's back
 - [ ] Settings → General → New notes go to: Notes sends new notes and imports straight to Notes, and the Inbox leaves the sidebar while it's empty (it comes back with a Move to Inbox); Inbox (the default) as above
 - [ ] [Sync] Filing a note on one device and editing it on another keeps both; the note's file has `inbox: true` only while it's in the Inbox
@@ -810,9 +810,9 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 
 ## 21. Website and demo
 
-- [ ] The home page (overtio.github.io/lines/) and its pictures show in light and dark as the system is, with no flash of the other
+- [ ] The home page (olekslitus.com/lines/) and its pictures show in light and dark as the system is, with no flash of the other
 - [ ] **Download** offers the visitor's system's app (Mac, Windows or Linux), and the Download section lists the latest release's files with their sizes; each link downloads
-- [ ] **Open in your browser** and **Open lines** open the web app (overtio.github.io/lines/app/)
+- [ ] **Open in your browser** and **Open lines** open the web app (olekslitus.com/lines/app/)
 - [ ] lines installed from the web app before it moved to app/ opens the app, not the home page
 - [ ] Docs: every page in the README's Documentation tables is listed, the open one marked; links between pages and to their headings land; the outline beside a page jumps to its headings; on a phone, All docs opens the list
 - [ ] At a phone's width no page scrolls sideways; wide tables and code scroll by themselves

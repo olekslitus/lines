@@ -28,7 +28,7 @@ Each of these has only run in Chrome, through the end-to-end tests (two browser 
 Where the web app keeps everything is in [storage.md](storage.md).
 
 - Notes kept only in the browser can be lost: clearing site data deletes them, the browser may evict them when the disk is low (lines doesn't ask for persistent storage), and Safari deletes them after 7 days without a visit.
-- The demo website shares its storage with every other site on `overtio.github.io`. It needs a domain of its own before people keep real notes there.
+- The demo website shares its storage with every other site on `olekslitus.com`. It needs a domain of its own before people keep real notes there.
 
 ## Closing and quitting
 
@@ -54,7 +54,7 @@ How each import works is in [importing.md](importing.md).
 
 ## The website
 
-The home page and the docs at https://overtio.github.io/lines/ (`site/`):
+The home page and the docs at https://olekslitus.com/lines/ (`site/`):
 
 - There's no search across the docs yet.
 - They're in English only, though the app speaks Spanish and French too.
@@ -218,7 +218,7 @@ The home page and the docs at https://overtio.github.io/lines/ (`site/`):
 - Pele doesn't read Mermaid's themes or `themeVariables`, except the colors of charts' series: diagrams take the theme's colors. Colors set in a diagram (`style`, `classDef`) stay as written.
 - Links in diagrams (`click A href "…"`) aren't drawn as links, as one followed would open in lines' own window. In labels, HTML's bold, italic, underline, code, subscript and superscript (`<b>`, `<strong>`, `<i>`, `<em>`, `<u>`, `<code>`, `<sub>`, `<sup>`) and line breaks (`<br>`) are drawn; other tags are left out with their text kept (a link's, a `<span>`'s), and pictures aren't drawn. Icons (`fa:fa-car`) aren't drawn. ZenUML and Mermaid's other add-ons aren't drawn.
 - Math in a label (`$$x^2$$`) is drawn by the math plugin, KaTeX, and shows as written with it off.
-- Mermaid itself (about 5 MB) is still in the app, for the Diagrams (Mermaid) plugin, though it's off unless chosen. It can leave the download once plugins can be installed on their own ([#158](https://github.com/overtio/lines/issues/158)).
+- Mermaid itself (about 5 MB) is still in the app, for the Diagrams (Mermaid) plugin, though it's off unless chosen. It can leave the download once plugins can be installed on their own ([#158](https://github.com/olekslitus/lines/issues/158)).
 
 ## LaTeX notes
 
@@ -255,7 +255,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 - A screen reader hears each cell as it's reached, but can't browse the grid's rows and columns as a table: the grid is inside the editor's text box (docs/accessibility.md).
 - Filling by dragging scrolls the grid only as the pointer moves, not while it's held still past the edge. Dates go on only written as `2026-01-31`; days and months by name only in English and the app's language. There are no lists of your own to fill from, and double-clicking the corner fills down, not across.
 - Every row is kept in memory and worked out again on each change, so very large sheets (tens of thousands of rows) are slow to change, though only the rows in view are drawn.
-- A formula engine other than IronCalc can't be chosen yet ([HyperFormula](https://github.com/overtio/lines/issues/1)).
+- A formula engine other than IronCalc can't be chosen yet ([HyperFormula](https://github.com/olekslitus/lines/issues/1)).
 
 ## PDF
 
@@ -418,7 +418,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 - Repeating is for the whole series: one time can't be moved, changed or skipped on its own, and a repeating event is dragged to another time, not another day (change its dates for that). A `repeat` is written in English words (`every monday`), whatever language lines is in, and RFC 5545 rules (`FREQ=WEEKLY;BYDAY=MO`) aren't read yet. A monthly one on the 29th to 31st comes on a shorter month's last day.
 - Colors are the theme's eight (a note's own, or its type's or tag's), not any color. A day in the month shows a dot for each of three colors at most, and on the chosen day, filled in the accent, they're all the accent's text color.
 - A colored tag's name is in the text's color on a tint of its color: in Solarized's light colors that's a little under 4.5:1 (4.3:1 at least), as its text is under 5:1 on its own; Increased contrast makes it more.
-- Your calendars' events (EventKit, `.ics` subscriptions) and a feed of your dates for other calendar apps aren't there yet ([#77](https://github.com/overtio/lines/issues/77)).
+- Your calendars' events (EventKit, `.ics` subscriptions) and a feed of your dates for other calendar apps aren't there yet ([#77](https://github.com/olekslitus/lines/issues/77)).
 
 ## Panes
 
@@ -427,7 +427,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 ## Inbox
 
-- Notes leave the Inbox only by Mark as Filed (or Move to Inbox puts them back); tagging one or giving it a type doesn't file it. Notebooks to file them into are planned ([#75](https://github.com/overtio/lines/issues/75)).
+- Notes leave the Inbox only by Mark as Filed (or Move to Inbox puts them back); tagging one or giving it a type doesn't file it. Notebooks to file them into are planned ([#75](https://github.com/olekslitus/lines/issues/75)).
 - The Inbox lists notes in the list's usual order, newest first, not oldest first as inboxes are often worked through.
 - A trashed note in the Inbox is still in it when restored.
 

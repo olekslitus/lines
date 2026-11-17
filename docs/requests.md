@@ -1,6 +1,6 @@
 # API requests
 
-Notes can hold requests to an API, to try it, explore it and keep what you learned beside it: a lighter [Bruno](https://www.usebruno.com) or Postman. The API Requests [plugin](plugins.md) sends them and shows the responses. ([#165](https://github.com/overtio/lines/issues/165))
+Notes can hold requests to an API, to try it, explore it and keep what you learned beside it: a lighter [Bruno](https://www.usebruno.com) or Postman. The API Requests [plugin](plugins.md) sends them and shows the responses. ([#165](https://github.com/olekslitus/lines/issues/165))
 
 Requests are written in the `.http` format, or in [Hurl](#hurl)'s, which adds checks of the response. The `.http` format is the one the JetBrains IDEs' HTTP Client, VS Code (REST Client and httpYac), Visual Studio and Neovim (kulala) read. It has a [published spec](https://github.com/JetBrains/http-request-in-editor-spec), so requests written in lines open in those editors, and theirs in lines.
 

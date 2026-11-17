@@ -28,7 +28,7 @@ stubApp({
     return new Response(answer.body ?? "", { status: answer.status ?? 200, headers: answer.location ? { location: answer.location } : {} });
   },
 });
-mock.module("../../src/lib/release", () => ({ VERSION: "0.0.0", REPO: "https://github.com/overtio/lines" }));
+mock.module("../../src/lib/release", () => ({ VERSION: "0.0.0", REPO: "https://github.com/olekslitus/lines" }));
 const { isLocal, LocalAddress, outsideFetch } = await import("../../src/lib/outside");
 const { fetchFeed } = await import("../../src/lib/feeds/fetch");
 

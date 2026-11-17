@@ -23,7 +23,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const REPO = "https://github.com/overtio/lines";
+const REPO = "https://github.com/olekslitus/lines";
 const CHANGELOG = join(root, "CHANGELOG.md");
 
 const TYPES = ["feat", "fix", "perf", "refactor", "docs", "test", "build", "ci", "chore", "revert", "style"];

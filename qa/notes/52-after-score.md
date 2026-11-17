@@ -452,7 +452,7 @@ Rating: 4/5
 Half: 3.5/5
 Score: 7 / 10
 Not a score: 12/20
-Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
 #### 38. Score (Settings → Little Touches), then arXiv links
 

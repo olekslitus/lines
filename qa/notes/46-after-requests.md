@@ -674,7 +674,7 @@ GET {{api}}/todos/1
 ### Its owner
 GET {{api}}/users/{{todo.response.body.$.userId}}
 ```
-Issue https://github.com/overtio/lines/issues/1 and [a named link](https://github.com/overtio/lines)
+Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
 #### 38. API requests (http block): a variable, a named request and one using its response, then arXiv links
 

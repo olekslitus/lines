@@ -13,7 +13,7 @@ fix(sync): keep edits made while a pass is running. See CONTRIBUTING.md.
 
 ## Checklist
 
-- [ ] I've agreed to the [contributor agreement](https://github.com/overtio/lines/blob/main/CLA.md) (the bot asks on a first pull request)
+- [ ] I've agreed to the [contributor agreement](https://github.com/olekslitus/lines/blob/main/CLA.md) (the bot asks on a first pull request)
 - [ ] `bun run check`, `bun run lint` and `bun run build` pass
 - [ ] Docs, the QA checklist and the feature tour are updated where people will see the change (CLAUDE.md lists which)
 - [ ] Text the app shows is translated (`bun run i18n`)

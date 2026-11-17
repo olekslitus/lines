@@ -189,6 +189,7 @@ Also on the website: [olekslitus.com/lines/docs](https://olekslitus.com/lines/do
 | [Translations](docs/translations.md) | How translations work, and adding a language |
 | [Releasing](docs/releasing.md) | Versions, release notes, and how the apps are built and published |
 | [Theme tools](docs/theme-tools.md) | Swatches of the colors in pictures and videos, and themes from them, or from lines' own, for VS Code, GTK and Base24 |
+| [Lessons from Mem](docs/lessons-from-mem.md) | What Mem, an AI notes app closing in January 2027, did, what people liked and didn't, and what lines takes from it |
 
 ## Development
 

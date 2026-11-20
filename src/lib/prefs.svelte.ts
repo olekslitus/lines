@@ -24,6 +24,9 @@ export type SwipeDirection = "fingers" | "reversed";
 /** Where new notes go: the Inbox, to be sorted later, or straight among the rest. */
 export const NEW_NOTES = ["inbox", "notes"] as const;
 export type NewNotes = (typeof NEW_NOTES)[number];
+/** Where the phone apps open a web link: over lines, in a browser view of its own (a Safari view, a Custom Tab), or in the browser. */
+export const OPEN_LINKS = ["lines", "browser"] as const;
+export type OpenLinks = (typeof OPEN_LINKS)[number];
 /** The day the Calendar's weeks start on: where the language says, or a chosen one. */
 export const WEEK_STARTS = ["auto", "monday", "sunday", "saturday"] as const;
 export type WeekStart = (typeof WEEK_STARTS)[number];
@@ -206,6 +209,7 @@ export interface Stored {
   weekStart: WeekStart;
   calendarView: CalendarView;
   newNotes: NewNotes;
+  openLinks: OpenLinks;
   /** The Calendar also shows notes on the day they were made or last edited, not only by their dates. */
   calendarEdited: boolean;
   feedRefresh: FeedRefresh;
@@ -410,6 +414,7 @@ const DEFAULTS: Stored = {
   weekStart: "auto",
   calendarView: "week",
   newNotes: "inbox",
+  openLinks: "lines",
   calendarEdited: false,
   feedRefresh: 30,
   feedsInSidebar: "kind",
@@ -591,6 +596,7 @@ function read(json?: string): Stored {
     weekStart: oneOf(raw.weekStart, WEEK_STARTS, DEFAULTS.weekStart),
     calendarView: oneOf(raw.calendarView, CALENDAR_VIEWS, DEFAULTS.calendarView),
     newNotes: oneOf(raw.newNotes, NEW_NOTES, DEFAULTS.newNotes),
+    openLinks: oneOf(raw.openLinks, OPEN_LINKS, DEFAULTS.openLinks),
     calendarEdited: flag(raw.calendarEdited, DEFAULTS.calendarEdited),
     feedRefresh: oneOf(raw.feedRefresh, FEED_REFRESH, DEFAULTS.feedRefresh),
     feedsInSidebar: oneOf(raw.feedsInSidebar, FEEDS_IN_SIDEBAR, DEFAULTS.feedsInSidebar),
@@ -712,6 +718,7 @@ class Prefs {
   weekStart = $state<WeekStart>(this.#initial.weekStart);
   calendarView = $state<CalendarView>(this.#initial.calendarView);
   newNotes = $state<NewNotes>(this.#initial.newNotes);
+  openLinks = $state<OpenLinks>(this.#initial.openLinks);
   calendarEdited = $state(this.#initial.calendarEdited);
   feedRefresh = $state<FeedRefresh>(this.#initial.feedRefresh);
   feedsInSidebar = $state<FeedsInSidebar>(this.#initial.feedsInSidebar);
@@ -926,6 +933,7 @@ class Prefs {
       weekStart: this.weekStart,
       calendarView: this.calendarView,
       newNotes: this.newNotes,
+      openLinks: this.openLinks,
       calendarEdited: this.calendarEdited,
       feedRefresh: this.feedRefresh,
       feedsInSidebar: this.feedsInSidebar,
@@ -1049,6 +1057,7 @@ class Prefs {
     this.weekStart = next.weekStart;
     this.calendarView = next.calendarView;
     this.newNotes = next.newNotes;
+    this.openLinks = next.openLinks;
     this.calendarEdited = next.calendarEdited;
     this.feedRefresh = next.feedRefresh;
     this.feedsInSidebar = next.feedsInSidebar;

@@ -14,6 +14,7 @@ mod lock;
 mod oauth;
 #[cfg(target_os = "macos")]
 mod quit;
+mod safari_view;
 mod sf_symbols;
 mod system_bars;
 #[cfg(desktop)]
@@ -66,6 +67,7 @@ pub fn run() {
       lock::touch_id_unlock,
       oauth::oauth_wait,
       oauth::oauth_cancel,
+      safari_view::open_safari_view,
       system_bars::set_status_bar,
       #[cfg(desktop)]
       updates::updates_status,

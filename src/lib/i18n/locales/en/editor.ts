@@ -205,8 +205,9 @@ export default {
   "editor.copyCode": "Copy code",
   "editor.copyCell": "Copy cell",
   "editor.copied": "Copied",
-  // A web link's menu, in a note (right-click it); plugins add to it.
+  // A web link's menu, in a note (right-click it); plugins add to it. Open in Browser is where links open over lines (the phone apps).
   "editor.link.open": "Open Link",
+  "editor.link.openInBrowser": "Open in Browser",
   "editor.link.copy": "Copy Link",
   // The button on a code block that tidies its code.
   "editor.formatCode": "Format code",

@@ -10,6 +10,8 @@ interface Window {
   linesBack?: () => boolean;
   /** The Android app's status and navigation bars: the color of the pane on screen behind them, their icons light on a dark one (MainActivity.kt). */
   linesSystemBars?: { setColors(background: string, dark: boolean): void };
+  /** The Android app's Custom Tabs: a web page over lines, its toolbar `toolbar`'s color; whether it could (MainActivity.kt). */
+  linesBrowser?: { open(url: string, toolbar: string, dark: boolean): boolean };
 }
 
 /** The messages each of Settings' sections shows, by its id, for its search, each with the part it's in (vite.config.ts). */

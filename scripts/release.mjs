@@ -17,12 +17,18 @@
 //   check-android-signatures <dir>
 //                           whether every APK and .aab in <dir> is signed by Lines' Android key
 //                           alone; exits 1, saying which isn't, if not
+//   check-mac-signature <target> [notarized]
+//                           whether the Mac app Tauri built in <target> (the .app, the app in its
+//                           update package, and the .dmg) is signed with Lines' Developer ID, ready
+//                           to notarize, and with `notarized`, notarized and stapled; exits 1,
+//                           saying what isn't, if not
 //
 // The version is in package.json (the app's About shows it), src-tauri/tauri.conf.json,
 // src-tauri/Cargo.toml and src-tauri/Cargo.lock; releases are tagged `v0.2.0`.
 
-import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { execFileSync, spawnSync } from "node:child_process";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -42,6 +48,11 @@ const PR_NUMBER = /\s*\(#(\d+)\)$/;
 const git = (...args) => execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
 const read = (path) => readFileSync(join(root, path), "utf8");
 const write = (path, text) => writeFileSync(join(root, path), text);
+/** Runs a program, returning whether it succeeded and everything it printed. */
+const run = (program, args) => {
+  const { status, stdout, stderr, error } = spawnSync(program, args, { encoding: "utf8" });
+  return { ok: status === 0, output: `${stdout ?? ""}${stderr ?? ""}${error?.message ?? ""}` };
+};
 
 /** Why `title` doesn't follow the convention, or null if it does. */
 function titleProblem(title) {
@@ -225,18 +236,22 @@ export function downloadName(file, version) {
   return named.replace(versioned, `lines_${version}_${system}_`).replace("_en-US", "");
 }
 
+/** The folders in `dir`, if it's there. */
+const folders = (dir) => (existsSync(dir) ? readdirSync(dir).map((name) => join(dir, name)).filter((path) => statSync(path).isDirectory()) : []);
+
+/** Where Tauri puts the desktop apps it built in `target`: `release/bundle/`, and `<target triple>/release/bundle/`. */
+const bundleFolders = (target) => [join(target, "release", "bundle"), ...folders(target).map((dir) => join(dir, "release", "bundle"))];
+
 /**
  * Renames what Tauri built in `target` as downloadName says: the desktop apps in `src-tauri/target`
  * (`…/release/bundle/<kind>/`, for any target triple), or Android's in `src-tauri/gen/android`
  * (`app/build/outputs/apk/<abi>/release/` and `app/build/outputs/bundle/<abi>Release/`).
  */
 function nameDownloads(version, target) {
-  const folders = (dir) => (existsSync(dir) ? readdirSync(dir).map((name) => join(dir, name)).filter((path) => statSync(path).isDirectory()) : []);
-  const bundles = [join(target, "release", "bundle"), ...folders(target).map((dir) => join(dir, "release", "bundle"))];
   const android = join(target, "app", "build", "outputs");
   const apks = folders(join(android, "apk")).map((dir) => join(dir, "release"));
   const appBundles = folders(join(android, "bundle")).filter((dir) => dir.endsWith("Release"));
-  for (const folder of [...bundles.flatMap(folders), ...apks, ...appBundles].filter((dir) => existsSync(dir))) {
+  for (const folder of [...bundleFolders(target).flatMap(folders), ...apks, ...appBundles].filter((dir) => existsSync(dir))) {
     for (const file of readdirSync(folder)) {
       const name = downloadName(file, version);
       if (name !== file && statSync(join(folder, file)).isFile()) {
@@ -257,13 +272,6 @@ const ANDROID_CERTIFICATE = "32:18:95:64:7F:13:07:2C:79:6C:C1:3B:A7:3B:21:C2:B4:
  */
 function checkAndroidSignatures(dir) {
   const hex = (fingerprint) => fingerprint.replaceAll(":", "").toLowerCase();
-  const run = (program, args) => {
-    try {
-      return { ok: true, output: execFileSync(program, args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }) };
-    } catch (error) {
-      return { ok: false, output: `${error.stdout ?? ""}${error.stderr ?? error.message}` };
-    }
-  };
   const buildTools = join(process.env.ANDROID_HOME ?? "", "build-tools");
   const newest = existsSync(buildTools) ? readdirSync(buildTools).sort((a, b) => a.localeCompare(b, "en", { numeric: true })).at(-1) : undefined;
   if (!newest) throw new Error(`No Android build tools in ${buildTools}: set ANDROID_HOME to the Android SDK`);
@@ -289,6 +297,72 @@ function checkAndroidSignatures(dir) {
       console.error(`${file}: not signed by Lines' key alone${signers.length ? ` (signed by ${signers.join(", ")})` : ""}\n${output.trim()}`);
     }
   }
+  if (wrong) process.exit(1);
+}
+
+/** The certificate the Mac app is signed with, and its team (docs/releasing.md#the-mac-apps-signature). */
+const MAC_IDENTITY = "Developer ID Application: OLEKSANDR LITUS (YT4AC6762J)";
+const MAC_TEAM = "YT4AC6762J";
+
+/**
+ * Checks the Mac app Tauri built in `target`: that the .app, the app in the update package
+ * (`.app.tar.gz`) and the .dmg are signed with Lines' Developer ID and a secure timestamp, the apps
+ * with the hardened runtime, as notarization needs. With `notarized`, also that Gatekeeper accepts
+ * them as notarized and that their tickets are stapled to them, so they open offline too. Exits 1,
+ * saying what's wrong, if anything is, or if any of the three is missing.
+ */
+function checkMacSignature(target, notarized) {
+  const bundled = (kind, end) =>
+    bundleFolders(target)
+      .map((dir) => join(dir, kind))
+      .filter((dir) => existsSync(dir))
+      .flatMap((dir) => readdirSync(dir).filter((name) => name.endsWith(end)).map((name) => join(dir, name)));
+  /** Each check of `path`, [what it is, whether it passed, what the tool said]. */
+  const checks = (path) => {
+    const app = path.endsWith(".app");
+    const verified = run("codesign", ["--verify", "--deep", "--strict", "--verbose=2", path]);
+    const { output } = run("codesign", ["--display", "--verbose=2", path]);
+    const signed = [
+      ["valid", verified.ok, verified.output],
+      [`signed by ${MAC_IDENTITY}`, output.includes(`Authority=${MAC_IDENTITY}\n`) && output.includes(`TeamIdentifier=${MAC_TEAM}\n`), output],
+      ["timestamped", /^Timestamp=/m.test(output), output],
+      ...(app ? [["hardened", /^CodeDirectory .*flags=0x[0-9a-f]+\([^)]*runtime/m.test(output), output]] : []),
+    ];
+    if (!notarized) return signed;
+    const context = app ? ["--type", "execute"] : ["--type", "open", "--context", "context:primary-signature"];
+    const assessed = run("spctl", ["--assess", "--verbose=2", ...context, path]);
+    const stapled = run("xcrun", ["stapler", "validate", path]);
+    return [...signed, ["notarized", assessed.ok && assessed.output.includes("source=Notarized Developer ID"), assessed.output], ["stapled", stapled.ok, stapled.output]];
+  };
+
+  const packages = bundled("macos", ".app.tar.gz");
+  const unpacked = mkdtempSync(join(tmpdir(), "lines-update-"));
+  let wrong = 0;
+  try {
+    const updates = packages.flatMap((file) => {
+      const into = mkdtempSync(join(unpacked, "package-"));
+      execFileSync("tar", ["-xzf", file, "-C", into]);
+      return readdirSync(into).filter((name) => name.endsWith(".app")).map((name) => join(into, name));
+    });
+    const paths = [...bundled("macos", ".app"), ...updates, ...bundled("dmg", ".dmg")];
+    if (!packages.length || updates.length !== packages.length || !paths.some((path) => path.endsWith(".dmg"))) {
+      throw new Error(`No .app, update package with its app, and .dmg in ${target}'s bundle folders`);
+    }
+    for (const path of paths) {
+      const all = checks(path);
+      const failed = all.filter(([, ok]) => !ok);
+      if (failed.length) {
+        wrong++;
+        const said = [...new Set(failed.map(([, , output]) => output.trim()))].join("\n");
+        console.error(`${path} isn't ${failed.map(([what]) => what).join(", ")}\n${said}`);
+      } else {
+        console.log(`${path}: ${all.map(([what]) => what).join(", ")}`);
+      }
+    }
+  } finally {
+    rmSync(unpacked, { recursive: true, force: true });
+  }
+  if (!notarized) console.log("Notarization wasn't checked: the build had no App Store Connect key to notarize with.");
   if (wrong) process.exit(1);
 }
 
@@ -320,6 +394,8 @@ if (!import.meta.main) {
   nameDownloads(arg, arg2);
 } else if (command === "check-android-signatures") {
   checkAndroidSignatures(arg);
+} else if (command === "check-mac-signature") {
+  checkMacSignature(arg, arg2 === "notarized");
 } else {
   console.error(`Unknown command "${command}". See the top of scripts/release.mjs.`);
   process.exit(1);

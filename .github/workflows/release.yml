@@ -155,15 +155,16 @@ jobs:
       # processor, so its 120 MB would be in the APK four times (docs/releasing.md#android).
       - name: OpenSCAD, which the app includes for 3D models made from code
         run: bun run openscad-assets
+      # Where the key is, for app/build.gradle.kts (Tauri's Android signing guide). Its alias, `lines`,
+      # isn't read from a secret: a job given one hides the word everywhere in its log.
       - name: The signing key, from the repository's secrets
         env:
           ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
           base64 -d <<< "$ANDROID_KEY_BASE64" > "$RUNNER_TEMP/lines-android.jks"
           {
-            echo "keyAlias=$ANDROID_KEY_ALIAS"
+            echo "keyAlias=lines"
             echo "password=$ANDROID_KEY_PASSWORD"
             echo "storeFile=$RUNNER_TEMP/lines-android.jks"
           } > src-tauri/gen/android/keystore.properties

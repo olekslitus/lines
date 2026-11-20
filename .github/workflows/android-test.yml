@@ -41,11 +41,10 @@ jobs:
         env:
           ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
           base64 -d <<< "$ANDROID_KEY_BASE64" > "$RUNNER_TEMP/lines-android.jks"
           {
-            echo "keyAlias=$ANDROID_KEY_ALIAS"
+            echo "keyAlias=lines"
             echo "password=$ANDROID_KEY_PASSWORD"
             echo "storeFile=$RUNNER_TEMP/lines-android.jks"
           } > src-tauri/gen/android/keystore.properties

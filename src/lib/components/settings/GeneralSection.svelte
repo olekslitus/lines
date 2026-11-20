@@ -39,6 +39,8 @@
 
   /** Only shown where there may be a trackpad. */
   const hasPointer = matchMedia("(any-pointer: fine)").matches;
+  /** And where there's a touch screen. */
+  const hasTouch = navigator.maxTouchPoints > 0 || matchMedia("(any-pointer: coarse)").matches;
 
   /** Starts lines again in the language chosen, once what's typed is saved. */
   async function chooseLanguage(choice: LanguageChoice) {
@@ -80,6 +82,14 @@
         value={prefs.swipe}
         onselect={(id) => (prefs.swipe = id)}
       />
+    </FieldRow>
+  </FieldGroup>
+{/if}
+
+{#if hasTouch}
+  <FieldGroup title={t("settings.touchScreen")}>
+    <FieldRow label={t("settings.gestures")} note={t("settings.gesturesNote")}>
+      <Switch label={t("settings.gestures")} checked={prefs.gestures} onchange={(on) => (prefs.gestures = on)} />
     </FieldRow>
   </FieldGroup>
 {/if}

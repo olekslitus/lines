@@ -21,6 +21,8 @@ export interface Options {
   timezone?: string;
   /** As Safari on an iPhone has it: its size, its touch screen, and its user agent, which lines takes for an iPhone's. */
   phone?: boolean;
+  /** Another phone or tablet as Playwright has it (`Pixel 7`): its size, touch screen and user agent. */
+  device?: string;
   /**
    * Its storage kept on disk, as a browser's own is: Playwright's WebKit keeps no files (Blobs) in
    * IndexedDB otherwise, so the app can't keep an attachment there. Slower to start.
@@ -59,8 +61,8 @@ export const clickMod = (page: App["page"]) => page.evaluate(() => (/Mac|iPhone|
 /** What a browser says in the console on its own, not about lines: WebKit on Linux doesn't know a viewport key the page sets. */
 const NOISE = [/^Viewport argument key ".+" not recognized and ignored\.$/];
 
-export async function openApp({ prefs = {}, tour = false, scheme = "light", width = 1280, height = 820, timezone, phone = false, onDisk = false }: Options = {}): Promise<App> {
-  const device = phone ? devices["iPhone 15"] : { viewport: { width, height }, deviceScaleFactor: 1 };
+export async function openApp({ prefs = {}, tour = false, scheme = "light", width = 1280, height = 820, timezone, phone = false, device: name = phone ? "iPhone 15" : undefined, onDisk = false }: Options = {}): Promise<App> {
+  const device = name ? devices[name] : { viewport: { width, height }, deviceScaleFactor: 1 };
   const settings = { ...device, colorScheme: scheme, timezoneId: timezone };
   const dir = onDisk && engine() === "webkit" ? mkdtempSync(join(tmpdir(), "lines-test-")) : null;
   const context = dir ? await webkit.launchPersistentContext(dir, settings) : await globalThis.lines.browser.newContext(settings);

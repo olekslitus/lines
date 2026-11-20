@@ -8,6 +8,7 @@
   import { formatDate } from "../format";
   import { lockedNotes } from "../notes/locked.svelte";
   import { isClosed, notes, type Entry } from "../notes/store.svelte";
+  import { swipeStartsAt } from "../gestures";
   import { longPress } from "../longPress";
   import { coarsePointer, copyText, isApple, isMacApp, reducedMotion } from "../platform";
   import { lookUpDetails } from "../library/adding";
@@ -338,6 +339,8 @@
     suppressClick = false;
     if (isMacApp && event.pointerType !== "touch" && event.button === 0 && !event.ctrlKey && !isClosed(entry.note)) followDrag(event);
     if (event.pointerType === "mouse" || event.button !== 0) return;
+    // From the screen's edge, the swipe is the sidebar's (App.svelte), as iOS gives its edge to going back.
+    if (event.pointerType === "touch" && swipeStartsAt(event.clientX, event.clientY)) return;
     const { pointerId, clientX: x, clientY: y, timeStamp } = event;
     gesture = { pointerId, x, y, from: 0, horizontal: false, lastX: x, lastT: timeStamp, velocity: 0 };
   }

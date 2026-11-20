@@ -537,9 +537,12 @@ class Feeds {
     }
   }
 
-  /** Fetches these feeds (every one subscribed to, if none are named) as they're asked for: even those waiting, or gone. */
-  refresh(urls: string[] = this.subscriptions.map(({ url }) => url)) {
-    for (const url of urls) void this.#request(url, true);
+  /**
+   * Fetches these feeds (every one subscribed to, if none are named) as they're asked for: even
+   * those waiting, or gone. Settles once each has been, fetched or not.
+   */
+  async refresh(urls: string[] = this.subscriptions.map(({ url }) => url)) {
+    await Promise.all(urls.map((url) => this.#request(url, true)));
   }
 
   /** A feed fetched in its turn, a few at a time and one per site: what it read, or null if nothing changed or it couldn't be. */

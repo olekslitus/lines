@@ -16,6 +16,7 @@
   import LockedNoteView from "./lib/components/LockedNoteView.svelte";
   import NotesPasswordDialog from "./lib/components/NotesPasswordDialog.svelte";
   import PdfPreview from "./lib/components/PdfPreview.svelte";
+  import PullIndicator from "./lib/components/PullIndicator.svelte";
   import PaneResizer from "./lib/components/PaneResizer.svelte";
   import SaveError from "./lib/components/SaveError.svelte";
   import Panes from "./lib/components/Panes.svelte";
@@ -45,7 +46,8 @@
   import { postEpisode } from "./lib/player/episodes";
   import { playerKey } from "./lib/player/keys";
   import { player } from "./lib/player/player.svelte";
-  import { canPrint, copyText, isApple, isNewNoteShortcut, newNoteKey, openExternal } from "./lib/platform";
+  import { EDGE, pull, swipes, type Swipe } from "./lib/gestures";
+  import { canPrint, copyText, isApple, isIOS, isMobile, isNewNoteShortcut, newNoteKey, openExternal } from "./lib/platform";
   import { saveAndShow } from "./lib/save";
   import { NOTE_MIN, ui, type MenuItem } from "./lib/ui.svelte";
   import { MAIN } from "./lib/panes";
@@ -218,7 +220,96 @@
     return false;
   };
 
-  const focusKey = isApple ? "⇧⌘\\" : "Ctrl+Shift+\\";
+  /*
+   * Swipes on a phone or tablet that follow the finger, as UIKit's do. On iPhone and iPad, from the
+   * screen's left edge: back from a note to the list, as the Back button goes, the list sliding out
+   * from under it; on the list, from the sidebar's edge, the drawer. Android's Back gesture has the
+   * edges there (window.linesBack). On both, a swipe toward its side closes the drawer. Mice, and
+   * laptops' touch screens, whose edges are the system's, keep the buttons.
+   */
+  function swipeAt(x: number): Swipe | null {
+    if (!isMobile) return null;
+    const drawer = !wide;
+    if (drawer && ui.sidebarOpen) return sidebarSwipe(false);
+    if (!isIOS) return null;
+    if (narrow && (selected || post)) return x <= EDGE ? backSwipe() : null;
+    if (drawer && (prefs.sidebarSide === "left" ? x <= EDGE : x >= innerWidth - EDGE)) return sidebarSwipe(true);
+    return null;
+  }
+
+  /** How far the list is under the note, as a share of its width, while the note's swiped back: UIKit's. */
+  const UNDER = 0.3;
+
+  /** Puts a pane where the finger has it, or slides it there over `duration` ms. */
+  function follow(element: HTMLElement, styles: Record<string, string>, duration = 0) {
+    element.style.transition = duration ? `translate ${duration}ms var(--ease-sheet), opacity ${duration}ms var(--ease-sheet)` : "none";
+    for (const [property, value] of Object.entries(styles)) element.style.setProperty(property, value);
+  }
+
+  /** Back to how its classes have it, once they say the same: what the finger set comes off. */
+  function letGo(element: HTMLElement) {
+    for (const property of ["transition", "translate", "opacity", "visibility", "box-shadow", "--under"]) element.style.removeProperty(property);
+  }
+
+  /** Back to the list: the note slides off to the right, and the list out from under it, dimmed until it's out. */
+  function backSwipe(): Swipe {
+    const width = editorPane.offsetWidth;
+    const at = (shown: number, duration?: number) => {
+      follow(editorPane, { translate: `${(shown - 1) * width}px` }, duration);
+      follow(listPane, { translate: `${-UNDER * width * (1 - shown)}px`, "--under": String(1 - shown) }, duration);
+    };
+    return {
+      direction: 1,
+      distance: width,
+      begin() {
+        listPane.toggleAttribute("data-under", true);
+        editorPane.style.boxShadow = "var(--shadow-drawer)";
+      },
+      move: (progress) => at(progress),
+      end(done, duration) {
+        at(done ? 1 : 0, duration);
+        setTimeout(() => {
+          if (done) {
+            back();
+            flushSync();
+          }
+          listPane.toggleAttribute("data-under", false);
+          letGo(editorPane);
+          letGo(listPane);
+        }, duration);
+      },
+    };
+  }
+
+  /** The sidebar drawer opened or closed as far as the finger has it, and the window dimmed as much. */
+  function sidebarSwipe(open: boolean): Swipe {
+    const width = sidebarPane.offsetWidth;
+    // Which way the sidebar goes out.
+    const out: 1 | -1 = prefs.sidebarSide === "left" ? -1 : 1;
+    const at = (shown: number, duration?: number) => {
+      follow(sidebarPane, { translate: `${out * (1 - shown) * 100}%` }, duration);
+      if (scrim) follow(scrim, { opacity: String(shown) }, duration);
+    };
+    return {
+      direction: open ? (-out as 1 | -1) : out,
+      distance: width,
+      begin: () => follow(sidebarPane, { visibility: "visible", "box-shadow": "var(--shadow-drawer)" }),
+      move: (progress) => at(open ? progress : 1 - progress),
+      end(done, duration) {
+        at(open === done ? 1 : 0, duration);
+        setTimeout(() => {
+          if (done) {
+            ui.sidebarOpen = open;
+            flushSync();
+          }
+          letGo(sidebarPane);
+          if (scrim) letGo(scrim);
+        }, duration);
+      },
+    };
+  }
+
+  const focusKey =isApple ? "⇧⌘\\" : "Ctrl+Shift+\\";
 
   /** Where there's no note: what to do, or what went wrong. */
   const placeholder = "editor-placeholder flex flex-1 flex-col items-center justify-center gap-3 pb-(--titlebar-h) text-faint";
@@ -230,6 +321,9 @@
   let sidebarPane: HTMLElement;
   let listPane: HTMLElement;
   let editorPane: HTMLElement;
+  /** Where the open note is, and what a pull down past its top shows. */
+  let noteArea = $state<HTMLElement>();
+  let findIndicator = $state<HTMLElement>();
   /** The dimmed window beside the drawer: a click there closes it, and takes focus, which is as good as lost. */
   let scrim = $state<HTMLElement>();
 
@@ -592,6 +686,7 @@
   ]}
   data-sidebar={prefs.sidebarSide}
   data-first={first}
+  {@attach swipes(swipeAt)}
   style:--sidebar-w="{sidebarWidth}px"
   style:--list-w="{listWidth}px"
   style:grid-template-areas={grid?.areas}
@@ -803,8 +898,19 @@
       <SaveError class="mx-3 mb-2" />
 
       {#if selected}
-        <!-- The editor stays, out of sight, so other notes keep their undo history and place. -->
-        <div class="min-h-0 flex-1" hidden={closed || !!readingBook}>
+        <!-- The editor stays, out of sight, so other notes keep their undo history and place.
+             Pulled down past its top on a touch screen, it finds in the note, as ⌘F does. -->
+        <div
+          class="relative min-h-0 flex-1"
+          hidden={closed || !!readingBook}
+          bind:this={noteArea}
+          {@attach pull({
+            scroller: () => noteArea?.querySelector<HTMLElement>(".cm-scroller"),
+            indicator: () => findIndicator,
+            release: () => findInPane(noteArea!),
+          })}
+        >
+          <PullIndicator kind="search" bind:element={findIndicator} />
           <Editor noteId={selected.note.id} trashed={selected.note.trashed || closed} pane={MAIN} />
         </div>
         {#if readingBook}

@@ -11,6 +11,7 @@
   import { notes } from "../notes/store.svelte";
   import { isApple, isTauri, newNoteKey } from "../platform";
   import { deletePicked, inboxPicked, pinPicked, restorePicked, tagPicked, trashPicked } from "../notes/picked";
+  import { pull } from "../gestures";
   import { prefs } from "../prefs.svelte";
   import { today } from "../today.svelte";
   import { ui } from "../ui.svelte";
@@ -20,6 +21,7 @@
   import MiniPlayer from "./MiniPlayer.svelte";
   import NoteRow from "./NoteRow.svelte";
   import PostRow from "./PostRow.svelte";
+  import PullIndicator from "./PullIndicator.svelte";
   import SidebarToggle from "./SidebarToggle.svelte";
   import Button from "./ui/Button.svelte";
   import IconButton from "./ui/IconButton.svelte";
@@ -91,6 +93,7 @@
 
   let list: HTMLUListElement;
   let titleBar = $state<HTMLElement>();
+  let pulled = $state<HTMLElement>();
   /**
    * On a phone, the round + at the list's bottom (Settings → Layout), but in the Trash, where
    * nothing is made.
@@ -408,7 +411,18 @@
     </p>
   {/if}
 
-  <div class="relative flex min-h-0 flex-1 flex-col">
+  <!-- Pulled down past its top on a touch screen, the list searches, or in the Feeds refreshes them. -->
+  <div
+    class="relative flex min-h-0 flex-1 flex-col"
+    {@attach pull({
+      scroller: () => list,
+      indicator: () => pulled,
+      haptic: () => !!feedView,
+      enabled: () => !feedView || listedFeeds.length > 0,
+      release: () => (feedView ? feeds.refresh(listedFeeds) : searchInput?.focus()),
+    })}
+  >
+    <PullIndicator kind={feedView ? "refresh" : "search"} bind:element={pulled} />
     <!-- The same inset as the search field, so the rows line up under it. The rows not drawn are
          space above and below the drawn ones (the styles below), so it scrolls as far as all of them;
          under the + on a phone, as far as the last row clears it, and at the bottom of the screen

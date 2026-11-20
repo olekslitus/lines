@@ -51,6 +51,7 @@
     "@lezer/markdown": "^1.8.1",
     "@lucide/svelte": "^1.70.0",
     "@tauri-apps/api": "^2.12.4",
+    "@tauri-apps/plugin-haptics": "^2.4.2",
     "@tauri-apps/plugin-http": "^2.8.3",
     "@tauri-apps/plugin-opener": "^2.7.2",
     "asciinema-player": "3.18.0",

@@ -55,7 +55,7 @@
   import { canFloat, floatingOpen, toggleFloating } from "./lib/windows/floating";
   import { tabs } from "./lib/tabs.svelte";
   import { textSizeKey } from "./lib/textSize";
-  import { isDarkPane } from "./lib/themes/show.svelte";
+  import { isDarkPane, showBars } from "./lib/themes/show.svelte";
   import { findInPane } from "./lib/editor/find.svelte";
 
   let searchInput = $state<HTMLInputElement>();
@@ -182,6 +182,14 @@
           divider(prefs.listSide, focusMode),
         ],
   ]);
+
+  /** The pane under a phone's status bar, which takes its colors: the sidebar's drawer over the others, or the leftmost. */
+  const topPane = $derived(!wide && ui.sidebarOpen ? "sidebar" : first);
+  $effect(() => {
+    // Again as it's shown in the theme's dark colors, or no longer (Settings → Theme → Dark panes).
+    if (topPane !== "editor") isDarkPane(topPane);
+    showBars({ sidebar: sidebarPane, list: listPane, editor: editorPane }[topPane]);
+  });
 
   /** Back to the list on a phone: no note open, nor post. */
   function back() {

@@ -636,7 +636,7 @@
 <!-- Said after the title, by name: the icons alone would say nothing. With increased contrast,
      the date on the open note's row keeps 4.5:1 over its darker background. -->
 {#snippet details()}
-  <span class={["mt-0.5 flex items-center gap-[5px] text-[11.5px] text-faint", lit && "in-data-[contrast=more]:text-muted"]}>
+  <span class={["mt-0.5 flex items-center gap-[5px] text-[11.5px] text-faint coarse:text-xs", lit && "in-data-[contrast=more]:text-muted"]}>
     {#if entry.note.pinned}<Icon name="pin" size={12} class="text-accent" /><span class="sr-only">{t("list.pinned")}</span>{/if}
     {#if entry.note.locked}
       {@const lockLabel = entry.note.locked.open ? t("list.lockedNoteOpen") : t("list.lockedNote")}

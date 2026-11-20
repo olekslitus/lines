@@ -289,7 +289,7 @@
       </div>
       <p class="sr-only" aria-live="polite">{searching ? (found.length ? t("settings.searchCount", { count: found.length }) : t("settings.searchNone", { query: query.trim() })) : ""}</p>
       {#if searching}
-        <div class="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+        <div class="bounce relative min-h-0 flex-1 overflow-y-auto px-3 pb-3">
           {#if found.length}
             <ul class="flex flex-col gap-0.5" aria-label={t("settings.searchResults")}>
               {#each found as result (`${result.section.id}:${result.text}`)}
@@ -314,7 +314,7 @@
           {/if}
         </div>
       {/if}
-      <nav aria-label={t("settings.sections")} class={["min-h-0 flex-1 overflow-y-auto px-3 pb-3", searching && "hidden"]}>
+      <nav aria-label={t("settings.sections")} class={["bounce relative min-h-0 flex-1 overflow-y-auto px-3 pb-3", searching && "hidden"]}>
         <ul class="flex flex-col gap-0.5">
           {#each list as entry (entry.kind === "group" ? entry.id : entry.section.id)}
             <li class="flex flex-col gap-0.5">
@@ -361,7 +361,7 @@
         {/if}
       </header>
       <!-- Positioned, so text hidden for screen readers (position: absolute) scrolls with it rather than stretching it. -->
-      <div bind:this={body} class="relative min-h-0 flex-1 overflow-y-auto overscroll-contain select-text">
+      <div bind:this={body} class="bounce relative min-h-0 flex-1 overflow-y-auto overscroll-contain select-text">
         <section aria-labelledby="settings-section-title" class="mx-auto flex max-w-[680px] flex-col gap-7 px-6 pt-1 pb-8 @max-[640px]:px-4">
           {#if current.plugin}
             <PluginPage plugin={current.plugin} page={pages.get(current.id)} />

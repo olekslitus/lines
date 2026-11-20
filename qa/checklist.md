@@ -804,7 +804,11 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] Narrow (under 700 px): one pane at a time; Back returns to the list
 - [ ] Narrow: a new note slides in with its editor showing, ready to type in; [iOS] the screen isn't left blank
 - [ ] [Android] Back closes a dialog or menu, then the sidebar drawer, then the open note; from the list it leaves lines
-- [ ] [Android] lines starts below the status bar, on a tablet too; behind the status and navigation bars is the theme's background, their icons light over a dark theme (lines set to Dark on a light system too); the keyboard never covers the line being typed
+- [ ] [Android] lines starts below the status bar, on a tablet too; behind the status and navigation bars is the color of the pane showing (the list's, the note's, the sidebar's), their icons light over a dark one (lines set to Dark on a light system too, and a pane shown dark); the keyboard never covers the line being typed
+- [ ] [iOS] The status bar and the home indicator lie over lines' own panes: the note list's color under the time on the list, the note's on a note, the sidebar's with it open, edge to edge, with no line or band of another color, in light and dark and a few themes (one with Dark panes); the time and battery light over a dark top, dark over a light one, lines set to Dark on a light system too; the last note in a long list scrolls clear of the home indicator
+- [ ] [iOS] Nothing zooms the page: pinching, double-tapping, or tapping the search field or a field in Settings; the page stays put. [Touch] In Safari on iPhone, tapping a field doesn't zoom in, but pinching still zooms
+- [ ] [iOS] The note list, the sidebar, Settings' list and sections, and a short note can each be dragged down and up and spring back, though all of it fits; dragging the note's text still selects it, and its grips still move lines
+- [ ] [Touch] Text is the platform's size: the list's titles 17 pt and excerpts 15, the sidebar's rows, Settings' rows and fields, menus and the search field 17; [iOS] a bigger or smaller text size in iOS's Settings (Display & Brightness → Text Size) changes lines' too, on coming back to it, while a note's text keeps Settings → Typography's size
 - [ ] Focus mode (⇧⌘\ or the toolbar button) shows just the note; not on phones
 - [ ] Trashed notes show Restore and Delete Forever instead of the toolbar
 - [ ] [Mac] The window drags by its toolbars and starts without a flash

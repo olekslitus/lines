@@ -20,7 +20,7 @@ class MainActivity : TauriActivity() {
     super.onCreate(savedInstanceState)
     // Edge to edge, the web view would lie under the status bar, the navigation bar and the
     // keyboard, and it tells the page only of a camera's cutout. So lines is kept clear of them
-    // all, and what shows behind the bars is the page's background (SystemBars.setColors).
+    // all, and what shows behind the bars is the pane on screen's color (SystemBars.setColors).
     ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
       val clear = insets.getInsets(
         WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime()
@@ -46,7 +46,7 @@ class MainActivity : TauriActivity() {
     })
   }
 
-  // The bars show lines' background, and their icons follow it: it can be dark while the system is
+  // The bars show the pane on screen's color, and their icons follow it: it can be dark while the system is
   // light, and change while lines is open (themes/show.svelte.ts).
   inner class SystemBars {
     @JavascriptInterface

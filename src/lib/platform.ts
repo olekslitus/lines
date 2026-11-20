@@ -8,6 +8,15 @@ const ua = navigator.userAgent;
 export const isApple = /Mac|iPhone|iPad|iPod/.test(ua);
 const isMobile = onPhoneOrTablet(ua, navigator.maxTouchPoints);
 
+/** An iPhone or iPad: the app, or Safari (and every browser there, which is WebKit too). */
+export const isIOS = isApple && isMobile;
+
+/** The iPhone, iPad and Android apps. */
+export const isMobileApp = isTauri && isMobile;
+
+/** The iPhone and iPad app. */
+export const isIOSApp = isTauri && isIOS;
+
 /** The native macOS app, where the window draws traffic lights over our content. */
 export const isMacApp = isTauri && /Macintosh/.test(ua) && !isMobile;
 
@@ -74,9 +83,6 @@ export function download(filename: string, data: BlobPart, type: string) {
 export function downloadText(filename: string, text: string, type = "text/markdown") {
   download(filename, text, `${type};charset=utf-8`);
 }
-
-/** The iPhone and iPad app. */
-export const isIOSApp = isTauri && isApple && isMobile;
 
 /**
  * Saves a file: a normal download on the web, or straight into Downloads in the apps (Documents

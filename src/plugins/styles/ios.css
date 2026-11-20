@@ -39,8 +39,8 @@
 }
 
 /*
- * Type: SF Pro's tracking for each size (HIG → Typography → Tracking values), and on a touch screen
- * iOS's text styles: Body 17, Subheadline 15, Footnote 13, Caption 12 and 11, Title 3 20, Title 2 22.
+ * Type: SF Pro's tracking for each size (HIG → Typography → Tracking values). The sizes on a touch
+ * screen are iOS's text styles in every style, with Dynamic Type (app.css).
  */
 :root[data-style="ios"] .text-sm {
   letter-spacing: -0.006em;
@@ -63,15 +63,6 @@
 }
 
 @media (pointer: coarse) {
-  :root[data-style="ios"][data-scheme],
-  :root[data-style="ios"] [data-scheme] {
-    --text-sm: 15px;
-    --text-base: 17px;
-    --text-md: 17px;
-    --text-lg: 20px;
-    --text-xl: 22px;
-  }
-
   :root[data-style="ios"] .text-sm {
     letter-spacing: -0.016em;
   }

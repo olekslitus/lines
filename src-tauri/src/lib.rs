@@ -15,6 +15,7 @@ mod oauth;
 #[cfg(target_os = "macos")]
 mod quit;
 mod sf_symbols;
+mod system_bars;
 #[cfg(desktop)]
 mod updates;
 mod window_style;
@@ -63,6 +64,7 @@ pub fn run() {
       lock::touch_id_unlock,
       oauth::oauth_wait,
       oauth::oauth_cancel,
+      system_bars::set_status_bar,
       #[cfg(desktop)]
       updates::updates_status,
       #[cfg(desktop)]
@@ -101,6 +103,8 @@ pub fn run() {
       // The main window starts hidden and shows itself once its look is applied, so it never
       // flashes the wrong shape or color. Should that ever not happen, show it anyway.
       if let Some(window) = app.get_webview_window("main") {
+        #[cfg(target_os = "ios")]
+        system_bars::clear_edges(&window);
         std::thread::spawn(move || {
           std::thread::sleep(std::time::Duration::from_secs(3));
           let _ = window.show();

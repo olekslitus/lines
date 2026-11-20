@@ -411,9 +411,13 @@
   <div class="relative flex min-h-0 flex-1 flex-col">
     <!-- The same inset as the search field, so the rows line up under it. The rows not drawn are
          space above and below the drawn ones (the styles below), so it scrolls as far as all of them;
-         under the + on a phone, as far as the last row clears it. -->
+         under the + on a phone, as far as the last row clears it, and at the bottom of the screen
+         (nothing playing under it), clear of the home indicator. -->
     <ul
-      class={["items relative flex-1 overflow-y-auto overscroll-contain px-3 outline-none", addButton ? "pb-[calc(88px+env(safe-area-inset-bottom))]" : "pb-6"]}
+      class={[
+        "items relative flex-1 overflow-y-auto overscroll-contain px-3 outline-none",
+        addButton ? "pb-[calc(88px+env(safe-area-inset-bottom))]" : "pb-6 in-[.note-list>:last-child]:pb-[calc(24px+env(safe-area-inset-bottom))]",
+      ]}
       style:--before="{drawnRows.before}px"
       style:--after="{drawnRows.after}px"
       bind:this={list}
@@ -458,6 +462,8 @@
         />
       {/each}
       {/if}
+      <!-- Lets the list always bounce on iPhone and iPad (app.css), as its own ::after is the room under the rows. -->
+      <li class="bounce-floor" aria-hidden="true"></li>
     </ul>
     {#if addButton}
       <AddButton bar={titleBar} />
@@ -492,11 +498,11 @@
    * hides next to a highlighted, swiped or right-clicked row. It's CSS because it depends on the
    * rows beside.
    */
-  .items > :global(li:not([aria-posinset="1"])) {
+  .items > :global(li[aria-posinset]:not([aria-posinset="1"])) {
     padding-top: 6px;
   }
 
-  .items > :global(li:not([aria-posinset="1"])::before) {
+  .items > :global(li[aria-posinset]:not([aria-posinset="1"])::before) {
     content: "";
     position: absolute;
     top: 2.5px;

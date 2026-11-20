@@ -90,7 +90,7 @@
             autocomplete="off"
             autocapitalize="off"
             spellcheck="false"
-            class="h-[30px] min-w-0 flex-1 border-0 bg-transparent p-0 font-[inherit] text-sm text-fg outline-none placeholder:text-faint coarse:h-11"
+            class="h-[30px] min-w-0 flex-1 border-0 bg-transparent p-0 font-[inherit] text-sm text-fg outline-none placeholder:text-faint coarse:h-11 coarse:text-base"
             {...field}
           />
           <button

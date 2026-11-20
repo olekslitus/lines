@@ -479,7 +479,7 @@
   </header>
 
   <!-- Right-clicking its empty space offers a new section, and back what's hidden. -->
-  <div class="flex-1 overflow-y-auto overscroll-contain px-2.5 pt-1 pb-6" oncontextmenu={onEmptyContextMenu} role="presentation">
+  <div class="bounce relative flex-1 overflow-y-auto overscroll-contain px-2.5 pt-1 pb-6" oncontextmenu={onEmptyContextMenu} role="presentation">
     {#each shownSections as section, i (section.key)}
       {@const heading = hasHeading(section)}
       {@const open = !heading || !sidebarLayout.isCollapsed(section.key)}

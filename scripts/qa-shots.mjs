@@ -13,7 +13,7 @@
 import { mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
-import { chromium, webkit } from "playwright";
+import { chromium, devices, webkit } from "playwright";
 import { build, preview } from "vite";
 import { zip } from "../src/lib/zip.ts";
 import { answerFile, ico, png, wav } from "../tests/browser/files.ts";
@@ -27,6 +27,8 @@ const option = (name, fallback) => {
 const engine = option("browser", "chromium");
 const only = option("only", "").split(",").filter(Boolean);
 const out = `${root}qa/shots/`;
+/** The widest a scene can be and still be a phone's. */
+const PHONE_WIDTH = 430;
 const outDir = "dist-test";
 
 const PROSE = `# A day's notes
@@ -848,7 +850,7 @@ const SCENES = [
       await page.getByRole("dialog").getByRole("button", { name: "All Settings" }).click();
       await page.getByRole("dialog").locator("#settings-nav-editor").click();
     }],
-  ].map(([id, what, look, act]) => ({ id: `phone-ios-${id}`, title: `Phone: iOS, ${what}`, look, prefs: { style: "ios", theme: "ios" }, width: 390, height: 844, touch: true, act })),
+  ].map(([id, what, look, act]) => ({ id: `phone-ios-${id}`, title: `Phone: iOS, ${what}`, look, prefs: { style: "ios", theme: "ios" }, width: 390, height: 844, act })),
   ...["sidebar", "list", "both"].map((panes) => ({
     id: `dark-panes-${panes}`,
     title: `Dark panes: ${panes}`,
@@ -1987,7 +1989,7 @@ const SCENES = [
       await page.locator(".add-button").click({ button: "right" });
     },
   },
-  { id: "phone-dark-list", title: "Phone: a dark note list", look: "The list dark, its rows readable; the top of the screen not a light strip over it (a known gap, docs/limitations.md).", prefs: { darkPanes: "list" }, width: 390, height: 780, schemes: ["light"] },
+  { id: "phone-dark-list", title: "Phone: a dark note list", look: "The list dark, its rows readable, its title bar dark up to the top of the screen.", prefs: { darkPanes: "list" }, width: 390, height: 780, schemes: ["light"] },
   {
     id: "phone-typing",
     title: "Phone: typing practice",
@@ -2027,6 +2029,23 @@ const SCENES = [
     shoot: "dialog",
   },
   {
+    id: "phone-list",
+    title: "Phone: the note list",
+    look: "Text at iOS's sizes: the title bar's and each note's title 17 pt, the excerpt 15, the date 13, the search field's 17; the title bar the list's color to the top of the screen, with nothing across it.",
+    note: PROSE,
+    width: 390,
+    height: 780,
+    act: (page) => page.getByRole("button", { name: "Back to notes" }).click(),
+  },
+  {
+    id: "phone-sidebar",
+    title: "Phone: the sidebar",
+    look: "The drawer's rows at 17 pt, tags at 15, nothing cut short; its top the sidebar's color up to the screen's edge.",
+    width: 390,
+    height: 780,
+    act: (page) => page.getByRole("button", { name: "Show sidebar" }).click(),
+  },
+  {
     id: "phone-note-info",
     title: "Phone: a note's info, in Spanish",
     look: "The panel inside the screen with room on both sides; the formats on two lines rather than past its edge.",
@@ -2054,8 +2073,19 @@ mkdirSync(out, { recursive: true });
 const shots = [];
 for (const scene of scenes) {
   for (const scheme of scene.schemes ?? ["light", "dark"]) {
-    const context = await browser.newContext({ viewport: { width: scene.width ?? 1280, height: scene.height ?? 800 }, colorScheme: scheme, deviceScaleFactor: scene.touch ? 3 : 2, hasTouch: !!scene.touch, isMobile: !!scene.touch, reducedMotion: "reduce" });
+    const width = scene.width ?? 1280;
+    // A phone's width is an iPhone's Safari, with its touch screen: the sizes lines gives fingers and its text there.
+    const phone = width <= PHONE_WIDTH ? { userAgent: devices["iPhone 15"].userAgent, isMobile: true, hasTouch: true } : {};
+    const context = await browser.newContext({ ...phone, viewport: { width, height: scene.height ?? 800 }, colorScheme: scheme, deviceScaleFactor: phone.isMobile ? 3 : 2, reducedMotion: "reduce" });
     const { plugins: pluginChoices, ...prefs } = scene.prefs ?? {};
+    // WebKit on a Mac gives iOS's text size (`-apple-system-body`, src/lib/mobile.ts) as a Mac's 13px:
+    // the phone's text is shown at iOS's usual size instead, as lines can't tell it there.
+    if (phone.isMobile) {
+      await context.addInitScript(() => {
+        const supports = CSS.supports.bind(CSS);
+        CSS.supports = (...args) => !args.join(" ").includes("-apple-system-body") && supports(...args);
+      });
+    }
     await context.addInitScript(
       ([prefs, plugins, storage, language]) => {
         if (location.protocol !== "http:") return;

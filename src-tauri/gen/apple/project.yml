@@ -47,6 +47,9 @@ targets:
         # ProMotion's 120 Hz for what Core Animation draws, as WebKit's slides off the page are: an
         # iPhone app is held to 60 Hz without it (iPad isn't).
         CADisableMinimumFrameDurationOnPhone: true
+        # Export compliance: no encryption but the system's (TLS through Security.framework, the notes'
+        # through WebKit's Web Crypto; src-tauri/Cargo.toml), so App Store Connect doesn't ask for each build.
+        ITSAppUsesNonExemptEncryption: false
         LSRequiresIPhoneOS: true
         # Exports are saved in the app's Documents, which the Files app shows under On My iPhone (src/export.rs).
         LSSupportsOpeningDocumentsInPlace: true

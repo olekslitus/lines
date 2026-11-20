@@ -1,4 +1,5 @@
-import { onPhoneOrTablet } from "./device";
+import { solid } from "./colors";
+import { linkRoute, onPhoneOrTablet } from "./device";
 
 export const isTauri = "__TAURI_INTERNALS__" in window;
 /** The demo website (`bun run build:site`): the web app with the feature tour, saving only to a folder. */
@@ -51,8 +52,6 @@ export function isNewNoteShortcut(event: KeyboardEvent) {
   return event.altKey && !event.metaKey && !event.ctrlKey && event.code === "KeyN";
 }
 
-const SAFE_URL = /^(https?:|mailto:|tel:)/i;
-
 let nativeFetch: Promise<typeof fetch> | undefined;
 
 /**
@@ -64,13 +63,39 @@ export function webFetch(): Promise<typeof fetch> {
   return (nativeFetch ??= import("@tauri-apps/plugin-http").then((module) => module.fetch as typeof fetch));
 }
 
-export async function openExternal(url: string) {
-  if (!SAFE_URL.test(url)) return;
+/**
+ * Opens an address where it goes (device.ts's linkRoute): a web page over lines in the phone apps,
+ * unless Settings → General says the browser or `inBrowser` asks for it, else in the browser; mail
+ * and phone numbers in their apps.
+ */
+export async function openExternal(url: string, { inBrowser = false } = {}) {
+  const openLinks = isMobileApp ? (await import("./prefs.svelte")).prefs.openLinks : "browser";
+  const route = linkRoute(url, { phoneApp: isMobileApp, openLinks, inBrowser });
+  if (!route || (route === "lines" && (await showOverLines(url)))) return;
   if (isTauri) {
     const { openUrl } = await import("@tauri-apps/plugin-opener");
     await openUrl(url);
   } else {
     window.open(url, "_blank", "noopener,noreferrer");
+  }
+}
+
+/**
+ * Shows a web page over lines, in a browser view of its own that closes back to where lines was:
+ * Safari's on iPhone and iPad (safari_view.rs), with the theme's accent on its buttons; a Custom
+ * Tab on Android (MainActivity.kt), its toolbar in lines' background. Whether it could.
+ */
+async function showOverLines(url: string) {
+  const dark = document.documentElement.dataset.scheme === "dark";
+  try {
+    if (window.linesBrowser) return window.linesBrowser.open(url, solid("var(--bg)"), dark);
+    if (!isIOSApp) return false;
+    const { invoke } = await import("@tauri-apps/api/core");
+    await invoke("open_safari_view", { url, tint: solid("var(--accent)"), dark });
+    return true;
+  } catch (error) {
+    console.error(`Couldn't show ${url} in lines:`, error);
+    return false;
   }
 }
 

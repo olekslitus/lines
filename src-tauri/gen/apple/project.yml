@@ -84,6 +84,8 @@ targets:
       - sdk: Metal.framework
       - sdk: MetalKit.framework
       - sdk: QuartzCore.framework
+      # Links open in Safari's view over lines (src/safari_view.rs).
+      - sdk: SafariServices.framework
       - sdk: Security.framework
       - sdk: UIKit.framework
       - sdk: WebKit.framework

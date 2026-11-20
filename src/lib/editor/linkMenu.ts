@@ -2,15 +2,19 @@ import { syntaxTree } from "@codemirror/language";
 import type { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import type { SyntaxNode } from "@lezer/common";
+import { linkRoute } from "../device";
 import { t } from "../i18n/index.svelte";
+import { isMobileApp, openExternal } from "../platform";
 import { plugins } from "../plugins/registry.svelte";
 import type { WebLink } from "../plugins/types";
+import { prefs } from "../prefs.svelte";
 import { ui } from "../ui.svelte";
 import { copyAddress, openHref } from "./links";
 
 /*
  * A web link's menu in a Markdown note (right-click it, or the menu key with the cursor on it): open
- * it, copy its address, and what plugins do with links (`linkActions`: add it to the Library).
+ * it, in the browser too where it opens over lines (the phone apps), copy its address, and what
+ * plugins do with links (`linkActions`: add it to the Library).
  */
 
 /** What an address is part of, when it's more than a bare one. */
@@ -45,6 +49,7 @@ export const linkMenu = EditorView.domEventHandlers({
     event.preventDefault();
     const at = fromKeys ? view.coordsAtPos(link.to) : null;
     const element = (event.target as Element).closest<HTMLElement>(".cm-lp-link");
+    const overLines = linkRoute(link.href, { phoneApp: isMobileApp, openLinks: prefs.openLinks }) === "lines";
     const actions = plugins.linkActions.filter((action) => !(action.edits && view.state.readOnly) && (action.offers?.(link) ?? true));
     ui.openMenu({
       x: at ? at.left : event.clientX,
@@ -52,6 +57,7 @@ export const linkMenu = EditorView.domEventHandlers({
       label: link.text,
       items: [
         { label: t("editor.link.open"), icon: "link", run: () => openHref(link.href, link.text, element ?? undefined) },
+        ...(overLines ? [{ label: t("editor.link.openInBrowser"), icon: "external-link" as const, run: () => void openExternal(link.href, { inBrowser: true }) }] : []),
         { label: t("editor.link.copy"), icon: "copy", run: () => copyAddress(link.href, element) },
         ...(actions.length ? ["separator" as const] : []),
         ...actions.map((action) => ({ label: action.label, icon: action.icon, run: () => action.run(view, link) })),

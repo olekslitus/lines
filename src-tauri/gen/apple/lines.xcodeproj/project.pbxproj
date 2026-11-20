@@ -13,6 +13,7 @@
 		5866674CACC9DD45C33E332F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9099859626B0024FDA6277F2 /* Assets.xcassets */; };
 		630DFE5DC956B482106D4F7A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 379A1ABEFB53E99909FFFE59 /* LaunchScreen.storyboard */; };
 		6403D9FD1B70E5FE22C696EF /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 40962BF7A6F08A4773AA307F /* Security.framework */; };
+		5AFE7A1E5E5A3C1E9B0D2F41 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AFE7A1E5E5A3C1E9B0D2F42 /* SafariServices.framework */; };
 		653652C3F869799DB793DF2C /* libapp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CEFEB47044870740523D203 /* libapp.a */; };
 		684E3037E30CBEDAB10C1D5D /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD60B6E49BCE8B8F94BA057E /* Metal.framework */; };
 		80C6F45C7D1BB543881EC7BC /* assets in Resources */ = {isa = PBXBuildFile; fileRef = F017090473AABAC64B2728E7 /* assets */; };
@@ -32,6 +33,7 @@
 		3848AC6889087EF07976EC5F /* oauth.rs */ = {isa = PBXFileReference; path = oauth.rs; sourceTree = "<group>"; };
 		3A33B6E65B0DA1662DFFE22E /* lib.rs */ = {isa = PBXFileReference; path = lib.rs; sourceTree = "<group>"; };
 		40962BF7A6F08A4773AA307F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		5AFE7A1E5E5A3C1E9B0D2F42 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
 		491BE1AEAA338E994B48B6E9 /* addresses.rs */ = {isa = PBXFileReference; path = addresses.rs; sourceTree = "<group>"; };
 		5108407CFA55EF13C33DB492 /* lines_iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = lines_iOS.entitlements; sourceTree = "<group>"; };
 		61D58C04691BFC275B879BBE /* lines_iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = lines_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -67,6 +69,7 @@
 				684E3037E30CBEDAB10C1D5D /* Metal.framework in Frameworks */,
 				C80C880F16B212D2E78E2900 /* MetalKit.framework in Frameworks */,
 				030DA650E7AEA323B93C68D7 /* QuartzCore.framework in Frameworks */,
+				5AFE7A1E5E5A3C1E9B0D2F41 /* SafariServices.framework in Frameworks */,
 				6403D9FD1B70E5FE22C696EF /* Security.framework in Frameworks */,
 				4B59208889DD8D9904667FAD /* UIKit.framework in Frameworks */,
 				864AB55292E34EA74E2C12E8 /* WebKit.framework in Frameworks */,
@@ -173,6 +176,7 @@
 				CD60B6E49BCE8B8F94BA057E /* Metal.framework */,
 				A62C0233C2199C5EF80BF1EE /* MetalKit.framework */,
 				CC44169FE94BB2FA674F83B5 /* QuartzCore.framework */,
+				5AFE7A1E5E5A3C1E9B0D2F42 /* SafariServices.framework */,
 				40962BF7A6F08A4773AA307F /* Security.framework */,
 				C7A0EEF984076C5BAD706F45 /* UIKit.framework */,
 				141E650F380806120D42350A /* WebKit.framework */,

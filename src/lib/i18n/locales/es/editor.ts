@@ -170,6 +170,7 @@ export default {
   "editor.copyCell": "Copiar celda",
   "editor.copied": "Copiado",
   "editor.link.open": "Abrir enlace",
+  "editor.link.openInBrowser": "Abrir en el navegador",
   "editor.link.copy": "Copiar enlace",
   "editor.formatCode": "Formatear código",
   "editor.codeFormatted": "Código formateado",

@@ -13,6 +13,7 @@
   import type { EditorView } from "@codemirror/view";
   import { tick, untrack } from "svelte";
   import { speak } from "../../lib/a11y";
+  import { pressed as feelPressed } from "../../lib/haptics";
   import { htmlTable, parseTabbed } from "../../lib/editor/tables";
   import { locale, type MessageKey, t } from "../../lib/i18n/index.svelte";
   import { copyText, isApple } from "../../lib/platform";
@@ -753,6 +754,8 @@
       if (state !== "pressed" || sheet.readOnly) return;
       state = "moving";
       moving = { area: { ...range }, rows: 0, columns: 0 };
+      // Picked up, as iOS has a drag lift: felt in the hand when there's no pointer to show it.
+      if (event.pointerType !== "mouse") feelPressed();
     }, HOLD);
     const end = () => {
       clearTimeout(hold);

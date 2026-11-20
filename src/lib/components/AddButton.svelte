@@ -132,7 +132,7 @@
   onclick={add}
   oncontextmenu={openKinds}
   onfocus={() => (away = false)}
-  {@attach longPress(() => openKinds())}
+  {@attach longPress(() => openKinds(), { sinks: false })}
   {@attach followScroll}
 >
   <Icon name="plus" size={26} strokeWidth={2.25} />

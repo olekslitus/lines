@@ -116,7 +116,8 @@ jobs:
           screencapture -x "$RUNNER_TEMP/screen-2.png" || true
           # A LaTeX note, typeset with TeX (BusyTeX's WebAssembly).
           keys 'keystroke "n" using command down'; sleep 3
-          keys 'keystroke "Signed and hardened"'; keys 'key code 36'; keys 'keystroke "Typeset by TeX in the signed app."'; sleep 2
+          keys 'keystroke "Signed and hardened"'; sleep 1
+          keys 'keystroke "a" using command down'; keys 'keystroke "Typeset by TeX in the signed app"'; sleep 2
           # Where the ⓘ button, Written in's LaTeX, and Typeset with's TeX are in a 1024-wide window.
           "$RUNNER_TEMP/click" 888 57; sleep 3
           screencapture -x "$RUNNER_TEMP/screen-3.png" || true

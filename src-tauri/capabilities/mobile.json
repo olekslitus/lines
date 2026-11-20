@@ -1,0 +1,7 @@
+{
+  "identifier": "mobile",
+  "description": "Permissions only the iPhone, iPad and Android apps have",
+  "platforms": ["iOS", "android"],
+  "windows": ["main"],
+  "permissions": ["haptics:allow-impact-feedback"]
+}

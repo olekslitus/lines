@@ -386,6 +386,9 @@ export default {
   "settings.swipeFingers": "Follow fingers",
   "settings.swipeReversed": "Reversed",
   "settings.swipeNote": "Swipe a note with two fingers to pin or trash it. Choose which way the note moves when you swipe.",
+  "settings.touchScreen": "Touch screen",
+  "settings.gestures": "Swipes and pulls",
+  "settings.gesturesNote": "Swipe from the screen's edge to go back to the list or open the sidebar. Pull the list down past its top to search, a note to find in it, or the feeds to refresh them.",
 
   // The Calendar (in the sidebar).
   "settings.calendar": "Calendar",

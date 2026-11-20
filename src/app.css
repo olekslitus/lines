@@ -88,6 +88,19 @@
   --ease-pop: var(--ease-pop);
 }
 
+/* How far a pull down has gone (gestures.ts), registered so it can slide back. */
+@property --pull {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --pulled {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
 /* Fingers, and devices that can hover. */
 @custom-variant coarse (@media (pointer: coarse));
 @custom-variant fine (@media (pointer: fine));
@@ -318,6 +331,21 @@
   border-radius: var(--window-radius);
   box-shadow: inset 0 0 0 1px var(--window-edge);
   pointer-events: none;
+}
+
+/*
+ * The note list under a note swiped back off it on a phone (App.svelte), dimmed as UIKit's is
+ * until it's out. Moved by the finger, the list is what this is placed in.
+ */
+[data-pane="list"][data-under]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: var(--scrim);
+  opacity: var(--under, 0);
+  pointer-events: none;
+  transition: inherit;
 }
 
 /*

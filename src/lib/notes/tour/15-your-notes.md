@@ -29,6 +29,7 @@ The Mac app (and the iPhone app, coming) adds:
 - **Two notes at once:** ⌥-click a note in the list, or right-click it and choose Open to the Side, to read it beside the one you're writing.
 - **Links:** Settings → Editor → Links chooses what a click, ⌘-click and ⇧⌘-click do on links, tags and mentions.
 - **The list:** right-click a note to pin it or give it an icon, or swipe it to pin or delete it. ⌘-click notes (or ⇧-click, or ⌘A for all) to tag, pin or trash several at once.
+- **On a phone:** pull the list down to search it, or a note to find in it. On an iPhone, swipe from the screen's edge to go back to the list.
 
 Most of lines is plugins, as in a code editor: LaTeX notes, spreadsheets and their formulas, the math and diagrams, TeX for PDFs, the themes and the icons. Settings → Plugins turns off the ones you don't use, and nothing in your notes changes: a LaTeX note waits as plain text until LaTeX is on again.
 

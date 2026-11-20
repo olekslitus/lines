@@ -351,6 +351,9 @@ export default {
   "settings.swipeFingers": "Seguir los dedos",
   "settings.swipeReversed": "Invertida",
   "settings.swipeNote": "Desliza una nota con dos dedos para fijarla o enviarla a la papelera. Elige hacia dónde se mueve la nota al deslizar.",
+  "settings.touchScreen": "Pantalla táctil",
+  "settings.gestures": "Deslizar y tirar",
+  "settings.gesturesNote": "Desliza desde el borde de la pantalla para volver a la lista o abrir la barra lateral. Tira hacia abajo de la lista para buscar, de una nota para buscar en ella o de los feeds para actualizarlos.",
 
   "settings.calendar": "Calendario",
   "settings.weekStart": "La semana empieza el",

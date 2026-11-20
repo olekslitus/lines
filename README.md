@@ -89,6 +89,7 @@ Put one in a Markdown note with `/spreadsheet` (a ` ```csv ` block), or, with Sp
 - **Note icons**, shown before the title in the list.
 - **Fast search** across every note.
 - **Pin, trash, restore.** Right-click, long-press or swipe a note.
+- **Gestures on a phone.** On iPhone and iPad, swipe from the screen's edge back to the list or into the sidebar, the note following your finger. Pull the list down to search it, a note to find in it, the feeds to refresh them. Turn them off in Settings → General.
 - **Several notes at once.** <kbd>⌘</kbd>-click, <kbd>⇧</kbd>-click or <kbd>⌘A</kbd> in the list, then tag, pin or trash them together.
 - **Notes side by side, and above and below.** Open to the Side or Open Below (or <kbd>⌥</kbd>-click and <kbd>⌥⇧</kbd>-click in the list) opens a note beside the one you're in, to read one while writing another; split as many times as there's room, one on top and two at the bottom, swap any with the open note, and drag the lines between them. Or drag a note from the list onto a pane, by its edge to open it beside or in its middle to open it there, and drag panes around by their grips.
 - **Floating notes** (desktop apps). Pop a note into its own small window that can stay on top.

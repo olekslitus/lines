@@ -32,6 +32,8 @@ pub fn run() {
     .manage(updates::Updates::default());
   #[cfg(any(windows, target_os = "linux"))]
   let builder = builder.plugin(tauri_plugin_dialog::init());
+  #[cfg(mobile)]
+  let builder = builder.plugin(tauri_plugin_haptics::init());
   #[cfg(target_os = "macos")]
   let builder = builder.manage(quit::Quitting::default());
   let builder = builder

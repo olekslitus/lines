@@ -6,7 +6,8 @@ export const isSite = import.meta.env.VITE_SITE === "1";
 
 const ua = navigator.userAgent;
 export const isApple = /Mac|iPhone|iPad|iPod/.test(ua);
-const isMobile = onPhoneOrTablet(ua, navigator.maxTouchPoints);
+/** An iPhone, iPad or Android phone or tablet, in the app or a browser. */
+export const isMobile = onPhoneOrTablet(ua, navigator.maxTouchPoints);
 
 /** An iPhone or iPad: the app, or Safari (and every browser there, which is WebKit too). */
 export const isIOS = isApple && isMobile;

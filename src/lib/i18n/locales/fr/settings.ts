@@ -351,6 +351,9 @@ export default {
   "settings.swipeFingers": "Suivre les doigts",
   "settings.swipeReversed": "Inversé",
   "settings.swipeNote": "Balayez une note avec deux doigts pour l’épingler ou la placer dans la corbeille. Choisissez dans quel sens la note se déplace quand vous balayez.",
+  "settings.touchScreen": "Écran tactile",
+  "settings.gestures": "Balayer et tirer",
+  "settings.gesturesNote": "Balayez depuis le bord de l’écran pour revenir à la liste ou ouvrir la barre latérale. Tirez la liste vers le bas pour rechercher, une note pour y chercher, ou les flux pour les actualiser.",
 
   "settings.calendar": "Calendrier",
   "settings.weekStart": "La semaine commence le",

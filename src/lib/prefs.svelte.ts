@@ -201,6 +201,8 @@ export interface Stored {
   textSize: number;
   icons: string;
   swipe: SwipeDirection;
+  /** Touch screens' swipes from the edge and pulls down past the top (gestures.ts). */
+  gestures: boolean;
   weekStart: WeekStart;
   calendarView: CalendarView;
   newNotes: NewNotes;
@@ -404,6 +406,7 @@ const DEFAULTS: Stored = {
   textSize: 17,
   icons: "lucide",
   swipe: "fingers",
+  gestures: true,
   weekStart: "auto",
   calendarView: "week",
   newNotes: "inbox",
@@ -580,6 +583,7 @@ function read(json?: string): Stored {
     textSize: clamp(raw.textSize, TEXT_SIZE.min, TEXT_SIZE.max, DEFAULTS.textSize),
     icons: id(raw.icons, DEFAULTS.icons),
     swipe: oneOf(raw.swipe, ["fingers", "reversed"] as const, DEFAULTS.swipe),
+    gestures: flag(raw.gestures, DEFAULTS.gestures),
     weekStart: oneOf(raw.weekStart, WEEK_STARTS, DEFAULTS.weekStart),
     calendarView: oneOf(raw.calendarView, CALENDAR_VIEWS, DEFAULTS.calendarView),
     newNotes: oneOf(raw.newNotes, NEW_NOTES, DEFAULTS.newNotes),
@@ -700,6 +704,7 @@ class Prefs {
   textSize = $state(this.#initial.textSize);
   icons = $state(this.#initial.icons);
   swipe = $state<SwipeDirection>(this.#initial.swipe);
+  gestures = $state(this.#initial.gestures);
   weekStart = $state<WeekStart>(this.#initial.weekStart);
   calendarView = $state<CalendarView>(this.#initial.calendarView);
   newNotes = $state<NewNotes>(this.#initial.newNotes);
@@ -913,6 +918,7 @@ class Prefs {
       textSize: this.textSize,
       icons: this.icons,
       swipe: this.swipe,
+      gestures: this.gestures,
       weekStart: this.weekStart,
       calendarView: this.calendarView,
       newNotes: this.newNotes,
@@ -1035,6 +1041,7 @@ class Prefs {
     this.textSize = next.textSize;
     this.icons = next.icons;
     this.swipe = next.swipe;
+    this.gestures = next.gestures;
     this.weekStart = next.weekStart;
     this.calendarView = next.calendarView;
     this.newNotes = next.newNotes;

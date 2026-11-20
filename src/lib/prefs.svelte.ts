@@ -1,5 +1,5 @@
 import { locale, t } from "./i18n/index.svelte";
-import { isIOSApp, isMacApp } from "./platform";
+import { isMacApp } from "./platform";
 import type { BookFlow } from "./plugins/types";
 import { CURRENCIES, DATE_STYLES, type DateStyle, localCurrency, MONEY_STYLES, type MoneyStyle, NEGATIVE_STYLES, type NegativeStyle } from "./sheets/display";
 import { type FormattingFonts, readFormattingFonts, sameFormattingFonts } from "./themes/formattingFonts";
@@ -512,9 +512,10 @@ const DEFAULTS: Stored = {
 
 /**
  * Which saved preferences these are, to bring older ones up to date as they're read: 2, from when
- * a click on a tag opened it (before, it put the cursor in it, and ⌘-click opened it).
+ * a click on a tag opened it (before, it put the cursor in it, and ⌘-click opened it); 3, from when
+ * the iOS preset was taken out.
  */
-const VERSION = 2;
+const VERSION = 3;
 
 /** How narrow and wide the sidebar and note list can be dragged, and where double-clicking puts them back. */
 export const PANE_WIDTHS = {
@@ -555,21 +556,24 @@ const id = (value: unknown, fallback: string) => (typeof value === "string" && /
 const color = (value: unknown, fallback: string) => (typeof value === "string" && value.length <= 120 && CSS.supports("color", value) ? value : fallback);
 
 /**
- * Where lines starts on iPhone and iPad, before anything's been chosen: the Styles plugin's iOS
- * preset, its SF Symbols too. Only then, not as these settings' defaults, so a look chosen before
- * stays, and a preset or a file that leaves one out still gets lines' own.
+ * The iOS preset, its style and theme, is gone: saved before then, they're lines' own, and so are
+ * the SF Symbols it brought (and the iPhone app started in).
  */
-const FIRST_RUN: Record<string, unknown> = isIOSApp ? { style: "ios", theme: "ios", preset: "ios", icons: "sf" } : {};
+function forgetIOSLook(raw: Record<string, unknown>) {
+  if (raw.preset === "ios" && raw.icons === "sf") raw.icons = DEFAULTS.icons;
+  for (const key of ["theme", "style", "preset", "floatingTheme"] as const) if (raw[key] === "ios") raw[key] = DEFAULTS[key];
+}
 
 /** The saved preferences (or those `json` gives), each checked and falling back to its default; unknown keys are dropped. */
 function read(json?: string): Stored {
   let raw: Record<string, unknown> = {};
   try {
-    const saved = json ?? localStorage.getItem(KEY);
-    raw = saved === null ? { ...FIRST_RUN } : (JSON.parse(saved) ?? {});
+    raw = JSON.parse(json ?? localStorage.getItem(KEY) ?? "{}") ?? {};
   } catch {
     // Unreadable: start from the defaults.
   }
+  const version = typeof raw.version === "number" ? raw.version : 1;
+  if (version < 3) forgetIOSLook(raw);
   const spacing = (raw.spacing ?? {}) as Record<string, unknown>;
   return {
     theme: id(raw.theme, DEFAULTS.theme),
@@ -672,7 +676,7 @@ function read(json?: string): Stored {
     scores: oneOf(raw.scores, SCORE_STYLES, DEFAULTS.scores),
     lookUpLinks: flag(raw.lookUpLinks, DEFAULTS.lookUpLinks),
     countAddedAgain: flag(raw.countAddedAgain, DEFAULTS.countAddedAgain),
-    links: readLinks(raw.links, typeof raw.version === "number" ? raw.version : 1),
+    links: readLinks(raw.links, version),
     sheetStats: Array.isArray(raw.sheetStats) ? SHEET_STATS.filter((stat) => (raw.sheetStats as unknown[]).includes(stat)) : DEFAULTS.sheetStats,
     sheetDates: oneOf(raw.sheetDates, DATE_STYLES, DEFAULTS.sheetDates),
     sheetMoney: oneOf(raw.sheetMoney, MONEY_STYLES, DEFAULTS.sheetMoney),

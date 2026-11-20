@@ -350,8 +350,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 - Pixel's, Adventure's, Constructivist's and Neon's fonts cover Latin (and Pixel's, Adventure's and Constructivist's Cyrillic, Neon's Thai and Vietnamese); other writing shows in the fallback font. With Icons off (Settings → Layout), buttons that are only an icon show their names in words, which can crowd a narrow window's toolbar; a block's buttons inside a note keep their icons. Classic uses Tahoma, which Linux usually lacks, so it falls back to Verdana or the system's sans.
 - Classic's scroll bars with arrow buttons show where the system draws scroll bars that stay (Windows, Linux, or macOS set to show them always); overlay scroll bars stay the system's.
 - Printed pages and PDFs are black on white in every style, but in a style's own font while it's the first font (Settings → Typography).
-- iOS: its title bars are frosted, but the list and the note scroll below them rather than under them, so there's little for them to blur yet. Only the note list's title is a large title; Settings' sections and the sidebar keep theirs in their bar, and on a phone Settings opens as a card over the notes rather than as a screen of its own. Its system colors are those Apple's guidelines give for iOS 26, not read from the device, so a color chosen in iOS doesn't change them. It starts only where nothing's been chosen yet: an iPhone or iPad where lines already ran keeps the look it had (Settings → Presets → iOS chooses it). There's no Material counterpart for Android yet.
-- Not tried in the Mac app yet; on phones, only iOS, in the iOS 27.2 simulator.
+- Not tried in the Mac app yet, nor on phones.
 
 ## Fonts
 

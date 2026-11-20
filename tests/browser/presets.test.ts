@@ -86,6 +86,30 @@ test("fonts are part of the look, one installed on this device and formatting's 
   await settings.getByText(/^Changed since/).waitFor({ state: "detached" });
 });
 
+test("the iOS preset, taken out, comes back as lines' own look and icons, saved so; another look chosen after it, or SF Symbols without it, stay", async () => {
+  const ios = { version: 2, preset: "ios", style: "ios", theme: "ios", icons: "sf", floatingTheme: "ios" };
+  const look = () =>
+    app.page.evaluate(() => {
+      const { preset, style, theme, icons, floatingTheme } = window.testing.prefs;
+      const saved = JSON.parse(localStorage.getItem("lines.prefs")!);
+      return { now: [preset, style, theme, icons, floatingTheme], saved: [saved.preset, saved.style, saved.theme, saved.icons, saved.floatingTheme] };
+    });
+  app = await openApp({ prefs: ios });
+  expect(await app.root("style")).toBe("lines");
+  const own = ["lines", "lines", "lines", "lucide", "same"];
+  await app.page.waitForFunction(() => JSON.parse(localStorage.getItem("lines.prefs")!).version === 3);
+  expect(await look()).toEqual({ now: own, saved: own });
+  const settings = await app.settings("Presets");
+  await presetsGroup(settings).getByRole("radio", { name: /^Lines/, checked: true }).waitFor();
+  await app.close();
+
+  app = await openApp({ prefs: { ...ios, style: "void", theme: "nord" } });
+  expect((await look()).now).toEqual(["lines", "void", "nord", "lucide", "same"]);
+  await app.close();
+  app = await openApp({ prefs: { version: 2, preset: "classic", style: "classic", theme: "classic", icons: "sf" } });
+  expect((await look()).now).toEqual(["classic", "classic", "classic", "sf", "same"]);
+});
+
 test("Puddle brings its colors, ink lines around cards and what's chosen, and no shadows, light and dark", async () => {
   for (const scheme of ["light", "dark"] as const) {
     app = await openApp({ scheme });

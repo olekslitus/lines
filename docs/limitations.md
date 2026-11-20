@@ -487,7 +487,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 - Monochrome and Invert change lines' colors, not pictures or drawings' pen colors. Inverted, menus and cards (lighter than the note in a dark theme) are darker than the note, as in a negative.
 - The color picker picks colors without transparency (one typed as text keeps its own), and its eyedropper, which picks a color from anywhere on the screen, is only in Chrome and Edge: Safari, Firefox and the Mac app have none to offer. The colors it offers first are the palette's as it has them, so with Monochrome or Invert on they aren't the greys or turned colors shown; and a theme's palette has only the colors it lists, so the picker offers no red or green for one whose tag and callout colors are worked out (lines' own Lines, Ink and the like), only its greys and accent.
 - Formatting's colors (Settings → Theme's editor → Formatting): Markdown shown as written (Source) colors headings, bold, italics, strikethrough, links, mentions and quotes, but not underlines, highlighted text, inline code or list markers, which it doesn't draw; there, text both bold and italic is in italics' color if both have one, where Live has the innermost's. LaTeX notes take them as Live draws them; shown as written, a LaTeX note has only its commands' colors. Void's links in the text's color and grey bullets give way to colors your theme sets for them.
-- Dark panes: the theme's editor (Your themes) previews each scheme as it is, without them; on a phone, the strip under the status bar keeps the note's color over a dark note list.
+- Dark panes: the theme's editor (Your themes) previews each scheme as it is, without them.
 
 ## Plugins
 
@@ -590,6 +590,10 @@ What isn't done yet is in [secrets.md](secrets.md#not-yet).
 - Exports are saved in lines' Documents on iPhone and iPad, which the Files app shows under On My iPhone (or iPad) → lines. On Android they're saved in lines' own folder (`Android/data/com.olekslitus.lines/files/Download`), which the Files app doesn't show, not yet in Downloads. Neither has a share sheet to send them elsewhere.
 - Android's backup leaves lines out, to the cloud and to a new phone alike: its storage holds the notes and, without the app lock, the keys sync uses, in plain text. On a new or reset phone notes come back through sync, not from Android's backup.
 - TeX's PDF is shown at its own size on iPhone, wider than the screen.
+- The apps never zoom, so only what zooms by itself can be made bigger with two fingers (a drawing, a 3D model): not a picture or a PDF yet.
+- On iPhone and iPad lines' own text follows the text size chosen in iOS's Settings from xSmall to xxxLarge, but not past it into the accessibility sizes, which need layouts of their own; notes' text keeps the size Settings → Typography gives it. Android's font size isn't followed yet.
+- On iPad, where the status bar spans the panes, its text suits the leftmost; in landscape on iPhone, beside the camera, the note's background shows rather than the pane's.
+- Lists and notes always bounce on iPhone and iPad as other apps' do, but that was checked in the simulator by what can scroll, not by dragging with a finger; the bounce isn't Android's, which has none for what fits.
 - On iPhone there's no swipe from the edge to go back to the list; the Back button does it. On Android the system's Back closes what's open, then the sidebar, then the note.
 - No floating notes or other windows, menus, Touch ID or updates in the app: they're the desktop's. Updates are to come from the App Store and Google Play.
 

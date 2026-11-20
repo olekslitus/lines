@@ -114,10 +114,13 @@
   --editor-pad-top: 24px;
   /* Room under a note's last line, so it can be scrolled up to the middle. */
   --editor-pad-bottom: 40vh;
-  --titlebar-pad-top: 0px;
+  /* The panes' title bars reach up under a phone's status bar, in their own colors. */
+  --titlebar-pad-top: env(safe-area-inset-top, 0px);
   --titlebar-h: calc(52px + var(--titlebar-pad-top));
   --control: 32px;
   --row: 28px;
+  /* How much bigger or smaller than usual text is on touch screens: on iPhone and iPad, as iOS's Settings say (mobile.ts). */
+  --type-scale: 1;
 
   /*
    * Window surfaces. In the Mac app, window opacity (Settings → Floating) makes them
@@ -519,12 +522,42 @@
   pointer-events: none;
 }
 
-/* Fingers need bigger targets. */
+/*
+ * Fingers need bigger targets, and phones bigger text: iOS's sizes (its body text, 17pt, for rows,
+ * fields and menus; 15pt under them; 13pt for footnotes), which Android's are close to, scaled on iPhone
+ * and iPad by the text size chosen in iOS's Settings. A note's text is Settings → Typography's.
+ */
 @media (pointer: coarse) {
   :root {
     --control: 44px;
     --row: 44px;
+    --text-2xs: calc(12px * var(--type-scale));
+    --text-xs: calc(13px * var(--type-scale));
+    --text-sm: calc(15px * var(--type-scale));
+    --text-base: calc(17px * var(--type-scale));
+    --text-md: calc(17px * var(--type-scale));
+    --text-lg: calc(20px * var(--type-scale));
+    --text-xl: calc(22px * var(--type-scale));
   }
+}
+
+/*
+ * On iPhone and iPad a list, a page or a note can always be dragged, and springs back, even when all
+ * of it fits, as UIScrollView's alwaysBounceVertical has it. WebKit bounces only what can scroll, so
+ * each is made a pixel taller than it is: a scroller marked `bounce` (with `bounce-floor` in it where
+ * its own ::after is taken), and a note's page, but a spreadsheet's, which stops at the grid's edges.
+ * It stays a plain scroller: overscroll shows as a scrollTop below 0.
+ */
+:root[data-platform="ios"] .bounce::after,
+:root[data-platform="ios"] .bounce-floor,
+:root[data-platform="ios"] .cm-editor.cm-page:not(.cm-sheet-note) > .cm-scroller::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: calc(100% + 1px);
+  pointer-events: none;
 }
 
 @media (max-width: 699px) {
@@ -568,12 +601,13 @@
     background: var(--bg);
     color: var(--text);
     font-family: var(--font-ui);
-    font-size: 14px;
+    font-size: var(--text-base);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     -webkit-tap-highlight-color: transparent;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+    /* Under the status bar and the home indicator are the panes', which keep clear of them themselves. */
+    padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
     user-select: none;
     -webkit-user-select: none;
   }

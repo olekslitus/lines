@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { onPhoneOrTablet } from "../../src/lib/device";
+import { onPhoneOrTablet, viewport } from "../../src/lib/device";
 
 const UA = {
   // An iPad's too: it asks for sites as a Mac would.
@@ -15,4 +15,12 @@ test("phones and tablets, and computers, a touch screen or not", () => {
   expect([onPhoneOrTablet(UA.mac, 0), onPhoneOrTablet(UA.windows, 0), onPhoneOrTablet(UA.linux, 0)]).toEqual([false, false, false]);
   // A Surface, or any laptop with a touch screen.
   expect([onPhoneOrTablet(UA.windows, 10), onPhoneOrTablet(UA.linux, 10)]).toEqual([false, false]);
+});
+
+test("the apps never zoom; Safari on iPhone and iPad still pinches, but doesn't zoom into fields; other browsers keep it all", () => {
+  const base = "width=device-width, initial-scale=1";
+  expect(viewport(base, { app: true, ios: true })).toBe(`${base}, maximum-scale=1, user-scalable=no`);
+  expect(viewport(base, { app: true, ios: false })).toBe(`${base}, maximum-scale=1, user-scalable=no`);
+  expect(viewport(base, { app: false, ios: true })).toBe(`${base}, maximum-scale=1`);
+  expect(viewport(base, { app: false, ios: false })).toBe(base);
 });

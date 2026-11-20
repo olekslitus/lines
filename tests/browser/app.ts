@@ -2,7 +2,7 @@ import { expect } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { type Locator, type Page, webkit } from "playwright";
+import { devices, type Locator, type Page, webkit } from "playwright";
 
 /*
  * The app in a page of its own, for a browser test: fresh storage, Settings as given, and what the
@@ -19,6 +19,8 @@ export interface Options {
   height?: number;
   /** The page's time zone (`America/New_York`), if not this machine's. */
   timezone?: string;
+  /** As Safari on an iPhone has it: its size, its touch screen, and its user agent, which lines takes for an iPhone's. */
+  phone?: boolean;
   /**
    * Its storage kept on disk, as a browser's own is: Playwright's WebKit keeps no files (Blobs) in
    * IndexedDB otherwise, so the app can't keep an attachment there. Slower to start.
@@ -57,8 +59,9 @@ export const clickMod = (page: App["page"]) => page.evaluate(() => (/Mac|iPhone|
 /** What a browser says in the console on its own, not about lines: WebKit on Linux doesn't know a viewport key the page sets. */
 const NOISE = [/^Viewport argument key ".+" not recognized and ignored\.$/];
 
-export async function openApp({ prefs = {}, tour = false, scheme = "light", width = 1280, height = 820, timezone, onDisk = false }: Options = {}): Promise<App> {
-  const settings = { viewport: { width, height }, colorScheme: scheme, deviceScaleFactor: 1, timezoneId: timezone };
+export async function openApp({ prefs = {}, tour = false, scheme = "light", width = 1280, height = 820, timezone, phone = false, onDisk = false }: Options = {}): Promise<App> {
+  const device = phone ? devices["iPhone 15"] : { viewport: { width, height }, deviceScaleFactor: 1 };
+  const settings = { ...device, colorScheme: scheme, timezoneId: timezone };
   const dir = onDisk && engine() === "webkit" ? mkdtempSync(join(tmpdir(), "lines-test-")) : null;
   const context = dir ? await webkit.launchPersistentContext(dir, settings) : await globalThis.lines.browser.newContext(settings);
   if (engine() === "chromium") await context.grantPermissions(["clipboard-read", "clipboard-write"]);

@@ -144,7 +144,7 @@
       {#if post.excerpt}
         <span class="line-clamp-2 text-sm leading-[1.45] text-muted" id="excerpt-{post.key}" aria-hidden="true">{post.excerpt}</span>
       {/if}
-      <span class={["mt-0.5 flex min-w-0 items-center gap-[5px] text-[11.5px] text-faint", selected && "in-data-[contrast=more]:text-muted", episode && "min-h-[26px] pr-9"]}>
+      <span class={["mt-0.5 flex min-w-0 items-center gap-[5px] text-[11.5px] text-faint coarse:text-xs", selected && "in-data-[contrast=more]:text-muted", episode && "min-h-[26px] pr-9"]}>
         {#if post.audio}<Icon name="headphones" size={12} class="shrink-0" /><span class="sr-only">{t("feeds.episode")}</span>{/if}
         <span class="min-w-0 truncate">{source}</span>
         {#if post.date}<span aria-hidden="true">·</span><time class="shrink-0" datetime={new Date(post.date).toISOString()}>{post.approximate ? t("feeds.about", { date: formatDate(post.date, now) }) : formatDate(post.date, now)}</time>{/if}

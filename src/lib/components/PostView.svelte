@@ -120,7 +120,7 @@
   });
 </script>
 
-<div class={["h-full min-h-0", source && "overflow-y-auto"]} hidden={unreadable}>
+<div class={["h-full min-h-0", source && "bounce relative overflow-y-auto"]} hidden={unreadable}>
   <!-- With its discussion, one page (editor.css): the post as tall as it is, the comments under it. -->
   <div class={source ? "post-page" : "h-full"}>
     <div class={source ? "post-with-discussion" : "h-full"} bind:this={host}></div>

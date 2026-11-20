@@ -35,8 +35,10 @@ import { canFloat, floatingOpen, restoreFloating } from "./lib/windows/floating"
 import { closeSettings, forwardToMain, initialSection, isSettingsWindow, serveSettings } from "./lib/windows/settings.svelte";
 import { ui } from "./lib/ui.svelte";
 import { updates } from "./lib/updates.svelte";
+import { fitToDevice } from "./lib/mobile";
 
 if (isMacApp) document.documentElement.dataset.platform = "mac-app";
+fitToDevice();
 
 // Something dragged in and let go where nothing takes it (the editor takes files and text, the panes
 // and the sidebar a note: panes.svelte.ts) is dropped nowhere, not opened in lines' place, but for

@@ -126,7 +126,7 @@
           value={typing ? query : chosen}
           autocomplete="off"
           spellcheck="false"
-          class="ui-select h-control w-full truncate rounded-md border border-line bg-panel pr-8 pl-2.5 font-[inherit] text-sm text-fg shadow-segment transition-colors placeholder:text-faint enabled:hover:bg-hover disabled:opacity-45"
+          class="ui-select h-control w-full truncate rounded-md border border-line bg-panel pr-8 pl-2.5 font-[inherit] text-sm text-fg shadow-segment transition-colors placeholder:text-faint enabled:hover:bg-hover disabled:opacity-45 coarse:text-base"
         />
       {/snippet}
     </Combobox.Input>

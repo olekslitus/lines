@@ -1,3 +1,5 @@
+import { solid } from "../colors";
+import { isIOSApp } from "../platform";
 import { plugins } from "../plugins/registry.svelte";
 import type { Theme, ThemeColors } from "../plugins/types";
 import { prefs } from "../prefs.svelte";
@@ -168,11 +170,25 @@ function showTheme() {
   root.dataset.scheme = shown;
   root.style.colorScheme = shown;
   showPanes(theme, own, shown);
-  // Tint the browser's and phone's status bar to match.
-  const bg = root.style.getPropertyValue("--bg") || theme[own].bg;
-  document.querySelector('meta[name="theme-color"]:not([media])')?.setAttribute("content", bg);
-  // And the Android app's, which show behind its status and navigation bars.
-  window.linesSystemBars?.setColors(bg, shown === "dark");
+  showBars();
+}
+
+/** The pane at the top of the screen (App.svelte), or none, for the window's background. */
+let topPane: HTMLElement | undefined;
+
+/**
+ * A phone's status bar shows the top of the screen: the pane there, whose title bar reaches up under
+ * it (app.css), and text dark or light to suit it, which a dark pane, or a theme darker or lighter
+ * than the system, turns from the system's. iOS's status bar text, Android's bars (the pane's color
+ * behind them, MainActivity.kt) and browsers' tint (theme-color) follow it.
+ */
+export function showBars(pane = topPane) {
+  topPane = pane;
+  const color = solid(pane ? getComputedStyle(pane).backgroundColor : "var(--bg)");
+  const dark = (pane?.closest<HTMLElement>("[data-scheme]") ?? document.documentElement).dataset.scheme === "dark";
+  document.querySelector('meta[name="theme-color"]:not([media])')?.setAttribute("content", color);
+  window.linesSystemBars?.setColors(color, dark);
+  if (isIOSApp) void import("@tauri-apps/api/core").then(({ invoke }) => invoke("set_status_bar", { dark }));
 }
 
 /** Headings in the theme's colors for them, the accent, or a color of your own (Settings → Typography; editor.css). */

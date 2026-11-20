@@ -21,9 +21,9 @@
   <div class={["flex gap-x-4 gap-y-2.5", stacked ? "flex-col" : "flex-wrap items-center"]}>
     <div class={["min-w-0", !stacked && "flex-1 basis-48"]}>
       {#if control}
-        <label for={control} class="text-sm text-fg">{label}</label>
+        <label for={control} class="text-sm text-fg coarse:text-base">{label}</label>
       {:else}
-        <div class="text-sm text-fg">{label}</div>
+        <div class="text-sm text-fg coarse:text-base">{label}</div>
       {/if}
       {#if note}<p id={control && `${control}-note`} class="m-0 mt-0.5 text-xs leading-normal text-muted">{note}</p>{/if}
     </div>

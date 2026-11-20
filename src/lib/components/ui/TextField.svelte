@@ -22,7 +22,7 @@
   <input
     bind:this={input}
     bind:value
-    class="tabular h-full min-w-0 flex-1 border-0 bg-transparent p-0 font-[inherit] text-sm text-fg outline-none placeholder:text-faint"
+    class="tabular h-full min-w-0 flex-1 border-0 bg-transparent p-0 font-[inherit] text-sm text-fg outline-none placeholder:text-faint coarse:text-base"
     {...rest}
   />
   {#if trailing}{@render trailing()}{/if}

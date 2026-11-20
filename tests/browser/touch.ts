@@ -50,3 +50,34 @@ export function drag(page: Page, from: Point, to: Point, { steps = 10, duration 
 
 /** Lifts the finger `drag` left down. */
 export const lift = (page: Page) => page.evaluate(() => (window as unknown as { liftFinger: () => void }).liftFinger());
+
+/**
+ * A finger put down on `selector`'s first element, held `ms` (moved `moveBy` px down partway, as a scroll starts), then
+ * lifted: pointer events, as a long press is read (longPress.ts). What the page saw: how long after
+ * the finger went down a menu opened (null if none did), and how far the element had sunk just
+ * before it would open.
+ */
+export function hold(page: Page, selector: string, { ms = 600, moveBy = 0, pointerType = "touch" }: { ms?: number; moveBy?: number; pointerType?: string } = {}) {
+  return page.evaluate(
+    async ([selector, ms, moveBy, pointerType]) => {
+      const target = document.querySelector<HTMLElement>(selector)!;
+      const box = target.getBoundingClientRect();
+      const at = (dy: number) => ({ clientX: box.x + box.width / 2, clientY: box.y + box.height / 2 + dy, pointerId: 7, pointerType, isPrimary: true, bubbles: true, cancelable: true });
+      const start = performance.now();
+      let opened: number | null = null;
+      let sunk = 1;
+      target.dispatchEvent(new PointerEvent("pointerdown", at(0)));
+      while (performance.now() - start < ms) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        const elapsed = performance.now() - start;
+        if (moveBy && elapsed > 100) target.dispatchEvent(new PointerEvent("pointermove", at(moveBy)));
+        if (elapsed < 360) sunk = Number(getComputedStyle(target).scale) || 1;
+        if (opened === null && document.querySelector('[role="menu"]')) opened = elapsed;
+      }
+      target.dispatchEvent(new PointerEvent("pointerup", at(moveBy)));
+      target.click();
+      return { opened, sunk, scale: getComputedStyle(target).scale };
+    },
+    [selector, ms, moveBy, pointerType] as const,
+  );
+}

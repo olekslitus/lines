@@ -9,6 +9,7 @@
   import { lockedNotes } from "../notes/locked.svelte";
   import { isClosed, notes, type Entry } from "../notes/store.svelte";
   import { swipeStartsAt } from "../gestures";
+  import { tick as feelTick } from "../haptics";
   import { longPress } from "../longPress";
   import { coarsePointer, copyText, isApple, isMacApp, reducedMotion } from "../platform";
   import { lookUpDetails } from "../library/adding";
@@ -189,7 +190,7 @@
   ]);
 
   $effect(() => {
-    if (armed) navigator.vibrate?.(8);
+    if (armed) feelTick();
   });
 
   $effect(() => {

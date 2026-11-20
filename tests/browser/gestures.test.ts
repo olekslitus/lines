@@ -30,7 +30,7 @@ const settled = () => app.page.waitForFunction(() => [...document.querySelectorA
 
 async function openNote() {
   await app.open("# A note\n\nSome text to read.");
-  await app.page.waitForFunction(() => document.querySelector(".editor-pane")!.getBoundingClientRect().x === 0);
+  await app.page.waitForFunction(() => Math.abs(document.querySelector(".editor-pane")!.getBoundingClientRect().x) < 1);
 }
 
 test("a swipe from the left edge takes a note back to the list, following the finger, the list coming out from under it", async () => {

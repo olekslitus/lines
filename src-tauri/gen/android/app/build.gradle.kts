@@ -14,6 +14,13 @@ val tauriProperties = Properties().apply {
     }
 }
 
+// The release key, as Tauri's Android signing guide has it: keystore.properties beside this folder
+// (keyAlias, password, storeFile), kept out of git; release.yml writes it from the repository's
+// secrets. Without it a release build is left unsigned, and debug builds never need it.
+val keystoreProperties = rootProject.file("keystore.properties").takeIf { it.exists() }?.let { propFile ->
+    Properties().apply { propFile.inputStream().use { load(it) } }
+}
+
 android {
     compileSdk = 37
     namespace = "com.olekslitus.lines"
@@ -24,6 +31,16 @@ android {
         targetSdk = 37
         versionCode = tauriProperties.getProperty("tauri.android.versionCode", "1").toInt()
         versionName = tauriProperties.getProperty("tauri.android.versionName", "1.0")
+    }
+    signingConfigs {
+        if (keystoreProperties != null) {
+            create("release") {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("password")
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("password")
+            }
+        }
     }
     buildTypes {
         getByName("debug") {
@@ -40,6 +57,7 @@ android {
             }
         }
         getByName("release") {
+            signingConfig = signingConfigs.findByName("release")
             optimization {
                enable = true
             }

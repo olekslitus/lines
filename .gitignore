@@ -12,6 +12,11 @@ qa/shots
 src-tauri/target
 src-tauri/gen/schemas
 
+# Android's signing key and where it is (docs/releasing.md): never in git
+*.jks
+*.keystore
+keystore.properties
+
 # The TeX engine (bun run tex-assets): too big for git
 public/busytex
 

@@ -1,7 +1,7 @@
 # Releases lines when its release pull request is merged (release-pr.yml): tags the version, builds
-# the desktop apps on macOS, Windows and Linux, attaches them and their signed update packages to a
-# GitHub release with the version's notes from CHANGELOG.md, adds the update manifest the apps
-# check, publishes it, and deploys the website again for its downloads. docs/releasing.md has the
+# the desktop apps on macOS, Windows and Linux and the Android app, attaches them and the desktop
+# apps' signed update packages to a GitHub release with the version's notes from CHANGELOG.md, adds
+# the update manifest the apps check, publishes it, and deploys the website again for its downloads. docs/releasing.md has the
 # whole process.
 name: Release
 
@@ -39,7 +39,9 @@ jobs:
           {
             echo "lines is in alpha: early and changing. Export your notes now and then (Settings → Data → Export)."
             echo
-            echo "The apps aren't signed yet. On a Mac, open lines once with right-click → Open (or System Settings → Privacy & Security → Open Anyway); on Windows, choose More info → Run anyway."
+            echo "The desktop apps aren't signed yet. On a Mac, open lines once with right-click → Open (or System Settings → Privacy & Security → Open Anyway); on Windows, choose More info → Run anyway."
+            echo
+            echo "On Android, download the \`.apk\` on the phone and open it; allow your browser or Files app to install apps when asked. It doesn't update itself yet: install a newer one over it, and your notes stay. The \`.aab\` is the same app for Google Play, not for installing."
             echo
             bun scripts/release.mjs notes "$VERSION"
           } > "$notes"
@@ -118,8 +120,72 @@ jobs:
             \( -name '*.dmg' -o -name '*.msi' -o -name '*-setup.exe' -o -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.app.tar.gz' -o -name '*.sig' \) \
             -print0 | xargs -0 gh release upload "v$VERSION" --clobber
 
+  # The Android app: an APK to install from the release, for every kind of Android device, and the
+  # same app as an .aab for Google Play later, both signed with lines' Android key.
+  android:
+    needs: tag
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ needs.tag.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: v${{ needs.tag.outputs.version }}
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+      - name: Java 17 and the NDK, which the runner has (the Android SDK is at $ANDROID_HOME)
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
+          echo "NDK_HOME=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
+      - name: Rust, for each kind of Android processor
+        run: |
+          rustup toolchain install stable --profile minimal && rustup default stable
+          rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: src-tauri
+          key: android
+      - run: bun install --frozen-lockfile
+      # TeX is left out: Tauri builds the app's pages into the native library, once for each kind of
+      # processor, so its 120 MB would be in the APK four times (docs/releasing.md#android).
+      - name: OpenSCAD, which the app includes for 3D models made from code
+        run: bun run openscad-assets
+      - name: The signing key, from the repository's secrets
+        env:
+          ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          base64 -d <<< "$ANDROID_KEY_BASE64" > "$RUNNER_TEMP/lines-android.jks"
+          {
+            echo "keyAlias=$ANDROID_KEY_ALIAS"
+            echo "password=$ANDROID_KEY_PASSWORD"
+            echo "storeFile=$RUNNER_TEMP/lines-android.jks"
+          } > src-tauri/gen/android/keystore.properties
+      - name: Build
+        run: bun run tauri android build --apk --aab
+        env:
+          # The same services' keys as the desktop apps'.
+          VITE_UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+          VITE_GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
+          VITE_ANILIST_CLIENT_ID: ${{ secrets.ANILIST_CLIENT_ID }}
+          VITE_MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
+      - name: Signed with lines' key, and only it
+        run: bun scripts/release.mjs check-android-signatures src-tauri/gen/android/app/build/outputs
+      - name: Name the downloads by the system they're for, lines_0.3.3_android_universal.apk
+        run: bun scripts/release.mjs name-downloads "$VERSION" src-tauri/gen/android
+      - name: Attach the APK and the app bundle to the release
+        run: |
+          find src-tauri/gen/android/app/build/outputs -type f -name "lines_${VERSION}_android_*" \( -name '*.apk' -o -name '*.aab' \) \
+            -print0 | xargs -0 gh release upload "v$VERSION" --clobber
+
   publish:
-    needs: [tag, build]
+    needs: [tag, build, android]
     runs-on: ubuntu-latest
     permissions:
       contents: write

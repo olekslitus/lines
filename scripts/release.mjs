@@ -12,7 +12,11 @@
 //                           from its packages' signatures (the .sig files) in <dir>
 //   name-downloads <version> <target>
 //                           names the installers and update packages Tauri built in <target> (its
-//                           bundle folders) by the system they're for: lines_0.3.3_macos_universal.dmg
+//                           bundle folders, or Android's outputs) by the system they're for:
+//                           lines_0.3.3_macos_universal.dmg, lines_0.3.3_android_universal.apk
+//   check-android-signatures <dir>
+//                           whether every APK and .aab in <dir> is signed by lines' Android key
+//                           alone; exits 1, saying which isn't, if not
 //
 // The version is in package.json (the app's About shows it), src-tauri/tauri.conf.json,
 // src-tauri/Cargo.toml and src-tauri/Cargo.lock; releases are tagged `v0.2.0`.
@@ -196,6 +200,8 @@ const SYSTEMS = [
   [".AppImage", "linux"],
   [".deb", "linux"],
   [".rpm", "linux"],
+  [".apk", "android"],
+  [".aab", "android"],
 ];
 
 /**
@@ -203,21 +209,32 @@ const SYSTEMS = [
  * `lines_0.3.3_macos_universal.dmg`, `lines_0.3.3_windows_x64.msi`, `lines_0.3.3_linux_amd64.deb`,
  * and `lines_0.3.3_linux_x86_64.rpm` (`lines-0.3.3-1.x86_64.rpm`). The Mac's update package,
  * `lines.app.tar.gz`, gets the version and `universal` too: the Mac app is one for both kinds of Mac.
- * Signatures (`.sig`) follow their file. Other files keep their names.
+ * Android's, `app-universal-release.apk` and `.aab`, become `lines_0.3.3_android_universal.apk`; an
+ * unsigned one (`app-universal-release-unsigned.apk`) isn't renamed. Signatures (`.sig`) follow their
+ * file. Other files keep their names.
  */
 export function downloadName(file, version) {
   const system = SYSTEMS.find(([end]) => file.replace(/\.sig$/, "").endsWith(end))?.[1];
   if (!system) return file;
-  const named = file.startsWith("lines.app.tar.gz") ? `lines_${version}_universal${file.slice("lines".length)}` : file;
+  const named = file.startsWith("lines.app.tar.gz")
+    ? `lines_${version}_universal${file.slice("lines".length)}`
+    : file.replace(/^app-(\w+)-release\./, `lines_${version}_$1.`);
   const versioned = new RegExp(`^lines[_-]${version.replaceAll(".", "\\.")}(?:-1)?[_.](?!${system}_)`);
   return named.replace(versioned, `lines_${version}_${system}_`).replace("_en-US", "");
 }
 
-/** Renames what Tauri built in `target` (`…/release/bundle/<kind>/`, for any target triple) as downloadName says. */
+/**
+ * Renames what Tauri built in `target` as downloadName says: the desktop apps in `src-tauri/target`
+ * (`…/release/bundle/<kind>/`, for any target triple), or Android's in `src-tauri/gen/android`
+ * (`app/build/outputs/apk/<abi>/release/` and `app/build/outputs/bundle/<abi>Release/`).
+ */
 function nameDownloads(version, target) {
   const folders = (dir) => (existsSync(dir) ? readdirSync(dir).map((name) => join(dir, name)).filter((path) => statSync(path).isDirectory()) : []);
   const bundles = [join(target, "release", "bundle"), ...folders(target).map((dir) => join(dir, "release", "bundle"))];
-  for (const folder of bundles.flatMap(folders)) {
+  const android = join(target, "app", "build", "outputs");
+  const apks = folders(join(android, "apk")).map((dir) => join(dir, "release"));
+  const appBundles = folders(join(android, "bundle")).filter((dir) => dir.endsWith("Release"));
+  for (const folder of [...bundles.flatMap(folders), ...apks, ...appBundles].filter((dir) => existsSync(dir))) {
     for (const file of readdirSync(folder)) {
       const name = downloadName(file, version);
       if (name !== file && statSync(join(folder, file)).isFile()) {
@@ -226,6 +243,51 @@ function nameDownloads(version, target) {
       }
     }
   }
+}
+
+/** The SHA-256 fingerprint of the certificate in lines' Android key (docs/releasing.md). */
+const ANDROID_CERTIFICATE = "32:18:95:64:7F:13:07:2C:79:6C:C1:3B:A7:3B:21:C2:B4:19:75:82:15:BE:10:EE:BB:8D:EC:45:21:E4:81:12";
+
+/**
+ * Checks that every APK and app bundle in `dir` is signed by lines' Android key and nothing else:
+ * apksigner for an APK, from the SDK at $ANDROID_HOME, and the JDK's jarsigner and keytool for an
+ * .aab. Exits 1, saying which, if any isn't, or if there are none.
+ */
+function checkAndroidSignatures(dir) {
+  const hex = (fingerprint) => fingerprint.replaceAll(":", "").toLowerCase();
+  const run = (program, args) => {
+    try {
+      return { ok: true, output: execFileSync(program, args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }) };
+    } catch (error) {
+      return { ok: false, output: `${error.stdout ?? ""}${error.stderr ?? error.message}` };
+    }
+  };
+  const buildTools = join(process.env.ANDROID_HOME ?? "", "build-tools");
+  const newest = existsSync(buildTools) ? readdirSync(buildTools).sort((a, b) => a.localeCompare(b, "en", { numeric: true })).at(-1) : undefined;
+  if (!newest) throw new Error(`No Android build tools in ${buildTools}: set ANDROID_HOME to the Android SDK`);
+  const apksigner = join(buildTools, newest, "apksigner");
+  const jdk = (program) => (process.env.JAVA_HOME ? join(process.env.JAVA_HOME, "bin", program) : program);
+  /** apksigner's report on an APK; for an app bundle, jarsigner's check and then keytool's list of its certificates. */
+  const verify = (path) => {
+    if (path.endsWith(".apk")) return run(apksigner, ["verify", "--print-certs", path]);
+    const jar = run(jdk("jarsigner"), ["-verify", path]);
+    return jar.ok && jar.output.includes("jar verified.") ? run(jdk("keytool"), ["-printcert", "-jarfile", path]) : { ok: false, output: jar.output };
+  };
+
+  const files = readdirSync(dir, { recursive: true }).filter((file) => /\.(apk|aab)$/.test(file));
+  if (!files.length) throw new Error(`No APK or app bundle in ${dir}`);
+  let wrong = 0;
+  for (const file of files) {
+    const { ok, output } = verify(join(dir, file));
+    const signers = [...output.matchAll(/(?:certificate SHA-256 digest: |SHA256: )([0-9A-Fa-f:]+)/g)].map((match) => hex(match[1]));
+    if (ok && signers.length && signers.every((signer) => signer === hex(ANDROID_CERTIFICATE))) {
+      console.log(`${file}: signed by lines' key`);
+    } else {
+      wrong++;
+      console.error(`${file}: not signed by lines' key alone${signers.length ? ` (signed by ${signers.join(", ")})` : ""}\n${output.trim()}`);
+    }
+  }
+  if (wrong) process.exit(1);
 }
 
 const [command, arg, arg2] = process.argv.slice(2);
@@ -254,6 +316,8 @@ if (!import.meta.main) {
   console.log(JSON.stringify(manifest(arg, arg2), null, 2));
 } else if (command === "name-downloads") {
   nameDownloads(arg, arg2);
+} else if (command === "check-android-signatures") {
+  checkAndroidSignatures(arg);
 } else {
   console.error(`Unknown command "${command}". See the top of scripts/release.mjs.`);
   process.exit(1);

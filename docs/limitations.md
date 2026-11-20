@@ -591,6 +591,13 @@ What isn't done yet is in [secrets.md](secrets.md#not-yet).
 - On iPhone there's no swipe from the edge to go back to the list; the Back button does it. On Android the system's Back closes what's open, then the sidebar, then the note.
 - No floating notes or other windows, menus, Touch ID or updates in the app: they're the desktop's. Updates are to come from the App Store and Google Play.
 
+### Installing the Android app
+
+- Each release has an APK, signed with lines' key ([releasing.md](releasing.md#android)), installed by opening it on the phone and allowing the browser or Files app to install apps. It isn't on Google Play yet.
+- It doesn't update itself, nor say when there's a newer one: download the next release's APK and install it over the old one, which keeps the notes.
+- **Google's developer verification.** Google is to let certified Android devices install only apps registered by a verified developer: from 30 September 2026 in Brazil, Indonesia, Singapore and Thailand, and worldwide in 2027 ([Google's announcement](https://android-developers.googleblog.com/2026/03/android-developer-verification-rolling-out-to-all-developers.html)). lines' developer account isn't verified, nor the app registered, yet. Until they are, the APK installs as above elsewhere; where it's enforced, and everywhere from 2027, it needs Android's advanced flow for installing unregistered apps, or `adb install` from a computer.
+- TeX isn't in it, so a LaTeX note's PDF says TeX isn't included. The app's pages are built into its native library once for each kind of processor, four in the APK, so TeX would add about 300 MB.
+
 ## Future work
 
 - [ ] Convert a note between Markdown and LaTeX when switching

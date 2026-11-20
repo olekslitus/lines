@@ -66,7 +66,11 @@ export async function readVault({ name: vault, files }: Exported): Promise<Sourc
   const config = new Map(files.filter((file) => file.path.startsWith(".obsidian/")).map((file) => [file.path.slice(".obsidian/".length), file]));
   const read = async (file: string) => (await config.get(file)?.text().catch(() => "")) ?? "";
   // The vault's own files, and those in its trash; not its settings, nor other hidden folders (.git).
-  const inVault = files.filter((file) => !/(^|\/)\./.test(file.path.replace(/^\.trash\//, "")));
+  // By path, as browsers and disks list a folder in orders of their own: the same vault always
+  // imports the same way.
+  const inVault = files
+    .filter((file) => !/(^|\/)\./.test(file.path.replace(/^\.trash\//, "")))
+    .sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
   // What links lead to: not what's in the trash, as in Obsidian.
   const linkable = inVault.filter((file) => !file.path.startsWith(".trash/"));
   const byPath = new Map(linkable.map((file) => [lower(file.path), file]));

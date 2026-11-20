@@ -94,6 +94,12 @@ describe("an Obsidian vault", () => {
     expect(note("Projects/Plan.md").body).toBe("# Plan\n\nThe plan for #work, from [[Welcome]].\n");
   });
 
+  test("the same, however the folder's files are listed", async () => {
+    const { name, files } = folder("obsidian/Vault");
+    const same = (source: typeof vault) => source.notes.map(({ id, body, pinned, trashed, created, modified }) => ({ id, body, pinned, trashed, created, modified }));
+    for (const order of [[...files].reverse(), [...files].sort((a, b) => a.size - b.size)]) expect(same(await readVault({ name, files: order }))).toEqual(same(vault));
+  });
+
   test("bookmarked notes (in groups too) pinned, the trash's in the Trash, daily notes dated, dates from properties or the file", () => {
     expect(vault.notes.filter((each) => each.pinned).map((each) => each.id)).toEqual(["Ideas.md", "Projects/Plan.md"]);
     expect(note(".trash/Old idea.md")).toMatchObject({ trashed: true, folders: [] });

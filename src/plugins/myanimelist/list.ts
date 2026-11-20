@@ -145,7 +145,8 @@ export const list: ListSite = {
     signal.addEventListener("abort", () => void invoke("oauth_cancel"), { once: true });
     const page = new URL(`${OAUTH}/authorize`);
     page.search = new URLSearchParams({ response_type: "code", client_id: CLIENT ?? "", state, redirect_uri: REDIRECT, code_challenge: verifier, code_challenge_method: "plain" }).toString();
-    await openExternal(page.href);
+    // In the browser, where people are signed in, on phones too.
+    await openExternal(page.href, { inBrowser: true });
     const query = new URLSearchParams(await back);
     signal.throwIfAborted();
     if (query.get("state") !== state || !query.get("code")) throw new ListError("token", "MyAnimeList didn't say yes");

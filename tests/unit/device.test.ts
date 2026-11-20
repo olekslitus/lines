@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { onPhoneOrTablet, viewport } from "../../src/lib/device";
+import { linkRoute, onPhoneOrTablet, viewport } from "../../src/lib/device";
 
 const UA = {
   // An iPad's too: it asks for sites as a Mac would.
@@ -23,4 +23,31 @@ test("the apps never zoom; Safari on iPhone and iPad still pinches, but doesn't 
   expect(viewport(base, { app: true, ios: false })).toBe(`${base}, maximum-scale=1, user-scalable=no`);
   expect(viewport(base, { app: false, ios: true })).toBe(`${base}, maximum-scale=1`);
   expect(viewport(base, { app: false, ios: false })).toBe(base);
+});
+
+test("in the phone apps a web page opens over lines, unless Settings or the link's menu says the browser; elsewhere in the browser", () => {
+  const page = "https://example.com/a?b=c";
+  const phone = { phoneApp: true, openLinks: "lines" } as const;
+  expect(linkRoute(page, phone)).toBe("lines");
+  expect(linkRoute("HTTP://example.com", phone)).toBe("lines");
+  expect(linkRoute(page, { ...phone, openLinks: "browser" })).toBe("browser");
+  // Open in Browser, and signing in to a site, where people are signed in already.
+  expect(linkRoute(page, { ...phone, inBrowser: true })).toBe("browser");
+  // The desktop apps and the web have no view of their own: the setting isn't theirs.
+  expect(linkRoute(page, { phoneApp: false, openLinks: "lines" })).toBe("browser");
+  expect(linkRoute(page, { phoneApp: false, openLinks: "browser" })).toBe("browser");
+});
+
+test("mail and phone numbers go to their apps, however links open; anything else nowhere", () => {
+  for (const settings of [
+    { phoneApp: true, openLinks: "lines" },
+    { phoneApp: true, openLinks: "browser" },
+    { phoneApp: false, openLinks: "lines" },
+  ] as const) {
+    expect(linkRoute("mailto:someone@example.com", settings)).toBe("system");
+    expect(linkRoute("tel:+15551234567", settings)).toBe("system");
+    for (const unsafe of ["javascript:alert(1)", "file:///etc/passwd", "data:text/html,hi", "lines://note", "https://", "example.com", ""]) {
+      expect(linkRoute(unsafe, settings)).toBeNull();
+    }
+  }
 });

@@ -2,8 +2,8 @@
   import { LANGUAGES, languageChoice, locale, setLanguage, type LanguageChoice, t } from "../../i18n/index.svelte";
   import { weekStartIn } from "../../notes/calendar";
   import { notes } from "../../notes/store.svelte";
-  import { isDesktopApp } from "../../platform";
-  import { type NewNotes, prefs, type SettingsOpens, type SwipeDirection, type WeekStart } from "../../prefs.svelte";
+  import { isDesktopApp, isMobileApp } from "../../platform";
+  import { type NewNotes, type OpenLinks, prefs, type SettingsOpens, type SwipeDirection, type WeekStart } from "../../prefs.svelte";
   import { setSettingsOpens } from "../../windows/settings.svelte";
   import FieldGroup from "../ui/FieldGroup.svelte";
   import FieldRow from "../ui/FieldRow.svelte";
@@ -22,6 +22,10 @@
   const settingsOpens: { id: SettingsOpens; label: string }[] = [
     { id: "overlay", label: t("settings.settingsOpensOverlay") },
     { id: "window", label: t("settings.settingsOpensWindow") },
+  ];
+  const openLinks: { id: OpenLinks; label: string }[] = [
+    { id: "lines", label: t("settings.openLinksLines") },
+    { id: "browser", label: t("settings.openLinksBrowser") },
   ];
   const swipeDirections: { id: SwipeDirection; label: string }[] = [
     { id: "fingers", label: t("settings.swipeFingers") },
@@ -57,6 +61,11 @@
   <FieldRow label={t("settings.newNotes")} note={t("settings.newNotesNote")}>
     <Segmented label={t("settings.newNotes")} options={newNotes} value={prefs.newNotes} onselect={(id) => (prefs.newNotes = id)} />
   </FieldRow>
+  {#if isMobileApp}
+    <FieldRow label={t("settings.openLinks")} note={t("settings.openLinksNote")}>
+      <Segmented label={t("settings.openLinks")} options={openLinks} value={prefs.openLinks} onselect={(id) => (prefs.openLinks = id)} />
+    </FieldRow>
+  {/if}
   {#if isDesktopApp}
     <FieldRow label={t("settings.settingsOpens")} note={t("settings.settingsOpensNote")}>
       <Segmented label={t("settings.settingsOpens")} options={settingsOpens} value={prefs.settingsOpens} onselect={(id) => void setSettingsOpens(id)} />

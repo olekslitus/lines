@@ -1,12 +1,17 @@
 package com.olekslitus.lines
 
+import android.content.ActivityNotFoundException
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.browser.customtabs.CustomTabColorSchemeParams
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -32,6 +37,7 @@ class MainActivity : TauriActivity() {
 
   override fun onWebViewCreate(webView: WebView) {
     webView.addJavascriptInterface(SystemBars(), "linesSystemBars")
+    webView.addJavascriptInterface(Browser(), "linesBrowser")
     // Back closes what's open in lines, or goes back to the list (App.svelte); with nothing to go
     // back to, it leaves lines as usual.
     onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -59,6 +65,32 @@ class MainActivity : TauriActivity() {
           isAppearanceLightNavigationBars = !dark
         }
       }
+    }
+  }
+
+  // A web page opened from lines shows over it in a Custom Tab, the browser's own view of it, which
+  // closes back to where lines was; its toolbar in lines' background, light or dark as lines is
+  // (src/lib/platform.ts). Settings → General can send links to the browser instead.
+  inner class Browser {
+    @JavascriptInterface
+    fun open(url: String, toolbar: String, dark: Boolean): Boolean {
+      val page = Uri.parse(url)
+      if (page.scheme != "https" && page.scheme != "http") return false
+      val colors = CustomTabColorSchemeParams.Builder()
+      runCatching { Color.parseColor(toolbar) }.getOrNull()?.let { colors.setToolbarColor(it) }
+      val tab = CustomTabsIntent.Builder()
+        .setDefaultColorSchemeParams(colors.build())
+        .setColorScheme(if (dark) CustomTabsIntent.COLOR_SCHEME_DARK else CustomTabsIntent.COLOR_SCHEME_LIGHT)
+        .setShowTitle(true)
+        .build()
+      runOnUiThread {
+        try {
+          tab.launchUrl(this@MainActivity, page)
+        } catch (error: ActivityNotFoundException) {
+          Log.e("lines", "No browser to open $url in", error)
+        }
+      }
+      return true
     }
   }
 }

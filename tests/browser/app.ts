@@ -24,6 +24,11 @@ export interface Options {
   /** Another phone or tablet as Playwright has it (`Pixel 7`): its size, touch screen and user agent. */
   device?: string;
   /**
+   * As lines' own app there rather than a browser: Tauri's IPC is the test's, which notes each
+   * command asked of the app in `window.invoked` and answers it with nothing.
+   */
+  app?: boolean;
+  /**
    * Its storage kept on disk, as a browser's own is: Playwright's WebKit keeps no files (Blobs) in
    * IndexedDB otherwise, so the app can't keep an attachment there. Slower to start.
    */
@@ -61,7 +66,7 @@ export const clickMod = (page: App["page"]) => page.evaluate(() => (/Mac|iPhone|
 /** What a browser says in the console on its own, not about lines: WebKit on Linux doesn't know a viewport key the page sets. */
 const NOISE = [/^Viewport argument key ".+" not recognized and ignored\.$/];
 
-export async function openApp({ prefs = {}, tour = false, scheme = "light", width = 1280, height = 820, timezone, phone = false, device: name = phone ? "iPhone 15" : undefined, onDisk = false }: Options = {}): Promise<App> {
+export async function openApp({ prefs = {}, tour = false, scheme = "light", width = 1280, height = 820, timezone, phone = false, device: name = phone ? "iPhone 15" : undefined, app = false, onDisk = false }: Options = {}): Promise<App> {
   const device = name ? devices[name] : { viewport: { width, height }, deviceScaleFactor: 1 };
   const settings = { ...device, colorScheme: scheme, timezoneId: timezone };
   const dir = onDisk && engine() === "webkit" ? mkdtempSync(join(tmpdir(), "lines-test-")) : null;
@@ -80,6 +85,25 @@ export async function openApp({ prefs = {}, tour = false, scheme = "light", widt
     },
     [prefs, tour] as const,
   );
+  if (app) {
+    await context.addInitScript(() => {
+      const invoked: { cmd: string; args: unknown }[] = [];
+      let callbacks = 0;
+      Object.assign(window, {
+        invoked,
+        __TAURI_INTERNALS__: {
+          metadata: { currentWindow: { label: "main" }, currentWebview: { windowLabel: "main", label: "main" } },
+          invoke: async (cmd: string, args: unknown) => void invoked.push({ cmd, args }),
+          transformCallback: (callback: unknown) => {
+            const id = ++callbacks;
+            Object.assign(window, { [`_${id}`]: callback });
+            return id;
+          },
+          convertFileSrc: (path: string) => path,
+        },
+      });
+    });
+  }
   const page = await context.newPage();
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));

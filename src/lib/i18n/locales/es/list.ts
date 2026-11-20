@@ -6,6 +6,8 @@ export default {
   "list.showSidebar": "Mostrar la barra lateral",
   "list.newNote": "Nueva nota",
   "list.newNoteWithKey": "Nueva nota ({key})",
+  "list.newKinds": "Nuevo",
+  "list.newKindNote": "Nota",
   "list.search": "Buscar",
   "list.searchLabel": "Buscar notas",
   "list.clearSearch": "Borrar la búsqueda",

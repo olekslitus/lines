@@ -387,6 +387,14 @@ async function playEpisode(page) {
   });
 }
 
+/** A few notes in the list, one a recipe, none open. */
+async function addNotes(page) {
+  await page.evaluate(() => {
+    for (const title of ["Groceries", "Trip to Lisbon", "Book club", "Ideas for the garden", "Meeting notes"]) window.testing.notes.add(`# ${title}\n\nA line or two about it, to fill the row.`);
+    window.testing.notes.add("---\ntype: recipe\n---\n# Tomato soup\n\nOnions, tomatoes, a little cream.");
+  });
+}
+
 /** A browser's exported bookmarks, as Chrome writes them, for the import's pictures. */
 const BOOKMARKS = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
 <TITLE>Bookmarks</TITLE>
@@ -1158,7 +1166,7 @@ const SCENES = [
   {
     id: "player-phone",
     title: "Phone: the podcast player",
-    look: "At the bottom of the list, above the screen's edge: the same player, nothing cut off, the list scrolling above it.",
+    look: "At the bottom of the list, above the screen's edge: the same player, nothing cut off, the list scrolling above it; the round + above the player, clear of it.",
     width: 390,
     height: 780,
     act: (page) => playEpisode(page),
@@ -1960,6 +1968,25 @@ const SCENES = [
       },
     ];
   }),
+  {
+    id: "phone-add-button",
+    title: "Phone: the note list's round +",
+    look: "A round + in the accent at the bottom middle, its plus in the accent's own text color, a soft shadow under it, 16 px above the screen's edge; no New Note button in the title bar; the rows above it.",
+    width: 390,
+    height: 780,
+    act: (page) => addNotes(page),
+  },
+  {
+    id: "phone-add-button-kinds",
+    title: "Phone: the round +, held",
+    look: "A menu over the +, centred on it: Note, the types of your own (Recipe with its icon), a line, then Add to Library and Subscribe to a Feed.",
+    width: 390,
+    height: 780,
+    act: async (page) => {
+      await addNotes(page);
+      await page.locator(".add-button").click({ button: "right" });
+    },
+  },
   { id: "phone-dark-list", title: "Phone: a dark note list", look: "The list dark, its rows readable; the top of the screen not a light strip over it (a known gap, docs/limitations.md).", prefs: { darkPanes: "list" }, width: 390, height: 780, schemes: ["light"] },
   {
     id: "phone-typing",

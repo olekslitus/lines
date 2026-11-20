@@ -14,6 +14,7 @@
   import { prefs } from "../prefs.svelte";
   import { today } from "../today.svelte";
   import { ui } from "../ui.svelte";
+  import AddButton from "./AddButton.svelte";
   import CalendarMonth from "./CalendarMonth.svelte";
   import { ListWindow } from "./listWindow.svelte";
   import MiniPlayer from "./MiniPlayer.svelte";
@@ -89,6 +90,12 @@
   const ROW_GAP = 6;
 
   let list: HTMLUListElement;
+  let titleBar = $state<HTMLElement>();
+  /**
+   * On a phone, the round + at the list's bottom (Settings → Layout), but in the Trash, where
+   * nothing is made.
+   */
+  const addButton = $derived(prefs.addButton && ui.layout === "narrow" && notes.ready && notes.filter.kind !== "trash");
   /** What the list says when it has no posts to show. */
   let empty = $state<HTMLElement>();
   /** The row that's swiped open, if any. */
@@ -252,7 +259,7 @@
 </script>
 
 <section class="note-list flex h-full flex-col" aria-labelledby="note-list-title">
-  <header class="titlebar flex h-(--titlebar-h) shrink-0 items-center gap-1.5 pt-(--titlebar-pad-top) pr-3 pl-4" data-tauri-drag-region>
+  <header class="titlebar flex h-(--titlebar-h) shrink-0 items-center gap-1.5 pt-(--titlebar-pad-top) pr-3 pl-4" data-tauri-drag-region bind:this={titleBar}>
     <!-- The sidebar's button, on the sidebar's side. -->
     {#if ui.sidebarToggle === "list" && prefs.sidebarSide === "left"}
       <SidebarToggle />
@@ -266,8 +273,11 @@
         label={feedView.feed ? t("feeds.refreshOne") : t("feeds.refresh")}
         onclick={() => feeds.refresh(listedFeeds)}
       />
-      <IconButton icon="plus" label={t("feeds.subscribe")} open={!!ui.subscribePrompt} onclick={openSubscribe} />
-    {:else if notes.filter.kind !== "trash"}
+      <!-- On a phone the round + at the bottom (AddButton.svelte) is this button, in reach of a thumb. -->
+      {#if !addButton}
+        <IconButton icon="plus" label={t("feeds.subscribe")} open={!!ui.subscribePrompt} onclick={openSubscribe} />
+      {/if}
+    {:else if notes.filter.kind !== "trash" && !addButton}
       <IconButton
         icon="square-pen"
         label={t("list.newNote")}
@@ -398,55 +408,61 @@
     </p>
   {/if}
 
-  <!-- The same inset as the search field, so the rows line up under it. The rows not drawn are
-       space above and below the drawn ones (the styles below), so it scrolls as far as all of them. -->
-  <ul
-    class="items relative flex-1 overflow-y-auto overscroll-contain px-3 pb-6 outline-none"
-    style:--before="{drawnRows.before}px"
-    style:--after="{drawnRows.after}px"
-    bind:this={list}
-    bind:clientHeight={() => drawnRows.viewHeight, (height) => (rows.viewHeight = postRows.viewHeight = height)}
-    aria-labelledby="note-list-title"
-    onscroll={() => {
-      swipedId = null;
-      drawnRows.scrolled();
-    }}
-  >
-    {#if feedView}
-      {#each postRows.drawn as { item: row, index, top } (row.post.key)}
-        <PostRow
-          {row}
+  <div class="relative flex min-h-0 flex-1 flex-col">
+    <!-- The same inset as the search field, so the rows line up under it. The rows not drawn are
+         space above and below the drawn ones (the styles below), so it scrolls as far as all of them;
+         under the + on a phone, as far as the last row clears it. -->
+    <ul
+      class={["items relative flex-1 overflow-y-auto overscroll-contain px-3 outline-none", addButton ? "pb-[calc(88px+env(safe-area-inset-bottom))]" : "pb-6"]}
+      style:--before="{drawnRows.before}px"
+      style:--after="{drawnRows.after}px"
+      bind:this={list}
+      bind:clientHeight={() => drawnRows.viewHeight, (height) => (rows.viewHeight = postRows.viewHeight = height)}
+      aria-labelledby="note-list-title"
+      onscroll={() => {
+        swipedId = null;
+        drawnRows.scrolled();
+      }}
+    >
+      {#if feedView}
+        {#each postRows.drawn as { item: row, index, top } (row.post.key)}
+          <PostRow
+            {row}
+            {now}
+            {index}
+            count={posts.length}
+            {top}
+            measure={postRows.measure(row.post.key)}
+            selected={index === openPost}
+            tabbable={index === postStop}
+            onkeydown={(event) => onPostKeydown(event, row)}
+            ondismiss={(why) => dismissRow(row, why)}
+          />
+        {/each}
+      {:else}
+      {#each rows.drawn as { item: entry, index, top } (entry.note.id)}
+        {@const id = entry.note.id}
+        <NoteRow
+          {entry}
           {now}
           {index}
-          count={posts.length}
+          count={notes.visible.length}
           {top}
-          measure={postRows.measure(row.post.key)}
-          selected={index === openPost}
-          tabbable={index === postStop}
-          onkeydown={(event) => onPostKeydown(event, row)}
-          ondismiss={(why) => dismissRow(row, why)}
+          measure={rows.measure(id)}
+          selected={id === notes.selectedId}
+          picked={notes.picked.has(id)}
+          tabbable={index === tabStop}
+          open={swipedId === id}
+          onswipe={(open) => (swipedId = open ? id : swipedId === id ? null : swipedId)}
+          onkeydown={onListKeydown}
         />
       {/each}
-    {:else}
-    {#each rows.drawn as { item: entry, index, top } (entry.note.id)}
-      {@const id = entry.note.id}
-      <NoteRow
-        {entry}
-        {now}
-        {index}
-        count={notes.visible.length}
-        {top}
-        measure={rows.measure(id)}
-        selected={id === notes.selectedId}
-        picked={notes.picked.has(id)}
-        tabbable={index === tabStop}
-        open={swipedId === id}
-        onswipe={(open) => (swipedId = open ? id : swipedId === id ? null : swipedId)}
-        onkeydown={onListKeydown}
-      />
-    {/each}
+      {/if}
+    </ul>
+    {#if addButton}
+      <AddButton bar={titleBar} />
     {/if}
-  </ul>
+  </div>
   {#if !ui.playerInSidebar}
     <MiniPlayer class="pb-[calc(8px_+_env(safe-area-inset-bottom))]" />
   {/if}

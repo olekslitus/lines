@@ -350,6 +350,8 @@ export default {
   "settings.hideBarsNote": "The bars over the note and the note list, and the sidebar's top and bottom, stay out of sight until you point near them or Tab to them. On a touch screen they always show.",
   "settings.showIcons": "Icons",
   "settings.showIconsNote": "Off, a button that's only an icon shows its name instead, a note's pinned and locked marks show as words, and other icons go, but for checkmarks and the arrows of what opens.",
+  "settings.addButton": "Add button on phones",
+  "settings.addButtonNote": "A round + at the bottom of the note list, in reach of your thumb: a new note where you are, or in the Library a new entry. Hold it for other kinds. It goes as you scroll down and comes back as you scroll up.",
   "settings.mainWindow": "Main window",
   // How see-through a window is.
   "settings.opacity": "Opacity",

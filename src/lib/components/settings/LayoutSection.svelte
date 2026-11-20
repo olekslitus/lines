@@ -55,4 +55,7 @@
   <FieldRow label={t("settings.showIcons")} note={t("settings.showIconsNote")}>
     <Switch label={t("settings.showIcons")} checked={prefs.showIcons} onchange={(on) => (prefs.showIcons = on)} />
   </FieldRow>
+  <FieldRow label={t("settings.addButton")} note={t("settings.addButtonNote")}>
+    <Switch label={t("settings.addButton")} checked={prefs.addButton} onchange={(on) => (prefs.addButton = on)} />
+  </FieldRow>
 </FieldGroup>

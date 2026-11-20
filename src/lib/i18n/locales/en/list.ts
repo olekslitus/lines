@@ -6,6 +6,10 @@ export default {
   "list.newNote": "New note",
   // {key} is the keyboard shortcut, like ⌘N.
   "list.newNoteWithKey": "New note ({key})",
+  // The menu held open on the round + at the bottom of the note list on a phone: what kind of thing to make.
+  "list.newKinds": "New",
+  // In that menu, a plain note, before the types of note.
+  "list.newKindNote": "Note",
   // In the search field until something's typed.
   "list.search": "Search",
   "list.searchLabel": "Search notes",

@@ -322,6 +322,8 @@ export default {
   "settings.hideBarsNote": "Les barres au-dessus de la note et de la liste des notes, et le haut et le bas de la barre latérale, restent cachés jusqu’à ce que vous en approchiez le pointeur ou y arriviez avec Tab. Sur un écran tactile, ils s’affichent toujours.",
   "settings.showIcons": "Icônes",
   "settings.showIconsNote": "Désactivées, un bouton qui n’est qu’une icône affiche son nom, les marques de note épinglée ou verrouillée s’affichent en mots, et les autres icônes disparaissent, sauf les coches et les flèches de ce qui se déplie.",
+  "settings.addButton": "Bouton d’ajout sur téléphone",
+  "settings.addButtonNote": "Un + rond en bas de la liste des notes, à portée du pouce : une nouvelle note là où vous êtes, ou dans la Bibliothèque une nouvelle entrée. Maintenez-le appuyé pour d’autres types. Il s’efface quand vous faites défiler vers le bas et revient vers le haut.",
   "settings.mainWindow": "Fenêtre principale",
   "settings.opacity": "Opacité",
   "settings.blur": "Flouter l’arrière-plan",

@@ -2025,11 +2025,23 @@ const SCENES = [
   {
     id: "phone-list",
     title: "Phone: the note list",
-    look: "Text at iOS's sizes: the title bar's and each note's title 17 pt, the excerpt 15, the date 13, the search field's 17; the title bar the list's color to the top of the screen, with nothing across it.",
+    look: "Text at iOS's sizes: the title bar's and each note's title 17 pt, the excerpt 15, the date 13; the title bar the list's color to the top of the screen, with nothing across it. No search field: the first row right under the title bar, as iOS's Mail and Notes start.",
     note: PROSE,
     width: 390,
     height: 780,
     act: (page) => page.getByRole("button", { name: "Back to notes" }).click(),
+  },
+  {
+    id: "phone-list-search",
+    title: "Phone: the note list, its search field shown",
+    look: "The search field shown under the title bar (as a pull down or the Search shortcut shows it), its text 17 pt and its placeholder whole, the same inset as the rows, the first row under it with the usual room; nothing overlapping.",
+    note: PROSE,
+    width: 390,
+    height: 780,
+    act: async (page) => {
+      await page.getByRole("button", { name: "Back to notes" }).click();
+      await page.getByRole("searchbox", { name: "Search notes" }).focus();
+    },
   },
   {
     id: "phone-sidebar",

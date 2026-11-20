@@ -17,7 +17,10 @@ export interface Moves {
   lift?: boolean;
 }
 
-/** Puts a finger down at `from` and moves it to `to`, then lifts it unless told not to. */
+/**
+ * Puts a finger down at `from` and moves it to `to`, then lifts it unless told not to. Whether the
+ * page stopped its first move, which in WebKit decides whether the touch can scroll the page at all.
+ */
 export function drag(page: Page, from: Point, to: Point, { steps = 10, duration = 160, lift = true }: Moves = {}) {
   return page.evaluate(
     async ([from, to, steps, duration, lift]) => {
@@ -34,15 +37,19 @@ export function drag(page: Page, from: Point, to: Point, { steps = 10, duration 
           Object.defineProperties(event, { touches: { value: touches }, changedTouches: { value: [point] }, targetTouches: { value: touches } });
         }
         target.dispatchEvent(event);
+        return event.defaultPrevented;
       };
       const pause = () => new Promise((resolve) => setTimeout(resolve, duration / steps));
       fire("touchstart", from);
+      let stopped = false;
       for (let step = 1; step <= steps; step++) {
         await pause();
-        fire("touchmove", { x: from.x + ((to.x - from.x) * step) / steps, y: from.y + ((to.y - from.y) * step) / steps });
+        const move = fire("touchmove", { x: from.x + ((to.x - from.x) * step) / steps, y: from.y + ((to.y - from.y) * step) / steps });
+        if (step === 1) stopped = move;
       }
       (window as unknown as { liftFinger: () => void }).liftFinger = () => fire("touchend", to);
       if (lift) fire("touchend", to);
+      return stopped;
     },
     [from, to, steps, duration, lift] as const,
   );

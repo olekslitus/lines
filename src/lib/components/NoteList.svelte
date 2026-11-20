@@ -1,5 +1,6 @@
 <script lang="ts">
   import { flushSync, untrack } from "svelte";
+  import type { Attachment } from "svelte/attachments";
   import { speak } from "../a11y";
   import { locale, t } from "../i18n/index.svelte";
   import Icon from "../icons/Icon.svelte";
@@ -9,9 +10,10 @@
   import { dateOf } from "../notes/calendar";
   import { typeLabel } from "../notes/properties";
   import { notes } from "../notes/store.svelte";
-  import { isApple, isTauri, newNoteKey } from "../platform";
+  import { isApple, isMobile, isTauri, newNoteKey, reducedMotion } from "../platform";
   import { deletePicked, inboxPicked, pinPicked, restorePicked, tagPicked, trashPicked } from "../notes/picked";
   import { pull } from "../gestures";
+  import { SLIDE_EASE, SLIDE_MS } from "../spring";
   import { prefs } from "../prefs.svelte";
   import { today } from "../today.svelte";
   import { ui } from "../ui.svelte";
@@ -101,6 +103,79 @@
   const addButton = $derived(prefs.addButton && ui.layout === "narrow" && notes.ready && notes.filter.kind !== "trash");
   /** What the list says when it has no posts to show. */
   let empty = $state<HTMLElement>();
+  /*
+   * On a phone the search field waits above the list, as iOS's Mail and Notes keep theirs: the list
+   * starts with its first row. A pull down past the top shows it (a long one searches, as before),
+   * as does a fling that reaches the top, or going to it (the Search shortcut, Tab, a screen
+   * reader); it stays while the list's at its top, and goes as it scrolls down, unless it's
+   * searching or in use. Tablets and computers always show it.
+   */
+  const tucks = $derived(isMobile && ui.layout === "narrow");
+  let searchShown = $state(false);
+  let searchFocused = $state(false);
+  const searchOut = $derived(!tucks || searchShown || searchFocused || !!notes.query);
+  /** How far a pull that falls short of searching goes to show the field, px. */
+  const SHOWS_SEARCH = 24;
+  /** How far down the list scrolls before the field goes, px: about its own height. */
+  const HIDES_SEARCH = 44;
+  let searchBox: HTMLElement;
+  /** A finger's on the list: it's dragged, not flung. */
+  let touching = false;
+  let lastScrollTop = 0;
+
+  // Another list starts with its first row too.
+  $effect(() => {
+    void notes.filter;
+    untrack(() => (searchShown = false));
+  });
+
+  /** What's below the field, and how far down each was before it came or went, to slide on from there. */
+  let slid: [HTMLElement, number][] = [];
+  $effect.pre(() => {
+    void searchOut;
+    untrack(() => {
+      if (!searchBox) return;
+      const below: HTMLElement[] = [];
+      for (let next = searchBox.nextElementSibling; next && !next.contains(list); next = next.nextElementSibling) below.push(next as HTMLElement);
+      slid = [...below, list].map((element) => [element, element.getBoundingClientRect().top]);
+    });
+  });
+  $effect(() => {
+    void searchOut;
+    untrack(() => {
+      const was = slid;
+      slid = [];
+      if (reducedMotion.matches) return;
+      const timing = { duration: SLIDE_MS, easing: SLIDE_EASE };
+      for (const [element, top] of was) {
+        const moved = top - element.getBoundingClientRect().top;
+        if (!element.isConnected || Math.abs(moved) < 1) continue;
+        // From where it shows, which for the list may be a pull's way down as it springs back.
+        const [, pulled = "0"] = getComputedStyle(element).translate.split(" ");
+        element.animate([{ translate: `0 ${moved + parseFloat(pulled)}px` }, { translate: "0 0" }], timing);
+      }
+      if (searchOut && was.length) searchBox.animate([{ opacity: 0 }, { opacity: 1 }], timing);
+    });
+  });
+
+  /** Shows the field as a fling reaches the top, and puts it away as the list scrolls down. */
+  function scrolled() {
+    const top = list.scrollTop;
+    if (tucks && !touching && top <= 0 && lastScrollTop > 0) searchShown = true;
+    else if (searchShown && top > HIDES_SEARCH) searchShown = false;
+    lastScrollTop = top;
+  }
+
+  /** Whether a finger's on the list, watched without holding up its scrolling (passive). */
+  const watchTouches: Attachment<HTMLElement> = (element) => {
+    const watch = (event: TouchEvent) => (touching = event.touches.length > 0);
+    const options = { passive: true };
+    for (const type of ["touchstart", "touchend", "touchcancel"] as const) element.addEventListener(type, watch, options);
+    return () => {
+      for (const type of ["touchstart", "touchend", "touchcancel"] as const) element.removeEventListener(type, watch);
+    };
+  };
+
   /** The row that's swiped open, if any. */
   let swipedId = $state<string | null>(null);
 
@@ -293,7 +368,8 @@
     {/if}
   </header>
 
-  <div class="relative mx-3 mt-0.5 mb-2.5 flex items-center text-faint">
+  <!-- Put away, it's still in the page, for Tab and screen readers to reach; reached, it shows. -->
+  <div class={["relative mx-3 flex items-center text-faint", searchOut ? "mt-0.5 mb-2.5" : "h-0 overflow-hidden opacity-0"]} bind:this={searchBox}>
     <Icon name="search" size={15} class="pointer-events-none absolute left-2.5" />
     <input
       bind:this={searchInput}
@@ -304,6 +380,8 @@
       aria-label={t("list.searchLabel")}
       autocomplete="off"
       spellcheck="false"
+      onfocus={() => (searchFocused = searchShown = true)}
+      onblur={() => (searchFocused = false)}
       onkeydown={(e) => e.key === "Escape" && ((notes.query = ""), focusList())}
     />
     {#if notes.query}
@@ -419,7 +497,13 @@
       indicator: () => pulled,
       haptic: () => !!feedView,
       enabled: () => !feedView || listedFeeds.length > 0,
-      release: () => (feedView ? feeds.refresh(listedFeeds) : searchInput?.focus()),
+      release: () => {
+        searchShown = true;
+        return feedView ? feeds.refresh(listedFeeds) : searchInput?.focus();
+      },
+      letGo: (distance) => {
+        if (distance >= SHOWS_SEARCH) searchShown = true;
+      },
     })}
   >
     <PullIndicator kind={feedView ? "refresh" : "search"} bind:element={pulled} />
@@ -440,7 +524,9 @@
       onscroll={() => {
         swipedId = null;
         drawnRows.scrolled();
+        scrolled();
       }}
+      {@attach watchTouches}
     >
       {#if feedView}
         {#each postRows.drawn as { item: row, index, top } (row.post.key)}

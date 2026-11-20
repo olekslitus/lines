@@ -76,7 +76,7 @@ export function downloadText(filename: string, text: string, type = "text/markdo
 }
 
 /** The iPhone and iPad app. */
-const isIOSApp = isTauri && isApple && isMobile;
+export const isIOSApp = isTauri && isApple && isMobile;
 
 /**
  * Saves a file: a normal download on the web, or straight into Downloads in the apps (Documents

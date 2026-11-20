@@ -1,5 +1,5 @@
 import { locale, t } from "./i18n/index.svelte";
-import { isMacApp } from "./platform";
+import { isIOSApp, isMacApp } from "./platform";
 import type { BookFlow } from "./plugins/types";
 import { CURRENCIES, DATE_STYLES, type DateStyle, localCurrency, MONEY_STYLES, type MoneyStyle, NEGATIVE_STYLES, type NegativeStyle } from "./sheets/display";
 import { type FormattingFonts, readFormattingFonts, sameFormattingFonts } from "./themes/formattingFonts";
@@ -543,11 +543,19 @@ const id = (value: unknown, fallback: string) => (typeof value === "string" && /
 /** A CSS color, short enough to be one someone chose rather than anything else. */
 const color = (value: unknown, fallback: string) => (typeof value === "string" && value.length <= 120 && CSS.supports("color", value) ? value : fallback);
 
+/**
+ * Where lines starts on iPhone and iPad, before anything's been chosen: the Styles plugin's iOS
+ * preset, its SF Symbols too. Only then, not as these settings' defaults, so a look chosen before
+ * stays, and a preset or a file that leaves one out still gets lines' own.
+ */
+const FIRST_RUN: Record<string, unknown> = isIOSApp ? { style: "ios", theme: "ios", preset: "ios", icons: "sf" } : {};
+
 /** The saved preferences (or those `json` gives), each checked and falling back to its default; unknown keys are dropped. */
 function read(json?: string): Stored {
   let raw: Record<string, unknown> = {};
   try {
-    raw = JSON.parse(json ?? localStorage.getItem(KEY) ?? "{}") ?? {};
+    const saved = json ?? localStorage.getItem(KEY);
+    raw = saved === null ? { ...FIRST_RUN } : (JSON.parse(saved) ?? {});
   } catch {
     // Unreadable: start from the defaults.
   }

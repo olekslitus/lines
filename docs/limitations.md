@@ -544,7 +544,7 @@ What isn't done yet is in [secrets.md](secrets.md#not-yet).
 
 - Tried on a Mac, with test builds and a stand-in for GitHub: a release that had waited long enough was downloaded and installed as the app quit, and the new version opened. Restart to update, and updating on Windows and Linux, haven't been tried yet; the first real release with updates will be the first test of its packages.
 - The Mac app is signed from the release after 0.7.0 on, and an update of a signed version keeps reading Lines' Keychain item (app lock, Touch ID) without asking. The first update from an unsigned version (0.7.0 and earlier) asks for the login password once more, as after reinstalling by hand ([releasing.md](releasing.md#the-mac-apps-signature)).
-- The Mac app isn't notarized yet, so macOS says it can't verify a downloaded Lines is free of malware: open it once from System Settings → Privacy & Security → Open Anyway. The Windows app isn't signed: choose More info → Run anyway.
+- The Windows app isn't signed, so Windows warns before opening a downloaded copy: choose More info → Run anyway.
 - A `.deb` or `.rpm` install asks for a password when it updates, and the Windows MSI for permission; the AppImage and the `-setup.exe` install don't.
 - Once an update is downloaded it's the one installed: a newer one found before quitting waits for the next run.
 - There's no Check for Updates… in the Mac's app menu yet; it's in Settings → About.

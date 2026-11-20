@@ -126,7 +126,7 @@ function downloads(release) {
         <ul class="mt-10 grid gap-4 md:grid-cols-2">
           ${systems}
         </ul>
-        <p class="mx-auto mt-6 max-w-3xl text-center text-sm text-muted">Lines is in alpha, so export your notes now and then. The Mac app is signed with Lines' Developer ID; if macOS still says it can't verify Lines is free of malware, open it once from System Settings → Privacy & Security → Open Anyway. The Windows app isn't signed yet: choose More info → Run anyway. On Android, open the downloaded file and allow your browser or Files app to install apps when asked. <a href="${release.url}">All of this release's files</a></p>`;
+        <p class="mx-auto mt-6 max-w-3xl text-center text-sm text-muted">Lines is in alpha, so export your notes now and then. The Mac app is signed and notarized by Apple, so it opens like any other app. The Windows app isn't signed yet: choose More info → Run anyway. On Android, open the downloaded file and allow your browser or Files app to install apps when asked. <a href="${release.url}">All of this release's files</a></p>`;
 }
 
 /** The download button offers the visitor's system's app, when there's one for it. */

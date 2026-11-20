@@ -93,6 +93,21 @@ jobs:
           ps -o pid,stat,etime,command -p "$pid" || { echo "::error::Lines quit"; cat "$RUNNER_TEMP/lines.log"; exit 1; }
           pgrep -fl WebKit || true
           screencapture -x "$RUNNER_TEMP/screen-1.png" || true
+          cat > "$RUNNER_TEMP/click.c" <<'EOF'
+          #include <ApplicationServices/ApplicationServices.h>
+          #include <stdlib.h>
+          #include <unistd.h>
+          int main(int argc, char **argv) {
+            CGPoint at = CGPointMake(atof(argv[1]), atof(argv[2]));
+            CGEventPost(kCGHIDEventTap, CGEventCreateMouseEvent(NULL, kCGEventMouseMoved, at, kCGMouseButtonLeft));
+            usleep(200000);
+            CGEventPost(kCGHIDEventTap, CGEventCreateMouseEvent(NULL, kCGEventLeftMouseDown, at, kCGMouseButtonLeft));
+            usleep(100000);
+            CGEventPost(kCGHIDEventTap, CGEventCreateMouseEvent(NULL, kCGEventLeftMouseUp, at, kCGMouseButtonLeft));
+            return 0;
+          }
+          EOF
+          clang -framework ApplicationServices -o "$RUNNER_TEMP/click" "$RUNNER_TEMP/click.c"
           keys() { osascript -e "tell application \"System Events\" to tell (first process whose unix id is $pid) to set frontmost to true" -e "tell application \"System Events\" to $1" || true; }
           # A 3D model (OpenSCAD's WebAssembly, WebGL), from /model in a new note.
           keys 'keystroke "n" using command down'; sleep 3
@@ -103,13 +118,13 @@ jobs:
           keys 'keystroke "n" using command down'; sleep 3
           keys 'keystroke "Signed and hardened"'; keys 'key code 36'; keys 'keystroke "Typeset by TeX in the signed app."'; sleep 2
           # Where the ⓘ button, Written in's LaTeX, and Typeset with's TeX are in a 1024-wide window.
-          keys 'click at {888, 57}'; sleep 3
+          "$RUNNER_TEMP/click" 888 57; sleep 3
           screencapture -x "$RUNNER_TEMP/screen-3.png" || true
-          keys 'click at {638, 110}'; sleep 3
+          "$RUNNER_TEMP/click" 638 110; sleep 3
           keys 'key code 53'; sleep 1
           keys 'keystroke "p" using command down'; sleep 5
           screencapture -x "$RUNNER_TEMP/screen-4.png" || true
-          keys 'click at {565, 57}'; sleep 90
+          "$RUNNER_TEMP/click" 565 57; sleep 90
           screencapture -x "$RUNNER_TEMP/screen-5.png" || true
           ps -o pid,stat,etime,command -p "$pid" || { echo "::error::Lines quit"; cat "$RUNNER_TEMP/lines.log"; exit 1; }
           kill "$pid"

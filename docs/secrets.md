@@ -4,7 +4,7 @@ API keys, tokens and passwords can be kept out of notes, in one locked note, and
 
 ## Where they're kept
 
-A **secrets note** is a [locked note](../README.md#sync-and-privacy) whose type is `secrets`. Its properties are the secrets, by name:
+A **secrets note** is a [locked note](sync.md#locked-notes) whose type is `secrets`. Its properties are the secrets, by name:
 
 ```markdown
 ---

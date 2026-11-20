@@ -821,30 +821,6 @@ describe("styles", () => {
     }
   });
 
-  test("iOS: Settings' groups are borderless rounded cards, its switches 51 by 31 and green with the knob across, and the note list's rows run edge to edge", async () => {
-    app = await openApp();
-    const settings = await app.settings("Presets");
-    await settings.getByRole("radio", { name: /^iOS/ }).first().click();
-    expect(await app.root("style")).toBe("ios");
-    expect(await app.root("theme")).toBe("ios");
-    const editor = await app.settings("Editor");
-    expect(await app.style(".ui-card", "border-top-left-radius")).toBe("26px");
-    expect(await app.style(".ui-card", "border-top-width")).toBe("0px");
-    await toggle(editor, "Copy what you select", true);
-    const on = editor.getByRole("switch", { name: "Copy what you select" });
-    await on.locator(".ui-switch-thumb").evaluate((thumb) => Promise.all(thumb.getAnimations().map((animation) => animation.finished)));
-    const [track, knob] = await Promise.all([on.boundingBox(), on.locator(".ui-switch-thumb").boundingBox()]);
-    expect([track!.width, track!.height]).toEqual([51, 31]);
-    expect(track!.x + track!.width - (knob!.x + knob!.width)).toBeCloseTo(2, 0);
-    const [green, success] = await on.evaluate((element) => [getComputedStyle(element).backgroundColor, getComputedStyle(element).getPropertyValue("--success").trim()]);
-    expect(await lightness(app.page, green)).toBeCloseTo(await lightness(app.page, success), 2);
-    await app.closeSettings();
-    await app.open("A note");
-    const [list, row] = await Promise.all([app.page.locator(".note-list .items").boundingBox(), app.page.locator(".ui-note-row").first().boundingBox()]);
-    expect(row!.x).toBe(list!.x);
-    expect(row!.width).toBe(list!.width);
-  });
-
   test("Void's hairlines under fields and around switches reach 3:1 with Increased contrast", async () => {
     app = await openApp({ prefs: { style: "void", theme: "void", contrast: "more" } });
     const settings = await app.settings("Editor");

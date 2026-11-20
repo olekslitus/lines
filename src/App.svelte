@@ -698,9 +698,11 @@
   </aside>
 
   {#if !wide}
+    <!-- Over everything in the panes but the drawer, the phone's round + (z-10) too, which it dims
+         and takes the taps of. -->
     <button
       bind:this={scrim}
-      class={["absolute inset-0 z-10 bg-scrim transition-opacity duration-320 ease-sheet", ui.sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"]}
+      class={["absolute inset-0 z-15 bg-scrim transition-opacity duration-320 ease-sheet", ui.sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"]}
       aria-label={t("app.closeSidebar")}
       tabindex="-1"
       onclick={() => (ui.sidebarOpen = false)}

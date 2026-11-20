@@ -58,19 +58,19 @@ export function layout({ page, title, description, head = "", body }) {
     <a class="skip" href="#main">Skip to content</a>
     <header class="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
       <a href="${up("./")}" class="flex items-center gap-2.5 text-lg font-semibold text-fg no-underline">
-        <img src="${up("../public/icon.svg")}" alt="" width="28" height="28" />lines
+        <img src="${up("../public/icon.svg")}" alt="" width="28" height="28" />Lines
       </a>
       <nav aria-label="Site" class="ml-auto flex items-center gap-1 text-md">
         <a href="${up("docs/")}" class="${NAV_LINK}"${current(page.startsWith("docs/") && !changelog)}>Docs</a>
         <a href="${up("docs/changelog.html")}" class="${NAV_LINK} max-sm:hidden"${current(changelog)}>What's new</a>
         <a href="${REPO}" class="${NAV_LINK} max-sm:hidden">GitHub</a>
-        <a href="${up("app/")}" class="button button-primary ml-2">Open lines</a>
+        <a href="${up("app/")}" class="button button-primary ml-2">Open Lines</a>
       </nav>
     </header>
 ${body}
     <footer class="mt-24 border-t border-line">
       <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-8 text-sm text-muted sm:px-6">
-        <p class="m-0">lines is free software, under the <a href="${REPO}/blob/main/LICENSE">AGPL</a>.</p>
+        <p class="m-0">Lines is free software, under the <a href="${REPO}/blob/main/LICENSE">AGPL</a>.</p>
         <nav aria-label="More" class="flex flex-wrap gap-x-5 gap-y-2 sm:ml-auto">
           <a href="${up("./#download")}">Download</a>
           <a href="${up("docs/")}">Docs</a>
@@ -141,7 +141,7 @@ function docsLayout({ page, title, description, groups, content, outline = [] })
 export function doc({ entry, groups, rendered }) {
   return docsLayout({
     page: entry.page,
-    title: `${entry.label} · lines docs`,
+    title: `${entry.label} · Lines docs`,
     description: entry.about.replace(/`/g, ""),
     groups,
     outline: rendered.headings,
@@ -154,10 +154,10 @@ export function docsHome({ groups }) {
   const page = "docs/index.html";
   return docsLayout({
     page,
-    title: "lines docs",
-    description: "How to use lines, and how to work on it.",
+    title: "Lines docs",
+    description: "How to use Lines, and how to work on it.",
     groups,
-    content: `<div class="prose"><h1>Docs</h1><p class="text-lg text-muted">How to use lines, and how to work on it.</p></div>
+    content: `<div class="prose"><h1>Docs</h1><p class="text-lg text-muted">How to use Lines, and how to work on it.</p></div>
         ${groups
           .map(
             (group, i) => `<section aria-labelledby="group-${i}" class="mt-10 max-w-3xl">

@@ -328,7 +328,7 @@ Total, =costs!B2*2
 ---
 :::
 
-#### 31. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop) in a callout with no icon (stays Markdown here)
+#### 31. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop) in a callout with no icon (stays Markdown here)
 
 :::^ icon=none
 Before the break.

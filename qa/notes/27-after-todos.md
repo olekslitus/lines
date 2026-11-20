@@ -358,7 +358,7 @@ Total, =costs!B2*2
   - [ ] Nested open todo
 ---
 
-#### 31. Todo list, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Todo list, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 - [x] Done todo
 - [ ] Open todo

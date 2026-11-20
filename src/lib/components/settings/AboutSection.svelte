@@ -57,7 +57,7 @@
 <section class="flex flex-wrap items-center gap-4 px-1">
   <img src="{import.meta.env.BASE_URL}icon.svg" alt="" width="64" height="64" class="shrink-0 rounded-xl" />
   <div class="min-w-0 flex-1">
-    <h3 class="m-0 text-xl font-bold">lines</h3>
+    <h3 class="m-0 text-xl font-bold">Lines</h3>
     <p class="tabular m-0 mt-0.5 text-xs text-faint">{t("settings.version", { version })}</p>
     <p class="m-0 mt-1 text-sm text-muted">{t("settings.tagline")}</p>
   </div>

@@ -388,7 +388,7 @@ Score: 7 / 10
 Not a score: 12/20
 ---
 
-#### 31. Score (Settings → Little Touches), then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Score (Settings → Little Touches), then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 Rating: 4/5
 Half: 3.5/5

@@ -1,11 +1,11 @@
 # Theme tools
 
-Two small command-line tools in `tools/themes/`, beside lines for now (they may become a project of their own):
+Two small command-line tools in `tools/themes/`, beside Lines for now (they may become a project of their own):
 
 - **swatch** reads pictures and videos and keeps their colors: 16 of them, or as many as you ask for.
-- **adapt-theme** makes themes of a swatch, or of a lines theme, for other apps: lines itself, VS Code, GTK and Base24 (and from that, the hundreds of apps Base16's templates theme).
+- **adapt-theme** makes themes of a swatch, or of a Lines theme, for other apps: Lines itself, VS Code, GTK and Base24 (and from that, the hundreds of apps Base16's templates theme).
 
-lines' Green World theme was made with them, from SkyeWei's animation [Green World](https://youtu.be/MkxgDkH1rto): the swatch first, then the theme from it, its colors then tuned by hand.
+Lines' Green World theme was made with them, from SkyeWei's animation [Green World](https://youtu.be/MkxgDkH1rto): the swatch first, then the theme from it, its colors then tuned by hand.
 
 They run with [Bun](https://bun.com) from the repository, after `bun install`. **swatch** needs [ffmpeg](https://ffmpeg.org) (`brew install ffmpeg`, or your system's package), and [yt-dlp](https://github.com/yt-dlp/yt-dlp) for links to video pages.
 
@@ -51,9 +51,9 @@ bun run adapt-theme <file.swatch.json | file.lines-theme.json> [options]
 | `--name <name>` | The theme's name: otherwise the file's |
 | `-o`, `--out <folder>` | Where they go: a folder named after the theme to begin with, with one inside for each target |
 
-A **swatch** makes a theme as Settings → Theme → New → From a Picture… does ([themes.md](themes.md#your-own-themes)), light and dark: the main color tints the backgrounds, the most vivid plentiful one is the accent, and colors near red, green, blue and the rest color callouts and code, all made to read. A **lines theme file** is used as it is: download one of yours from the share button beside its name in Settings → Theme (for one of lines' own, make yours from it first with **New**), so any theme can go to other apps; to tune a swatch's theme by hand, make the lines theme first, open it in lines with Import, change it there, and download it again.
+A **swatch** makes a theme as Settings → Theme → New → From a Picture… does ([themes.md](themes.md#your-own-themes)), light and dark: the main color tints the backgrounds, the most vivid plentiful one is the accent, and colors near red, green, blue and the rest color callouts and code, all made to read. A **Lines theme file** is used as it is: download one of yours from the share button beside its name in Settings → Theme (for one of Lines' own, make yours from it first with **New**), so any theme can go to other apps; to tune a swatch's theme by hand, make the Lines theme first, open it in Lines with Import, change it there, and download it again.
 
-Colors a lines theme leaves out (most leave out the callouts' and code's) are lines' own, from `src/app.css`, as the app shows them.
+Colors a Lines theme leaves out (most leave out the callouts' and code's) are Lines' own, from `src/app.css`, as the app shows them.
 
 ### What it writes
 
@@ -64,10 +64,10 @@ Colors a lines theme leaves out (most leave out the callouts' and code's) are li
 | `gtk` | `gtk-4.0/gtk.css`, and `gtk-3.0/light.css` and `dark.css` | For GNOME's apps (libadwaita 1.6 or later), copy `gtk-4.0/gtk.css` to `~/.config/gtk-4.0/`: its dark colors are used while the system's style is dark. For GTK 3 apps with the adw-gtk3 theme, copy `light.css` or `dark.css` to `~/.config/gtk-3.0/gtk.css` |
 | `base24` | `green-world-light.yaml`, `green-world-dark.yaml` | With [tinty](https://github.com/tinted-theming/tinty), Stylix or flavours, or any Base16 template, for terminals, editors and window managers |
 
-How lines' colors are given to each:
+How Lines' colors are given to each:
 
-- **VS Code**: the note's background is the editor's, the note list's the panels' and tabs', the sidebar's the side bar's, activity bar's, title bar's and status bar's, and menus' the widgets', menus' and inputs'. The accent is buttons, links, badges, focus and the cursor; the selection and borders are mixed from it and the theme's ink, as lines mixes them. Code's colors go to TextMate's scopes and to semantic tokens; danger, success and the callouts to errors, warnings, git and the terminal.
+- **VS Code**: the note's background is the editor's, the note list's the panels' and tabs', the sidebar's the side bar's, activity bar's, title bar's and status bar's, and menus' the widgets', menus' and inputs'. The accent is buttons, links, badges, focus and the cursor; the selection and borders are mixed from it and the theme's ink, as Lines mixes them. Code's colors go to TextMate's scopes and to semantic tokens; danger, success and the callouts to errors, warnings, git and the terminal.
 - **GTK**: libadwaita's named colors: the note's background for views, the note list's for windows and header bars, the sidebar's for sidebars, menus' for popovers, dialogs and cards; the accent, and danger, success and the pin's color for libadwaita's destructive, success and warning colors, with the text that goes on them. GTK 3's older names (`theme_bg_color`…) too.
 - **Base24**: `base00` to `base07` go from the background to the text and past it (the sidebar, a selection, faint text for comments, secondary text), `base08` to `base0F` are red, orange, yellow, green, cyan, blue, magenta and brown, from danger, the pin, highlights, success and the callouts, each at least 3:1 on the background; `base10` and `base11` are darker backgrounds, and `base12` to `base17` the bright hues. Base16 and Base24 have no accent of their own, so a theme whose accent isn't blue loses it there (`base0D`, blue, is what Base16's templates use).
 
-What lines writes reads back in lines (Import), which is how its tests check them (`tests/unit/themeTools.test.ts`).
+What Lines writes reads back in Lines (Import), which is how its tests check them (`tests/unit/themeTools.test.ts`).

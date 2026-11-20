@@ -1,10 +1,10 @@
-# QA · Right after: Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+# QA · Right after: Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
-Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop) followed straight away, with no blank line, by each element. Check: nothing overlaps, nothing is cut off, and the space between is even. Markdown joins some pairs without a blank line (text followed by --- is a heading, and a line of text can carry on into the next), so check that what's drawn matches the Markdown.
+Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop) followed straight away, with no blank line, by each element. Check: nothing overlaps, nothing is cut off, and the space between is even. Markdown joins some pairs without a blank line (text followed by --- is a heading, and a line of text can carry on into the next), so check that what's drawn matches the Markdown.
 
 #qa/adjacent
 
-#### 1. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Paragraph
+#### 1. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Paragraph
 
 Before the break.
 
@@ -16,7 +16,7 @@ After it, on a new page.
 And another.
 A paragraph with **bold**, *italic*, <u>underlined</u>, ~~struck~~, ==highlighted==, `code`, a [link](https://example.com) and a #qa/tag.
 
-#### 2. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Long paragraph
+#### 2. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Long paragraph
 
 Before the break.
 
@@ -28,7 +28,7 @@ After it, on a new page.
 And another.
 A long paragraph that wraps onto several lines at the usual width, so the space between its lines, its indent on every line, and where it meets the edges of anything around it can be checked. It goes on a little longer to be sure it wraps on a phone too.
 
-#### 3. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Heading 1
+#### 3. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Heading 1
 
 Before the break.
 
@@ -40,7 +40,7 @@ After it, on a new page.
 And another.
 # Heading one
 
-#### 4. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Heading 2
+#### 4. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Heading 2
 
 Before the break.
 
@@ -52,7 +52,7 @@ After it, on a new page.
 And another.
 ## Heading two
 
-#### 5. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Heading 3
+#### 5. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Heading 3
 
 Before the break.
 
@@ -64,7 +64,7 @@ After it, on a new page.
 And another.
 ### Heading three
 
-#### 6. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Bullet list
+#### 6. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Bullet list
 
 Before the break.
 
@@ -80,7 +80,7 @@ And another.
     - Third level
 - Last item
 
-#### 7. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Numbered list
+#### 7. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Numbered list
 
 Before the break.
 
@@ -95,7 +95,7 @@ And another.
    1. Nested
 3. Third
 
-#### 8. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Todo list
+#### 8. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Todo list
 
 Before the break.
 
@@ -109,7 +109,7 @@ And another.
 - [ ] Open todo
   - [ ] Nested open todo
 
-#### 9. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Quote
+#### 9. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Quote
 
 Before the break.
 
@@ -122,7 +122,7 @@ And another.
 > A quote that runs over
 > two lines.
 
-#### 10. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Line marks
+#### 10. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Line marks
 
 Before the break.
 
@@ -138,7 +138,7 @@ The second of them. <!-- mark green: ready -->
 Red, with a label to point at. <!-- mark red: to fix -->
 - A list item, marked purple. <!-- mark purple -->
 
-#### 11. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Code block
+#### 11. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Code block
 
 Before the break.
 
@@ -153,7 +153,7 @@ plain code
   indented line
 ```
 
-#### 12. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Code block (TypeScript)
+#### 12. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Code block (TypeScript)
 
 Before the break.
 
@@ -168,7 +168,7 @@ const greeting: string = "hello";
 console.log(greeting);
 ```
 
-#### 13. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then JSON block (no language)
+#### 13. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then JSON block (no language)
 
 Before the break.
 
@@ -182,7 +182,7 @@ And another.
 {"name":"lines","tags":["a","b"],"id":12345678901234567890}
 ```
 
-#### 14. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Diagram
+#### 14. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Diagram
 
 Before the break.
 
@@ -198,7 +198,7 @@ flowchart LR
   B --> C[Done]
 ```
 
-#### 15. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Diagram (240 px wide)
+#### 15. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Diagram (240 px wide)
 
 Before the break.
 
@@ -213,7 +213,7 @@ flowchart LR
   A[Small] --> B[Diagram]
 ```
 
-#### 16. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then 3D model (openscad block), a colored part, an echo
+#### 16. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then 3D model (openscad block), a colored part, an echo
 
 Before the break.
 
@@ -232,7 +232,7 @@ translate([25, 0, 0]) color("tomato") cylinder(h = 10, r = 5);
 echo("made");
 ```
 
-#### 17. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Flat model (openscad block)
+#### 17. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Flat model (openscad block)
 
 Before the break.
 
@@ -247,7 +247,7 @@ square(20);
 translate([30, 10]) circle(8);
 ```
 
-#### 18. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Broken model (openscad block)
+#### 18. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Broken model (openscad block)
 
 Before the break.
 
@@ -262,7 +262,7 @@ cube(10)
 sphere(3;
 ```
 
-#### 19. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then 3D model (stl block)
+#### 19. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then 3D model (stl block)
 
 Before the break.
 
@@ -319,7 +319,7 @@ endfacet
 endsolid pyramid
 ```
 
-#### 20. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Timing diagram (wavedrom block)
+#### 20. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Timing diagram (wavedrom block)
 
 Before the break.
 
@@ -338,7 +338,7 @@ And another.
 ], edge: ["a~>b t1"] }
 ```
 
-#### 21. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Typing practice (typing block)
+#### 21. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Typing practice (typing block)
 
 Before the break.
 
@@ -355,7 +355,7 @@ function go() {
 }
 ```
 
-#### 22. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Math block
+#### 22. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Math block
 
 Before the break.
 
@@ -369,7 +369,7 @@ $$
 \int_0^1 x^2\,dx = \frac{1}{3}
 $$
 
-#### 23. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Table
+#### 23. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Table
 
 Before the break.
 
@@ -384,7 +384,7 @@ And another.
 | a | **b** | 1 |
 | longer cell text | `code` | 22 |
 
-#### 24. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Table with formulas
+#### 24. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Table with formulas
 
 Before the break.
 
@@ -401,7 +401,7 @@ And another.
 | Total | =SUM(B2:B3) |
 | Broken | =B2/0 |
 
-#### 25. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Hurl entries (hurl block): a capture used by the next entry, and asserts
+#### 25. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Hurl entries (hurl block): a capture used by the next entry, and asserts
 
 Before the break.
 
@@ -427,7 +427,7 @@ HTTP 200
 jsonpath "$.name" isString
 ```
 
-#### 26. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Secret ({{name}}, kept in a locked secrets note)
+#### 26. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Secret ({{name}}, kept in a locked secrets note)
 
 Before the break.
 
@@ -439,7 +439,7 @@ After it, on a new page.
 And another.
 The token is {{qa-token}}, and {{no-such-secret}} isn't one.
 
-#### 27. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then API requests (http block): a variable, a named request and one using its response
+#### 27. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then API requests (http block): a variable, a named request and one using its response
 
 Before the break.
 
@@ -460,7 +460,7 @@ GET {{api}}/todos/1
 GET {{api}}/users/{{todo.response.body.$.userId}}
 ```
 
-#### 28. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Spreadsheet (csv block)
+#### 28. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Spreadsheet (csv block)
 
 Before the break.
 
@@ -477,7 +477,7 @@ Food, 450.50
 Total, =SUM(B2:B3)
 ```
 
-#### 29. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Named spreadsheet (csv name=), and a formula in another block using it
+#### 29. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Named spreadsheet (csv name=), and a formula in another block using it
 
 Before the break.
 
@@ -496,7 +496,7 @@ Rent, $1200, 2026-01-05
 Total, =costs!B2*2
 ```
 
-#### 30. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Divider
+#### 30. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Divider
 
 Before the break.
 
@@ -508,7 +508,7 @@ After it, on a new page.
 And another.
 ---
 
-#### 31. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 Before the break.
 
@@ -527,7 +527,7 @@ After it, on a new page.
 
 And another.
 
-#### 32. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Key: Value line
+#### 32. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Key: Value line
 
 Before the break.
 
@@ -539,7 +539,7 @@ After it, on a new page.
 And another.
 **Wi-Fi password:** correct-horse-battery
 
-#### 33. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Score (Settings → Little Touches)
+#### 33. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Score (Settings → Little Touches)
 
 Before the break.
 
@@ -554,7 +554,7 @@ Half: 3.5/5
 Score: 7 / 10
 Not a score: 12/20
 
-#### 34. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Mention
+#### 34. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Mention
 
 Before the break.
 
@@ -566,7 +566,7 @@ After it, on a new page.
 And another.
 Ask @[QA · Ada] at @[QA · Ada].email.
 
-#### 35. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Wiki link
+#### 35. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Wiki link
 
 Before the break.
 
@@ -578,7 +578,7 @@ After it, on a new page.
 And another.
 Ask [[QA · Ada]], or [[QA · Ada|her]].
 
-#### 36. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Symbols
+#### 36. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Symbols
 
 Before the break.
 
@@ -590,7 +590,7 @@ After it, on a new page.
 And another.
 Home -> cabin <- back, a <-> b, x => y, p <=> q, 1 <= 2 >= 0 != 3. Stays: --> !== \-> and `a -> b` in code.
 
-#### 37. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then GitHub links
+#### 37. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then GitHub links
 
 Before the break.
 
@@ -602,7 +602,7 @@ After it, on a new page.
 And another.
 Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 
-#### 38. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then arXiv links
+#### 38. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then arXiv links
 
 Before the break.
 
@@ -614,7 +614,7 @@ After it, on a new page.
 And another.
 Paper https://arxiv.org/abs/1706.03762 and [a named link](https://arxiv.org/abs/2006.11239)
 
-#### 39. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Time in an episode
+#### 39. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Time in an episode
 
 Before the break.
 
@@ -626,7 +626,7 @@ After it, on a new page.
 And another.
 At [12:34](https://traffic.megaphone.fm/FSI3647670844.mp3#t=754) they said it; [3:16] stays text here
 
-#### 40. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Image
+#### 40. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Image
 
 Before the break.
 
@@ -638,7 +638,7 @@ After it, on a new page.
 And another.
 ![A sample picture](attachment:photo.png)
 
-#### 41. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Drawing
+#### 41. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Drawing
 
 Before the break.
 
@@ -650,7 +650,7 @@ After it, on a new page.
 And another.
 ![A sample drawing](attachment:drawing.svg)
 
-#### 42. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then File
+#### 42. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then File
 
 Before the break.
 
@@ -662,7 +662,7 @@ After it, on a new page.
 And another.
 [Budget.csv](attachment:budget.csv)
 
-#### 43. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Folder and file links
+#### 43. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Folder and file links
 
 Before the break.
 
@@ -674,7 +674,7 @@ After it, on a new page.
 And another.
 See [Projects](file:///Users/me/My%20Projects/) and [the plan](file:///Users/me/plan.pdf) on this computer.
 
-#### 44. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Attached 3D model (STL)
+#### 44. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Attached 3D model (STL)
 
 Before the break.
 
@@ -686,7 +686,7 @@ After it, on a new page.
 And another.
 [Bracket.stl](attachment:bracket.stl)
 
-#### 45. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Terminal recording (.cast file)
+#### 45. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Terminal recording (.cast file)
 
 Before the break.
 
@@ -698,7 +698,7 @@ After it, on a new page.
 And another.
 [terminal.cast](attachment:terminal.cast)
 
-#### 46. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Audio
+#### 46. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Audio
 
 Before the break.
 
@@ -710,7 +710,7 @@ After it, on a new page.
 And another.
 [Chime.mp3](attachment:chime.mp3)
 
-#### 47. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Video
+#### 47. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Video
 
 Before the break.
 
@@ -722,7 +722,7 @@ After it, on a new page.
 And another.
 [Sky.mp4](attachment:sky.mp4)
 
-#### 48. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Missing file
+#### 48. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Missing file
 
 Before the break.
 
@@ -734,7 +734,7 @@ After it, on a new page.
 And another.
 [Not here yet.pdf](../attachments/00000000000000000000000000000000.pdf)
 
-#### 49. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Card
+#### 49. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Card
 
 Before the break.
 
@@ -748,7 +748,7 @@ And another.
 Text in a card.
 :::
 
-#### 50. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Callout (info)
+#### 50. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Callout (info)
 
 Before the break.
 
@@ -762,7 +762,7 @@ And another.
 Text in an info callout.
 :::
 
-#### 51. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Callout (warning, chosen icon)
+#### 51. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Callout (warning, chosen icon)
 
 Before the break.
 
@@ -776,7 +776,7 @@ And another.
 Text in a warning callout with the flag icon.
 :::
 
-#### 52. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Callout (decision, no icon)
+#### 52. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Callout (decision, no icon)
 
 Before the break.
 

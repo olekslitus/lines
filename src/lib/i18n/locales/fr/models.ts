@@ -10,7 +10,7 @@ export default {
   "models.reading": "Lecture du modèle…",
   "models.unreadable": "Impossible de lire ce fichier {kind}.",
   "models.empty": "Rien à afficher : le modèle est vide.",
-  "models.noOpenScad": "Cette copie de lines n’a pas OpenSCAD, qui fait le modèle à partir de son code.",
+  "models.noOpenScad": "Cette copie de Lines n’a pas OpenSCAD, qui fait le modèle à partir de son code.",
   "models.noWebGL": "Cet appareil ne peut pas dessiner en 3D.",
   "models.tooLong": "C’était trop long, alors ça a été arrêté.",
   "models.failed": "Une erreur s’est produite.",

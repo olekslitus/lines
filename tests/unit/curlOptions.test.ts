@@ -27,6 +27,6 @@ describe("a pasted curl command's options", () => {
     expect(asked("curl --data-urlencode '=a b' --data-urlencode \"it's (100%)!\" https://api.example.com/")?.body).toBe("a%20b&it%27s%20%28100%25%29%21");
     const read = readCurl("curl --data-urlencode name@notes.txt -d a=1 https://api.example.com/");
     expect(read?.asked.body).toBe("a=1");
-    expect(read?.notes).toEqual(["Not sent: lines doesn't read data from files yet (--data-urlencode name@notes.txt)"]);
+    expect(read?.notes).toEqual(["Not sent: Lines doesn't read data from files yet (--data-urlencode name@notes.txt)"]);
   });
 });

@@ -34,7 +34,7 @@ export default {
   "picker.color.blue": "Blue",
   "picker.color.purple": "Purple",
   "picker.color.gray": "Gray",
-  // More of the words lines names a palette's colors by, from how each looks.
+  // More of the words Lines names a palette's colors by, from how each looks.
   "picker.color.teal": "Teal",
   "picker.color.pink": "Pink",
   "picker.color.brown": "Brown",
@@ -50,7 +50,7 @@ export default {
   "picker.writtenIn": "Written in",
   // A note whose format's plugin is off, or isn't on this device, shows as plain text.
   "picker.languageOff": "Written in {language}, whose plugin is off: it shows as plain text.",
-  "picker.languageMissing": "Written in {language}, which lines can’t show here: it shows as plain text.",
+  "picker.languageMissing": "Written in {language}, which Lines can’t show here: it shows as plain text.",
   "picker.turnOn": "Turn On",
   "picker.words": "Words",
   "picker.characters": "Characters",

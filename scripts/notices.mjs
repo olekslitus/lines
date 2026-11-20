@@ -120,7 +120,7 @@ const rust = [...crates.values()].sort((a, b) => a.name.localeCompare(b.name));
 
 const header = `Third-party notices for lines
 
-lines is free software under the GNU Affero General Public License v3.0
+Lines is free software under the GNU Affero General Public License v3.0
 (https://github.com/olekslitus/lines/blob/main/LICENSE). It is built on the open
 source packages below; their licenses follow.
 
@@ -128,9 +128,9 @@ Theme colors, all MIT: Solarized (c) Ethan Schoonover; Nord (c) Arctic Ice
 Studio & Sven Greb; Dracula (c) Dracula Theme; Catppuccin (c) Catppuccin; Tokyo
 Night (c) enkia; Gruvbox (c) Pavel Pertsev; Everforest (c) sainnhe; Ayu (c) Ike
 Ku. SF Symbols are Apple's and are drawn by macOS and iOS on your device; they
-are not included in lines.
+are not included in Lines.
 
-Excalidraw's fonts, served with lines for drawings: Excalifont and Virgil
+Excalidraw's fonts, served with Lines for drawings: Excalifont and Virgil
 (c) Excalidraw, Nunito (c) The Nunito Project Authors, Lilita One (c) Juan
 Montoreano, Assistant (c) The Assistant Project Authors, Cascadia Code (c)
 Microsoft, Liberation Sans (c) Red Hat, all under the SIL Open Font License
@@ -146,7 +146,7 @@ https://github.com/openscad/openscad.
 
 const text =
   header +
-  section(`JavaScript packages (${js.length}), used by every version of lines`, js) +
+  section(`JavaScript packages (${js.length}), used by every version of Lines`, js) +
   (rust.length ? "\n" + section(`Rust crates (${rust.length}), used by the Mac, Windows, Linux, iPhone and Android apps`, rust) : "");
 writeFileSync(join(root, "public/third-party-notices.txt"), text);
 console.log(`Wrote public/third-party-notices.txt: ${js.length} JavaScript packages, ${rust.length} Rust crates, ${(text.length / 1024).toFixed(0)} KB`);

@@ -1,23 +1,23 @@
 # Sync with your own storage
 
-lines syncs through storage you already have. There's no lines server and no account.
+Lines syncs through storage you already have. There's no Lines server and no account.
 
 ## Cloud drive (desktop apps)
 
-In the Mac (and Windows/Linux) app, Settings → Sync → Cloud drive lists the drives on your computer: iCloud Drive, Google Drive, Proton Drive, Dropbox, OneDrive and Box. Pick one, or any folder. lines keeps your notes in a `lines` folder there, one Markdown file per note (`lines/notes/<note-id>.md`, the same format as a bucket), and the drive's own app carries them to your other computers. Connect lines on each of them to the same drive.
+In the Mac (and Windows/Linux) app, Settings → Sync → Cloud drive lists the drives on your computer: iCloud Drive, Google Drive, Proton Drive, Dropbox, OneDrive and Box. Pick one, or any folder. Lines keeps your notes in a `lines` folder there, one Markdown file per note (`lines/notes/<note-id>.md`, the same format as a bucket), and the drive's own app carries them to your other computers. Connect Lines on each of them to the same drive.
 
-- lines only ever touches its own files in that one folder: `.md` notes and their attachments (or, with end-to-end encryption, `.enc` files and `encryption.json`).
+- Lines only ever touches its own files in that one folder: `.md` notes and their attachments (or, with end-to-end encryption, `.enc` files and `encryption.json`).
 - macOS asks once for permission to use the drive's folder.
-- If iCloud hasn't downloaded a note to this Mac yet, lines asks it to and picks the note up on the next pass.
+- If iCloud hasn't downloaded a note to this Mac yet, Lines asks it to and picks the note up on the next pass.
 - A note's file another app saved with a byte order mark or Windows line endings, or as UTF-16, reads as usual. Bytes that aren't UTF-8 (a file saved as Latin-1, say) read as �, as they do from a bucket, rather than stop sync.
-- The drive's app does the uploading, so lines doesn't need to be online, and conflicts are handled just like with a bucket.
-- When the drive itself finds two versions of a note's file it can't merge, it keeps one under the note's name and the other beside it: `<note-id> (MacBook's conflicted copy 2026-11-09).md` (Dropbox), `<note-id> 2.md` (iCloud), `<note-id> (1).md` (Google Drive), `<note-id>-MacBook.md` (OneDrive). lines brings that one in as a “… (conflicted copy)” note, as for a conflict of its own (or nothing, if it says what the note does), and then deletes the drive's file: the copy syncs as a note of its own. Two devices bringing in the same file at once each make a copy.
+- The drive's app does the uploading, so Lines doesn't need to be online, and conflicts are handled just like with a bucket.
+- When the drive itself finds two versions of a note's file it can't merge, it keeps one under the note's name and the other beside it: `<note-id> (MacBook's conflicted copy 2026-11-09).md` (Dropbox), `<note-id> 2.md` (iCloud), `<note-id> (1).md` (Google Drive), `<note-id>-MacBook.md` (OneDrive). Lines brings that one in as a “… (conflicted copy)” note, as for a conflict of its own (or nothing, if it says what the note does), and then deletes the drive's file: the copy syncs as a note of its own. Two devices bringing in the same file at once each make a copy.
 
 On the web and on phones, use a bucket for now; signing in to iCloud, Google Drive and Proton Drive there is on the roadmap.
 
 ## S3-compatible bucket
 
-lines can also sync through any S3-compatible object storage you control.
+Lines can also sync through any S3-compatible object storage you control.
 
 Tested API surface: `ListObjectsV2`, `GetObject`, `PutObject` (with `If-Match` and `If-None-Match` where the provider supports them), `DeleteObject`. Any provider that implements these with AWS Signature V4 should work:
 
@@ -28,7 +28,7 @@ Tested API surface: `ListObjectsV2`, `GetObject`, `PutObject` (with `If-Match` a
 
 ## How it works
 
-Your notes are always stored on the device first. lines stays instant and works offline, and syncs in the background: about 2 seconds after you stop typing, every minute, when the app regains focus, and when you come back online.
+Your notes are always stored on the device first. Lines stays instant and works offline, and syncs in the background: about 2 seconds after you stop typing, every minute, when the app regains focus, and when you come back online.
 
 Each note is a Markdown file in the bucket:
 
@@ -49,7 +49,7 @@ trashed: false
 Plain Markdown, readable by any editor.
 ```
 
-A note in the Inbox has an `inbox: true` line, and loses it once filed. A note with an icon has an `icon` line, and one with a color a `color` line. A note in another format has a `format` line, followed by its text: `format: latex` and its LaTeX ([latex.md](latex.md)), or `format: spreadsheet` and its title and CSV ([spreadsheets.md](spreadsheets.md#its-text)). A note imported from another app has a `source` line saying where it came from, as JSON ([importing.md](importing.md#importing-again)). A line lines doesn't know, a newer version's, is kept as it is and written back when the note changes. A note changed on two devices at once keeps such lines of both, a line at a time, each as the side that changed it since has it (this device's, if both did), and they aren't part of its text, so one of them changed elsewhere is never an edit to keep a conflicted copy of. A version that retires such a line keeps its name known (read, and left out), so older versions that still have it don't bring it back.
+A note in the Inbox has an `inbox: true` line, and loses it once filed. A note with an icon has an `icon` line, and one with a color a `color` line. A note in another format has a `format` line, followed by its text: `format: latex` and its LaTeX ([latex.md](latex.md)), or `format: spreadsheet` and its title and CSV ([spreadsheets.md](spreadsheets.md#its-text)). A note imported from another app has a `source` line saying where it came from, as JSON ([importing.md](importing.md#importing-again)). A line Lines doesn't know, a newer version's, is kept as it is and written back when the note changes. A note changed on two devices at once keeps such lines of both, a line at a time, each as the side that changed it since has it (this device's, if both did), and they aren't part of its text, so one of them changed elsewhere is never an edit to keep a conflicted copy of. A version that retires such a line keeps its name known (read, and left out), so older versions that still have it don't bring it back.
 
 Importing such a file (Settings → Export and Import → Import Files…) brings the note back as it was, with its id, unless a note on the device has that id; then it comes in as a note of its own, so an import never replaces one.
 
@@ -67,7 +67,7 @@ fullname: Oleksandr Litus
 # Oleks
 ```
 
-On each sync, lines compares every note with what it last exchanged with the bucket (the object's ETag and a hash of its content):
+On each sync, Lines compares every note with what it last exchanged with the bucket (the object's ETag and a hash of its content):
 
 | Situation | What happens |
 | --- | --- |
@@ -77,7 +77,7 @@ On each sync, lines compares every note with what it last exchanged with the buc
 | Edited on one, pinned, moved to the trash, filed or put in the Inbox, given an icon or locked on the other | Both kept, in one note: pinning and the rest don't count as edits. A note locked on either device stays locked, the edit inside it (or, on a device that doesn't have the password, the edit as a conflicted copy) |
 | Deleted on one device | Deleted on the others, unless another device edited it in the meantime, in which case the edit wins |
 
-If every note that synced is gone from the bucket or folder at once, that's as likely a drive that's signed out or the wrong folder as every note deleted elsewhere, so lines changes nothing and sync stops until you say which, in Settings → Sync: **Delete them here too…** (asks first; notes edited here since they last synced are kept and uploaded), or **Upload them again**.
+If every note that synced is gone from the bucket or folder at once, that's as likely a drive that's signed out or the wrong folder as every note deleted elsewhere, so Lines changes nothing and sync stops until you say which, in Settings → Sync: **Delete them here too…** (asks first; notes edited here since they last synced are kept and uploaded), or **Upload them again**.
 
 Images and files in notes sit next to them, named after their content and keeping their extension:
 
@@ -86,24 +86,24 @@ Images and files in notes sit next to them, named after their content and keepin
 <bucket>/<folder>/attachments/<hash>.pdf
 ```
 
-A note shows an image as `![](../attachments/<hash>.png)` and links a file as `[Report.pdf](../attachments/<hash>.pdf)`, so the folder reads correctly in other Markdown apps too. Since a name always means the same bytes, there's nothing to merge: each sync uploads the attachments your notes use that the bucket lacks, and downloads the ones this device lacks. Every device keeps a copy of every attachment, so large files take room everywhere. One no note uses any more is removed from the device at the next launch (one where lines isn't open in another tab, which could still bring it back with undo), but stays in the bucket for now.
+A note shows an image as `![](../attachments/<hash>.png)` and links a file as `[Report.pdf](../attachments/<hash>.pdf)`, so the folder reads correctly in other Markdown apps too. Since a name always means the same bytes, there's nothing to merge: each sync uploads the attachments your notes use that the bucket lacks, and downloads the ones this device lacks. Every device keeps a copy of every attachment, so large files take room everywhere. One no note uses any more is removed from the device at the next launch (one where Lines isn't open in another tab, which could still bring it back with undo), but stays in the bucket for now.
 
 The icons and colors chosen for tags and types are one small file beside the notes, `<bucket>/<folder>/library.json` (encrypted like a note when encryption is on). Each choice keeps when it was made, so devices merge them one by one, the later winning: an icon chosen for a tag on the phone and a color for a type on the Mac both stay. A choice undone is kept as undone, so that syncs too. Icons chosen before they synced are the device's until another device chooses for the same tag or type.
 
-What the Library's kinds are rated on ([library.md](library.md#ratings)) is a file of its own beside it, `<bucket>/<folder>/ratings.json` (encrypted likewise): each kind's scale and its named ratings, two choices of their own, and each scale of yours, merged the same way. A scale removed is kept as removed, so that syncs too, unless a kind is still rated on it on either device, which keeps it. A file of its own, so that a lines from before ratings, which writes `library.json` back as it knows it, leaves them alone. The ratings themselves are properties of the notes, and sync with them.
+What the Library's kinds are rated on ([library.md](library.md#ratings)) is a file of its own beside it, `<bucket>/<folder>/ratings.json` (encrypted likewise): each kind's scale and its named ratings, two choices of their own, and each scale of yours, merged the same way. A scale removed is kept as removed, so that syncs too, unless a kind is still rated on it on either device, which keeps it. A file of its own, so that a Lines from before ratings, which writes `library.json` back as it knows it, leaves them alone. The ratings themselves are properties of the notes, and sync with them.
 
 What's been done with feeds' posts is a folder of small files beside them, `<bucket>/<folder>/feeds/`, one for each feed, named by a fingerprint of its address (encrypted like notes when encryption is on, under names that hide even that). Each says, for each post, when it was read, marked unread, dismissed (done with, or not interesting) and put back, under a fingerprint of the post's id (its guid, or its link and title), which every device that fetches the feed reads alike; a Dismiss All as one cut-off, everything published before it dismissed, rather than a mark for each post (undoing it puts back the one before, for every device); and the feed's horizon (below). Devices merge them mark by mark, the later winning (a mark made after another device's is later than it, whatever this device's clock says), and each applies them to the posts it has fetched, or fetches later ([library.md](library.md#feeds)).
 
 - **What's sent:** each pass lists the folder (unless there are no feeds and nothing's been done with posts, when it isn't listed, nor made); a file is read only when its tag says it changed since this device last read it, and written only when this device knows more than it says (marks newer than its, or a horizon moved on), at most every 15 seconds while posts are being read and dismissed (and with any pass sooner). Files are written the same whenever what they say is, so two devices with the same marks never write them back and forth. A file the drive hasn't downloaded yet (iCloud's placeholder) is read on a later pass, and not written over meanwhile. A feed's file is about 130 bytes with one post marked, 1.8 KB with 30 read and dismissed, 16 KB with 200 read, dismissed and still in the feed, and after Dismiss All about 0.5 KB; a busy feed read 30 posts a day, each dismissed one by one, holds 90 days of them, about 150 KB (a third more encrypted).
-- **How long marks stay:** a mark is kept while its post is in its feed, however old, so a new device (or one whose storage was cleared, or a browser that dropped the site's storage) shows a post dismissed years ago as dismissed: a device that fetches the feed says which marked posts are still in it, once a day. Once a post has been gone from its feed for 90 days, its mark is let go: the device that fetched moves the feed's horizon on, in the file, and every device that reads the file lets go of its marks from before it too, whether or not it fetches the feed, so none writes them back. A device away for less than 90 days finds every mark made meanwhile; every device that has the post keeps it as it was left. A post put back after Dismiss All keeps its mark while the cut-off stands, however old. Posts read before lines synced this stay each device's own.
-- **One tab syncs them.** With lines open in several tabs of a browser, one of them syncs the feeds' marks; the others send it theirs as they're made, and each tab takes in every other's, so none writes over another's. When it closes, another takes over.
+- **How long marks stay:** a mark is kept while its post is in its feed, however old, so a new device (or one whose storage was cleared, or a browser that dropped the site's storage) shows a post dismissed years ago as dismissed: a device that fetches the feed says which marked posts are still in it, once a day. Once a post has been gone from its feed for 90 days, its mark is let go: the device that fetched moves the feed's horizon on, in the file, and every device that reads the file lets go of its marks from before it too, whether or not it fetches the feed, so none writes them back. A device away for less than 90 days finds every mark made meanwhile; every device that has the post keeps it as it was left. A post put back after Dismiss All keeps its mark while the cut-off stands, however old. Posts read before Lines synced this stay each device's own.
+- **One tab syncs them.** With Lines open in several tabs of a browser, one of them syncs the feeds' marks; the others send it theirs as they're made, and each tab takes in every other's, so none writes over another's. When it closes, another takes over.
 - **Feed filters:** beside them, `feeds/muted.json` has the words and phrases hidden in every feed (Settings → Library → Feed filters), the later setting winning. A feed's own filters are on its note.
 - A drive's own conflicted copy of one of these files (`a1b2c3 2.json`) is merged in and removed, as a note's is.
 - **What it shows:** a post's fingerprint hides nothing. A post's id is usually its public link or guid, so with encryption off, anyone who can read the folder can tell which posts of which feeds were read and dismissed, and when. End-to-end encryption hides it all, the files' names too.
 
-Only one sync pass runs at a time, even with lines open in several browser tabs, so a conflict makes one copy, not one per tab.
+Only one sync pass runs at a time, even with Lines open in several browser tabs, so a conflict makes one copy, not one per tab.
 
-A note is only written over the version lines saw there a moment before, so an edit another device saves while this one syncs isn't overwritten: the next pass brings it in and compares, as above. In a bucket that's a conditional write (`If-Match`, or `If-None-Match` for a new note); a service that ignores those, or doesn't do them (it refuses a write over the very version it holds), is written to as before. In a cloud drive's folder, lines looks at the file again just before writing it.
+A note is only written over the version Lines saw there a moment before, so an edit another device saves while this one syncs isn't overwritten: the next pass brings it in and compares, as above. In a bucket that's a conditional write (`If-Match`, or `If-None-Match` for a new note); a service that ignores those, or doesn't do them (it refuses a write over the very version it holds), is written to as before. In a cloud drive's folder, Lines looks at the file again just before writing it.
 
 Several devices can share one bucket and folder. To keep separate libraries in one bucket, use different folders.
 
@@ -122,7 +122,7 @@ Settings → Sync → **Set up encryption…** encrypts notes and attachments on
 - Attachment names are hidden too: a content hash would show whether a known file is in your library.
 - Still visible: how many notes and attachments there are, their sizes, when they change, and note ids (random).
 
-Turning it on syncs once, uploads everything again encrypted, and removes the plain copies. Every other device stops syncing until you enter the passphrase there (Settings → Sync). Turning it off does the reverse; other devices stop until it's turned off there too. lines never goes back to plain files on its own, since anyone who can change the bucket could make that happen.
+Turning it on syncs once, uploads everything again encrypted, and removes the plain copies. Every other device stops syncing until you enter the passphrase there (Settings → Sync). Turning it off does the reverse; other devices stop until it's turned off there too. Lines never goes back to plain files on its own, since anyone who can change the bucket could make that happen.
 
 If you forget the passphrase, any device that still syncs can set a new one (Change passphrase…), since it already has the key. With no such device left, the encrypted notes can't be recovered; the copies on each device are unaffected.
 
@@ -152,7 +152,7 @@ AWeRtq…
 
 1. Create a bucket (private, no public access needed).
 2. Create an access key that can only read and write that bucket.
-3. In lines, open the sync button at the bottom of the sidebar, choose your provider, and enter the endpoint, bucket and keys.
+3. In Lines, open the sync button at the bottom of the sidebar, choose your provider, and enter the endpoint, bucket and keys.
 4. **Only for the web app:** add a CORS rule (below). The desktop and mobile apps send requests from native code and don't need CORS.
 
 ### Cloudflare R2
@@ -188,7 +188,7 @@ AWeRtq…
 
 ## CORS (web app only)
 
-Browsers only let a web page call your bucket if the bucket allows the page's origin. Replace the origin with wherever you host lines, e.g. `https://notes.example.com`.
+Browsers only let a web page call your bucket if the bucket allows the page's origin. Replace the origin with wherever you host Lines, e.g. `https://notes.example.com`.
 
 **Amazon S3, Cloudflare R2, MinIO, and most others** (bucket → CORS settings):
 

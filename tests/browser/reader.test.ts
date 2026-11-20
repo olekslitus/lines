@@ -588,7 +588,7 @@ test("a feed the site won't let the web app read says why, quietly", async () =>
   await page.route((url) => url.href === "https://closed.example/feed", (route) => route.abort("failed"));
   await page.evaluate(() => window.testing.notes.insert({ id: "closed", body: "---\ntype: feed\nfeed: https://closed.example/feed\n---\n# Closed", createdAt: 0, updatedAt: 0, pinned: false, trashed: false }));
   await page.evaluate(() => window.testing.feeds.refresh());
-  await page.getByText("On the web, lines can read only the feeds whose sites allow it.", { exact: false }).waitFor();
+  await page.getByText("On the web, Lines can read only the feeds whose sites allow it.", { exact: false }).waitFor();
   await openFeeds(app, "https://closed.example/feed");
   await page.getByText("This feed’s site doesn’t let web pages read it. The desktop apps can.").waitFor();
   app.errors.length = 0;

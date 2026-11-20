@@ -1,6 +1,6 @@
 # Translations
 
-lines speaks English, Spanish and French. Settings → General → Language chooses one, or **System** follows the device's language (English when lines doesn't speak it). Changing it starts lines again, in every window, after saving what's being typed.
+Lines speaks English, Spanish and French. Settings → General → Language chooses one, or **System** follows the device's language (English when Lines doesn't speak it). Changing it starts Lines again, in every window, after saving what's being typed.
 
 Notes themselves aren't translated: the welcome note, the feature tour and the examples are in English.
 
@@ -33,11 +33,11 @@ A language can ship partly translated; what's missing shows in English.
 - **Placeholders** are names in braces: `"Synced {date}"`. Keep them as they are; move them where the language needs them.
 - **Plurals** use ICU's form: `"{count, plural, one {# note} other {# notes}}"`. `#` is the number. Use the categories the language has ([CLDR plural rules](https://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html)): `one` and `other` for English and Spanish; French's `one` covers 0 and 1; Russian or Polish add `few` and `many`. `=0 {No notes}` matches an exact number.
 - **Whole sentences** are one message. Code never joins messages into a sentence, since word order differs between languages.
-- **Leave as they are:** "lines" (always lowercase), product and service names (iCloud Drive, Touch ID, S3, Markdown, LaTeX, Unsplash, GitHub), file extensions, and Markdown or LaTeX syntax in a message (`#tag`, `/`, `\section`).
+- **Leave as they are:** "Lines" (always with a capital L), product and service names (iCloud Drive, Touch ID, S3, Markdown, LaTeX, Unsplash, GitHub), file extensions, and Markdown or LaTeX syntax in a message (`#tag`, `/`, `\section`).
 - **Punctuation:** no "…" on a menu item, even one that asks for more before acting ("Rename"); a button that does has one (one character), as in "Choose a Folder…". Typographic quotes and apostrophes: “ ” ’ in English, « » with narrow no-break spaces and ’ in French, “ ” or « » in Spanish.
 - **Voice:** as Apple writes its own apps in each language. Spanish uses tú; French uses vous. Settings is "Ajustes" in Spanish and "Réglages" in French.
 - **Labels for screen readers** (`aria-label`) are messages too: say what a button does ("Hide sidebar"), not what it looks like.
 
 ## Adding text to the app
 
-New text goes into the English file for its area, with a key starting with that area (`list.emptyTrash`), and is looked up with `t()`. Add the Spanish and French while you're there if you can; otherwise `bun run i18n` lists them for a translator. Text set once when a file loads (`const LABELS = [t("…")]`) is fine, because the language never changes while lines runs.
+New text goes into the English file for its area, with a key starting with that area (`list.emptyTrash`), and is looked up with `t()`. Add the Spanish and French while you're there if you can; otherwise `bun run i18n` lists them for a translator. Text set once when a file loads (`const LABELS = [t("…")]`) is fine, because the language never changes while Lines runs.

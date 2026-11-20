@@ -16,21 +16,21 @@ export default {
 
   "lock.app.title": "Verrouillage de l’app",
   "lock.app.intro":
-    "Verrouillez lines avec une phrase secrète. Vos notes, pièces jointes et réglages de synchronisation sur cet appareil sont chiffrés, et lines demande la phrase secrète à son ouverture.",
+    "Verrouillez Lines avec une phrase secrète. Vos notes, pièces jointes et réglages de synchronisation sur cet appareil sont chiffrés, et Lines demande la phrase secrète à son ouverture.",
   "lock.app.setUp": "Configurer le verrouillage de l’app…",
   "lock.app.turnOn": "Activer le verrouillage de l’app",
   "lock.app.encrypting": "Chiffrement des notes…",
-  "lock.app.turnedOn": "Le verrouillage de l’app est activé. lines demandera la phrase secrète à son ouverture.",
+  "lock.app.turnedOn": "Le verrouillage de l’app est activé. Lines demandera la phrase secrète à son ouverture.",
   "lock.app.forget":
-    "Si vous l’oubliez, les notes de cet appareil ne pourront pas être ouvertes, pas même par lines. Les notes synchronisées restent en sécurité dans votre stockage de synchronisation.",
-  "lock.app.on": "Les notes de cet appareil sont chiffrées, et lines demande votre phrase secrète à son ouverture.",
+    "Si vous l’oubliez, les notes de cet appareil ne pourront pas être ouvertes, pas même par Lines. Les notes synchronisées restent en sécurité dans votre stockage de synchronisation.",
+  "lock.app.on": "Les notes de cet appareil sont chiffrées, et Lines demande votre phrase secrète à son ouverture.",
   "lock.app.after": "Verrouiller après",
   "lock.app.afterLabel": "Verrouiller après cette durée d’inactivité",
   "lock.app.never": "Jamais",
   "lock.app.minutes": "{count} min",
   "lock.app.hour": "1 heure",
-  "lock.app.afterHint": "Après cette durée d’inactivité, lines se verrouille tout seul.",
-  "lock.app.neverHint": "lines se verrouille lorsque vous le quittez, ou lorsque vous le verrouillez.",
+  "lock.app.afterHint": "Après cette durée d’inactivité, Lines se verrouille tout seul.",
+  "lock.app.neverHint": "Lines se verrouille lorsque vous le quittez, ou lorsque vous le verrouillez.",
   "lock.app.askTurnOff": "Désactiver…",
   "lock.app.askChange": "Changer la phrase secrète…",
   "lock.app.change": "Changer la phrase secrète",
@@ -80,14 +80,14 @@ export default {
     "Pour chiffrer les notes avant qu’elles ne quittent cet appareil, afin que votre fournisseur de stockage ne puisse pas les lire, activez le chiffrement de bout en bout dans Réglages → Synchronisation.",
   "lock.synced.open": "Aller à Synchronisation",
 
-  "lock.screen.title": "lines est verrouillé",
+  "lock.screen.title": "Lines est verrouillé",
   "lock.screen.hint": "Saisissez votre phrase secrète pour ouvrir vos notes.",
   "lock.screen.unlock": "Déverrouiller",
   "lock.screen.unlocking": "Déverrouillage…",
   "lock.screen.unlockFailed": "Impossible de déverrouiller : {error}",
   "lock.screen.forgot": "Phrase secrète oubliée ?",
   "lock.screen.forgotHint":
-    "Sans elle, les notes de cet appareil ne peuvent pas être ouvertes, pas même par lines. Si vous synchronisez, vos notes se trouvent toujours dans votre stockage de synchronisation : effacez cet appareil, puis reconnectez la synchronisation.",
+    "Sans elle, les notes de cet appareil ne peuvent pas être ouvertes, pas même par Lines. Si vous synchronisez, vos notes se trouvent toujours dans votre stockage de synchronisation : effacez cet appareil, puis reconnectez la synchronisation.",
   "lock.screen.askErase": "Effacer cet appareil…",
   "lock.screen.eraseQuestion":
     "Effacer toutes les notes et pièces jointes de cet appareil, ainsi que ses réglages de synchronisation ? Les notes synchronisées restent dans votre stockage de synchronisation. Cette action est irréversible.",
@@ -103,13 +103,13 @@ export default {
   "lock.note.opening": "Ouverture…",
   "lock.note.forgot": "Mot de passe oublié ?",
   "lock.note.forgotHint":
-    "Sans son mot de passe, une note verrouillée ne peut pas être ouverte, pas même par lines. Vous pouvez définir un nouveau mot de passe pour les notes que vous verrouillerez désormais.",
+    "Sans son mot de passe, une note verrouillée ne peut pas être ouverte, pas même par Lines. Vous pouvez définir un nouveau mot de passe pour les notes que vous verrouillerez désormais.",
   "lock.note.openPrivacy": "Ouvrir les réglages de confidentialité",
 
   "lock.dialog.setTitle": "Définissez un mot de passe pour les notes verrouillées",
   "lock.dialog.setIntro":
     "Il ouvre toutes les notes que vous verrouillez, ici et sur vos autres appareils. Les titres des notes verrouillées restent visibles dans la liste.",
-  "lock.dialog.setHint": "Si vous l’oubliez, les notes verrouillées avec ce mot de passe ne pourront pas être ouvertes, pas même par lines.",
+  "lock.dialog.setHint": "Si vous l’oubliez, les notes verrouillées avec ce mot de passe ne pourront pas être ouvertes, pas même par Lines.",
   "lock.dialog.openTitle": "Saisissez le mot de passe des notes verrouillées",
   "lock.dialog.openIntro": "Vos notes verrouillées s’ouvrent aussi, jusqu’à ce que vous les verrouilliez de nouveau.",
   "lock.dialog.secretIntro": "Vos secrets sont gardés dans une note verrouillée. Vos autres notes verrouillées s’ouvrent aussi, jusqu’à ce que vous les verrouilliez à nouveau.",
@@ -122,7 +122,7 @@ export default {
   "lock.error.wrongPassword": "Ce mot de passe est incorrect.",
   "lock.error.otherPassword":
     "Ce mot de passe a ouvert d’autres notes verrouillées, mais celle-ci a été verrouillée avec un autre mot de passe.",
-  "lock.error.notEncrypted": "Ceci n’a pas été chiffré par lines.",
+  "lock.error.notEncrypted": "Ceci n’a pas été chiffré par Lines.",
   "lock.error.unreadable": "Impossible de déchiffrer : le contenu a été modifié, endommagé ou chiffré avec une autre clé.",
-  "lock.error.unknownFormat": "Cette clé est dans un format que lines ne connaît pas, peut-être celui d’une version plus récente de lines.",
+  "lock.error.unknownFormat": "Cette clé est dans un format que Lines ne connaît pas, peut-être celui d’une version plus récente de Lines.",
 } satisfies Translation<typeof en>;

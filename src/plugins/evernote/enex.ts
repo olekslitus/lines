@@ -177,9 +177,9 @@ const tightTasks = (markdown: string) => markdown.replace(/^(- \[[ x]\] .*)\n\n(
 
 /** The notes of one notebook's .enex, its name the notebook's. */
 export function readNotebook(notebook: string, xml: string, attachments: ExportedFile[], report: Tally, unpacking = new Unpacking()): SourceNote[] {
-  if (declaresEntities(xml)) throw new Error(`${notebook} declares entities, which lines doesn't expand`);
+  if (declaresEntities(xml)) throw new Error(`${notebook} declares entities, which Lines doesn't expand`);
   const document = new DOMParser().parseFromString(xml, "application/xml");
-  if (document.querySelector("parsererror")) throw new Error(`${notebook} isn't an .enex file lines can read`);
+  if (document.querySelector("parsererror")) throw new Error(`${notebook} isn't an .enex file Lines can read`);
   return [...document.querySelectorAll("en-export > note")].map((note) => {
     const own = (name: string) => note.querySelector(`:scope > ${name}`)?.textContent ?? "";
     const attribute = (name: string) => note.querySelector(`:scope > note-attributes > ${name}`)?.textContent?.trim() ?? "";

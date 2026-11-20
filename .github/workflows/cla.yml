@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   cla:
-    if: github.event_name == 'pull_request_target' || github.event.comment.body == 'recheck' || github.event.comment.body == 'I have read the lines Contributor License Agreement, and I agree to it.'
+    if: github.event_name == 'pull_request_target' || github.event.comment.body == 'recheck' || github.event.comment.body == 'I have read the Lines Contributor License Agreement, and I agree to it.'
     runs-on: ubuntu-latest
     steps:
       - uses: contributor-assistant/github-action@ca4a40a7d1004f18d9960b404b97e5f30a505a08 # v2.6.1
@@ -33,9 +33,9 @@ jobs:
           branch: cla-signatures
           # The maintainer, who the agreement is with, and bots.
           allowlist: olekslitus,dependabot[bot],github-actions[bot]
-          custom-pr-sign-comment: I have read the lines Contributor License Agreement, and I agree to it.
+          custom-pr-sign-comment: I have read the Lines Contributor License Agreement, and I agree to it.
           custom-notsigned-prcomment: |
-            Thank you for contributing to lines! Before it can be merged, please read the [contributor agreement](https://github.com/olekslitus/lines/blob/main/CLA.md): you keep the copyright in your contribution, and lines stays open source. If you agree, reply to this pull request with this sentence, exactly:
+            Thank you for contributing to Lines! Before it can be merged, please read the [contributor agreement](https://github.com/olekslitus/lines/blob/main/CLA.md): you keep the copyright in your contribution, and Lines stays open source. If you agree, reply to this pull request with this sentence, exactly:
           custom-allsigned-prcomment: Everyone who contributed to this pull request has agreed to the contributor agreement. Thank you!
           signed-commit-message: "chore(cla): $contributorName agreed, in #$pullRequestNo"
           create-file-commit-message: "chore(cla): start recording agreements"

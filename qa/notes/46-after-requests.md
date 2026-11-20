@@ -568,7 +568,7 @@ GET {{api}}/users/{{todo.response.body.$.userId}}
 ```
 ---
 
-#### 31. API requests (http block): a variable, a named request and one using its response, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. API requests (http block): a variable, a named request and one using its response, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 ```http
 @api = https://jsonplaceholder.typicode.com

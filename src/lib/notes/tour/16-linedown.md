@@ -1,6 +1,6 @@
 # Linedown cheat sheet
 
-lines writes Markdown with a few additions of its own. We call it Linedown.
+Lines writes Markdown with a few additions of its own. We call it Linedown.
 
 | Write | Get |
 | ----- | --- |

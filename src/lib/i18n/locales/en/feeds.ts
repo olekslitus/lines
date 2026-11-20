@@ -32,9 +32,9 @@ export default {
   // Said by screen readers while the feed is looked for, and once it's found.
   "feeds.finding": "Looking for the feed…",
   "feeds.subscribed": "Subscribed to {title}",
-  "feeds.noFeedThere": "There’s no feed there that lines can read.",
+  "feeds.noFeedThere": "There’s no feed there that Lines can read.",
   // On the web app, in the box to subscribe in and over the list when a feed couldn't be read.
-  "feeds.webHint": "On the web, lines can read only the feeds whose sites allow it. The desktop apps read them all.",
+  "feeds.webHint": "On the web, Lines can read only the feeds whose sites allow it. The desktop apps read them all.",
   // The list of posts, when there are none to show.
   "feeds.none": "No feeds yet.",
   "feeds.noPosts": "No posts yet.",
@@ -42,7 +42,7 @@ export default {
   "feeds.noMatches": "No posts match “{query}”.",
   // Why a feed couldn't be fetched, over its posts and in its row's tooltip.
   "feeds.errorBlocked": "This feed’s site doesn’t let web pages read it. The desktop apps can.",
-  "feeds.errorLocal": "It leads to an address on this computer or its network, which lines doesn’t follow from the web.",
+  "feeds.errorLocal": "It leads to an address on this computer or its network, which Lines doesn’t follow from the web.",
   "feeds.errorTimeout": "The feed took too long to answer.",
   "feeds.errorTooBig": "The feed is too big to read.",
   "feeds.errorNotFeed": "There’s no feed at this address any more.",
@@ -137,7 +137,7 @@ export default {
   // On a phone, the button back from an open post to the list.
   "feeds.back": "Back to posts",
   // The title of the OPML file the feeds are exported in.
-  "feeds.opmlTitle": "Feeds from lines",
+  "feeds.opmlTitle": "Feeds from Lines",
   // Settings → Library: how often feeds are fetched, and OPML.
   // The Library's rows of feeds, a kind each (Settings → Library → Feeds in the sidebar).
   "feeds.group.rss": "RSS Feeds",
@@ -166,12 +166,12 @@ export default {
   "feeds.byKind": "By Kind",
   "feeds.together": "Together",
   "feeds.refreshEvery": "Refresh feeds",
-  "feeds.refreshEveryNote": "When lines starts, and then this often while it’s open.",
+  "feeds.refreshEveryNote": "When Lines starts, and then this often while it’s open.",
   "feeds.every": "{minutes, plural, =60 {Every hour} =240 {Every 4 hours} other {Every # minutes}}",
   "feeds.onlyWhenAsked": "Only when I ask",
   // In an episode's note as it plays, Enter after a time's item starts the next with the time it's at.
   "feeds.timeNotes": "Time new notes while listening",
-  "feeds.timeNotesNote": "In an episode’s note, while it plays or is paused after playing (not one paused before lines opened), Enter after an item of a list of times starts the next with the time the episode is at.",
+  "feeds.timeNotesNote": "In an episode’s note, while it plays or is paused after playing (not one paused before Lines opened), Enter after an item of a list of times starts the next with the time the episode is at.",
   "feeds.dismissOnRead": "Dismiss posts once read",
   "feeds.dismissOnReadNote": "A post you open leaves the list when you go on to another, unless you mark it unread. It’s still under Show Dismissed, in its feed’s menu.",
   "feeds.opml": "Subscriptions",

@@ -358,7 +358,7 @@ Text in an info callout.
 :::
 ---
 
-#### 31. Callout (info), then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Callout (info), then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 :::i
 Text in an info callout.

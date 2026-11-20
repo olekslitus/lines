@@ -6,8 +6,8 @@ What these features don't do (yet), and what hasn't been tried outside tests. Th
 
 Each of these has only run in Chrome, through the end-to-end tests (two browser profiles and a stand-in S3 server):
 
-- [ ] **Touch ID** in the Mac app, for the app lock and for locked notes. The development build is unsigned, so macOS may ask for the login password the first time lines reads its Keychain item ("lines app lock").
-- [ ] **Floating notes** while lines is locked, and while locked notes are locked or open. The key is handed to them through the app's native side (app lock) or the window channel (locked notes).
+- [ ] **Touch ID** in the Mac app, for the app lock and for locked notes. The development build is unsigned, so macOS may ask for the login password the first time Lines reads its Keychain item ("lines app lock").
+- [ ] **Floating notes** while Lines is locked, and while locked notes are locked or open. The key is handed to them through the app's native side (app lock) or the window channel (locked notes).
 - [ ] **End-to-end encryption with a cloud drive folder.** Only S3 was tested end to end with encryption on. Plain folder sync passes its test.
 - [ ] **iPhone and Android.** None of the three features has been run there.
 - [ ] **Saving to a folder on the web** with a folder picked in the real folder picker, and the "Allow access" prompt after restarting the browser. The tests used the browser's private storage, which has the same interface but never asks.
@@ -15,7 +15,7 @@ Each of these has only run in Chrome, through the end-to-end tests (two browser 
 ## Saving to a folder on the web
 
 - Only Chrome, Edge and other Chromium browsers have the File System Access API. Safari and Firefox keep notes in the browser, and can export them.
-- After the browser restarts, it asks again before lines may use the folder; until someone clicks Allow access in Settings → Sync, sync shows an error.
+- After the browser restarts, it asks again before Lines may use the folder; until someone clicks Allow access in Settings → Sync, sync shows an error.
 - The browser blocks some folders (the home folder itself, system folders, Downloads on some systems).
 
 ## Attachments in a bucket
@@ -27,28 +27,28 @@ Each of these has only run in Chrome, through the end-to-end tests (two browser 
 
 Where the web app keeps everything is in [storage.md](storage.md).
 
-- Notes kept only in the browser can be lost: clearing site data deletes them, the browser may evict them when the disk is low (lines doesn't ask for persistent storage), and Safari deletes them after 7 days without a visit.
+- Notes kept only in the browser can be lost: clearing site data deletes them, the browser may evict them when the disk is low (Lines doesn't ask for persistent storage), and Safari deletes them after 7 days without a visit.
 - The demo website shares its storage with every other site on `olekslitus.com`. It needs a domain of its own before people keep real notes there.
 
 ## Closing and quitting
 
 - A note is stored a moment after the last key typed. Closing a tab or reloading before then keeps a copy in localStorage, stored at the next start. Not for locked notes, nor while the app lock is on, as localStorage can't be written encrypted that fast: those have only the write started as the page goes, which may not finish.
-- In the Mac app, Quit (⌘Q) waits for every window to store what's typed in it, three seconds at most, and closing the main window waits too. Quitting from the Dock, or logging out, still ends lines at once. Neither has been tried in the Mac app yet.
+- In the Mac app, Quit (⌘Q) waits for every window to store what's typed in it, three seconds at most, and closing the main window waits too. Quitting from the Dock, or logging out, still ends Lines at once. Neither has been tried in the Mac app yet.
 
 ## Importing from other apps
 
 How each import works is in [importing.md](importing.md).
 
-- lines has no folders: an app's folders become nested tags, and notes with the same name in different folders share a title, so a link to that name finds one of them.
-- A link to a block (`[[Plan#^37066d]]`) or a heading opens the note at its top, and a note shown inside another is a link to it: lines has neither.
+- Lines has no folders: an app's folders become nested tags, and notes with the same name in different folders share a title, so a link to that name finds one of them.
+- A link to a block (`[[Plan#^37066d]]`) or a heading opens the note at its top, and a note shown inside another is a link to it: Lines has neither.
 - In WebKit as Playwright drives it, a chosen folder's hidden files (an Obsidian vault's `.obsidian` settings and `.trash`) don't come through, so bookmarks aren't pinned and the vault's trash isn't imported. Not yet tried in Safari or the Mac app's own folder picker, which may do the same.
 - Bear: locked notes can't be read, and are left out; Bear's own app data (its database) isn't read, only a backup or an export; Bear 1's markup (`::highlight::`, `/italic/`) isn't translated.
-- Logseq: a reference to a block is the block's text as it was (lines doesn't link to a block), Org-mode pages aren't read, and a block's own properties are text; drawings and whiteboards are left out.
+- Logseq: a reference to a block is the block's text as it was (Lines doesn't link to a block), Org-mode pages aren't read, and a block's own properties are text; drawings and whiteboards are left out.
 - Notion: pages are dated when they were exported (its Markdown export doesn't say when they were made, but database rows' Created and Last edited columns); toggles are open; a ZIP is read into memory whole, so a very large export may be better unpacked and chosen as a folder.
-- Evernote: an .enex has no ids, so a note's known by its notebook, title and when it was made, and one renamed in Evernote comes in again; encrypted parts can't be read here (they're kept as Evernote encrypted them); what lines' HTML reading leaves out (forms, colors, fonts, layouts in columns) is left out; an .enex is read whole into memory, up to 2 GB, its files decoded one at a time; Evernote's links between notes (`evernote:///view/…`) come across as their text, as an .enex doesn't say which note they lead to.
+- Evernote: an .enex has no ids, so a note's known by its notebook, title and when it was made, and one renamed in Evernote comes in again; encrypted parts can't be read here (they're kept as Evernote encrypted them); what Lines' HTML reading leaves out (forms, colors, fonts, layouts in columns) is left out; an .enex is read whole into memory, up to 2 GB, its files decoded one at a time; Evernote's links between notes (`evernote:///view/…`) come across as their text, as an .enex doesn't say which note they lead to.
 - Not tried in the Mac, Windows or Linux apps, nor with Settings in a window of its own, where the attachments are copied in the Settings window and the notes made in the main one (sent to it 500 at a time). Closing that window while attachments are copied stops the import there, before any note is made.
-- Versions of lines from before importing came keep a synced note's `source:` line only until they change the note: writing it again, they leave it out, so importing again on a device with this version would bring that note in twice. This version, and later ones, keep any line of the header they don't know and write it back.
-- An Obsidian vault has no id of its own that lines can read, so a vault imported before is found by its name, or by notes with the same paths; whether it's the same is asked, not guessed.
+- Versions of Lines from before importing came keep a synced note's `source:` line only until they change the note: writing it again, they leave it out, so importing again on a device with this version would bring that note in twice. This version, and later ones, keep any line of the header they don't know and write it back.
+- An Obsidian vault has no id of its own that Lines can read, so a vault imported before is found by its name, or by notes with the same paths; whether it's the same is asked, not guessed.
 - A ZIP is read into memory: up to 2 GB, unpacking to 2 GB all told. A bigger one is to be unpacked, and its folder chosen.
 - A note imported and then locked keeps only a hash of where it came from, even unlocked again: links brought with it no longer find it by its old name once it's renamed.
 
@@ -69,7 +69,7 @@ The home page and the docs at https://olekslitus.com/lines/ (`site/`):
 
 - An Unsplash photo is kept as the link to its page, not as a file, so it needs the internet to show, and isn't in exports or sync as a picture.
 - Other Markdown apps show these links as broken images, as the page isn't a picture.
-- lines loads the photo through Unsplash's download link, which counts as a download each time it's shown.
+- Lines loads the photo through Unsplash's download link, which counts as a download each time it's shown.
 - Unsplash+ photos don't show: Unsplash only hands them to subscribers. They say the image couldn't be shown. `/unsplash` leaves them out.
 
 ## Feeds
@@ -81,19 +81,19 @@ The home page and the docs at https://olekslitus.com/lines/ (`site/`):
 - On the web, a site's answer can't be read either unless it allows it: a feed that says to wait (with Retry-After) or that it's gone looks like one that couldn't be reached, so it's asked again as one that failed, later each time, a day at most.
 - **YouTube channels need the apps.** YouTube doesn't let web pages read its channels' pages or feeds, so on the web a channel's link isn't subscribed to (Subscribe says it couldn't be read).
 - YouTube's feeds list a channel's 15 newest videos, Shorts and premieres among them, with no way to leave Shorts out. While a channel's feed is missing, its page's 30 newest videos are read instead, without Shorts, their dates a guess ("3 days ago", to the hour at best) until the feed's back. A page YouTube changes (it does, without notice) can stop being read; the feed's own answers then show as it couldn't be fetched. Where YouTube asks first whether cookies may be kept (in some countries), its page can't be read.
-- A video's `channel` mentions the channel's note when the video's channel link (oEmbed's, by handle) is the note's `link`. A channel subscribed to by a page that names no handle has its `link` by its id, and its videos link to its page instead. Notes made before lines did this keep `channel` as just a name.
-- YouTube's player plays only for pages that tell it where they are (a referrer): in the apps, whose pages are lines' own, it may say the video can't be played; Open on YouTube is beside it. Videos don't play offline, and YouTube's player is YouTube's: its own controls, captions and ads.
-- **Each device fetches the posts itself.** Subscriptions are notes and sync, and so does what's done with posts (read, unread, dismissed, restored), but the posts themselves are kept on each device. Posts read before lines synced this stay as each device had them. A device away for more than 90 days doesn't get what was done meanwhile with posts that have been gone from their feeds that long (their marks are let go): any of them it still keeps shows as it left it, perhaps unread.
+- A video's `channel` mentions the channel's note when the video's channel link (oEmbed's, by handle) is the note's `link`. A channel subscribed to by a page that names no handle has its `link` by its id, and its videos link to its page instead. Notes made before Lines did this keep `channel` as just a name.
+- YouTube's player plays only for pages that tell it where they are (a referrer): in the apps, whose pages are Lines' own, it may say the video can't be played; Open on YouTube is beside it. Videos don't play offline, and YouTube's player is YouTube's: its own controls, captions and ads.
+- **Each device fetches the posts itself.** Subscriptions are notes and sync, and so does what's done with posts (read, unread, dismissed, restored), but the posts themselves are kept on each device. Posts read before Lines synced this stay as each device had them. A device away for more than 90 days doesn't get what was done meanwhile with posts that have been gone from their feeds that long (their marks are let go): any of them it still keeps shows as it left it, perhaps unread.
 - **A post is known by its id**, its guid (a JSON Feed item's `id`), or else its link and title (an aggregator's posts with no guids share a link), or else its title, date and text. A feed that changes a post's guid, edits the title of a post with no guid, or edits a post that has neither guid nor link, makes it a new post: unread, and back in the list if it was dismissed. Where an episode was stopped is still per device.
 - Filters read a post's title, author, categories and the start of its text, its first 2,000 characters; words further on aren't matched. A stream has no filters of its own, only its feeds'. Filters match words and phrases as written: no wildcards or regular expressions, and no "and" (a post with both of two words). In Chinese, Japanese, Thai, Lao, Khmer, Burmese and Korean a word is found anywhere in the text, so a short one can match within a longer word.
 - **Feeds don't learn what interests you yet.** Planned: a filter that learns from what you read, save to the Library and mark Not Interesting, with a small model trained on the device or an AI agent of your choosing, to keep, hide or rank posts. What it learns from is kept with each post on the device already (read, dismissed and why, saved). Nothing about it would leave the device unless you chose an agent that does.
 - Only the newest 200 posts of each feed are kept, dismissed ones too. Older ones go, and so does their content, unless saved to the Library.
 - A post can't be swiped away on a phone yet, as a note can: its menu (a long press) and the Dismiss button on its row, or over it, do it.
 - A post is shown as Markdown made from its HTML: what Markdown can't say (layouts, embedded players, forms, styling) is left out, and embedded videos are links; one to a YouTube video on a line of its own is its picture and YouTube's player, as in a note. Its pictures load from the web each time it's opened.
-- A feed is fetched in the main window only, at start and then as often as Settings → Library says, a few at a time and never two from one site at once; while lines is closed nothing's fetched.
+- A feed is fetched in the main window only, at start and then as often as Settings → Library says, a few at a time and never two from one site at once; while Lines is closed nothing's fetched.
 - A feed that moved for good (a permanent redirect) is followed each time; its note keeps the address it was subscribed with.
 - Feeds that need signing in aren't read. Of JSON Feed, a feed's further pages (`next_url`), `tags`, `language` and WebSub `hubs` aren't read, nor `expired`: a feed that says it's finished is still asked whether it changed, as any feed is.
-- A feed subscribed to before lines kept what it's written in is listed with RSS Feeds (or Podcast Feeds, if its note is a podcast's) until it's next fetched, which it is at start; one that can't be fetched stays there.
+- A feed subscribed to before Lines kept what it's written in is listed with RSS Feeds (or Podcast Feeds, if its note is a podcast's) until it's next fetched, which it is at start; one that can't be fetched stays there.
 - **A post's discussion (Hacker News')** is only to read: voting and replying need a Hacker News account, and it has no API for either. It comes from Algolia's copy of the thread, which leaves out comments deleted or taken down and every reply under them (none to a few percent of a big thread's; the count at its end says how many), can be minutes behind on a new story, and has replies oldest first, not as Hacker News ranks them (only the first comments are ranked, by the official API). ⌘F finds words in the post, not in its discussion. "3 hours ago" is worked out when the thread loads. Other sites' discussions (Lobsters, Reddit) aren't read yet, and a post saved to the Library doesn't show its discussion.
 - Fetching feeds has been tried only in the iOS simulator and the Android emulator, not yet in the Mac, Windows or Linux apps: the apps fetch through Rust (`webFetch`, with conditional requests of their own), which the browser tests don't reach.
 
@@ -105,7 +105,7 @@ The home page and the docs at https://olekslitus.com/lines/ (`site/`):
 - An episode linked over `http:` is asked for over https, as the apps' web views play only that; one whose site has no https doesn't play, and nor in the apps does one whose https address redirects to `http:` (the apps' content security policy allows sound only over https).
 - On a phone, the mini player is at the bottom of the note list, so not over an open note; the system's media controls work from anywhere.
 - Episodes play in the main window. A floating note's Play asks the main window to play it, and its button says Play even while it's playing there.
-- Locking lines, or quitting it, stops the episode playing: it's back in the player once lines is unlocked or open again, paused where it was.
+- Locking Lines, or quitting it, stops the episode playing: it's back in the player once Lines is unlocked or open again, paused where it was.
 - The player hasn't been tried in the Mac app yet: playing through its web view, Now Playing and the media keys, a floating note's Play, and keeping the place on ⌘Q.
 - Writing the time (⌃⌘T, `/time`) and the player's keys work only in the main window: a floating note doesn't know where the main window's player is. A time written there plays, in the main window.
 - Transcripts are only those a feed names, with times (plain text ones aren't read), and only in Podcasting 2.0's current namespace (a few feeds still use its first, on GitHub); on the web, only where their site lets pages read them (most hosts do; Transistor doesn't). Who's speaking is read from a name before what's said where a file has no voices, if the same name is written so on more than one line, so a line starting "Warning: …" stays as it is; a speaker named only once in a whole transcript isn't told apart from what they say. Chapters inside the sound file (ID3) aren't read.
@@ -124,8 +124,8 @@ The home page and the docs at https://olekslitus.com/lines/ (`site/`):
 
 ## /unsplash and /giphy
 
-- They need the internet, and an API key from each service built into lines (see the README). A build without one doesn't have the command, and Settings → Plugins says so.
-- What you search for goes to Unsplash or GIPHY. Nothing else does: lines doesn't send them your notes.
+- They need the internet, and an API key from each service built into Lines (see the README). A build without one doesn't have the command, and Settings → Plugins says so.
+- What you search for goes to Unsplash or GIPHY. Nothing else does: Lines doesn't send them your notes.
 - The keys are shared by everyone using that build, and each service limits how many searches a key can make an hour (until it approves the app for more). Past that, the picker says it couldn't reach them for a while.
 - A GIF is kept as its address on GIPHY, like an Unsplash photo: it needs the internet to show, and isn't in exports or sync as a picture. With reduced motion, GIFs from GIPHY show still, but other animated images in notes still play.
 - They're in Markdown notes only. A LaTeX note can't compile a picture from the web anyway.
@@ -139,23 +139,23 @@ The home page and the docs at https://olekslitus.com/lines/ (`site/`):
 
 ## Spotify, SoundCloud and YouTube
 
-- The players are the sites' own, in a frame. Spotify's plays 30 seconds of a song, an episode or a show to anyone not logged in to Spotify in that browser, and in the apps to everyone (the frame can't see a login made elsewhere, and WebKit has none of the protection, Widevine, Spotify's whole songs need in other browsers; not tried in the apps). Nothing of Spotify's plays through lines' own player, nor does SoundCloud's but for someone's podcast feed.
+- The players are the sites' own, in a frame. Spotify's plays 30 seconds of a song, an episode or a show to anyone not logged in to Spotify in that browser, and in the apps to everyone (the frame can't see a login made elsewhere, and WebKit has none of the protection, Widevine, Spotify's whole songs need in other browsers; not tried in the apps). Nothing of Spotify's plays through Lines' own player, nor does SoundCloud's but for someone's podcast feed.
 - Scrolled far from it in a long note, a player playing stops, as the note draws only what's near the view, and it's loaded again (paused) when scrolled back to.
 - In Safari, playing a card loads the player without starting it: the site's play button starts it. The Mac app's web view lets pages start sound, so it may start there; not tried.
 - In the apps, the links in a player (the Spotify logo, Share, YouTube's title and Watch on YouTube) go nowhere, as the app doesn't open windows a page asks for: Open on Spotify (or SoundCloud, or YouTube), beside it, opens the link.
-- Keys pressed in a player never reach lines, so Esc doesn't leave it; Tab and ⇧Tab do.
+- Keys pressed in a player never reach Lines, so Esc doesn't leave it; Tab and ⇧Tab do.
 - SoundCloud's player is light in every theme: SoundCloud has no dark one. Its colors are the theme's accent as it was when the player loaded.
 - Only a Markdown link on a line of its own is a player; a bare address is a link. Spotify's short links (`spotify.link/…`) and SoundCloud's (`on.soundcloud.com/…`) aren't known. LaTeX notes don't draw players: their links are links.
 - A YouTube video's card is its picture, which is loaded from YouTube's image server (i.ytimg.com) as soon as the card is drawn, in any note or post with such a link, older ones too; YouTube's player (youtube-nocookie.com) is loaded only once Play is pressed. A player played once and drawn again (back to the note, scrolled back to) waits to be played; it doesn't start by itself.
 - Spotify's links aren't looked up for the library by a source of Spotify's own (its developer terms don't let what it says be kept): MusicBrainz looks up those it knows, and in the apps Web Pages reads their pages. A SoundCloud set isn't looked up: SoundCloud says whether it's an album or a playlist only on its page.
-- Nothing of either needs an account, and nothing from one is read: your saved songs, playlists or what's playing aren't in lines.
+- Nothing of either needs an account, and nothing from one is read: your saved songs, playlists or what's playing aren't in Lines.
 
 ## Terminal recordings (asciinema)
 
 - A recording on asciinema.org is kept as its embed code, not as a file: it needs the internet to play, and isn't in exports or sync as a recording. A `.cast` file dropped into a note is an attachment like any other, and plays offline.
 - Printed, a recording from asciinema.org is asciinema's preview of it (dark, with its play mark), not a frame of it in black on white; a `.cast` file prints as its name.
 - A recording from another asciinema server than asciinema.org, or a link to a `.cast` file on the web, is a picture or link like any other: only asciinema.org's embed code and attached `.cast` files play.
-- The player is asciinema's, so its buttons are named in English for screen readers ("Play", "Toggle fullscreen mode"), and its list of keys (`?`) is English. lines hides its tooltips and the button for that list.
+- The player is asciinema's, so its buttons are named in English for screen readers ("Play", "Toggle fullscreen mode"), and its list of keys (`?`) is English. Lines hides its tooltips and the button for that list.
 - Recordings play only in Markdown notes. In a LaTeX note, a link to one is a link.
 - A recording plays again from its start, at the preview, when the theme changes or it's scrolled far out of view and back.
 - The player (about 185 KB, 65 KB compressed) loads the first time a note has a recording.
@@ -164,9 +164,9 @@ The home page and the docs at https://olekslitus.com/lines/ (`site/`):
 ## /paper and arXiv
 
 - Searching arXiv works in the apps only. arXiv's API doesn't take requests from web pages (CORS), so on the demo website `/paper` isn't there; links to arXiv still read short.
-- It needs the internet. What you search for goes to arXiv, nothing else: lines doesn't send it your notes.
-- arXiv asks for no more than one request every three seconds, so a search right after another waits for its turn (the picker says it's searching). What's been searched is kept until lines quits and isn't asked again.
-- arXiv's ranking is its own, and plain: lines looks for every word in titles and authors first, which finds the paper meant far more often, and in abstracts too when that finds nothing. arXiv's own syntax (`au:hinton AND ti:distilling`) goes to it as typed.
+- It needs the internet. What you search for goes to arXiv, nothing else: Lines doesn't send it your notes.
+- arXiv asks for no more than one request every three seconds, so a search right after another waits for its turn (the picker says it's searching). What's been searched is kept until Lines quits and isn't asked again.
+- arXiv's ranking is its own, and plain: Lines looks for every word in titles and authors first, which finds the paper meant far more often, and in abstracts too when that finds nothing. arXiv's own syntax (`au:hinton AND ti:distilling`) goes to it as typed.
 - arXiv is the only source of papers so far. Others (Semantic Scholar, OpenAlex, PubMed…) can be added as plugins ([plugins.md](plugins.md#what-a-plugin-can-add)); one that allows requests from web pages would bring `/paper` to the website too.
 - A paper goes in as a link named by its title, as arXiv writes it: a title with math (`$k$-means`) shows it drawn in Markdown, and TeX accents (`Schr\"odinger`) aren't turned into the letters they make. Its authors, year and abstract aren't added.
 - Searching from the Windows, Linux, iOS and Android apps hasn't been tried yet.
@@ -175,16 +175,16 @@ The home page and the docs at https://olekslitus.com/lines/ (`site/`):
 
 - Only Markdown notes are looked up: a LaTeX, code or spreadsheet note that's just a link stays one, and so does a locked note, whose link isn't sent anywhere.
 - On the web, only YouTube, Open Library, Wikidata, AniList, MusicBrainz and Apple Podcasts can be asked; other sites don't let web pages read them (CORS), so links to them stay links there. The apps read any page ([library.md](library.md#where-lines-looks)).
-- A page that only says what it is once its scripts have run (YouTube Music, some shops) isn't read for it: lines reads the page as it arrives, and never runs it. IMDb doesn't answer apps at all; its links are looked up through Wikidata, which has most films and series but not every one, nor the newest the day they're announced.
-- What Wikidata finds is what it's about from Wikipedia, in lines' language where Wikipedia has the page, else in English, and the poster at the top of that page.
+- A page that only says what it is once its scripts have run (YouTube Music, some shops) isn't read for it: Lines reads the page as it arrives, and never runs it. IMDb doesn't answer apps at all; its links are looked up through Wikidata, which has most films and series but not every one, nor the newest the day they're announced.
+- What Wikidata finds is what it's about from Wikipedia, in Lines' language where Wikipedia has the page, else in English, and the poster at the top of that page.
 - Episodes from Apple Podcasts are found among a podcast's latest 200; a link to an older one stays a link.
 - Comics are searched on AniList, which has manga, manhwa and manhua but few Western comics: add one of those by its Wikipedia page, or its publisher's. AniList is asked at most every two seconds (it asks for no more than 30 requests a minute), so a search after another waits a moment. Its `format` is told by the country a series is from, so a Korean webtoon is a `manhwa` there. MangaDex's links are looked up only in the apps, and only where MangaDex knows the series' AniList or MyAnimeList id; its pages ask a browser to prove itself first, so Web Pages can't read them. Open Library's graphic novels and manga are books.
 - A page tells a comic from a book only as it says it is ([library.md](library.md#where-lines-looks)): a series on a scanlation site that neither labels its type nor files it under `/comic/`, `/manga/` and the like is a book; change its `type` to `comic` by hand.
 - Anime: an anime added from a MyAnimeList link (through Jikan) has only its `mal` id, so an AniList link to it finds its note only once the note has its `anilist` too (AniList's lookup gives both). MyAnimeList is read through Jikan, an open API that isn't MyAnimeList's own, so it can be slower, or behind, than the site. Covers come where AniList's and MyAnimeList's picture servers let pages download them; in the apps, always.
-- **AniList and MyAnimeList** ([library.md](library.md#anilist-and-myanimelist)) were made from their documentation and tried against stand-ins for their APIs, not against real accounts, nor in the Mac app (MyAnimeList's signing in, which needs the apps, wasn't tried at all). Only status, overall rating and episodes watched sync: not notes, named ratings, rewatches (how many, and Rewatching beyond being watching), start and finish dates, custom lists, private or hidden entries, or favourites; manga isn't kept in step yet. Taking something off the list there leaves its note (not put back on the list unless it's changed here), and trashing a note leaves it on the list. Something on the list whose note is locked and shut is left as it is, and isn't found by its id until the note's open; one locked shut before it was ever kept in step can be imported again as a second note. When both sides changed the same thing, the note's side counts from when it was last changed, which is when its row's menu changed its status only if it was edited then too. Accounts are each device's: a device signed in to neither doesn't keep the list in step, though its notes still sync. AniList's terms don't allow keeping a copy of its data as a backup or for a competing list; lines keeps your own list's entries as your notes.
+- **AniList and MyAnimeList** ([library.md](library.md#anilist-and-myanimelist)) were made from their documentation and tried against stand-ins for their APIs, not against real accounts, nor in the Mac app (MyAnimeList's signing in, which needs the apps, wasn't tried at all). Only status, overall rating and episodes watched sync: not notes, named ratings, rewatches (how many, and Rewatching beyond being watching), start and finish dates, custom lists, private or hidden entries, or favourites; manga isn't kept in step yet. Taking something off the list there leaves its note (not put back on the list unless it's changed here), and trashing a note leaves it on the list. Something on the list whose note is locked and shut is left as it is, and isn't found by its id until the note's open; one locked shut before it was ever kept in step can be imported again as a second note. When both sides changed the same thing, the note's side counts from when it was last changed, which is when its row's menu changed its status only if it was edited then too. Accounts are each device's: a device signed in to neither doesn't keep the list in step, though its notes still sync. AniList's terms don't allow keeping a copy of its data as a backup or for a competing list; Lines keeps your own list's entries as your notes.
 - MusicBrainz knows Spotify, Apple Music, Bandcamp, Deezer and Tidal links only where someone has added them: most albums, few songs. In the apps, Web Pages reads the rest.
 - A YouTube video looked up on the web has its title, channel and picture, but not when it came out, how long it is or what it's about: those are on its page, which only the apps can read.
-- The keys and `status` values are English in every language, so a note reads the same everywhere; lines shows the status in its own language.
+- The keys and `status` values are English in every language, so a note reads the same everywhere; Lines shows the status in its own language.
 - A note filled in after you've moved to another note can't be put back with <kbd>⌘Z</kbd>: that's the note you're in's. Delete what was written, or paste the link again.
 - If its cover can't be stored once the note's written (the device out of space), the note keeps the picture's link without the picture.
 - The Library has no grid of covers yet, and its shelves list by date, so they don't sort or filter by rating (a `@type.book` table sorts by it). Feeds have limits of their own ([Feeds](#feeds)).
@@ -194,15 +194,15 @@ The home page and the docs at https://olekslitus.com/lines/ (`site/`):
 - A link being added shows how it's getting on in one pane: the same note open in two shows it in the first.
 - One note of each thing: the same thing from two sites is found by the ids its sources know (an IMDb link and a Wikipedia page of the same film, through Wikidata), not by its title, so a book added from Goodreads and again from Open Library can be two notes until one is looked up from the other's link. A new note that was only a link to something in the Library goes to the Trash when that's opened instead; ⌘Z doesn't bring it back (restore it from the Trash).
 - Bookmarks: Firefox's own `.jsonlz4` backups (the ones it makes by itself) aren't read, only its Backup… (`.json`) and its HTML export; Chrome's `Bookmarks` file in its profile folder isn't either (export it instead). Folders that are only a separator, and a bookmark's icon, keyword and whether it was private, aren't kept. A bookmark whose link only differs by its `#anchor` is a resource of its own.
-- Undo Import is there until another import is asked about, or lines quits; after, imported notes are deleted as any notes are. Importing many makes the first sync after it long ([library.md](library.md#bookmarks)).
+- Undo Import is there until another import is asked about, or Lines quits; after, imported notes are deleted as any notes are. Importing many makes the first sync after it long ([library.md](library.md#bookmarks)).
 - **Books you keep** ([library.md](library.md#books-you-keep)) are read from PDF and EPUB files without DRM. Kindle's (AZW, KFX) and Adobe's protected EPUBs can't be opened, and MOBI, AZW3, FictionBook, CBZ comics and DjVu aren't read yet. A book in a locked note can't be read in its place (its link still opens the file in its app).
-- Where you are in a book is kept on each device; only how far it's been read syncs, written into the note as the reader closes or lines locks or quits. On another device a book opens where that device left it. Once that's written, ⌘Z no longer takes back a quote kept before it.
+- Where you are in a book is kept on each device; only how far it's been read syncs, written into the note as the reader closes or Lines locks or quits. On another device a book opens where that device left it. Once that's written, ⌘Z no longer takes back a quote kept before it.
 - A book's file is an attachment like any other: every device keeps a copy, and sync moves it whole.
 - A book is read whole into memory to show it. With the app lock on, it's one encrypted record, and is in memory about three times over as it opens (sealed, opened, and as the reader reads it); a PDF isn't read a part at a time from storage yet.
 - A PDF has no zoom, two pages side by side, links within it, or forms. Its pages in the theme's colors keep their pictures as they are, but a picture pdf.js doesn't say it drew (a pattern, a shading) takes the theme's colors too.
 - An EPUB is shown a chapter at a time; fixed-layout books (comics, picture books), vertical writing and read-aloud overlays aren't laid out as they ask. Its search finds words within one run of text (not across italics), the first 50 matches.
 - Quotes are added to the note's end, and aren't drawn back in the book yet.
-- Reading books hasn't been tried in the Mac, Windows, Linux, iOS or Android apps yet. WebKit runs none of lines' own listeners on a frame sandboxed without scripts (webkit.org/b/218086), so an EPUB's frame is allowed them everywhere, and only its policy and lines' own, with nothing left in it to run, keep a book's scripts from running.
+- Reading books hasn't been tried in the Mac, Windows, Linux, iOS or Android apps yet. WebKit runs none of Lines' own listeners on a frame sandboxed without scripts (webkit.org/b/218086), so an EPUB's frame is allowed them everywhere, and only its policy and Lines' own, with nothing left in it to run, keep a book's scripts from running.
 - Looking links up hasn't been tried in the Mac, Windows, Linux, iOS or Android apps yet: the apps read pages through Rust (`webFetch`), which the browser tests don't reach.
 - Moving from Readwise (Settings → Library → Readwise) was made from Readwise's documented API and tried against answers shaped as it documents them, not a real account yet. It's a one-time move, done again when asked: nothing syncs with Readwise afterwards, and highlights deleted or changed there since aren't changed here. A highlight's color, whether it was a favorite, and Readwise's `.h1` headings aren't brought; nor the files of PDFs and EPUBs saved in Reader (their notes link to where they're from), nor pictures in highlights, which are written as their Markdown's text. A Kindle book has no link (Readwise gives none). Reader's Feed (posts not saved) isn't brought; its feeds come as OPML. A locked note that's closed isn't added to. A note found by its link or title gets no `readwise:` id, so it's found that way again. If you change a highlight's own words in a note, importing again adds Readwise's again.
 
@@ -216,18 +216,18 @@ The home page and the docs at https://olekslitus.com/lines/ (`site/`):
 
 - Diagrams are drawn by [Pele](https://pele.run), which reads Mermaid's syntax (up to Mermaid 12.1) but lays diagrams out its own way: they look different from GitHub's and other Mermaid apps'. Settings → Plugins → Diagrams (Mermaid) draws them with Mermaid itself instead.
 - Pele doesn't read Mermaid's themes or `themeVariables`, except the colors of charts' series: diagrams take the theme's colors. Colors set in a diagram (`style`, `classDef`) stay as written.
-- Links in diagrams (`click A href "…"`) aren't drawn as links, as one followed would open in lines' own window. In labels, HTML's bold, italic, underline, code, subscript and superscript (`<b>`, `<strong>`, `<i>`, `<em>`, `<u>`, `<code>`, `<sub>`, `<sup>`) and line breaks (`<br>`) are drawn; other tags are left out with their text kept (a link's, a `<span>`'s), and pictures aren't drawn. Icons (`fa:fa-car`) aren't drawn. ZenUML and Mermaid's other add-ons aren't drawn.
+- Links in diagrams (`click A href "…"`) aren't drawn as links, as one followed would open in Lines' own window. In labels, HTML's bold, italic, underline, code, subscript and superscript (`<b>`, `<strong>`, `<i>`, `<em>`, `<u>`, `<code>`, `<sub>`, `<sup>`) and line breaks (`<br>`) are drawn; other tags are left out with their text kept (a link's, a `<span>`'s), and pictures aren't drawn. Icons (`fa:fa-car`) aren't drawn. ZenUML and Mermaid's other add-ons aren't drawn.
 - Math in a label (`$$x^2$$`) is drawn by the math plugin, KaTeX, and shows as written with it off.
 - Mermaid itself (about 5 MB) is still in the app, for the Diagrams (Mermaid) plugin, though it's off unless chosen. It can leave the download once plugins can be installed on their own ([#158](https://github.com/olekslitus/lines/issues/158)).
 
 ## LaTeX notes
 
-- lines draws a common part of LaTeX ([latex.md](latex.md)), not what a TeX engine typesets: no packages, text macros (`\newcommand` only works in math), floats' placement or page layout. What it doesn't know stays as written, faint.
+- Lines draws a common part of LaTeX ([latex.md](latex.md)), not what a TeX engine typesets: no packages, text macros (`\newcommand` only works in math), floats' placement or page layout. What it doesn't know stays as written, faint.
 - In the editor, equation, section and theorem numbers aren't used for references: `\ref{sec:intro}` shows `sec:intro`, not "1", and equations aren't numbered at all. The PDF preview numbers them (see below).
 - A paragraph hard-wrapped in the source shows on several lines, where LaTeX would join them.
 - `\input` and `\include` don't pull in other files: a paper made of several files has to be pasted in as one.
 - There's no format toolbar over selected text, no todos, and no drag handles in LaTeX notes. An attached file is a plain `\href` link, not a card with its size; audio and video on a line of their own play there, but Enter doesn't play them.
-- A photo pasted from Unsplash, or any other `\includegraphics{https://…}`, shows in lines but doesn't compile: LaTeX can only include files.
+- A photo pasted from Unsplash, or any other `\includegraphics{https://…}`, shows in Lines but doesn't compile: LaTeX can only include files.
 - A synced LaTeX note's file still ends in `.md`, with `format: latex` in its front matter. Export writes `.tex` files.
 - Switching a note's format doesn't convert its text.
 - Formulas in a `tabular` aren't worked out, as they are in Markdown tables.
@@ -259,15 +259,15 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 ## PDF
 
-- lines' own pages are saved as a PDF through the print dialog (Save as PDF), not straight to a file. The print dialog isn't there on iPhone and iPad, so there lines' pages can be previewed but not printed or saved; a LaTeX note typeset by TeX saves as usual.
+- Lines' own pages are saved as a PDF through the print dialog (Save as PDF), not straight to a file. The print dialog isn't there on iPhone and iPad, so there Lines' pages can be previewed but not printed or saved; a LaTeX note typeset by TeX saves as usual.
 - Printing hasn't been tried in the Mac, Windows and Linux apps yet: whether their print dialogs keep the paper size the preview chose (A4 or Letter). Nor has showing TeX's PDF in the apps, whose web views draw PDFs themselves.
 - Pages are black on white: headings print black whatever color Settings → Typography gives them on screen, and formatting prints as it always does whatever colors your theme gives it.
-- lines' pages break between lines, never through one, but don't keep a paragraph's last line from starting a page alone, or a table's header with its rows. A block taller than a page (a very long code line wrapped many times, say) is cut where the page ends. Text isn't hyphenated.
-- A printed LaTeX note follows LaTeX in what it can: lines join into paragraphs, sections, theorems, `equation`s, figures and tables are numbered and `\ref` shows their numbers. But footnotes are gathered at the end rather than at the foot of their page; an `align`'s lines aren't numbered; `\cite` shows its key, not a number; commands lines doesn't know print their last argument's text or nothing; and the layout is lines', not a document class's (`\documentclass[twocolumn]` is one column).
+- Lines' pages break between lines, never through one, but don't keep a paragraph's last line from starting a page alone, or a table's header with its rows. A block taller than a page (a very long code line wrapped many times, say) is cut where the page ends. Text isn't hyphenated.
+- A printed LaTeX note follows LaTeX in what it can: lines join into paragraphs, sections, theorems, `equation`s, figures and tables are numbered and `\ref` shows their numbers. But footnotes are gathered at the end rather than at the foot of their page; an `align`'s lines aren't numbered; `\cite` shows its key, not a number; commands Lines doesn't know print their last argument's text or nothing; and the layout is Lines', not a document class's (`\documentclass[twocolumn]` is one column).
 - TeX's PDF uses pdfLaTeX with TeX Live's basic packages only: a note needing others (TikZ, `enumitem`, `microtype`…) stops with "File … not found". `booktabs` stands in with plain rules. Fonts and scripts beyond pdfLaTeX's (no XeLaTeX or LuaLaTeX yet), BibTeX's `.bib` files (there's nowhere to keep one), and `\input`ed files aren't available.
 - TeX downloads about 125 MB the first time, so that once needs the internet; the browser keeps it afterwards. It's only there when the build includes it (`bun run tex-assets`, see the README); a build without it says so.
 - When TeX stops at an error in a file other than the note (a package), the line it names is that file's, though the preview says it's the note's.
-- PNG images are of lines' pages, not TeX's PDF. They're drawn by copying the pages into an SVG picture (modern-screenshot), so what the browser can't copy that way is missing: a web image from a site that doesn't allow it (CORS) shows blank. Images are drawn at twice the page's size, but no bigger than every browser can draw (16.7 million pixels, WebKit's limit on iPhone and iPad): a note longer than about five pages as One Image comes out smaller, and from about twenty pages its text is less sharp than on screen. One per Page keeps every page sharp.
+- PNG images are of Lines' pages, not TeX's PDF. They're drawn by copying the pages into an SVG picture (modern-screenshot), so what the browser can't copy that way is missing: a web image from a site that doesn't allow it (CORS) shows blank. Images are drawn at twice the page's size, but no bigger than every browser can draw (16.7 million pixels, WebKit's limit on iPhone and iPad): a note longer than about five pages as One Image comes out smaller, and from about twenty pages its text is less sharp than on screen. One per Page keeps every page sharp.
 - Saving PNGs hasn't been tried in the Mac app (WebKit) yet.
 
 ## Image sizes
@@ -277,7 +277,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 ## Folders and files on your computer
 
-- Dropping a folder to link to it, and `/folder`, are in lines for Mac only: a page isn't told where a dropped folder is, and the Windows and Linux apps don't ask the system yet. Their links open in the Windows and Linux apps too.
+- Dropping a folder to link to it, and `/folder`, are in Lines for Mac only: a page isn't told where a dropped folder is, and the Windows and Linux apps don't ask the system yet. Their links open in the Windows and Linux apps too.
 - On the web and on phones a link to the computer can't be opened; following one copies its path.
 - A link leads to a path: moved or renamed, the folder isn't followed, and on another device the path may lead nowhere.
 - On Windows, a link to a share on another computer (`\\server\share`) isn't followed, since Windows would sign in to that computer, with your account, only to look; a share mapped to a drive letter is followed.
@@ -301,7 +301,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 - Only at a note's top level: in a card, a callout, a list or a quote a page break stays as written, and doesn't break the PDF's page.
 - In a LaTeX note, `\newpage` inside an environment (`center`, a list) is drawn as a page break, but the PDF breaks only at those outside any environment but the document; one in the middle of a line breaks the PDF but isn't drawn.
-- Other apps don't break pages at `<!-- pagebreak -->`; for their PDFs, `<div style="page-break-after: always"></div>` (which lines reads too) does in Obsidian, Typora and VS Code, with a blank line after it.
+- Other apps don't break pages at `<!-- pagebreak -->`; for their PDFs, `<div style="page-break-after: always"></div>` (which Lines reads too) does in Obsidian, Typora and VS Code, with a blank line after it.
 - A picture of a note (PNG) is one long page, without its breaks.
 - With a pattern drawn in columns (squares, graph) over a backdrop, each page's columns run its full height, past the last line's row.
 
@@ -309,7 +309,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 - A mascot lives in the main window only, not in floating notes or Settings' own window, and walks along the bottom of the note's pane. Where it stands, it's clicked rather than what's under it: drag it away.
 - It sits beside the line being written in notes; a spreadsheet's cells and other fields don't call it.
-- Only the four lines draws can be chosen; a plugin can add more, but there's no way yet to draw your own in Settings.
+- Only the four Lines draws can be chosen; a plugin can add more, but there's no way yet to draw your own in Settings.
 
 ## Copying what you select
 
@@ -320,14 +320,14 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 - A note has one cursor and one selection: there are no multiple cursors, nor ⌘D to select the next match as well, as code editors have.
 - The text cursor's look is in notes and Settings' little note; fields (search, renaming) and a spreadsheet's cells keep the system's, in the color chosen.
-- The Retro and Dot pointers show over lines' own windows only, and only where something hasn't asked for a pointer of its own (a resize edge, a diagram you can drag): those keep the system's. Not tried in the Mac app yet, where WebKit draws pointer images itself.
+- The Retro and Dot pointers show over Lines' own windows only, and only where something hasn't asked for a pointer of its own (a resize edge, a diagram you can drag): those keep the system's. Not tried in the Mac app yet, where WebKit draws pointer images itself.
 - Rainbow and the trail need a recent browser (`@property`, the Web Animations API); in an older one the cursor stays its color and jumps.
 - In WebKit (Safari, the Mac app), a block or underline cursor just before Markdown that's hidden (the `**` of bold, with Show Markdown on Hidden) can be drawn narrower than the letter after it, until it moves: it's measured before WebKit has laid the line out.
 
 ## Typing sounds
 
-- The built-in keyboards are made from sound, not recorded: close to the real thing, not the real thing. Recorded ones come as Mechvibes sound packs, which people share under their own terms; lines carries none of them.
-- Only keys pressed in lines' windows play, not everywhere on the computer, as Mechvibes does.
+- The built-in keyboards are made from sound, not recorded: close to the real thing, not the real thing. Recorded ones come as Mechvibes sound packs, which people share under their own terms; Lines carries none of them.
+- Only keys pressed in Lines' windows play, not everywhere on the computer, as Mechvibes does.
 - A pack whose sounds the system can't decode stays silent and says so: OGG files play in Chrome and Firefox, and in Safari and the Mac app only on recent versions of macOS. Not tried in the Mac app yet.
 - Packs are read from a .zip or a folder; a ZIP64 or encrypted .zip isn't read. Mouse packs are left out, and a pack's `random_pitch` and recommended volume aren't used (every keyboard varies its pitch a little).
 - Packs are kept on this device and don't sync.
@@ -341,7 +341,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 - It works in the main window only, not in a floating note or Settings in a window of its own (which show the changes, though).
 - It's made for a mouse or trackpad, or a keyboard's menu key: on a phone or tablet it may not open.
-- A color is matched to the theme's by its value: where two of the theme's colors are the same (code's background and a field's), lines goes by what the part is, and can name the other. With Monochrome or Invert on, colors are picked as the theme has them and shown through those.
+- A color is matched to the theme's by its value: where two of the theme's colors are the same (code's background and a field's), Lines goes by what the part is, and can name the other. With Monochrome or Invert on, colors are picked as the theme has them and shown through those.
 - A part drawn in a gradient, a picture or a mix of colors (a callout's tint, a scroll bar) isn't matched; the color it's made from can be changed in Settings → Theme's editor once saved.
 
 ## Styles
@@ -356,11 +356,11 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 - IBM Plex Sans, Fira Sans and Agave cover Latin, Greek, Cyrillic and Vietnamese; other writing shows in the fallback font. They come in regular and bold (Plex and Fira with their italics); weights between are the nearest of those, and Agave's italic is its regular slanted.
 - Code is in the code font whichever font notes are in, unless Fonts for formatting gives inline code or code blocks one of their own (Agave among them).
-- Fonts for formatting (Settings → Typography) are drawn in Markdown and LaTeX notes as lines shows them, and in lines' PDF of a Markdown note. Source mode (Markdown as written) keeps every part in the text's font, as it keeps their sizes, and a LaTeX note's PDF, lines' or TeX's, is in Computer Modern throughout. Bullets are drawn rather than written, so only lists' numbers take a font. Code notes, and blocks drawn as something else (diagrams, requests, spreadsheets), keep the code font.
+- Fonts for formatting (Settings → Typography) are drawn in Markdown and LaTeX notes as Lines shows them, and in Lines' PDF of a Markdown note. Source mode (Markdown as written) keeps every part in the text's font, as it keeps their sizes, and a LaTeX note's PDF, Lines' or TeX's, is in Computer Modern throughout. Bullets are drawn rather than written, so only lists' numbers take a font. Code notes, and blocks drawn as something else (diagrams, requests, spreadsheets), keep the code font.
 - Not tried in the Mac app yet.
-- A font installed on your device (Settings → Typography → Installed font): the apps list the fonts the system has, but on Android none, so there it's typed by name, and on iPhone and iPad only those iOS comes with: fonts installed from the App Store's font apps need the Fonts entitlement (`com.apple.developer.user-fonts`), which lines' app doesn't have yet. In a browser, Chrome and Edge list them once you allow it; Safari and Firefox can't, and you type a font's name instead, which says when it isn't one there. Safari only uses the fonts macOS comes with, not ones you installed, and Firefox can limit fonts the same way with its stricter privacy settings: such a font says it isn't installed.
-- It's kept by its name, so settings or a preset from another computer can name one this device hasn't: notes are then in the system's font (a style's own, where it has one) and formatting given it as if none were chosen, Settings → Typography says the font isn't installed here, and it's used again where it is. The same goes for a font of lines' whose plugin is off. A font's bold and italic are its own where it has them; where it hasn't, the browser thickens or slants its regular.
-- lines' printed pages, PDF and PNG images are in it; TeX's PDF of a LaTeX note never is (it's in TeX's fonts).
+- A font installed on your device (Settings → Typography → Installed font): the apps list the fonts the system has, but on Android none, so there it's typed by name, and on iPhone and iPad only those iOS comes with: fonts installed from the App Store's font apps need the Fonts entitlement (`com.apple.developer.user-fonts`), which Lines' app doesn't have yet. In a browser, Chrome and Edge list them once you allow it; Safari and Firefox can't, and you type a font's name instead, which says when it isn't one there. Safari only uses the fonts macOS comes with, not ones you installed, and Firefox can limit fonts the same way with its stricter privacy settings: such a font says it isn't installed.
+- It's kept by its name, so settings or a preset from another computer can name one this device hasn't: notes are then in the system's font (a style's own, where it has one) and formatting given it as if none were chosen, Settings → Typography says the font isn't installed here, and it's used again where it is. The same goes for a font of Lines' whose plugin is off. A font's bold and italic are its own where it has them; where it hasn't, the browser thickens or slants its regular.
+- Lines' printed pages, PDF and PNG images are in it; TeX's PDF of a LaTeX note never is (it's in TeX's fonts).
 - Listing them hasn't been tried in the apps yet: the Mac's (AppKit), Windows' (DirectWrite), Linux's (fontconfig's `fc-list`, which a desktop without it lacks; then the name is typed), the iPhone's and iPad's (UIKit).
 
 ## Symbols
@@ -373,7 +373,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 ## Timing diagrams
 
 - WaveJSON is read as JSON5, not run as JavaScript: a diagram that makes its waves with code (`"0".repeat(8)`, a function) says what it can't read.
-- WaveDrom lays text out for Helvetica's widths, and lines draws it in the note's font. A diagram grows to show every name whole, but a long data label can run past its box, more so in a wide font.
+- WaveDrom lays text out for Helvetica's widths, and Lines draws it in the note's font. A diagram grows to show every name whole, but a long data label can run past its box, more so in a wide font.
 - WaveDrom's `dark` look isn't used: the theme's colors stand in for it. Logic circuits don't light up under the pointer, as they do on WaveDrom's site.
 - A name written as markup keeps only WaveDrom's own (`<b>`, `<sub>`…); anything else (links, pictures) is left out, so a diagram can't run code or load anything from the web.
 - They're in Markdown notes only: LaTeX notes don't draw `tikz-timing`, and TeX's PDF has no TikZ.
@@ -382,8 +382,8 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 ## Drawings
 
-- Drawings are Excalidraw's: what it can draw is what there is. Its shape library (and its browser, libraries.excalidraw.com), its help, its links, its image tool (pictures go in the note instead), live collaboration and AI features aren't part of lines. Its ? key still opens its list of shortcuts.
-- Its fonts come with lines, except Xiaolai, its 12 MB Chinese and Japanese hand: on the web Excalidraw fetches that from its CDN when it's needed, and in the apps (which don't allow that) such text is in a system font.
+- Drawings are Excalidraw's: what it can draw is what there is. Its shape library (and its browser, libraries.excalidraw.com), its help, its links, its image tool (pictures go in the note instead), live collaboration and AI features aren't part of Lines. Its ? key still opens its list of shortcuts.
+- Its fonts come with Lines, except Xiaolai, its 12 MB Chinese and Japanese hand: on the web Excalidraw fetches that from its CDN when it's needed, and in the apps (which don't allow that) such text is in a system font.
 - In dark themes a drawing is drawn inverted, as Excalidraw does, so a photo inside a drawing shows inverted too.
 - A Mermaid diagram copied into a drawing is a copy: changing the code afterwards doesn't change the drawing, nor the other way round. Flowcharts, sequence, class, ER and state diagrams become shapes; other kinds (pie, Gantt, mindmap, timeline…) come in as one picture that can be moved and drawn around but not taken apart. The conversion lays the diagram out with Pele, its own copy inside Excalidraw's converter (which loads the first time a diagram is copied), so the shapes follow Pele's layout even when diagrams are drawn by Mermaid. Pasting Mermaid code onto a drawing, and Excalidraw's Mermaid to Excalidraw, convert the same way.
 - Excalidraw takes the theme's colors for its toolbars, menus and canvas, but not for what's drawn: its pens are its own colors (black, red, green…), as they are in any other app that opens the drawing. Changing the theme while a drawing is open shows in Excalidraw once it's opened again.
@@ -402,7 +402,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 - Only Markdown notes have properties and mentions; in a LaTeX note `@` and `---` are text.
 - A type table shows values; it can't edit them (open the note), filter its rows, or keep a sort. Its values are text, so sorting is by text (numbers within it compare as numbers: 9 before 10). It shows on screen only: in an export or another app it's the `@type.…` line.
 - A locked note can be mentioned by its title, but its properties can't be read, even while it's open.
-- A synced note's file has two front matter blocks: lines' own (id, dates…) and then the note's properties, as part of its text. Apps that read front matter see the first.
+- A synced note's file has two front matter blocks: Lines' own (id, dates…) and then the note's properties, as part of its text. Apps that read front matter see the first.
 - A synced note's file is read as UTF-8 (or UTF-16, with its byte order mark). One another app saved in another encoding, such as Latin-1, shows its other characters as �, and keeps them so once the note is edited here.
 
 ## Calendar
@@ -414,15 +414,15 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 - The list beside the week shows the chosen day's notes in the list's usual order, with when they were edited, not their times.
 - Only dates written `2026-11-30` (perhaps with a time after) count, in a `date`, `due`, `start` or `end` property; which properties count can't be chosen yet, and dates in a note's text or on todos aren't read.
 - Only Markdown notes have properties, so LaTeX notes, spreadsheets and other formats show on a day only with Notes made or edited that day on (Settings → General). A note made on a day in one of those formats isn't dated.
-- "Edited that day" is the day a note was last changed: lines doesn't keep each day a note was changed.
-- Repeating is for the whole series: one time can't be moved, changed or skipped on its own, and a repeating event is dragged to another time, not another day (change its dates for that). A `repeat` is written in English words (`every monday`), whatever language lines is in, and RFC 5545 rules (`FREQ=WEEKLY;BYDAY=MO`) aren't read yet. A monthly one on the 29th to 31st comes on a shorter month's last day.
+- "Edited that day" is the day a note was last changed: Lines doesn't keep each day a note was changed.
+- Repeating is for the whole series: one time can't be moved, changed or skipped on its own, and a repeating event is dragged to another time, not another day (change its dates for that). A `repeat` is written in English words (`every monday`), whatever language Lines is in, and RFC 5545 rules (`FREQ=WEEKLY;BYDAY=MO`) aren't read yet. A monthly one on the 29th to 31st comes on a shorter month's last day.
 - Colors are the theme's eight (a note's own, or its type's or tag's), not any color. A day in the month shows a dot for each of three colors at most, and on the chosen day, filled in the accent, they're all the accent's text color.
 - A colored tag's name is in the text's color on a tint of its color: in Solarized's light colors that's a little under 4.5:1 (4.3:1 at least), as its text is under 5:1 on its own; Increased contrast makes it more.
 - Your calendars' events (EventKit, `.ics` subscriptions) and a feed of your dates for other calendar apps aren't there yet ([#77](https://github.com/olekslitus/lines/issues/77)).
 
 ## Panes
 
-- The panes the notes are split into last while lines is open; they aren't kept after it's closed. The open note's pane stays where it is (its toolbar with it): others are moved around it, or swapped into it.
+- The panes the notes are split into last while Lines is open; they aren't kept after it's closed. The open note's pane stays where it is (its toolbar with it): others are moved around it, or swapped into it.
 - A note or pane is dragged with a mouse, trackpad or pen, not a finger; by keyboard, Open to the Side, Open Below and Swap do the same.
 
 ## Inbox
@@ -469,7 +469,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 - Tabs have no keyboard shortcuts of their own beyond their tablist (← →, Delete): browsers keep ⌘W, Ctrl+Tab and ⌘1–9 for their own tabs.
 - There are no tabs at phone width, nor in floating notes, and a tab can't be dragged to another place or into its own window.
 - Open tabs are kept on each device; they don't sync.
-- Two notes side by side: only two, and only where the window has room for both (the notes' pane at least 660 px wide; otherwise the note beside waits, and Open to the Side isn't offered), and never the same note in both (selecting the one beside closes it). The note beside isn't remembered when lines restarts, and has no tabs of its own.
+- Two notes side by side: only two, and only where the window has room for both (the notes' pane at least 660 px wide; otherwise the note beside waits, and Open to the Side isn't offered), and never the same note in both (selecting the one beside closes it). The note beside isn't remembered when Lines restarts, and has no tabs of its own.
 - Panes on the right, and tabs, haven't been tried in the Mac app yet: the window buttons' room in each arrangement, and dragging the window by the space around the tabs.
 - Links (Settings → Editor → Links): a web link can't open in a background tab of the browser, as browsers decide that; tab choices for mentions need tabs on, and in a floating note they open the note in the main window.
 - The outline shows only with room for it beside the text (none at phone width, nor with Compact spacing in a narrow window), and in Markdown and LaTeX notes; plain-text notes have no headings. In a very long note, headings far down join it a moment after the note opens, as the note is read in the background.
@@ -478,13 +478,13 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 ## Themes
 
 - Your themes and palettes are kept on each device, like the rest of Settings, and don't sync; a theme or palette file, or Copy Theme and Copy Palette, moves one to another device.
-- A VS Code theme that builds on another (`"include": "./dark_plus.json"`) is read without what it includes, so its code may take lines' colors. Themes are read from their `.json`; a `.vsix` extension package isn't opened, nor are Sublime Text's `.sublime-color-scheme` files, Vim, Neovim or Emacs themes (which are code), JetBrains' `.icls`, or Obsidian's CSS.
-- Only colors are imported: an app's fonts, its colors for parts lines doesn't have (an editor's gutter, a terminal's cursor), and translucency are left out. Which of an editor theme's colors becomes the accent is a guess when the theme doesn't say; it can be changed after.
+- A VS Code theme that builds on another (`"include": "./dark_plus.json"`) is read without what it includes, so its code may take Lines' colors. Themes are read from their `.json`; a `.vsix` extension package isn't opened, nor are Sublime Text's `.sublime-color-scheme` files, Vim, Neovim or Emacs themes (which are code), JetBrains' `.icls`, or Obsidian's CSS.
+- Only colors are imported: an app's fonts, its colors for parts Lines doesn't have (an editor's gutter, a terminal's cursor), and translucency are left out. Which of an editor theme's colors becomes the accent is a guess when the theme doesn't say; it can be changed after.
 - Colors made from the other scheme (Make Light Colors) are a start, not a designed theme.
-- A palette keeps its colors in sRGB, hex or `rgb()`, so lines can shade them: one typed another way (`oklch()`, `hsl()`, a name) goes in as the browser draws it, brought into sRGB if it's outside it.
+- A palette keeps its colors in sRGB, hex or `rgb()`, so Lines can shade them: one typed another way (`oklch()`, `hsl()`, a name) goes in as the browser draws it, brought into sRGB if it's outside it.
 - GTK themes are read only as named colors (`@define-color`, or libadwaita's custom properties); colors made with GTK's functions (`mix()`, `shade()`, `alpha()`) are left out.
-- Monochrome and Invert change lines' colors, not pictures or drawings' pen colors. Inverted, menus and cards (lighter than the note in a dark theme) are darker than the note, as in a negative.
-- The color picker picks colors without transparency (one typed as text keeps its own), and its eyedropper, which picks a color from anywhere on the screen, is only in Chrome and Edge: Safari, Firefox and the Mac app have none to offer. The colors it offers first are the palette's as it has them, so with Monochrome or Invert on they aren't the greys or turned colors shown; and a theme's palette has only the colors it lists, so the picker offers no red or green for one whose tag and callout colors are worked out (lines' own Lines, Ink and the like), only its greys and accent.
+- Monochrome and Invert change Lines' colors, not pictures or drawings' pen colors. Inverted, menus and cards (lighter than the note in a dark theme) are darker than the note, as in a negative.
+- The color picker picks colors without transparency (one typed as text keeps its own), and its eyedropper, which picks a color from anywhere on the screen, is only in Chrome and Edge: Safari, Firefox and the Mac app have none to offer. The colors it offers first are the palette's as it has them, so with Monochrome or Invert on they aren't the greys or turned colors shown; and a theme's palette has only the colors it lists, so the picker offers no red or green for one whose tag and callout colors are worked out (Lines' own Lines, Ink and the like), only its greys and accent.
 - Formatting's colors (Settings → Theme's editor → Formatting): Markdown shown as written (Source) colors headings, bold, italics, strikethrough, links, mentions and quotes, but not underlines, highlighted text, inline code or list markers, which it doesn't draw; there, text both bold and italic is in italics' color if both have one, where Live has the innermost's. LaTeX notes take them as Live draws them; shown as written, a LaTeX note has only its commands' colors. Void's links in the text's color and grey bullets give way to colors your theme sets for them.
 - Dark panes: the theme's editor (Your themes) previews each scheme as it is, without them.
 
@@ -492,7 +492,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 How plugins work is in [plugins.md](plugins.md).
 
-- Plugins come with lines; one made by someone else can't be installed yet.
+- Plugins come with Lines; one made by someone else can't be installed yet.
 - A note in a format whose plugin is off shows as plain text: no live preview, and its title is its first line as written. Exports and downloads still write it in its format.
 - Turning a plugin on or off isn't synced: each device keeps its own.
 - Drawings (Excalidraw), highlighting code blocks, symbols, and objects and mentions are still part of the core and Markdown, not plugins.
@@ -514,9 +514,9 @@ How plugins work is in [plugins.md](plugins.md).
 What isn't done yet is in [requests.md](requests.md#not-yet): environments, assertions and tests, bodies from files, forms with files, GraphQL and WebSocket, plain `http://` beyond this computer, and importing a Bruno or Postman collection.
 
 - In the browser, only APIs that allow requests from other sites (CORS) answer, and headers the browser keeps from pages (`Cookie`) aren't sent.
-- Responses aren't saved in the note: once lines quits they're gone, and a request using an earlier one's response needs that one sent again.
+- Responses aren't saved in the note: once Lines quits they're gone, and a request using an earlier one's response needs that one sent again.
 - **+** adds a response's body to the note only up to 200 KB.
-- Hurl: what lines doesn't read or check of a Hurl file is in [requests.md](requests.md#hurl): the HTTP version, certificates, cookies shared between entries, `[Multipart]`, `md5`, and the options that tune curl or repeat entries. Not following redirects works in the apps only. Dates in `toDate` are read as ISO 8601. Captures and asserts read a JSON number as a double, so a whole number past 2^53 (a 64-bit id) is rounded; a `.http` request's `{{name.response.body.$.id}}` keeps it as written.
+- Hurl: what Lines doesn't read or check of a Hurl file is in [requests.md](requests.md#hurl): the HTTP version, certificates, cookies shared between entries, `[Multipart]`, `md5`, and the options that tune curl or repeat entries. Not following redirects works in the apps only. Dates in `toDate` are read as ISO 8601. Captures and asserts read a JSON number as a double, so a whole number past 2^53 (a 64-bit id) is rounded; a `.http` request's `{{name.response.body.$.id}}` keeps it as written.
 - Requests in a code block inside a list or a quote, indented, aren't read as requests.
 - Sending from the Windows and Linux apps hasn't been tried yet.
 
@@ -538,12 +538,12 @@ What isn't done yet is in [secrets.md](secrets.md#not-yet).
 - Icon names, and the words the icon picker's search finds them by ("money", "finance"), are English in every language.
 - Errors from the desktop app's own code (folders, the window) are English, inside a translated sentence.
 - The welcome note, the feature tour and the examples are English. A note's text isn't translated, and the date `/date` writes is in the app's language.
-- Changing the language starts lines again.
+- Changing the language starts Lines again.
 
 ## Updates
 
 - Tried on a Mac, with test builds and a stand-in for GitHub: a release that had waited long enough was downloaded and installed as the app quit, and the new version opened. Restart to update, and updating on Windows and Linux, haven't been tried yet; the first real release with updates will be the first test of its packages.
-- The apps aren't signed, so after an update macOS may ask for the login password once more to read lines' Keychain item (app lock, Touch ID), as after reinstalling by hand.
+- The apps aren't signed, so after an update macOS may ask for the login password once more to read Lines' Keychain item (app lock, Touch ID), as after reinstalling by hand.
 - A `.deb` or `.rpm` install asks for a password when it updates, and the Windows MSI for permission; the AppImage and the `-setup.exe` install don't.
 - Once an update is downloaded it's the one installed: a newer one found before quitting waits for the next run.
 - There's no Check for Updates… in the Mac's app menu yet; it's in Settings → About.
@@ -587,24 +587,24 @@ What isn't done yet is in [secrets.md](secrets.md#not-yet).
 - The round + at the bottom of the note list was tried in the iOS simulator and headless Chromium and WebKit at a phone's size, not yet on a real phone, nor with VoiceOver or TalkBack; it shows wherever the window is as narrow as a phone's, tablets and desktop windows keeping the title bar's button.
 - A long press opens a menu after 0.4 s held still, Android's long-press time; iOS gives no number for its context menus, which open at about that (sooner with Haptic Touch set to Fast in iOS's Settings, which lines can't read). The tap felt as it opens is the system's in the apps; Safari has no vibration. Tried with pointer events made by script in Playwright's WebKit and Chromium, not yet with a finger on a phone.
 - An attachment can't be opened in another app yet.
-- Exports are saved in lines' Documents on iPhone and iPad, which the Files app shows under On My iPhone (or iPad) → lines. On Android they're saved in lines' own folder (`Android/data/com.olekslitus.lines/files/Download`), which the Files app doesn't show, not yet in Downloads. Neither has a share sheet to send them elsewhere.
-- Android's backup leaves lines out, to the cloud and to a new phone alike: its storage holds the notes and, without the app lock, the keys sync uses, in plain text. On a new or reset phone notes come back through sync, not from Android's backup.
+- Exports are saved in Lines' Documents on iPhone and iPad, which the Files app shows under On My iPhone (or iPad) → Lines. On Android they're saved in Lines' own folder (`Android/data/com.olekslitus.lines/files/Download`), which the Files app doesn't show, not yet in Downloads. Neither has a share sheet to send them elsewhere.
+- Android's backup leaves Lines out, to the cloud and to a new phone alike: its storage holds the notes and, without the app lock, the keys sync uses, in plain text. On a new or reset phone notes come back through sync, not from Android's backup.
 - TeX's PDF is shown at its own size on iPhone, wider than the screen.
 - The apps never zoom, so only what zooms by itself can be made bigger with two fingers (a drawing, a 3D model): not a picture or a PDF yet.
-- On iPhone and iPad lines' own text follows the text size chosen in iOS's Settings from xSmall to xxxLarge, but not past it into the accessibility sizes, which need layouts of their own; notes' text keeps the size Settings → Typography gives it. Android's font size isn't followed yet.
+- On iPhone and iPad Lines' own text follows the text size chosen in iOS's Settings from xSmall to xxxLarge, but not past it into the accessibility sizes, which need layouts of their own; notes' text keeps the size Settings → Typography gives it. Android's font size isn't followed yet.
 - On iPad, where the status bar spans the panes, its text suits the leftmost; in landscape on iPhone, beside the camera, the note's background shows rather than the pane's.
 - Lists and notes always bounce on iPhone and iPad as other apps' do, but that was checked in the simulator by what can scroll, not by dragging with a finger; the bounce isn't Android's, which has none for what fits.
 - On iPhone and iPad a swipe from the screen's left edge goes back from a note to the list, or opens the sidebar, following the finger. On Android the edges are the system's Back gesture, which closes what's open, then the sidebar, then the note; there a swipe opens no sidebar, though one closes it. The swipes were tried in Playwright's WebKit and Chromium with an iPhone's screen and touch events made by script, not with a finger: the simulator can't be swiped from a script (`simctl`), so how they feel on a real phone is still to be checked. Let go, a slide carries on at the finger's speed and comes to rest as a critically damped spring (0.4 s response, `src/lib/spring.ts`), played as keyframes a frame apart at 120 Hz that WebKit hands to Core Animation, off the page; a slide after a tap is a cubic Bézier within 3% of the same spring, as Core Animation can't run CSS's `linear()` easing. A finger being followed is drawn by the page, which WebKit updates at about 60 Hz even on a 120 Hz screen (its "Prefer page rendering updates near 60fps", on by default, which no public API turns off); `CADisableMinimumFrameDurationOnPhone` in the app's Info.plist lets Core Animation's slides run at 120 Hz on ProMotion iPhones, which the simulator can't show and wasn't checked on a phone. In Safari (the web app, not the app) a swipe from the edge is Safari's own Back when there's a page to go back to.
-- Pulling down past the top: the list searches, a note finds in it, the feeds refresh. On iPhone and iPad, where lists and notes always bounce, the pull is how far the bounce went past the top; on Android, where nothing bounces, lines moves what's pulled itself, stretching like a rubber band. The haptic tick as the feeds' pull is far enough is the system's in the apps (Tauri's haptics plugin) and isn't felt in Safari, which has no vibration. On a phone the list's search field is put away above its first row until a pull, a fling to the top or going to it shows it; it isn't part of what scrolls, as iOS's is, so it slides in and out as a whole rather than with the finger.
-- On iPhone and iPad WebKit waits for the page before it lets a touch scroll whenever anything in the page listens to touches or pointers without saying it won't stop them, and Svelte's own listeners for `onpointerdown` and the like are such; so a scroll starts as soon as the page answers, which a busy page delays. lines' own touch listeners say they won't where they don't (the long press, the pull on iPhone), and decide on a touch's first move, which is when WebKit decides whether it may scroll.
-- Web links open over lines: in Safari's view on iPhone and iPad, in a Custom Tab on Android (Settings → General → Open links can send them to the browser). Safari's view keeps its own cookies, not Safari's, so a site you're signed in to in Safari asks you to sign in again there; signing in to MyAnimeList always goes to the browser for that reason. On iOS 26 and later Safari's view draws its buttons in its own glass, so the theme's accent barely shows on them. A link from a note was opened in the iOS 27.2 simulator (light and dark) and the Android 16 emulator (closed with ✕ and with Back), clicked by script, not tapped; closing Safari's view with Done wasn't tried, as the simulator can't be tapped from a script.
+- Pulling down past the top: the list searches, a note finds in it, the feeds refresh. On iPhone and iPad, where lists and notes always bounce, the pull is how far the bounce went past the top; on Android, where nothing bounces, Lines moves what's pulled itself, stretching like a rubber band. The haptic tick as the feeds' pull is far enough is the system's in the apps (Tauri's haptics plugin) and isn't felt in Safari, which has no vibration. On a phone the list's search field is put away above its first row until a pull, a fling to the top or going to it shows it; it isn't part of what scrolls, as iOS's is, so it slides in and out as a whole rather than with the finger.
+- On iPhone and iPad WebKit waits for the page before it lets a touch scroll whenever anything in the page listens to touches or pointers without saying it won't stop them, and Svelte's own listeners for `onpointerdown` and the like are such; so a scroll starts as soon as the page answers, which a busy page delays. Lines' own touch listeners say they won't where they don't (the long press, the pull on iPhone), and decide on a touch's first move, which is when WebKit decides whether it may scroll.
+- Web links open over Lines: in Safari's view on iPhone and iPad, in a Custom Tab on Android (Settings → General → Open links can send them to the browser). Safari's view keeps its own cookies, not Safari's, so a site you're signed in to in Safari asks you to sign in again there; signing in to MyAnimeList always goes to the browser for that reason. On iOS 26 and later Safari's view draws its buttons in its own glass, so the theme's accent barely shows on them. A link from a note was opened in the iOS 27.2 simulator (light and dark) and the Android 16 emulator (closed with ✕ and with Back), clicked by script, not tapped; closing Safari's view with Done wasn't tried, as the simulator can't be tapped from a script.
 - No floating notes or other windows, menus, Touch ID or updates in the app: they're the desktop's. Updates are to come from the App Store and Google Play.
 
 ### Installing the Android app
 
-- Each release has an APK, signed with lines' key ([releasing.md](releasing.md#android)), installed by opening it on the phone and allowing the browser or Files app to install apps. It's about 150 MB, as it holds the app once for each kind of processor. It isn't on Google Play yet.
+- Each release has an APK, signed with Lines' key ([releasing.md](releasing.md#android)), installed by opening it on the phone and allowing the browser or Files app to install apps. It's about 150 MB, as it holds the app once for each kind of processor. It isn't on Google Play yet.
 - It doesn't update itself, nor say when there's a newer one: download the next release's APK and install it over the old one, which keeps the notes.
-- **Google's developer verification.** Google is to let certified Android devices install only apps registered by a verified developer: from 30 September 2026 in Brazil, Indonesia, Singapore and Thailand, and worldwide in 2027 ([Google's announcement](https://android-developers.googleblog.com/2026/03/android-developer-verification-rolling-out-to-all-developers.html)). lines' developer account isn't verified, nor the app registered, yet. Until they are, the APK installs as above elsewhere; where it's enforced, and everywhere from 2027, it needs Android's advanced flow for installing unregistered apps, or `adb install` from a computer.
+- **Google's developer verification.** Google is to let certified Android devices install only apps registered by a verified developer: from 30 September 2026 in Brazil, Indonesia, Singapore and Thailand, and worldwide in 2027 ([Google's announcement](https://android-developers.googleblog.com/2026/03/android-developer-verification-rolling-out-to-all-developers.html)). Lines' developer account isn't verified, nor the app registered, yet. Until they are, the APK installs as above elsewhere; where it's enforced, and everywhere from 2027, it needs Android's advanced flow for installing unregistered apps, or `adb install` from a computer.
 - TeX isn't in it, so a LaTeX note's PDF says TeX isn't included. The app's pages are built into its native library once for each kind of processor, four in the APK, so TeX would add about 300 MB.
 
 ## Future work
@@ -614,13 +614,13 @@ What isn't done yet is in [secrets.md](secrets.md#not-yet).
 - [ ] Install plugins made by others, safely; icon sets from a file
 - [ ] Drawings in LaTeX notes, saved as a PDF beside the SVG for TeX
 - [ ] Circuit schematics in CircuiTikZ (` ```circuitikz ` blocks, and `circuitikz` in LaTeX notes), drawn as you type
-- [ ] Save lines' PDF straight to a file in the apps (the web view's own PDF output), and print on iPhone and iPad
+- [ ] Save Lines' PDF straight to a file in the apps (the web view's own PDF output), and print on iPhone and iPad
 - [ ] More of TeX Live for TeX's PDFs, fetched as a note needs it; XeLaTeX for other scripts and fonts
 - [ ] Encrypt images and files in locked notes
 - [ ] Face ID for the app lock and locked notes on iPhone
 - [ ] A setting for how long locked notes stay open
 - [ ] Optional password hint for locked notes
-- [ ] Clear opened attachment copies from the cache when lines locks or quits
+- [ ] Clear opened attachment copies from the cache when Lines locks or quits
 - [ ] Store sync credentials in the OS keychain on native platforms
 - [ ] Remove attachments from sync storage once no note uses them
 - [ ] Backlinks, and updating mentions when a note is renamed

@@ -718,7 +718,7 @@ jsonpath "$.name" isString
 ```
 ---
 
-#### 31. Hurl entries (hurl block): a capture used by the next entry, and asserts, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Hurl entries (hurl block): a capture used by the next entry, and asserts, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 ```hurl
 # A todo

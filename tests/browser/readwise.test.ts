@@ -81,7 +81,7 @@ const many = (count: number, highlights = 1) => ({
 const WALDEN = "---\ntype: book\nauthor: Henry David Thoreau\nstatus: read\n---\n# Walden\n\nMy own notes on it.\n";
 const SUMMARY = [
   "Found 1 book, 3 articles, 1 episode, 1 video, and 1 paper, with 5 highlights.",
-  "Adds 1 highlight to notes in lines already: Walden.",
+  "Adds 1 highlight to notes in Lines already: Walden.",
   "1 supplemental book, Readwise’s suggestion, is left out.",
 ];
 
@@ -137,8 +137,8 @@ test("says what Readwise has before writing anything, imports it with its highli
   await group.getByRole("button", { name: "Import", exact: true }).click();
   await group.getByText("Added 7 notes. Added highlights to 1 note there already.").waitFor();
   await find();
-  await group.getByText("Everything in Readwise is in lines already.", { exact: true }).waitFor();
-  expect(await group.getByText(/in lines already: /).count()).toBe(0);
+  await group.getByText("Everything in Readwise is in Lines already.", { exact: true }).waitFor();
+  expect(await group.getByText(/in Lines already: /).count()).toBe(0);
   expect(await group.getByRole("button", { name: "Import", exact: true }).count()).toBe(0);
   expect(await focused(page)).toBe("Cancel");
   await page.keyboard.press("Enter");

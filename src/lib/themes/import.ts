@@ -89,4 +89,4 @@ export async function readThemes(text: string, fileName: string): Promise<ThemeF
 }
 
 /** What lines reads themes from, for saying so: lines' own files and each format's app. */
-export const readableFormats = () => ["lines", ...plugins.themeFormats.map((format) => format.name)];
+export const readableFormats = () => ["Lines", ...plugins.themeFormats.map((format) => format.name)];

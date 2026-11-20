@@ -77,7 +77,7 @@ pub fn touch_id_available() -> bool {
 /// Keeps the key lines is unlocked with now, for Touch ID to unlock it next time.
 #[tauri::command]
 pub fn touch_id_remember(state: State<'_, Unlocked>) -> Result<(), String> {
-  let key = state.get().ok_or("lines is locked")?;
+  let key = state.get().ok_or("Lines is locked")?;
   keep(Which::App, &key)
 }
 
@@ -152,7 +152,7 @@ mod touch_id {
     }
   }
 
-  /// What the Touch ID prompt says it's for: "lines is trying to …".
+  /// What the Touch ID prompt says it's for: "Lines is trying to …".
   fn reason(which: Which) -> &'static str {
     match which {
       Which::App => "unlock your notes",
@@ -198,7 +198,7 @@ mod touch_id {
     match passwords::get_generic_password(SERVICE, account(which)) {
       Ok(key) => Ok(Some(key)),
       Err(e) if e.code() == NOT_FOUND => Err(match which {
-        Which::App => "Touch ID isn't set up for lines any more. Use your passphrase.".into(),
+        Which::App => "Touch ID isn't set up for Lines any more. Use your passphrase.".into(),
         Which::Notes => "Touch ID isn't set up for locked notes any more. Use your password.".into(),
       }),
       Err(e) => Err(e.to_string()),

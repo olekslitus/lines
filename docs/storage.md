@@ -1,4 +1,4 @@
-# Where lines keeps your data on the web
+# Where Lines keeps your data on the web
 
 This covers the web app, including the demo at https://olekslitus.com/lines/app/. Everything stays in the browser, on the visitor's computer. The site's host (GitHub Pages) only serves the app's files, and the app never sends notes anywhere. The exception is sync, when someone sets it up: to a folder they choose, or to their own S3 bucket (not offered on the demo website).
 
@@ -15,7 +15,7 @@ Browser storage belongs to one site (origin) in one browser profile. Another bro
 | `lines` | `notes` | Every note: its Markdown, dates, pin, trash, icon, and for a locked note its encrypted text |
 | `lines` | `attachments` | Images and files added to notes, named by their content hash |
 | `lines` | `sync` | What was last exchanged with the sync folder or bucket, per note, to tell which side changed |
-| `lines-folders` | `folders` | The browser's handle to the folder chosen with **Save to a folder**, so lines can use it again after a reload |
+| `lines-folders` | `folders` | The browser's handle to the folder chosen with **Save to a folder**, so Lines can use it again after a reload |
 | `lines-feeds` | `feeds` | Each feed subscribed to: what it said of itself and what it's written in (RSS, Atom, RSS 1.0 or JSON Feed, for the sidebar's rows by kind), its newest 200 posts (all but their content), which were read and which dismissed (and why), which its filters keep out, and its ETag and Last-Modified for asking whether it changed (its picture is its note's cover, an attachment) |
 | `lines-feeds` | `posts` | Each post's content, as the feed gave it (HTML), read when the post is opened |
 | `lines-feeds` | `words` | What filters read of each feed's posts (each one's title, author, categories and the start of its text, in lower case, Latin and Greek letters without accents), read only when the filters change, and written when a post does |
@@ -28,7 +28,7 @@ With the app lock on, the notes and attachments in `lines` and everything in `li
 
 | Key | What's in it |
 |---|---|
-| `lines.prefs` | Theme, appearance, font (one of lines' or one installed on the device, by its name) and formatting's fonts, text size, note width, spacing, icon set, layout, symbols, spreadsheets, links, whether links are looked up (the Library), how often feeds refresh and whether posts read are dismissed, the podcast player's speed, whether books are read a page at a time or scrolled and a PDF's pages in the theme's colors |
+| `lines.prefs` | Theme, appearance, font (one of Lines' or one installed on the device, by its name) and formatting's fonts, text size, note width, spacing, icon set, layout, symbols, spreadsheets, links, whether links are looked up (the Library), how often feeds refresh and whether posts read are dismissed, the podcast player's speed, whether books are read a page at a time or scrolled and a PDF's pages in the theme's colors |
 | `lines.language` | The language chosen in Settings, unless it's System |
 | `lines.plugins` | Plugins turned off or on in Settings |
 | `lines.tabs` | The open tabs, when tabs are on |
@@ -39,13 +39,13 @@ With the app lock on, the notes and attachments in `lines` and everything in `li
 | `lines.lists` | Accounts on AniList and MyAnimeList (who, and their tokens), and for each anime on the list what was last exchanged with the site, both sides, and with which note; and what was taken off the list there, which isn't put back. This device's own: never synced. Encrypted while the app lock is on |
 | `lines.sync.leftovers` | Set only while encrypted copies are being removed after turning end-to-end encryption off |
 | `lines.seeded` | That the welcome note or feature tour has been added once, so deleting them doesn't bring them back |
-| `lines.unsaved.<id>` | A note typed in just before the page went (a tab closed or reloaded, lines quit), until it's in `lines`: stored at the next start unless what's there is newer. Never a locked note, nor anything while the app lock is on |
+| `lines.unsaved.<id>` | A note typed in just before the page went (a tab closed or reloaded, Lines quit), until it's in `lines`: stored at the next start unless what's there is newer. Never a locked note, nor anything while the app lock is on |
 | `lines.lock` | The app lock's settings, and its key locked with the passphrase |
 | `lines.lockedNotes` | Locked notes' key, locked with their password, and whether Touch ID opens them |
 
 ## In a folder
 
-After **Save to a folder** (Chrome, Edge and other Chromium browsers), lines also writes everything to that folder and keeps it in step with the browser, both ways:
+After **Save to a folder** (Chrome, Edge and other Chromium browsers), Lines also writes everything to that folder and keeps it in step with the browser, both ways:
 
 ```
 <folder>/
@@ -60,7 +60,7 @@ The format is described in [sync.md](sync.md). The browser stays the working cop
 Browser storage isn't permanent:
 
 - **Clearing site data** (or cookies and site data for the site) deletes the notes in the browser.
-- **The browser can evict it** when the disk runs low. lines doesn't ask for persistent storage (`navigator.storage.persist()`), so it's "best effort" storage.
+- **The browser can evict it** when the disk runs low. Lines doesn't ask for persistent storage (`navigator.storage.persist()`), so it's "best effort" storage.
 - **Safari** deletes the storage of a site that hasn't been visited for 7 days.
 
 For notes that should last, use **Save to a folder**, or export them (Settings → Export and Import → Export).
@@ -71,7 +71,7 @@ Browsers keep storage apart by domain, not by path. The demo is at `olekslitus.c
 
 ## In the desktop apps
 
-The apps keep the same databases and keys, in their web view's storage, in a folder named for lines' identifier, `com.olekslitus.lines`:
+The apps keep the same databases and keys, in their web view's storage, in a folder named for Lines' identifier, `com.olekslitus.lines`:
 
 | System | Folder |
 |---|---|
@@ -79,7 +79,7 @@ The apps keep the same databases and keys, in their web view's storage, in a fol
 | Windows | `%LOCALAPPDATA%\com.olekslitus.lines\` (WebView2's, in `EBWebView`) |
 | Linux | `~/.local/share/com.olekslitus.lines/` (WebKitGTK's) |
 
-Besides those, an update being downloaded and copies of attachments opened in other apps are in lines' cache folder (`~/Library/Caches/com.olekslitus.lines/` on a Mac, the folder above on Windows, `~/.cache/com.olekslitus.lines/` on Linux), and with Touch ID on, its keys are in the Mac's login keychain as "lines app lock".
+Besides those, an update being downloaded and copies of attachments opened in other apps are in Lines' cache folder (`~/Library/Caches/com.olekslitus.lines/` on a Mac, the folder above on Windows, `~/.cache/com.olekslitus.lines/` on Linux), and with Touch ID on, its keys are in the Mac's login keychain as "lines app lock".
 
 ## What the host sees
 

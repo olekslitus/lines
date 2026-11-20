@@ -37,9 +37,9 @@ jobs:
         run: |
           notes="$RUNNER_TEMP/notes.md"
           {
-            echo "lines is in alpha: early and changing. Export your notes now and then (Settings → Data → Export)."
+            echo "Lines is in alpha: early and changing. Export your notes now and then (Settings → Data → Export)."
             echo
-            echo "The desktop apps aren't signed yet. On a Mac, open lines once with right-click → Open (or System Settings → Privacy & Security → Open Anyway); on Windows, choose More info → Run anyway."
+            echo "The desktop apps aren't signed yet. On a Mac, open Lines once with right-click → Open (or System Settings → Privacy & Security → Open Anyway); on Windows, choose More info → Run anyway."
             echo
             echo "On Android, download the \`.apk\` on the phone and open it; allow your browser or Files app to install apps when asked. It doesn't update itself yet: install a newer one over it, and your notes stay. The \`.aab\` is the same app for Google Play, not for installing."
             echo
@@ -47,7 +47,7 @@ jobs:
           } > "$notes"
           git tag "v$VERSION"
           git push origin "v$VERSION"
-          gh release create "v$VERSION" --draft --verify-tag --title "lines $VERSION" --notes-file "$notes"
+          gh release create "v$VERSION" --draft --verify-tag --title "Lines $VERSION" --notes-file "$notes"
 
   build:
     needs: tag
@@ -176,7 +176,7 @@ jobs:
           VITE_GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
           VITE_ANILIST_CLIENT_ID: ${{ secrets.ANILIST_CLIENT_ID }}
           VITE_MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
-      - name: Signed with lines' key, and only it
+      - name: Signed with Lines' key, and only it
         run: bun scripts/release.mjs check-android-signatures src-tauri/gen/android/app/build/outputs
       - name: Name the downloads by the system they're for, lines_0.3.3_android_universal.apk
         run: bun scripts/release.mjs name-downloads "$VERSION" src-tauri/gen/android

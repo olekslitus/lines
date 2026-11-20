@@ -418,7 +418,7 @@ Red, with a label to point at. <!-- mark red: to fix -->
 - A list item, marked purple. <!-- mark purple -->
 ---
 
-#### 31. Line marks, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Line marks, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 Marked as the accent. <!-- mark -->
 Two lines marked green, one bar. <!-- mark green: ready -->

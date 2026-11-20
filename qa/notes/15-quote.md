@@ -268,7 +268,7 @@ Each element in a quote. Check: it draws as it does on its own, sits inside the 
 
 > ---
 
-#### 31. Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop) in a quote (stays Markdown here)
+#### 31. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop) in a quote (stays Markdown here)
 
 > Before the break.
 >

@@ -448,7 +448,7 @@ Total, =costs!B2*2
 | Broken | =B2/0 |
 ---
 
-#### 31. Table with formulas, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Table with formulas, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 | Item | Cost |
 | --- | ---: |

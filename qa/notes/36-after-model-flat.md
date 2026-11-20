@@ -388,7 +388,7 @@ translate([30, 10]) circle(8);
 ```
 ---
 
-#### 31. Flat model (openscad block), then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Flat model (openscad block), then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 ```openscad
 square(20);

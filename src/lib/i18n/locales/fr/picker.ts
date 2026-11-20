@@ -41,7 +41,7 @@ export default {
   "picker.color.again": "{name} {count}",
   "picker.writtenIn": "Rédigée en",
   "picker.languageOff": "Rédigée en {language}, dont l’extension est désactivée : elle s’affiche en texte brut.",
-  "picker.languageMissing": "Rédigée en {language}, que lines ne peut pas afficher ici : elle s’affiche en texte brut.",
+  "picker.languageMissing": "Rédigée en {language}, que Lines ne peut pas afficher ici : elle s’affiche en texte brut.",
   "picker.turnOn": "Activer",
   "picker.words": "Mots",
   "picker.characters": "Caractères",

@@ -38,7 +38,7 @@ export default {
     "Vos clés sont stockées uniquement sur cet appareil, dans le stockage de ce navigateur. Utilisez une clé qui n’a accès qu’à ce bucket.",
   "sync.bucket.corsTitle": "Dans le navigateur, le bucket a besoin d’une règle CORS pour {origin}",
   "sync.bucket.corsHelp": "Collez ceci dans les réglages CORS du bucket (S3, R2, MinIO). Pour Backblaze B2, consultez {file}.",
-  "sync.bucket.works": "Connecté. lines peut lire et écrire dans ce bucket.",
+  "sync.bucket.works": "Connecté. Lines peut lire et écrire dans ce bucket.",
   "sync.bucket.test": "Tester la connexion",
   "sync.bucket.testing": "Test en cours…",
 
@@ -52,14 +52,14 @@ export default {
     "Tout stockage compatible S3 : MinIO, Wasabi, Tigris, DigitalOcean Spaces, Garage, Hetzner…",
 
   "sync.folder.intro":
-    "Vos notes sont placées dans un dossier « {folder} » du stockage en ligne, et l’app de ce service les synchronise avec vos autres appareils. Activez-y le même service, puis connectez-y lines.",
+    "Vos notes sont placées dans un dossier « {folder} » du stockage en ligne, et l’app de ce service les synchronise avec vos autres appareils. Activez-y le même service, puis connectez-y Lines.",
   "sync.folder.looking": "Recherche des stockages en ligne…",
   "sync.folder.drives": "Stockage en ligne",
   "sync.folder.none":
     "Aucun stockage en ligne trouvé sur ce Mac. Activez iCloud Drive dans Réglages Système → votre nom → iCloud, ou installez Google Drive, Proton Drive, Dropbox ou OneDrive. Ou utilisez n’importe quel dossier :",
   "sync.folder.chooseOther": "Choisir un autre dossier…",
   "sync.folder.pickPrompt": "Utiliser ce dossier",
-  "sync.folder.pickMessage": "Choisissez où lines garde vos notes. Un dossier d’un service de stockage en ligne les synchronise.",
+  "sync.folder.pickMessage": "Choisissez où Lines garde vos notes. Un dossier d’un service de stockage en ligne les synchronise.",
   "sync.folder.icloud":
     "iCloud Drive garde vos Mac à jour. La synchronisation avec l’app pour iPhone et la connexion avec iCloud sur le Web arrivent bientôt.",
   "sync.folder.showInFinder": "Afficher dans le Finder",
@@ -68,17 +68,17 @@ export default {
   "sync.folder.failed": "Impossible d’utiliser le dossier : {error}",
 
   "sync.browser.intro":
-    "Enregistrez vos notes dans un dossier de cet ordinateur, sous forme de fichiers Markdown que n’importe quelle app peut ouvrir. lines les tient à jour pendant que vous écrivez, et vos notes restent aussi dans ce navigateur.",
+    "Enregistrez vos notes dans un dossier de cet ordinateur, sous forme de fichiers Markdown que n’importe quelle app peut ouvrir. Lines les tient à jour pendant que vous écrivez, et vos notes restent aussi dans ce navigateur.",
   "sync.browser.allow": "Autoriser l’accès",
-  "sync.browser.asksAgain": "Votre navigateur redemande l’autorisation après un redémarrage avant que lines puisse utiliser le dossier.",
+  "sync.browser.asksAgain": "Votre navigateur redemande l’autorisation après un redémarrage avant que Lines puisse utiliser le dossier.",
   "sync.browser.unsupported":
-    "Ce navigateur ne peut pas enregistrer dans un dossier. Ouvrez lines dans Chrome ou Edge pour enregistrer vos notes sous forme de fichiers, ou exportez-les depuis Réglages → Exporter et importer. En attendant, vos notes sont conservées dans ce navigateur.",
+    "Ce navigateur ne peut pas enregistrer dans un dossier. Ouvrez Lines dans Chrome ou Edge pour enregistrer vos notes sous forme de fichiers, ou exportez-les depuis Réglages → Exporter et importer. En attendant, vos notes sont conservées dans ce navigateur.",
   "sync.browser.choose": "Choisir un dossier…",
   "sync.browser.chooseAnother": "Choisir un autre dossier…",
   "sync.browser.cantPick": "Ce navigateur ne peut pas enregistrer dans un dossier. Essayez Chrome ou Edge.",
   "sync.browser.gone": "Le dossier n’est plus disponible. Choisissez-le de nouveau dans Réglages → Synchronisation.",
   "sync.browser.permission":
-    "lines a besoin de votre autorisation pour utiliser de nouveau « {name} ». Ouvrez Réglages → Synchronisation et autorisez-le.",
+    "Lines a besoin de votre autorisation pour utiliser de nouveau « {name} ». Ouvrez Réglages → Synchronisation et autorisez-le.",
 
   "sync.e2e.title": "Chiffrement de bout en bout",
   "sync.e2e.intro":
@@ -114,7 +114,7 @@ export default {
   "sync.error.keyFileMissing":
     "Le fichier de clé des notes ({file}) est introuvable. Si le stockage en ligne est encore en train de le télécharger, cela se réglera tout seul.",
   "sync.error.keyFileDamaged":
-    "{file} est endommagé ou provient d’une version plus récente de lines : rien n’a été synchronisé.",
+    "{file} est endommagé ou provient d’une version plus récente de Lines : rien n’a été synchronisé.",
   "sync.error.turnedOff":
     "Le chiffrement a été désactivé sur un autre appareil. Désactivez-le ici aussi pour continuer la synchronisation.",
   "sync.error.rekeyed":

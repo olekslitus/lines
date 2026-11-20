@@ -508,7 +508,7 @@ Total, =costs!B2*2
 ```
 ---
 
-#### 31. Timing diagram (wavedrom block), then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Timing diagram (wavedrom block), then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 ```wavedrom
 { signal: [

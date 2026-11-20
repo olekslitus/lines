@@ -29,7 +29,7 @@ export default {
   "books.failed": "Impossible d’ouvrir ce livre.",
   "books.fromFile": "Ajouter un livre depuis un fichier…",
   "books.added": "{title} ajouté aux Livres",
-  "books.notABook": "{name} n’est pas un livre que lines peut lire : PDF ou EPUB.",
-  "books.tooBig": "{name} est trop volumineux pour être gardé comme livre : lines garde les livres jusqu’à {size} Mo.",
+  "books.notABook": "{name} n’est pas un livre que Lines peut lire : PDF ou EPUB.",
+  "books.tooBig": "{name} est trop volumineux pour être gardé comme livre : Lines garde les livres jusqu’à {size} Mo.",
   "books.addFailed": "Impossible d’ajouter {name}.",
 } satisfies Translation<typeof en>;

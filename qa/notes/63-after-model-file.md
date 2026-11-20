@@ -298,7 +298,7 @@ Total, =costs!B2*2
 [Bracket.stl](attachment:bracket.stl)
 ---
 
-#### 31. Attached 3D model (STL), then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Attached 3D model (STL), then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 [Bracket.stl](attachment:bracket.stl)
 Before the break.

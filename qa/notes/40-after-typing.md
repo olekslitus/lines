@@ -448,7 +448,7 @@ function go() {
 ```
 ---
 
-#### 31. Typing practice (typing block), then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Typing practice (typing block), then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 ```typing
 It’s a “fine” day — type it.

@@ -10,6 +10,19 @@ const translations = { es: es as Record<string, string>, fr: fr as Record<string
 /** The names a message fills in: `{name}` and `{count, plural, …}`, not `{{name}}`, which is written as it is. */
 const placeholders = (message: string) => new Set([...message.replace(/\{\{\w+\}\}/g, "").matchAll(/\{(\w+)(?=[},])/g)].map((match) => match[1]));
 
+/** English messages where "lines" is the plain word, as in "Drag to move lines", not the app's name. */
+const linesAsWord = new Set([
+  "latex.preamble",
+  "settings.dragBlocks",
+  "shortcuts.markLines",
+  "styles.neon",
+  "styles.puddle",
+  "styles.lightbulb",
+  "styles.void",
+  "plugins.changes.description",
+  "plugins.paper.description",
+]);
+
 describe("messages", () => {
   test("each translation fills in the same things as the English", () => {
     const wrong: string[] = [];
@@ -33,6 +46,18 @@ describe("messages", () => {
         expect(formatted, `${language} ${key}`).not.toMatch(/\{\w+[},]/);
       }
     }
+  });
+
+  test("the app's name is written Lines", () => {
+    const lowercase: string[] = [];
+    for (const [language, messages] of [["en", english], ...Object.entries(translations)] as const) {
+      for (const [key, message] of Object.entries(messages)) {
+        if (language === "en" && linesAsWord.has(key)) continue;
+        // Identifiers keep their case: .lines-preset.json, lines-notes-{date}, olekslitus/lines#12.
+        if (/(?<![\w./-])lines(?![\w/#-])/.test(message)) lowercase.push(`${language} ${key}`);
+      }
+    }
+    expect(lowercase).toEqual([]);
   });
 
   test("no translation is left that English no longer has", () => {

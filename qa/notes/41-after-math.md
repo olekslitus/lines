@@ -358,7 +358,7 @@ $$
 $$
 ---
 
-#### 31. Math block, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Math block, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 $$
 \int_0^1 x^2\,dx = \frac{1}{3}

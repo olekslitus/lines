@@ -298,7 +298,7 @@ Total, =costs!B2*2
 ![A sample picture](attachment:photo.png)
 ---
 
-#### 31. Image, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Image, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 ![A sample picture](attachment:photo.png)
 Before the break.

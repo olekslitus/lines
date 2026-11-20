@@ -55,8 +55,8 @@ test("an Obsidian vault: what importing it would do, said first; then its notes,
   await group.getByText(`${count} notes, 2 attachments, and 3 folders in Vault.`).waitFor();
   expect(await group.getByText(/kept as text/).allInnerTexts()).toEqual([
     "1 link to a heading in its own note, kept as text: [[#Further reading]] (Welcome)",
-    "1 block id, kept as text, as lines doesn’t link to a line: ^37066d (Welcome)",
-    "1 task with a status lines doesn’t have, kept as text: [/] (Welcome)",
+    "1 block id, kept as text, as Lines doesn’t link to a line: ^37066d (Welcome)",
+    "1 task with a status Lines doesn’t have, kept as text: [/] (Welcome)",
   ]);
   await group.getByText(/^2 files no note shows, left out: /).waitFor();
   // Nothing written yet, and Import is where focus is.
@@ -66,7 +66,7 @@ test("an Obsidian vault: what importing it would do, said first; then its notes,
   await start.click();
   await group.getByText(`Imported ${count} notes.`).waitFor();
   // What didn't come across as it was is said again.
-  await group.getByText("1 note shown in another, made a link to it, as lines doesn’t show one note in another: ![[Ideas]] (Welcome)").waitFor();
+  await group.getByText("1 note shown in another, made a link to it, as Lines doesn’t show one note in another: ![[Ideas]] (Welcome)").waitFor();
 
   const notes = await imported();
   expect(Object.keys(notes).sort()).toEqual([...(hidden ? [".trash/Old idea.md"] : []), "Daily/2026-11-14.md", "Ideas.md", "Projects/Acme/Plan.md", "Projects/Plan.md", "Welcome.md"]);
@@ -103,11 +103,11 @@ test("an Obsidian vault: what importing it would do, said first; then its notes,
   await chooseVault(VAULT);
   await group.getByText("4 notes, 2 attachments, and 3 folders in Vault.").waitFor();
   // Which, by name, and why.
-  await group.getByText(hidden ? /^2 are in lines already, from importing it before, and left out: / : "1 is in lines already, from importing it before, and left out: Ideas").waitFor();
+  await group.getByText(hidden ? /^2 are in Lines already, from importing it before, and left out: / : "1 is in Lines already, from importing it before, and left out: Ideas").waitFor();
   await group.getByRole("button", { name: "Import 4 Notes" }).click();
   await group.getByText("Imported 4 notes.").waitFor();
   await chooseVault(VAULT);
-  await group.getByText("Everything in Vault is in lines already.").waitFor();
+  await group.getByText("Everything in Vault is in Lines already.").waitFor();
   expect(await group.getByRole("button", { name: /^Import/ }).count()).toBe(0);
   // The last import's Undo stays, under what this one would do.
   await group.getByRole("button", { name: "Undo Import" }).waitFor();
@@ -166,7 +166,7 @@ test("Bear's backup: its notes with their tags, pictures, pins, archive and tras
   await group.locator("input[accept*='.bear2bk']").setInputFiles(bearBackup());
   await group.getByText("5 notes and 2 attachments in Bear Notes 2024-11-14.").waitFor();
   await group.getByText("1 locked note, which can’t be read (unlock it in Bear to bring it), left out: Secret").waitFor();
-  await group.getByText("1 tag of several words, written with dashes, as lines’ tags have no spaces: #big ideas# → #big-ideas (Welcome)").waitFor();
+  await group.getByText("1 tag of several words, written with dashes, as Lines’ tags have no spaces: #big ideas# → #big-ideas (Welcome)").waitFor();
   // No folders in Bear: nothing to tag them with.
   expect(await group.getByRole("switch").count()).toBe(0);
   await group.getByRole("button", { name: "Import 5 Notes" }).click();
@@ -183,7 +183,7 @@ test("Bear's backup: its notes with their tags, pictures, pins, archive and tras
   await page.locator('.sidebar [data-tag="big-ideas"]').waitFor();
 
   await group.locator("input[accept*='.bear2bk']").setInputFiles(bearBackup());
-  await group.getByText("Everything in Bear Notes 2024-11-14 is in lines already.").waitFor();
+  await group.getByText("Everything in Bear Notes 2024-11-14 is in Lines already.").waitFor();
 });
 
 test("a Logseq graph: its pages and journals, outlines as lists and prose as paragraphs, references as text; then nothing new", async () => {
@@ -208,7 +208,7 @@ test("a Logseq graph: its pages and journals, outlines as lists and prose as par
   await page.locator('.sidebar [data-tag="journals"]').waitFor();
 
   await group.locator("input[webkitdirectory]").setInputFiles(graph);
-  await group.getByText("Everything in Graph is in lines already.").waitFor();
+  await group.getByText("Everything in Graph is in Lines already.").waitFor();
 });
 
 test("Notion's export, a ZIP of ZIPs: its pages, a database as a table of its rows, each a note of its type; then nothing new", async () => {
@@ -237,7 +237,7 @@ test("Notion's export, a ZIP of ZIPs: its pages, a database as a table of its ro
   await page.locator(".cm-content").getByText("Frank Herbert").waitFor();
 
   await (await app.settings("Export and Import")).getByRole("region", { name: "From Notion" }).locator("input[accept='.zip']").setInputFiles(exported);
-  await group.getByText("Everything in Export-0a1b is in lines already.").waitFor();
+  await group.getByText("Everything in Export-0a1b is in Lines already.").waitFor();
 });
 
 describe("Evernote", () => {
@@ -367,6 +367,6 @@ describe("Evernote", () => {
     expect(notes.Plan.created).toBe(Date.UTC(2024, 2, 1, 9));
     await page.locator('.sidebar [data-tag="big-ideas"]').waitFor();
     await group.locator("input[accept='.enex']").setInputFiles(file);
-    await group.getByText("Everything in Work is in lines already.").waitFor();
+    await group.getByText("Everything in Work is in Lines already.").waitFor();
   });
 });

@@ -493,7 +493,7 @@ describe("themes", () => {
   test("Wallhaven is the apps': on the web it says so, and New has no From Wallhaven", async () => {
     app = await openApp();
     const plugins = await app.settings("All Plugins");
-    expect(await plugins.getByText("Needs the lines app: Wallhaven's site doesn't answer web pages.").isVisible()).toBe(true);
+    expect(await plugins.getByText("Needs the Lines app: Wallhaven's site doesn't answer web pages.").isVisible()).toBe(true);
     const theme = await app.settings("Theme");
     await theme.getByRole("button", { name: "New", exact: true }).click();
     expect(await app.page.getByRole("menuitem", { name: "From Wallhaven" }).count()).toBe(0);

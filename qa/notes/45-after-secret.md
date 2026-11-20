@@ -298,7 +298,7 @@ Total, =costs!B2*2
 The token is {{qa-token}}, and {{no-such-secret}} isn't one.
 ---
 
-#### 31. Secret ({{name}}, kept in a locked secrets note), then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Secret ({{name}}, kept in a locked secrets note), then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 The token is {{qa-token}}, and {{no-such-secret}} isn't one.
 Before the break.

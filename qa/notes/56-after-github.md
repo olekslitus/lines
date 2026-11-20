@@ -298,7 +298,7 @@ Total, =costs!B2*2
 Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 ---
 
-#### 31. GitHub links, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. GitHub links, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 Issue https://github.com/olekslitus/lines/issues/1 and [a named link](https://github.com/olekslitus/lines)
 Before the break.

@@ -298,7 +298,7 @@ Total, =costs!B2*2
 [Budget.csv](attachment:budget.csv)
 ---
 
-#### 31. File, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. File, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 [Budget.csv](attachment:budget.csv)
 Before the break.

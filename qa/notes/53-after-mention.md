@@ -298,7 +298,7 @@ Total, =costs!B2*2
 Ask @[QA · Ada] at @[QA · Ada].email.
 ---
 
-#### 31. Mention, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Mention, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 Ask @[QA · Ada] at @[QA · Ada].email.
 Before the break.

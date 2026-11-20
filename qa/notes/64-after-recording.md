@@ -298,7 +298,7 @@ Total, =costs!B2*2
 [terminal.cast](attachment:terminal.cast)
 ---
 
-#### 31. Terminal recording (.cast file), then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Terminal recording (.cast file), then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 [terminal.cast](attachment:terminal.cast)
 Before the break.

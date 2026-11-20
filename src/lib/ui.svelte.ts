@@ -25,8 +25,8 @@ export interface Menu {
   /** Where to open, in viewport coordinates. */
   x: number;
   y: number;
-  /** "end" lines the menu's right edge up with `x`. */
-  align?: "start" | "end";
+  /** "end" lines the menu's right edge up with `x`, "center" its middle. */
+  align?: "start" | "center" | "end";
   /** The button that opened it; pressing it again closes the menu rather than reopening it. */
   anchor?: Element;
   /** What the menu is for, said by screen readers as it opens: "Share", a note's title. */
@@ -97,6 +97,11 @@ class UIState {
   iconPicker = $state.raw<IconTarget | null>(null);
   /** Notes a tag is being added to, and where its box opens. */
   tagPrompt = $state.raw<TagPrompt | null>(null);
+  /**
+   * Add to Library (AddToLibrary.svelte), while it's open: where, the button that opened it (focus
+   * goes back there if it's closed with nothing chosen), and the shelf it starts on, if not the first.
+   */
+  addToLibrary = $state.raw<{ x: number; y: number; button: HTMLElement; shelf?: string } | null>(null);
   /** Where the box to subscribe to a feed opens, while it's open. */
   subscribePrompt = $state.raw<Omit<TagPrompt, "ids"> | null>(null);
   /** The feed whose own filters are being set (FeedFilters.svelte), while they are. */

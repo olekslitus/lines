@@ -279,6 +279,8 @@ export interface Stored {
   hideBars: boolean;
   /** Icons (off: buttons that are only an icon show its name, and the rest go, but for those that say something). */
   showIcons: boolean;
+  /** On a phone, the round + at the bottom of the note list (AddButton.svelte). */
+  addButton: boolean;
   /**
    * How Markdown shows in a note: as written and colored (source), styled with all of it in sight
    * (visible), hidden but where you're writing (live), or never seen (hidden).
@@ -452,6 +454,7 @@ const DEFAULTS: Stored = {
   sidebarAbout: true,
   hideBars: false,
   showIcons: true,
+  addButton: true,
   markdownMode: "live",
   dragBlocks: true,
   underlinedHeadings: false,
@@ -622,6 +625,7 @@ function read(json?: string): Stored {
     sidebarAbout: flag(raw.sidebarAbout, DEFAULTS.sidebarAbout),
     hideBars: flag(raw.hideBars, DEFAULTS.hideBars),
     showIcons: flag(raw.showIcons, DEFAULTS.showIcons),
+    addButton: flag(raw.addButton, DEFAULTS.addButton),
     markdownMode: oneOf(raw.markdownMode, MARKDOWN_MODES, DEFAULTS.markdownMode),
     dragBlocks: flag(raw.dragBlocks, DEFAULTS.dragBlocks),
     underlinedHeadings: flag(raw.underlinedHeadings, DEFAULTS.underlinedHeadings),
@@ -735,6 +739,7 @@ class Prefs {
   sidebarAbout = $state(this.#initial.sidebarAbout);
   hideBars = $state(this.#initial.hideBars);
   showIcons = $state(this.#initial.showIcons);
+  addButton = $state(this.#initial.addButton);
   markdownMode = $state(this.#initial.markdownMode);
   dragBlocks = $state(this.#initial.dragBlocks);
   underlinedHeadings = $state(this.#initial.underlinedHeadings);
@@ -950,6 +955,7 @@ class Prefs {
       sidebarAbout: this.sidebarAbout,
       hideBars: this.hideBars,
       showIcons: this.showIcons,
+      addButton: this.addButton,
       markdownMode: this.markdownMode,
       dragBlocks: this.dragBlocks,
       underlinedHeadings: this.underlinedHeadings,
@@ -1071,6 +1077,7 @@ class Prefs {
     this.sidebarAbout = next.sidebarAbout;
     this.hideBars = next.hideBars;
     this.showIcons = next.showIcons;
+    this.addButton = next.addButton;
     this.markdownMode = next.markdownMode;
     this.dragBlocks = next.dragBlocks;
     this.underlinedHeadings = next.underlinedHeadings;

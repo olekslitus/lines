@@ -322,6 +322,8 @@ export default {
   "settings.hideBarsNote": "Las barras sobre la nota y la lista de notas, y la parte de arriba y de abajo de la barra lateral, no se ven hasta que acercas el puntero o llegas a ellas con Tab. En una pantalla táctil siempre se ven.",
   "settings.showIcons": "Iconos",
   "settings.showIconsNote": "Desactivados, un botón que solo es un icono muestra su nombre, las marcas de nota fijada o bloqueada se ven como palabras, y los demás iconos desaparecen, salvo las marcas de verificación y las flechas de lo que se despliega.",
+  "settings.addButton": "Botón para añadir en el móvil",
+  "settings.addButtonNote": "Un + redondo al final de la lista de notas, al alcance del pulgar: una nota nueva donde estás, o en la Biblioteca una entrada nueva. Mantenlo pulsado para otros tipos. Se va al bajar por la lista y vuelve al subir.",
   "settings.mainWindow": "Ventana principal",
   "settings.opacity": "Opacidad",
   "settings.blur": "Desenfocar lo que hay detrás",

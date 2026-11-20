@@ -20,7 +20,8 @@
    * paste a link to look up; or Blank, to fill one in by hand. What's chosen is a new note, opened.
    */
 
-  let { x, y, onclose }: { x: number; y: number; onclose: () => void } = $props();
+  /** `shelf`: the one to start on, if not the first. */
+  let { x, y, shelf, onclose }: { x: number; y: number; shelf?: string; onclose: () => void } = $props();
 
   /** What a search found, and whether it's whole (a link looked up) or only as much as a search says. */
   interface Found {
@@ -36,7 +37,7 @@
       return asked.length ? [{ shelf, asked }] : [];
     }),
   );
-  let chosen = $state(shelves.all[0]?.key ?? "");
+  let chosen = $derived(shelf ?? shelves.all[0]?.key ?? "");
   const current = $derived(searchable.find(({ shelf }) => shelf.key === chosen) ?? searchable[0]);
 
   let picker = $state<{ searchAgain(): void; close(): void }>();

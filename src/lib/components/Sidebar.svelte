@@ -297,17 +297,9 @@
   }
 
   /** Add to Library, open under the Library heading's button. */
-  let adding = $state<{ x: number; y: number; button: HTMLElement } | null>(null);
-
   function openAddToLibrary(button: HTMLElement) {
     const { left, bottom } = button.getBoundingClientRect();
-    adding = { x: left, y: bottom + 4, button };
-  }
-
-  /** Closed with nothing chosen, focus is back on the button. */
-  function closeAddToLibrary() {
-    if (!document.activeElement || document.activeElement === document.body) adding?.button.focus();
-    adding = null;
+    ui.addToLibrary = { x: left, y: bottom + 4, button };
   }
 
   /** The Library heading's button: Add to Library, or with feeds on, a menu of that and subscribing to a feed. */
@@ -718,8 +710,23 @@
   </footer>
 </nav>
 
-{#if adding}
-  <AddToLibrary x={adding.x} y={adding.y} onclose={closeAddToLibrary} />
+<!-- Add to Library, from the Library heading's + or the note list's round one on a phone (AddButton.svelte). -->
+{#if ui.addToLibrary}
+  {@const adding = ui.addToLibrary}
+  <AddToLibrary
+    x={adding.x}
+    y={adding.y}
+    shelf={adding.shelf}
+    onclose={() => {
+      ui.addToLibrary = null;
+      // Closed with nothing chosen (no note about to take the keyboard), focus is back on the button
+      // that opened it, once the box, which had it, is gone.
+      if (notes.pendingFocus) return;
+      requestAnimationFrame(() => {
+        if (!document.activeElement || document.activeElement === document.body) adding.button.focus();
+      });
+    }}
+  />
 {/if}
 
 <style>

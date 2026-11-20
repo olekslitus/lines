@@ -96,8 +96,7 @@ describe("an Obsidian vault", () => {
 
   test("the same, however the folder's files are listed", async () => {
     const { name, files } = folder("obsidian/Vault");
-    const same = (source: typeof vault) => source.notes.map(({ id, body, pinned, trashed, created, modified }) => ({ id, body, pinned, trashed, created, modified }));
-    for (const order of [[...files].reverse(), [...files].sort((a, b) => a.size - b.size)]) expect(same(await readVault({ name, files: order }))).toEqual(same(vault));
+    for (const order of [[...files].reverse(), [...files].sort((a, b) => a.size - b.size)]) expect((await readVault({ name, files: order })).notes).toEqual(vault.notes);
   });
 
   test("bookmarked notes (in groups too) pinned, the trash's in the Trash, daily notes dated, dates from properties or the file", () => {

@@ -93,30 +93,43 @@ jobs:
           ps -o pid,stat,etime,command -p "$pid" || { echo "::error::Lines quit"; cat "$RUNNER_TEMP/lines.log"; exit 1; }
           pgrep -fl WebKit || true
           screencapture -x "$RUNNER_TEMP/screen-1.png" || true
-          # A new note with math and a 3D model (OpenSCAD's WebAssembly, WebGL).
-          osascript -e "tell application \"System Events\" to set frontmost of (first process whose unix id is $pid) to true" || true
-          sleep 2
-          osascript -e 'tell application "System Events" to keystroke "n" using command down' || true
-          sleep 3
-          screencapture -x "$RUNNER_TEMP/screen-2.png" || true
-          cat > "$RUNNER_TEMP/type.applescript" <<'EOF'
-          tell application "System Events"
-            keystroke "Signed and hardened"
-            key code 36
-            keystroke "$e^{i\\pi} + 1 = 0$"
-            key code 36
-            key code 36
-            keystroke "```openscad"
-            key code 36
-            keystroke "difference() { cube(10, center = true); sphere(6.5); }"
-            key code 36
-            keystroke "```"
-            key code 36
-          end tell
+          cat > "$RUNNER_TEMP/click.applescript" <<'EOF'
+          -- Clicks the first thing in Lines' window named, described or titled argv's second item.
+          on run argv
+            set pid to (item 1 of argv) as integer
+            set label to item 2 of argv
+            tell application "System Events"
+              tell (first process whose unix id is pid)
+                set frontmost to true
+                repeat with e in (entire contents of window 1)
+                  try
+                    if name of e is label or description of e is label or title of e is label then
+                      click e
+                      return "clicked " & label
+                    end if
+                  end try
+                end repeat
+              end tell
+            end tell
+            return "no " & label
+          end run
           EOF
-          osascript "$RUNNER_TEMP/type.applescript" || true
-          sleep 25
+          keys() { osascript -e "tell application \"System Events\" to tell (first process whose unix id is $pid) to set frontmost to true" -e "tell application \"System Events\" to $1" || true; }
+          # A 3D model (OpenSCAD's WebAssembly, WebGL), from /model in a new note.
+          keys 'keystroke "n" using command down'; sleep 3
+          keys 'keystroke "/model"'; sleep 2
+          keys 'key code 36'; sleep 30
+          screencapture -x "$RUNNER_TEMP/screen-2.png" || true
+          # A LaTeX note, typeset with TeX (BusyTeX's WebAssembly).
+          keys 'keystroke "n" using command down'; sleep 3
+          keys 'keystroke "Signed and hardened"'; keys 'key code 36'; keys 'keystroke "Typeset by TeX in the signed app."'; sleep 2
+          osascript "$RUNNER_TEMP/click.applescript" "$pid" "Note info" || true; sleep 3
+          osascript "$RUNNER_TEMP/click.applescript" "$pid" "LaTeX" || true; sleep 3
           screencapture -x "$RUNNER_TEMP/screen-3.png" || true
+          keys 'key code 53'; sleep 1
+          keys 'keystroke "p" using command down'; sleep 5
+          osascript "$RUNNER_TEMP/click.applescript" "$pid" "TeX" || true; sleep 90
+          screencapture -x "$RUNNER_TEMP/screen-4.png" || true
           ps -o pid,stat,etime,command -p "$pid" || { echo "::error::Lines quit"; cat "$RUNNER_TEMP/lines.log"; exit 1; }
           kill "$pid"
           cat "$RUNNER_TEMP/lines.log"

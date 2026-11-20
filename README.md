@@ -606,6 +606,9 @@ What's planned next. Known limits of what's already there are in [docs/limitatio
 - [ ] Export a note as HTML
 
 **Platforms**
+- [x] The Mac app signed with Lines' Developer ID
+- [ ] The Mac app notarized by Apple, so it opens without a warning (waits on an App Store Connect key)
+- [ ] The Windows app signed
 - [x] The Android app with each release, signed, to install from the website
 - [ ] The Android app on Google Play, and registered with Google's developer verification so it keeps installing from the website after 2027
 - [ ] Updates in the Android app installed from the website

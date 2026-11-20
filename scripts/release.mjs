@@ -344,11 +344,12 @@ function checkMacSignature(target, notarized) {
       execFileSync("tar", ["-xzf", file, "-C", into]);
       return readdirSync(into).filter((name) => name.endsWith(".app")).map((name) => join(into, name));
     });
-    const paths = [...bundled("macos", ".app"), ...updates, ...bundled("dmg", ".dmg")];
-    if (!packages.length || updates.length !== packages.length || !paths.some((path) => path.endsWith(".dmg"))) {
+    const apps = bundled("macos", ".app");
+    const images = bundled("dmg", ".dmg");
+    if (!apps.length || !images.length || !packages.length || updates.length !== packages.length) {
       throw new Error(`No .app, update package with its app, and .dmg in ${target}'s bundle folders`);
     }
-    for (const path of paths) {
+    for (const path of [...apps, ...updates, ...images]) {
       const all = checks(path);
       const failed = all.filter(([, ok]) => !ok);
       if (failed.length) {

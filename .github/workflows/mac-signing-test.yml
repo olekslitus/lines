@@ -92,7 +92,32 @@ jobs:
           sleep 30
           ps -o pid,stat,etime,command -p "$pid" || { echo "::error::Lines quit"; cat "$RUNNER_TEMP/lines.log"; exit 1; }
           pgrep -fl WebKit || true
-          screencapture -x "$RUNNER_TEMP/screen.png" || true
+          screencapture -x "$RUNNER_TEMP/screen-1.png" || true
+          # A new note with math and a 3D model (OpenSCAD's WebAssembly, WebGL).
+          osascript -e "tell application \"System Events\" to set frontmost of (first process whose unix id is $pid) to true" || true
+          sleep 2
+          osascript -e 'tell application "System Events" to keystroke "n" using command down' || true
+          sleep 3
+          screencapture -x "$RUNNER_TEMP/screen-2.png" || true
+          cat > "$RUNNER_TEMP/type.applescript" <<'EOF'
+          tell application "System Events"
+            keystroke "Signed and hardened"
+            key code 36
+            keystroke "$e^{i\\pi} + 1 = 0$"
+            key code 36
+            key code 36
+            keystroke "```openscad"
+            key code 36
+            keystroke "difference() { cube(10, center = true); sphere(6.5); }"
+            key code 36
+            keystroke "```"
+            key code 36
+          end tell
+          EOF
+          osascript "$RUNNER_TEMP/type.applescript" || true
+          sleep 25
+          screencapture -x "$RUNNER_TEMP/screen-3.png" || true
+          ps -o pid,stat,etime,command -p "$pid" || { echo "::error::Lines quit"; cat "$RUNNER_TEMP/lines.log"; exit 1; }
           kill "$pid"
           cat "$RUNNER_TEMP/lines.log"
           ls ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i lines && exit 1 || true
@@ -104,4 +129,4 @@ jobs:
             src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
             src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app.tar.gz
             src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app.tar.gz.sig
-            ${{ runner.temp }}/screen.png
+            ${{ runner.temp }}/screen-*.png

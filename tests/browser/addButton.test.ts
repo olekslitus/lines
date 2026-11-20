@@ -1,5 +1,6 @@
 import { afterEach, expect, test } from "bun:test";
 import { type App, mod, noErrors, openApp, toggle } from "./app";
+import { drag, lift } from "./touch";
 
 /*
  * On a phone, the round + at the bottom of the note list (AddButton.svelte): what it makes where you
@@ -112,6 +113,52 @@ test("over the mini player, not under it", async () => {
     return plus.bottom === player.top - 16;
   });
   await page.evaluate(() => (window.testing.player.episode = null));
+});
+
+test("under the sidebar's dimming, opened by its button or a swipe: dimmed as much as the list, a tap on it closing the sidebar", async () => {
+  // The sidebar at its narrowest, so the + is half out from under it, under the dimming alone.
+  app = await openApp({ phone: true, prefs: { sidebarWidth: 180 } });
+  const { page } = app;
+  const sidebar = page.locator("[data-pane=sidebar]");
+  /** Where a finger on the + clear of the sidebar lands: its right edge. */
+  const point = async () => {
+    const box = (await button().boundingBox())!;
+    return { x: box.x + box.width - 8, y: box.y + box.height / 2 };
+  };
+  const at = ({ x, y }: { x: number; y: number }) => page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.closest("button")?.getAttribute("aria-label"), [x, y]);
+  /** Settled: the sidebar done sliding. */
+  const slid = () => sidebar.evaluate((pane) => Promise.all(pane.getAnimations().map((animation) => animation.finished)));
+  const covered = () =>
+    page.evaluate(() => {
+      const [scrim, plus] = [document.querySelector('[aria-label="Close sidebar"]')!, document.querySelector(".add-button")!];
+      return { opacity: Number(getComputedStyle(scrim).opacity), over: Number(getComputedStyle(scrim).zIndex) > Number(getComputedStyle(plus).zIndex) };
+    });
+  const spot = await point();
+  expect(await at(spot)).toBe("New note");
+
+  // Opened by its button: the dimming over the +, which a tap there closes, making nothing.
+  await page.getByRole("button", { name: "Show sidebar", exact: true }).click();
+  await page.waitForFunction(() => !(document.querySelector("[data-pane=sidebar]") as HTMLElement).inert);
+  await slid();
+  expect((await sidebar.boundingBox())!.width).toBeLessThan(spot.x);
+  expect(await at(spot)).toBe("Close sidebar");
+  expect(await covered()).toEqual({ opacity: 1, over: true });
+  const before = await page.evaluate(() => window.testing.notes.entries.length);
+  await page.mouse.click(spot.x, spot.y);
+  await page.waitForFunction(() => (document.querySelector("[data-pane=sidebar]") as HTMLElement).inert);
+  expect(await page.evaluate(() => window.testing.notes.entries.length)).toBe(before);
+  await slid();
+
+  // Swiped in: dimmed part way as it follows the finger, and drawn over the + all the while.
+  await drag(page, { x: 4, y: 400 }, { x: 100, y: 400 }, { lift: false });
+  const partway = await covered();
+  expect(partway.over).toBe(true);
+  expect(partway.opacity).toBeGreaterThan(0);
+  expect(partway.opacity).toBeLessThan(1);
+  await lift(page);
+  await page.waitForFunction(() => !(document.querySelector("[data-pane=sidebar]") as HTMLElement).inert);
+  await page.waitForFunction(() => !(document.querySelector("[data-pane=sidebar]") as HTMLElement).style.translate);
+  expect(await at(spot)).toBe("Close sidebar");
 });
 
 test("held, a menu of other kinds: a plain note, a type of your own, Add to Library", async () => {

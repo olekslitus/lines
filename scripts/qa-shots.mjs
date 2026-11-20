@@ -1989,6 +1989,19 @@ const SCENES = [
       await page.locator(".add-button").click({ button: "right" });
     },
   },
+  {
+    id: "phone-add-button-sidebar",
+    title: "Phone: the round +, with the sidebar open",
+    look: "The sidebar at its narrowest over the list, the + half out from under it and dimmed with the list, as dark as the rows beside it, not bright over the dimming.",
+    prefs: { sidebarWidth: 180 },
+    width: 390,
+    height: 780,
+    act: async (page) => {
+      await addNotes(page);
+      await page.locator(".sidebar-toggle").first().click();
+      await page.locator("[data-pane=sidebar]").evaluate((pane) => Promise.all(pane.getAnimations().map((animation) => animation.finished)));
+    },
+  },
   { id: "phone-dark-list", title: "Phone: a dark note list", look: "The list dark, its rows readable, its title bar dark up to the top of the screen.", prefs: { darkPanes: "list" }, width: 390, height: 780, schemes: ["light"] },
   {
     id: "phone-typing",

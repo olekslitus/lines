@@ -6,7 +6,7 @@ What these features don't do (yet), and what hasn't been tried outside tests. Th
 
 Each of these has only run in Chrome, through the end-to-end tests (two browser profiles and a stand-in S3 server):
 
-- [ ] **Touch ID** in the Mac app, for the app lock and for locked notes. The development build is unsigned, so macOS may ask for the login password the first time Lines reads its Keychain item ("lines app lock").
+- [ ] **Touch ID** in the Mac app, for the app lock and for locked notes. A development or locally built app is unsigned, so macOS may ask for the login password the first time it reads Lines' Keychain item ("lines app lock"); the released app is signed, and doesn't ask after an update ([releasing.md](releasing.md#the-mac-apps-signature)).
 - [ ] **Floating notes** while Lines is locked, and while locked notes are locked or open. The key is handed to them through the app's native side (app lock) or the window channel (locked notes).
 - [ ] **End-to-end encryption with a cloud drive folder.** Only S3 was tested end to end with encryption on. Plain folder sync passes its test.
 - [ ] **iPhone and Android.** None of the three features has been run there.
@@ -543,7 +543,8 @@ What isn't done yet is in [secrets.md](secrets.md#not-yet).
 ## Updates
 
 - Tried on a Mac, with test builds and a stand-in for GitHub: a release that had waited long enough was downloaded and installed as the app quit, and the new version opened. Restart to update, and updating on Windows and Linux, haven't been tried yet; the first real release with updates will be the first test of its packages.
-- The apps aren't signed, so after an update macOS may ask for the login password once more to read Lines' Keychain item (app lock, Touch ID), as after reinstalling by hand.
+- The Mac app is signed from the release after 0.7.0 on, and an update of a signed version keeps reading Lines' Keychain item (app lock, Touch ID) without asking. The first update from an unsigned version (0.7.0 and earlier) asks for the login password once more, as after reinstalling by hand ([releasing.md](releasing.md#the-mac-apps-signature)).
+- The Windows app isn't signed, so Windows warns before opening a downloaded copy: choose More info → Run anyway.
 - A `.deb` or `.rpm` install asks for a password when it updates, and the Windows MSI for permission; the AppImage and the `-setup.exe` install don't.
 - Once an update is downloaded it's the one installed: a newer one found before quitting waits for the next run.
 - There's no Check for Updates… in the Mac's app menu yet; it's in Settings → About.

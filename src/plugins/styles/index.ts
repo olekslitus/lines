@@ -18,6 +18,7 @@ import aero from "./aero.css?raw";
 import brutalist from "./brutalist.css?raw";
 import constructivist from "./constructivist.css?raw";
 import classic from "./classic.css?raw";
+import ios from "./ios.css?raw";
 import lightbulb from "./lightbulb.css?raw";
 import neon from "./neon.css?raw";
 import pixel from "./pixel.css?raw";
@@ -27,10 +28,10 @@ import voidStyle from "./void.css?raw";
 /*
  * Whole looks for the app, beside its colors, each a preset (Settings → Presets): lines' own, a 90s
  * desktop, one-bit pixels, neon, a rainy day in a picture book, a spark of lightning, a 2D adventure
- * game's pixel art, glossy 2000s glass, brutalism, 1920s Constructivist posters and heavy
- * minimalism. Each but lines' brings a color theme made for it, and some a cursor, a pointer or
- * other settings to go with it. Their fonts (SIL Open Font License) load only when a style that
- * uses them shows.
+ * game's pixel art, glossy 2000s glass, brutalism, 1920s Constructivist posters, heavy minimalism
+ * and an iPhone app's own look. Each but lines' brings a color theme made for it, and some a
+ * cursor, a pointer, icons or other settings to go with it. Their fonts (SIL Open Font License)
+ * load only when a style that uses them shows.
  */
 
 /** Their colors, which are themes like any other, each with its palette. */
@@ -842,6 +843,143 @@ const themes = (): WithPalette[] => [
       "callout-decision": "teal",
     },
   },
+  /*
+   * iOS: Apple's system colors, light and dark, as UIKit has them (Human Interface Guidelines →
+   * Color, developer.apple.com/design/human-interface-guidelines/color): white and black for the
+   * note and the list (systemBackground), grouped grey for the sidebar and Settings
+   * (secondarySystemBackground, and systemGroupedBackground with its cells' white; a sheet's
+   * elevated greys in dark), label for text, systemBlue for the accent, and the other system colors
+   * for highlights, status, callouts and tags. Grey text is systemGray at Increase Contrast's
+   * strength in light (secondaryLabel, #3c3c43 at 60%, is 3.4:1 on white), secondaryLabel in dark;
+   * faint text secondaryLabel in light, systemGray2 in dark. Code in Xcode's Default themes' colors.
+   */
+  {
+    id: "ios",
+    name: "iOS",
+    palette: {
+      light: {
+        name: "iOS Light",
+        author: "Apple",
+        colors: [
+          { id: "background", name: "System Background", color: "#ffffff" },
+          { id: "secondary-background", name: "Secondary System Background", color: "#f2f2f7" },
+          { id: "label", name: "Label", color: "#000000" },
+          { id: "secondary-label", name: "Secondary Label", color: "#8a8a8e" },
+          { id: "gray", name: "System Gray", color: "#8e8e93" },
+          { id: "gray-contrast", name: "System Gray (Increased Contrast)", color: "#6c6c70" },
+          { id: "blue", name: "System Blue", color: "#0088ff" },
+          { id: "red", name: "System Red", color: "#ff383c" },
+          { id: "orange", name: "System Orange", color: "#ff8d28" },
+          { id: "yellow", name: "System Yellow", color: "#ffcc00" },
+          { id: "green", name: "System Green", color: "#34c759" },
+          { id: "mint", name: "System Mint", color: "#00c8b3" },
+          { id: "indigo", name: "System Indigo", color: "#6155f5" },
+          { id: "purple", name: "System Purple", color: "#cb30e0" },
+          { id: "xcode-keyword", name: "Xcode Keyword", color: "#9b2393" },
+          { id: "xcode-string", name: "Xcode String", color: "#c41a16" },
+          { id: "xcode-number", name: "Xcode Number", color: "#1c00cf" },
+          { id: "xcode-comment", name: "Xcode Comment", color: "#5d6c79" },
+          { id: "xcode-function", name: "Xcode Function", color: "#326d74" },
+          { id: "xcode-type", name: "Xcode Type", color: "#0b4f79" },
+        ],
+      },
+      dark: {
+        name: "iOS Dark",
+        author: "Apple",
+        colors: [
+          { id: "background", name: "System Background", color: "#000000" },
+          { id: "secondary-background", name: "Secondary System Background", color: "#1c1c1e" },
+          { id: "tertiary-background", name: "Tertiary System Background", color: "#2c2c2e" },
+          { id: "label", name: "Label", color: "#ffffff" },
+          { id: "secondary-label", name: "Secondary Label", color: "#8d8d93" },
+          { id: "gray", name: "System Gray", color: "#8e8e93" },
+          { id: "gray-2", name: "System Gray 2", color: "#636366" },
+          { id: "blue", name: "System Blue", color: "#0091ff" },
+          { id: "red", name: "System Red", color: "#ff4245" },
+          { id: "orange", name: "System Orange", color: "#ff9230" },
+          { id: "yellow", name: "System Yellow", color: "#ffd600" },
+          { id: "green", name: "System Green", color: "#30d158" },
+          { id: "mint", name: "System Mint", color: "#00dac3" },
+          { id: "indigo", name: "System Indigo", color: "#6d7cff" },
+          { id: "purple", name: "System Purple", color: "#db34f2" },
+          { id: "xcode-keyword", name: "Xcode Keyword", color: "#ff7ab2" },
+          { id: "xcode-string", name: "Xcode String", color: "#ff8170" },
+          { id: "xcode-number", name: "Xcode Number", color: "#d9c97c" },
+          { id: "xcode-comment", name: "Xcode Comment", color: "#7f8c98" },
+          { id: "xcode-function", name: "Xcode Function", color: "#67b7a4" },
+          { id: "xcode-type", name: "Xcode Type", color: "#5dd8ff" },
+        ],
+      },
+    },
+    light: {
+      bg: "background",
+      "bg-list": "background",
+      "bg-sidebar": "secondary-background",
+      "bg-elevated": "secondary-background",
+      "card-bg": "background",
+      text: "label",
+      "text-sidebar": "label",
+      "text-muted": "gray-contrast",
+      "text-faint": "secondary-label",
+      accent: "blue",
+      ink: "label",
+      "highlight-base": "yellow",
+      pin: "orange",
+      danger: "red",
+      success: "green",
+      "callout-info": "blue",
+      "callout-question": "indigo",
+      "callout-warning": "orange",
+      "callout-decision": "mint",
+      "palette-red": "red",
+      "palette-orange": "orange",
+      "palette-yellow": "yellow",
+      "palette-green": "green",
+      "palette-blue": "blue",
+      "palette-purple": "purple",
+      "palette-gray": "gray",
+      "syn-keyword": "xcode-keyword",
+      "syn-string": "xcode-string",
+      "syn-number": "xcode-number",
+      "syn-comment": "xcode-comment",
+      "syn-function": "xcode-function",
+      "syn-type": "xcode-type",
+    },
+    dark: {
+      bg: "background",
+      "bg-list": "background",
+      "bg-sidebar": "secondary-background",
+      "bg-elevated": "secondary-background",
+      "card-bg": "tertiary-background",
+      text: "label",
+      "text-sidebar": "label",
+      "text-muted": "secondary-label",
+      "text-faint": "gray-2",
+      accent: "blue",
+      ink: "label",
+      "highlight-base": "yellow",
+      pin: "orange",
+      danger: "red",
+      success: "green",
+      "callout-info": "blue",
+      "callout-question": "indigo",
+      "callout-warning": "orange",
+      "callout-decision": "mint",
+      "palette-red": "red",
+      "palette-orange": "orange",
+      "palette-yellow": "yellow",
+      "palette-green": "green",
+      "palette-blue": "blue",
+      "palette-purple": "purple",
+      "palette-gray": "gray",
+      "syn-keyword": "xcode-keyword",
+      "syn-string": "xcode-string",
+      "syn-number": "xcode-number",
+      "syn-comment": "xcode-comment",
+      "syn-function": "xcode-function",
+      "syn-type": "xcode-type",
+    },
+  },
 ];
 
 const looks = (): AppStyle[] => [
@@ -1019,6 +1157,23 @@ const looks = (): AppStyle[] => [
       "shadow-drawer": "none",
     },
     css: lightbulb,
+  },
+  {
+    // Apple's look (ios.css); the iPhone and iPad app's preset to begin with (prefs.svelte.ts).
+    id: "ios",
+    name: "iOS",
+    description: t("styles.ios"),
+    theme: "ios",
+    settings: { icons: "sf" },
+    properties: {
+      "radius-scale": "1.25",
+      "card-shadow": "none",
+      // UISegmentedControl's raised segment.
+      "shadow-segment": "0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04)",
+      "shadow-menu": "0 10px 50px rgba(0, 0, 0, 0.18)",
+      "shadow-dialog": "0 20px 70px rgba(0, 0, 0, 0.28)",
+    },
+    css: ios,
   },
 ];
 

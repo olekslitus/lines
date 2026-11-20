@@ -822,6 +822,25 @@ const SCENES = [
     } },
   { id: "style-void-settings", title: "Void, in Settings", look: "Groups without boxes, buttons and choices as words (the chosen one black), hairline switches and fields, one size of type; everything still clearly a control.", prefs: { style: "void", theme: "void" }, settings: "Editor", shoot: "dialog" },
   { id: "style-pixel-settings", title: "Pixel, in Settings", look: "Each switch's knob all the way across when it's on; the chosen segment turned around.", prefs: { style: "pixel", theme: "pixel" }, settings: "Editor", shoot: "dialog" },
+  {
+    id: "style-ios",
+    title: "Style: iOS",
+    look: "White (black) note and list, the sidebar in grouped grey; frosted title bars with a hairline under them; the list's rows edge to edge with hairlines inset from the left; blue for the accent and the bars' buttons; the system's font.",
+    prefs: { style: "ios", theme: "ios" },
+    note: PROSE,
+  },
+  { id: "style-ios-settings", title: "iOS, in Settings", look: "Groups as rounded white (dark grey) cards on the grouped grey, without borders, their rows split by hairlines inset from the left; green switches with a round white knob; capsule segments and buttons; headings small, grey and in capitals.", prefs: { style: "ios", theme: "ios" }, settings: "Editor", shoot: "dialog" },
+  ...[
+    ["list", "the note list", "A large bold title under the bar's buttons, the search field a grey capsule, the rows edge to edge with their hairlines inset from the left, titles in bold body text and previews in grey.", (page) =>
+      page.evaluate((bodies) => bodies.forEach((body) => window.testing.notes.create(body, undefined, { open: false })), [PROSE, PERSON, "# Groceries\n\n- [ ] Bread\n- [ ] Milk\n- [x] Tea", "# Trip to Lisbon\n\nTrams, tiles and custard tarts; the castle at sunset."])],
+    ["note", "a note", "The note's text in the system's font, the bar over it frosted with a hairline under it, its buttons in blue.", (page) => page.evaluate((body) => window.testing.open(body), PROSE)],
+    ["sidebar", "the sidebar", "The sidebar's rows on grouped grey, its icons in blue, the counts in grey.", (page) => page.locator(".sidebar-toggle").first().click()],
+    ["settings", "Settings", "The sections' list, then a section: groups as rounded cards on grouped grey with inset hairlines, switches green, nothing cut off.", async (page) => {
+      await page.keyboard.press("ControlOrMeta+/");
+      await page.getByRole("dialog").getByRole("button", { name: "All Settings" }).click();
+      await page.getByRole("dialog").locator("#settings-nav-editor").click();
+    }],
+  ].map(([id, what, look, act]) => ({ id: `phone-ios-${id}`, title: `Phone: iOS, ${what}`, look, prefs: { style: "ios", theme: "ios" }, width: 390, height: 844, touch: true, act })),
   ...["sidebar", "list", "both"].map((panes) => ({
     id: `dark-panes-${panes}`,
     title: `Dark panes: ${panes}`,
@@ -2008,7 +2027,7 @@ mkdirSync(out, { recursive: true });
 const shots = [];
 for (const scene of scenes) {
   for (const scheme of scene.schemes ?? ["light", "dark"]) {
-    const context = await browser.newContext({ viewport: { width: scene.width ?? 1280, height: scene.height ?? 800 }, colorScheme: scheme, deviceScaleFactor: 2, reducedMotion: "reduce" });
+    const context = await browser.newContext({ viewport: { width: scene.width ?? 1280, height: scene.height ?? 800 }, colorScheme: scheme, deviceScaleFactor: scene.touch ? 3 : 2, hasTouch: !!scene.touch, isMobile: !!scene.touch, reducedMotion: "reduce" });
     const { plugins: pluginChoices, ...prefs } = scene.prefs ?? {};
     await context.addInitScript(
       ([prefs, plugins, storage, language]) => {

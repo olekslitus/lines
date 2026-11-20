@@ -7,7 +7,7 @@
 </script>
 
 <!-- As tall as a button only when it has one, so headings sit the same distance from their cards. -->
-<div class={["mb-2 flex flex-wrap items-end justify-end gap-2 px-1", action && "min-h-control", className]}>
+<div class={["ui-section-heading mb-2 flex flex-wrap items-end justify-end gap-2 px-1", action && "min-h-control", className]}>
   <div class="min-w-0 flex-1 basis-48">
     <!-- Focusable, so a link elsewhere in Settings can take you to it. -->
     <h3 {id} tabindex="-1" class="m-0 text-sm font-semibold text-fg outline-none">{title}</h3>

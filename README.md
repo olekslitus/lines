@@ -115,7 +115,7 @@ Put one in a Markdown note with `/spreadsheet` (a ` ```csv ` block), or, with Sp
 ### Make it yours
 
 - **Plugins.** Like a code editor, lines is a small core with plugins around it: the formats notes are written in, what draws math and diagrams, ways to make a PDF, themes and icons. Turn off what you don't use in Settings → Plugins; nothing in your notes changes. See [docs/plugins.md](docs/plugins.md).
-- **Presets**: the whole look in one, not just the colors. Classic, a desktop of the late 90s with bevels and a title bar; Pixel, one-bit and minimal in a pixel font; Neon, glowing lines on a grid; Adventure, a 2D adventure game's pixel art, with framed slots and grass; Aero, glossy 2000s glass; Brutalist, thick rules and big type; Constructivist, 1920s avant-garde posters in red, black and paper; Void, heavy minimalism, its toolbars out of sight until reached for and words in place of icons. Save your own (theme, type, paper, cursor and all) and share it as a file. See [docs/themes.md](docs/themes.md#presets).
+- **Presets**: the whole look in one, not just the colors. Classic, a desktop of the late 90s with bevels and a title bar; Pixel, one-bit and minimal in a pixel font; Neon, glowing lines on a grid; Adventure, a 2D adventure game's pixel art, with framed slots and grass; Aero, glossy 2000s glass; Brutalist, thick rules and big type; Constructivist, 1920s avant-garde posters in red, black and paper; Void, heavy minimalism, its toolbars out of sight until reached for and words in place of icons; iOS, an iPhone app's own look, in Apple's system colors, font and controls, which the iPhone and iPad app starts in. Save your own (theme, type, paper, cursor and all) and share it as a file. See [docs/themes.md](docs/themes.md#presets).
 - **Twenty-six themes**, each light and dark, including High Contrast and two for color blindness, each a palette (Nord's, Solarized's, Catppuccin's, lines' own) and what its colors are for. **Make your own** from any of them, bit by bit by right-clicking anything to change its color, down to each heading level, bold, italics and links, or from a picture (a wallpaper's colors, read on your device); make **palettes of your own** too, from a picture, pasted colors or another palette, and draw any theme of yours in any palette; share them as files, or import a theme made for VS Code, Zed, Base16, iTerm2, Alacritty, Kitty, Ghostty and other terminals, or KDE and GTK. See [docs/themes.md](docs/themes.md).
 - **Dark panes**: the sidebar, the note list or both in the theme's dark colors, while the note stays light. See [docs/themes.md](docs/themes.md#dark-panes).
 - **Monochrome and Invert**: any theme in greys, or turned light for dark, with the contrast it had.
@@ -370,7 +370,7 @@ src/
     mascots/                 Companions in the window, as pixel art (art.ts); what they do is lib/mascot/
     themes/                  The twenty-six themes, each a palette and what its colors are for (Lines, the default, in lines.ts), and the theme files of other apps it reads (formats/)
     fonts/                   Fonts to write notes in: IBM Plex Sans, Fira Sans and Agave
-    styles/                  Whole looks beyond the colors, each a preset: Classic, Pixel, Neon, Puddle, Lightbulb, Adventure, Aero, Brutalist, Constructivist and Void, each a CSS file, its fonts, its colors and the settings it brings
+    styles/                  Whole looks beyond the colors, each a preset: Classic, Pixel, Neon, Puddle, Lightbulb, Adventure, Aero, Brutalist, Constructivist, Void and iOS, each a CSS file, its fonts, its colors and the settings it brings
     lucide/  sf-symbols/     Icon sets
   lib/
     plugins/
@@ -607,6 +607,7 @@ What's planned next. Known limits of what's already there are in [docs/limitatio
 - [ ] Offline support for the web app (service worker)
 - [ ] Browser extensions (Chrome, Edge, Firefox, Safari)
 - [ ] Try the forced-colors styles (Windows' contrast themes) on Windows
+- [ ] A Material style for Android, as iOS is for iPhone: Material 3's type, shapes and controls, and the app starting in it there
 - [ ] A "System" theme that follows your desktop, generated from one seed color for light and dark, and updating live:
   - Mac: colors picked from the wallpaper (dynamic and per-display wallpapers, re-checked when the app comes to the front)
   - Windows: the wallpaper, or the accent color Windows picks from it

@@ -5,9 +5,11 @@ import { answerPictures } from "./files";
 import { drag, lift } from "./touch";
 
 /*
- * A touch screen's gestures (gestures.ts) on an iPhone, in Chromium and WebKit: swipes from the
- * screen's edge that follow the finger, back from a note and the sidebar in and out, and pulls
- * down past the top to search the list, find in a note, and refresh the feeds.
+ * A touch screen's gestures (gestures.ts) on an iPhone and an Android phone, in Chromium and
+ * WebKit: swipes from the screen's edge that follow the finger, back from a note and the sidebar
+ * in and out, and pulls down past the top to search the list, find in a note, and refresh the
+ * feeds. On iPhone lists and notes bounce past their top by themselves, which a test can only fake
+ * (below); on Android lines moves them, as a script's touches can show.
  */
 
 let app: App;
@@ -17,6 +19,7 @@ afterEach(async () => {
 });
 
 const phone = (prefs?: Record<string, unknown>) => openApp({ phone: true, prefs });
+const android = () => openApp({ device: "Pixel 7" });
 
 /** Whether a pane is out of reach (off-screen, on a phone). */
 const inert = (pane: string) => app.page.locator(`[data-pane=${pane}]`).evaluate((element) => (element as HTMLElement).inert);
@@ -108,11 +111,17 @@ test("turned off in Settings, swipes and pulls do nothing", async () => {
   await drag(page, { x: 200, y: 220 }, { x: 200, y: 500 });
   await settled();
   expect(await inert("sidebar")).toBe(true);
+  // Nor is anything drawn as iPhone bounces the list past its top.
+  await page.locator(".note-list ul.items").evaluate((list) => {
+    Object.defineProperty(list, "scrollTop", { configurable: true, get: () => -90 });
+    list.dispatchEvent(new Event("scroll"));
+  });
+  expect(await page.locator(".note-list .pull-indicator").getAttribute("data-armed")).toBeNull();
   expect(await page.evaluate(() => document.activeElement?.getAttribute("type"))).not.toBe("search");
 });
 
 test("pulling the list down past its top searches it; not far enough, it springs back", async () => {
-  app = await phone();
+  app = await android();
   const { page } = app;
   const search = page.getByRole("searchbox", { name: "Search notes" });
   const list = await page.locator(".note-list ul.items").boundingBox();
@@ -156,7 +165,7 @@ test("on iPhone, a list that scrolls bounces past its top by itself, and how far
 });
 
 test("pulling a note down past its top finds in it", async () => {
-  app = await phone();
+  app = await android();
   await openNote();
   const { page } = app;
   const box = (await page.locator(".editor-pane .cm-scroller").boundingBox())!;
@@ -166,7 +175,7 @@ test("pulling a note down past its top finds in it", async () => {
 });
 
 test("pulling the feeds down refreshes them, with a spinner while they're fetched", async () => {
-  app = await phone();
+  app = await android();
   const { page } = app;
   const BLOG = "https://site.example/feed.xml";
   let asked = 0;

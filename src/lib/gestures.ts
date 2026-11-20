@@ -264,7 +264,7 @@ export function pull(options: Pull): Attachment<HTMLElement> {
     /** iPhone's own bounce past the top. */
     function scrolled(event: Event) {
       const scroller = event.target as HTMLElement;
-      if (busy || scroller !== options.scroller() || (!finger?.native && !armed && scroller.scrollTop >= 0)) return;
+      if (busy || !prefs.gestures || options.enabled?.() === false || scroller !== options.scroller() || (!finger?.native && !armed && scroller.scrollTop >= 0)) return;
       show(Math.max(0, -scroller.scrollTop));
     }
 

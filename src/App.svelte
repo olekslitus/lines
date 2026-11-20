@@ -46,7 +46,7 @@
   import { postEpisode } from "./lib/player/episodes";
   import { playerKey } from "./lib/player/keys";
   import { player } from "./lib/player/player.svelte";
-  import { EDGE, pull, swipes, type Swipe } from "./lib/gestures";
+  import { EDGE, type Frames, pull, slide, swipes, type Swipe } from "./lib/gestures";
   import { canPrint, copyText, isApple, isIOS, isMobile, isNewNoteShortcut, newNoteKey, openExternal } from "./lib/platform";
   import { saveAndShow } from "./lib/save";
   import { NOTE_MIN, ui, type MenuItem } from "./lib/ui.svelte";
@@ -148,11 +148,13 @@
           "absolute inset-y-0 z-20 w-[min(var(--sidebar-w),82vw)]",
           prefs.sidebarSide === "left" ? "left-0" : "right-0",
           divider(prefs.sidebarSide),
-          // The shadow fades with the slide; otherwise its blur lingers at the edge and pops off at the end.
+          // The shadow fades with the slide, otherwise its blur lingers at the edge and pops off at the end:
+          // drawn by a layer of its own whose opacity changes, as only moving and fading run off the page.
+          "before:pointer-events-none before:absolute before:inset-0 before:shadow-drawer before:transition-opacity before:duration-(--spring-duration) before:ease-spring before:content-['']",
           ui.sidebarOpen
-            ? "visible translate-x-0 [box-shadow:var(--shadow-drawer)] [transition:translate_320ms_var(--ease-sheet),box-shadow_320ms_var(--ease-sheet)]"
+            ? "visible translate-x-0 before:opacity-100 [transition:translate_var(--spring-duration)_var(--ease-spring)]"
             : [
-                "invisible [box-shadow:0_0_40px_transparent] [transition:translate_320ms_var(--ease-sheet),box-shadow_320ms_var(--ease-sheet),visibility_0s_320ms]",
+                "invisible before:opacity-0 [transition:translate_var(--spring-duration)_var(--ease-spring),visibility_0s_var(--spring-duration)]",
                 prefs.sidebarSide === "left" ? "-translate-x-full" : "translate-x-full",
               ],
         ],
@@ -173,7 +175,7 @@
   });
 
   /** On a phone, the note list and the note side by side, slid along to the one showing. */
-  const stacked = $derived(["row-start-1 transition-[translate] duration-320 ease-sheet", (selected || post) && "-translate-x-full"]);
+  const stacked = $derived(["row-start-1 transition-[translate] duration-(--spring-duration) ease-spring", (selected || post) && "-translate-x-full"]);
   const listPaneClass = $derived([
     "min-h-0 min-w-0 bg-surface-list",
     narrow
@@ -240,43 +242,74 @@
   /** How far the list is under the note, as a share of its width, while the note's swiped back: UIKit's. */
   const UNDER = 0.3;
 
-  /** Puts a pane where the finger has it, or slides it there over `duration` ms. */
-  function follow(element: HTMLElement, styles: Record<string, string>, duration = 0) {
-    element.style.transition = duration ? `translate ${duration}ms var(--ease-sheet), opacity ${duration}ms var(--ease-sheet)` : "none";
-    for (const [property, value] of Object.entries(styles)) element.style.setProperty(property, value);
+  /** Puts what `frames` draws where the finger has it, `shown` of the way. */
+  function follow(frames: Frames, shown: number) {
+    for (const [element, style] of frames(shown)) {
+      element.style.transition = "none";
+      for (const [property, value] of Object.entries(style)) element.style.setProperty(property, String(value));
+    }
   }
 
   /** Back to how its classes have it, once they say the same: what the finger set comes off. */
   function letGo(element: HTMLElement) {
-    for (const property of ["transition", "translate", "opacity", "visibility", "box-shadow", "--under"]) element.style.removeProperty(property);
+    for (const property of ["transition", "translate", "opacity", "visibility", "box-shadow", "pointer-events"]) element.style.removeProperty(property);
   }
+
+  /** A note's swipe back still sliding after the finger's lifted, the list already in reach: a row tapped meanwhile opens its note from there. */
+  let settling: { stop(): void } | null = null;
+  $effect(() => {
+    void [selected, post];
+    untrack(() => settling?.stop());
+  });
 
   /** Back to the list: the note slides off to the right, and the list out from under it, dimmed until it's out. */
   function backSwipe(): Swipe {
     const width = editorPane.offsetWidth;
-    const at = (shown: number, duration?: number) => {
-      follow(editorPane, { translate: `${(shown - 1) * width}px` }, duration);
-      follow(listPane, { translate: `${-UNDER * width * (1 - shown)}px`, "--under": String(1 - shown) }, duration);
-    };
+    const frames: Frames = (shown) => [
+      [editorPane, { translate: `${(shown - 1) * width}px` }],
+      [listPane, { translate: `${-UNDER * width * (1 - shown)}px` }],
+      [underList, { opacity: String(1 - shown) }],
+    ];
+    let shown = 0;
     return {
       direction: 1,
       distance: width,
       begin() {
-        listPane.toggleAttribute("data-under", true);
         editorPane.style.boxShadow = "var(--shadow-drawer)";
       },
-      move: (progress) => at(progress),
-      end(done, duration) {
-        at(done ? 1 : 0, duration);
-        setTimeout(() => {
-          if (done) {
-            back();
-            flushSync();
-          }
-          listPane.toggleAttribute("data-under", false);
-          letGo(editorPane);
-          letGo(listPane);
-        }, duration);
+      move: (progress) => follow(frames, (shown = progress)),
+      end(done, velocity) {
+        const to = done ? 1 : 0;
+        const sliding = slide(frames, shown, to, velocity * Math.sign(to - shown), width);
+        const moving = [editorPane, listPane, underList];
+        const settled = () => moving.forEach(letGo);
+        if (!done) return void sliding.finished.then(settled);
+        // Back as the finger lifts: the list's in reach at once, to scroll or tap, while the note slides off.
+        listPane.inert = false;
+        editorPane.inert = true;
+        const current = (settling = {
+          // Another note or post opened from the list meanwhile: it slides in from wherever this got to.
+          stop() {
+            const where = moving.map((element) => {
+              const { translate, opacity } = getComputedStyle(element);
+              return { translate, opacity };
+            });
+            moving.forEach((element, i) => Object.assign(element.style, where[i]));
+            sliding.cancel();
+            settling = null;
+            // As it was before the finger lifted, which is how the panes are with a note open.
+            listPane.inert = true;
+            editorPane.inert = false;
+            requestAnimationFrame(settled);
+          },
+        });
+        void sliding.arrived.then(() => {
+          if (settling !== current) return;
+          settling = null;
+          back();
+          flushSync();
+          void sliding.finished.then(settled);
+        });
       },
     };
   }
@@ -286,25 +319,33 @@
     const width = sidebarPane.offsetWidth;
     // Which way the sidebar goes out.
     const out: 1 | -1 = prefs.sidebarSide === "left" ? -1 : 1;
-    const at = (shown: number, duration?: number) => {
-      follow(sidebarPane, { translate: `${out * (1 - shown) * 100}%` }, duration);
-      if (scrim) follow(scrim, { opacity: String(shown) }, duration);
+    const frames: Frames = (shown) => {
+      const drawn: ReturnType<Frames> = [[sidebarPane, { translate: `${out * (1 - shown) * 100}%` }]];
+      if (scrim) drawn.push([scrim, { opacity: String(shown) }]);
+      return drawn;
     };
+    let shown = open ? 0 : 1;
     return {
       direction: open ? (-out as 1 | -1) : out,
       distance: width,
-      begin: () => follow(sidebarPane, { visibility: "visible", "box-shadow": "var(--shadow-drawer)" }),
-      move: (progress) => at(open ? progress : 1 - progress),
-      end(done, duration) {
-        at(open === done ? 1 : 0, duration);
-        setTimeout(() => {
+      begin: () => Object.assign(sidebarPane.style, { visibility: "visible", boxShadow: "var(--shadow-drawer)" }),
+      move: (progress) => follow(frames, (shown = open ? progress : 1 - progress)),
+      end(done, velocity) {
+        const to = open === done ? 1 : 0;
+        // The finger's speed opening it is the sidebar's; closing it, the other way.
+        const sliding = slide(frames, shown, to, (open ? velocity : -velocity) * Math.sign(to - shown), width);
+        // Closed as the finger lifts: what's under the dimming is in reach at once.
+        if (done && !open && scrim) scrim.style.pointerEvents = "none";
+        void sliding.arrived.then(() => {
           if (done) {
             ui.sidebarOpen = open;
             flushSync();
           }
-          letGo(sidebarPane);
-          if (scrim) letGo(scrim);
-        }, duration);
+          void sliding.finished.then(() => {
+            letGo(sidebarPane);
+            if (scrim) letGo(scrim);
+          });
+        });
       },
     };
   }
@@ -321,6 +362,8 @@
   let sidebarPane: HTMLElement;
   let listPane: HTMLElement;
   let editorPane: HTMLElement;
+  /** The list's dimming, as a note's swiped back off it. */
+  let underList: HTMLElement;
   /** Where the open note is, and what a pull down past its top shows. */
   let noteArea = $state<HTMLElement>();
   let findIndicator = $state<HTMLElement>();
@@ -702,7 +745,7 @@
          and takes the taps of. -->
     <button
       bind:this={scrim}
-      class={["absolute inset-0 z-15 bg-scrim transition-opacity duration-320 ease-sheet", ui.sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"]}
+      class={["absolute inset-0 z-15 bg-scrim transition-opacity duration-(--spring-duration) ease-spring", ui.sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"]}
       aria-label={t("app.closeSidebar")}
       tabindex="-1"
       onclick={() => (ui.sidebarOpen = false)}
@@ -712,6 +755,8 @@
   <!-- On a phone one pane shows at a time; the other is off-screen and out of reach. -->
   <div class={listPaneClass} data-pane="list" data-scheme={isDarkPane("list") ? "dark" : undefined} inert={narrow && !!(selected || post)} bind:this={listPane}>
     <NoteList bind:searchInput />
+    <!-- Over the list as a note's swiped back off it on a phone, dimmed as UIKit's is until it's out. -->
+    <div class="pointer-events-none absolute inset-0 z-30 bg-scrim opacity-0" aria-hidden="true" data-list-dim bind:this={underList}></div>
   </div>
 
   {#if sidebarColumn}

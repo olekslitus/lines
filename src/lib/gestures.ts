@@ -2,6 +2,7 @@ import type { Attachment } from "svelte/attachments";
 import { tick } from "./haptics";
 import { isIOS, reducedMotion } from "./platform";
 import { prefs } from "./prefs.svelte";
+import { SLIDE, SLIDE_EASE, SLIDE_MS, springCurve } from "./spring";
 
 /*
  * Touch screens' gestures, as iOS has them: swipes that follow the finger (back from a note to the
@@ -33,11 +34,8 @@ const PULL_HOLD = 52;
  */
 export const rubberBand = (distance: number, size: number) => (1 - 1 / ((distance * 0.55) / size + 1)) * size;
 
-/** How long what's left of a slide takes, from how far it has to go and how fast the finger went. */
-function remaining(distance: number, velocity: number) {
-  if (reducedMotion.matches) return 0;
-  return Math.round(Math.min(360, Math.max(140, distance / Math.max(Math.abs(velocity), 1))));
-}
+/** How long a pull takes to slide back, along the spring tapped slides use (spring.ts). */
+const settles = () => (reducedMotion.matches ? 0 : SLIDE_MS);
 
 /**
  * Whether something between `target` and `root` takes this finger itself: it follows the finger
@@ -67,8 +65,12 @@ export interface Swipe {
   begin(): void;
   /** Where it is: 0 as it started, 1 all the way. */
   move(progress: number): void;
-  /** Let go: whether it's done or goes back, and how long what's left of the slide takes, ms. */
-  end(done: boolean, duration: number): void;
+  /**
+   * Let go: whether it's done or goes back, and how fast the finger was going its way, the whole
+   * distance per second (0 if it had stopped, or the system took the touch), for the slide to carry
+   * on from.
+   */
+  end(done: boolean, velocity: number): void;
 }
 
 /** What swipe a finger put down at (x, y) would start, if any. */
@@ -119,7 +121,9 @@ export function swipes(at: SwipeAt): Attachment<HTMLElement> {
       const dy = touch.clientY - finger.y;
       const { swipe } = finger;
       if (!finger.following) {
-        const sideways = dx * swipe.direction > 0 && Math.abs(dx) >= Math.abs(dy);
+        // Clearly sideways, or it's a scroll: WebKit decides on a touch's first move whether the
+        // page may scroll, and a scroll whose first move is stopped is lost, however it goes on.
+        const sideways = dx * swipe.direction > 0 && Math.abs(dx) >= 2 * Math.abs(dy);
         // Not sideways its way, too late to stop the page scrolling, or held first: not a swipe.
         if (!event.cancelable || event.timeStamp - finger.t > HOLD || (Math.hypot(dx, dy) >= SLOP && !sideways)) {
           finger = null;
@@ -148,11 +152,11 @@ export function swipes(at: SwipeAt): Attachment<HTMLElement> {
       finger = null;
       if (!following) return;
       const done = event.type === "touchend" && (velocity > FLICK || (progress > 0.5 && velocity > -FLICK));
-      swipe.end(done, remaining((done ? 1 - progress : progress) * swipe.distance, velocity));
+      swipe.end(done, (velocity * 1000) / swipe.distance);
     }
 
     function cancel() {
-      if (finger?.following) finger.swipe.end(false, remaining(finger.progress * finger.swipe.distance, 0));
+      if (finger?.following) finger.swipe.end(false, 0);
       finger = null;
     }
 
@@ -168,6 +172,37 @@ export function swipes(at: SwipeAt): Attachment<HTMLElement> {
       root.removeEventListener("touchend", end);
       root.removeEventListener("touchcancel", end);
     };
+  };
+}
+
+/** How each element looks `shown` of the way along a slide: its `translate` and `opacity`, which run off the page. */
+export type Frames = (shown: number) => [HTMLElement, Keyframe][];
+
+/**
+ * Slides what `frames` draws from `from` of the way to `to` along SLIDE, setting off at
+ * `velocity` (the whole way per second, toward `to`), `distance` px being the whole way on screen.
+ * Each element is left styled as at `to`, with no transition of its own; `arrived` resolves once
+ * it's as good as there, and `finished` once it's at rest (both at once with Reduce Motion);
+ * `cancel` stops it where it is.
+ */
+export function slide(frames: Frames, from: number, to: number, velocity: number, distance: number) {
+  const end = frames(to);
+  for (const [element, style] of end) {
+    element.style.transition = "none";
+    for (const [property, value] of Object.entries(style)) element.style.setProperty(property, String(value));
+  }
+  const span = to - from;
+  if (reducedMotion.matches || !span) return { arrived: Promise.resolve(), finished: Promise.resolve(), cancel() {} };
+  const curve = springCurve(velocity / Math.abs(span), SLIDE, { distance: Math.abs(span) * distance });
+  const all = curve.points.map((at) => frames(from + span * at));
+  const animations = end.map(([element], i) => element.animate(all.map((each) => each[i][1]), { duration: curve.duration, easing: "linear" }));
+  return {
+    arrived: new Promise<void>((resolve) => setTimeout(resolve, curve.arrives)),
+    finished: Promise.all(animations.map((animation) => animation.finished)).then(
+      () => {},
+      () => {},
+    ),
+    cancel: () => animations.forEach((animation) => animation.cancel()),
   };
 }
 
@@ -188,6 +223,8 @@ export interface Pull {
   haptic?(): boolean;
   /** Let go far enough. A promise keeps the room open, with the indicator busy in it, until it settles. */
   release(): unknown;
+  /** Let go short of that, `distance` px down as it's drawn. */
+  letGo?(distance: number): void;
 }
 
 /**
@@ -196,10 +233,17 @@ export interface Pull {
  * has; elsewhere, or one with less, it's moved down here, stretching like a rubber band.
  */
 export function pull(options: Pull): Attachment<HTMLElement> {
+  /**
+   * Whether it stops the page scrolling as it pulls. Not on iPhone and iPad, where what's pulled
+   * bounces by itself: there it only watches, so WebKit needn't wait on it before scrolling.
+   */
+  const stops = !isIOS;
   return (root) => {
     let finger: { id: number; y: number; x: number; t: number; scroller: HTMLElement; native: boolean; following: boolean } | null = null;
     let armed = false;
     let busy = false;
+    /** How far down it's drawn. */
+    let shown = 0;
     /** The scroller moved down here, if it is. */
     let moved: HTMLElement | null = null;
 
@@ -207,7 +251,8 @@ export function pull(options: Pull): Attachment<HTMLElement> {
 
     /** Shows the pull `distance` down, sliding there over `duration` ms (0: at once, following the finger). */
     function show(distance: number, duration = 0, scroller?: HTMLElement) {
-      const transition = duration ? `${duration}ms var(--ease-sheet)` : "";
+      shown = distance;
+      const transition = duration ? `${duration}ms ${SLIDE_EASE}` : "";
       if (scroller) {
         moved = distance ? scroller : null;
         scroller.style.transition = transition && `translate ${transition}`;
@@ -253,11 +298,11 @@ export function pull(options: Pull): Attachment<HTMLElement> {
           return;
         }
         // Down at the top already: the page isn't to scroll, nor bounce, from here.
-        if (dy > 0) event.preventDefault();
+        if (dy > 0 && stops) event.preventDefault();
         if (!far) return;
         finger.following = true;
       }
-      event.preventDefault();
+      if (stops) event.preventDefault();
       show(rubberBand(Math.max(0, dy), root.clientHeight), 0, finger.scroller);
     }
 
@@ -275,30 +320,31 @@ export function pull(options: Pull): Attachment<HTMLElement> {
       finger = null;
       if (!native && !following) return;
       if (!go) {
-        if (!native) show(0, remaining(armed ? PULL : PULL / 2, 0), scroller);
+        options.letGo?.(shown);
+        if (!native) show(0, settles(), scroller);
         return;
       }
       const result = options.release();
       if (!(result instanceof Promise)) {
         // On iPhone the bounce back is followed as it scrolls.
-        if (!native) show(0, remaining(PULL, 0), scroller);
+        if (!native) show(0, settles(), scroller);
         return;
       }
       busy = true;
       const indicator = options.indicator();
       indicator?.toggleAttribute("data-busy", true);
-      show(PULL_HOLD, remaining(PULL, 0), scroller);
+      show(PULL_HOLD, settles(), scroller);
       // Long enough to be seen to spin, however soon it's done.
       void Promise.all([result.catch(() => {}), new Promise((resolve) => setTimeout(resolve, reducedMotion.matches ? 0 : 500))]).then(() => {
         indicator?.toggleAttribute("data-busy", false);
-        const duration = remaining(PULL, 0);
+        const duration = settles();
         show(0, duration, scroller);
         setTimeout(() => (busy = false), duration);
       });
     }
 
     root.addEventListener("touchstart", start, { passive: true });
-    root.addEventListener("touchmove", move, { passive: false });
+    root.addEventListener("touchmove", move, { passive: !stops });
     root.addEventListener("touchend", end);
     root.addEventListener("touchcancel", end);
     // Scrolling doesn't bubble, but it's seen on its way down.

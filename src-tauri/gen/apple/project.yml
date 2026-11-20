@@ -44,6 +44,9 @@ targets:
     info:
       path: lines_iOS/Info.plist
       properties:
+        # ProMotion's 120 Hz for what Core Animation draws, as WebKit's slides off the page are: an
+        # iPhone app is held to 60 Hz without it (iPad isn't).
+        CADisableMinimumFrameDurationOnPhone: true
         LSRequiresIPhoneOS: true
         # Exports are saved in the app's Documents, which the Files app shows under On My iPhone (src/export.rs).
         LSSupportsOpeningDocumentsInPlace: true

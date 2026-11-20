@@ -154,7 +154,7 @@ export function readCurl(command: string): { asked: Asked; notes: string[] } | n
         // it; `name@file` and `@file` read a file, which lines doesn't.
         const text = value();
         const at = text.includes("=") ? text.indexOf("=") : text.indexOf("@");
-        if (text[at] === "@") notes.push(`Not sent: lines doesn't read data from files yet (--data-urlencode ${text})`);
+        if (text[at] === "@") notes.push(`Not sent: Lines doesn't read data from files yet (--data-urlencode ${text})`);
         else data.push(at > 0 ? `${text.slice(0, at)}=${urlEncode(text.slice(at + 1))}` : urlEncode(text.slice(at + 1)));
         break;
       }
@@ -194,7 +194,7 @@ export function readCurl(command: string): { asked: Asked; notes: string[] } | n
         break;
       case "-F":
       case "--form":
-        notes.push(`Not sent: lines doesn't send forms with files yet (-F ${value()})`);
+        notes.push(`Not sent: Lines doesn't send forms with files yet (-F ${value()})`);
         break;
       default:
         if (SKIPPED_WITH_VALUE.has(option)) value();

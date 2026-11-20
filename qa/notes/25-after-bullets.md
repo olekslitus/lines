@@ -418,7 +418,7 @@ Total, =costs!B2*2
 - Last item
 ---
 
-#### 31. Bullet list, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Bullet list, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 - First item
 - Second item

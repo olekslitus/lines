@@ -377,10 +377,10 @@ fn etag(meta: &std::fs::Metadata) -> String {
 fn describe(path: &Path, error: std::io::Error) -> String {
   match error.kind() {
     std::io::ErrorKind::PermissionDenied if cfg!(target_os = "macos") => format!(
-      "lines isn't allowed to use {}. Allow it in System Settings → Privacy & Security → Files and Folders.",
+      "Lines isn't allowed to use {}. Allow it in System Settings → Privacy & Security → Files and Folders.",
       path.display()
     ),
-    std::io::ErrorKind::PermissionDenied => format!("lines isn't allowed to use {}. Choose another folder.", path.display()),
+    std::io::ErrorKind::PermissionDenied => format!("Lines isn't allowed to use {}. Choose another folder.", path.display()),
     _ => format!("{}: {error}", path.display()),
   }
 }

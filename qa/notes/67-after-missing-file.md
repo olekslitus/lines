@@ -298,7 +298,7 @@ Total, =costs!B2*2
 [Not here yet.pdf](../attachments/00000000000000000000000000000000.pdf)
 ---
 
-#### 31. Missing file, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Missing file, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 [Not here yet.pdf](../attachments/00000000000000000000000000000000.pdf)
 Before the break.

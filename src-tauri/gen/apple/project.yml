@@ -10,7 +10,7 @@ configs:
 settingGroups:
   app:
     base:
-      PRODUCT_NAME: lines
+      PRODUCT_NAME: Lines
       PRODUCT_BUNDLE_IDENTIFIER: com.olekslitus.lines
 targetTemplates:
   app:

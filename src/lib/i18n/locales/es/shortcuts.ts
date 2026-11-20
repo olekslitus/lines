@@ -26,7 +26,7 @@ export default {
   "shortcuts.textBigger": "Texto más grande",
   "shortcuts.textSmaller": "Texto más pequeño",
   "shortcuts.textUsual": "Tamaño de texto habitual",
-  "shortcuts.lock": "Bloquear lines",
+  "shortcuts.lock": "Bloquear Lines",
   "shortcuts.lockNote": "Con el bloqueo de la app activado",
   "shortcuts.closeFloating": "Cerrar una nota flotante",
   "shortcuts.undoTrash": "Recuperar la nota que acabas de trasladar a la Papelera",

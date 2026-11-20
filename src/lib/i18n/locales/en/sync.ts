@@ -23,7 +23,7 @@ export default {
   /* Buttons the forms share. */
   "sync.connect": "Connect",
   "sync.connecting": "Connecting…",
-  // A badge beside the drive or folder lines syncs with now.
+  // A badge beside the drive or folder Lines syncs with now.
   "sync.connected": "Connected",
   "sync.disconnect": "Disconnect",
   "sync.save": "Save",
@@ -47,7 +47,7 @@ export default {
   "sync.bucket.corsTitle": "In the browser, the bucket needs a CORS rule for {origin}",
   // {file} is the name of a document, shown as code.
   "sync.bucket.corsHelp": "Paste this into the bucket’s CORS settings (S3, R2, MinIO). For Backblaze B2, see {file}.",
-  "sync.bucket.works": "Connected. lines can read and write this bucket.",
+  "sync.bucket.works": "Connected. Lines can read and write this bucket.",
   "sync.bucket.test": "Test connection",
   "sync.bucket.testing": "Testing…",
 
@@ -62,14 +62,14 @@ export default {
   /* A cloud drive's folder (the desktop apps). */
   // {folder} is the folder's name, “lines”.
   "sync.folder.intro":
-    "Your notes go in a “{folder}” folder in the drive, and the drive’s app syncs them to your other devices. Turn on the same drive there, and connect lines to it.",
+    "Your notes go in a “{folder}” folder in the drive, and the drive’s app syncs them to your other devices. Turn on the same drive there, and connect Lines to it.",
   "sync.folder.looking": "Looking for cloud drives…",
   "sync.folder.drives": "Cloud drive",
   "sync.folder.none":
     "No cloud drives found on this Mac. Turn on iCloud Drive in System Settings → your name → iCloud, or install Google Drive, Proton Drive, Dropbox or OneDrive. Or use any folder:",
   "sync.folder.chooseOther": "Choose another folder…",
   "sync.folder.pickPrompt": "Use This Folder",
-  "sync.folder.pickMessage": "Choose where lines keeps your notes. A folder in a cloud drive syncs them.",
+  "sync.folder.pickMessage": "Choose where Lines keeps your notes. A folder in a cloud drive syncs them.",
   "sync.folder.icloud":
     "iCloud Drive keeps your Macs in step. Syncing with the iPhone app and signing in with iCloud on the web are on the way.",
   "sync.folder.showInFinder": "Show in Finder",
@@ -81,17 +81,17 @@ export default {
 
   /* A folder on this computer, from the browser. */
   "sync.browser.intro":
-    "Save your notes to a folder on this computer, as Markdown files that any app can open. lines keeps them up to date as you write, and your notes stay in this browser too.",
+    "Save your notes to a folder on this computer, as Markdown files that any app can open. Lines keeps them up to date as you write, and your notes stay in this browser too.",
   "sync.browser.allow": "Allow access",
-  "sync.browser.asksAgain": "Your browser asks again after a restart before lines may use the folder.",
+  "sync.browser.asksAgain": "Your browser asks again after a restart before Lines may use the folder.",
   "sync.browser.unsupported":
-    "This browser can’t save to a folder. Open lines in Chrome or Edge to save your notes as files, or export them from Settings → Export and Import. Your notes are kept in this browser in the meantime.",
+    "This browser can’t save to a folder. Open Lines in Chrome or Edge to save your notes as files, or export them from Settings → Export and Import. Your notes are kept in this browser in the meantime.",
   "sync.browser.choose": "Choose a Folder…",
   "sync.browser.chooseAnother": "Choose Another Folder…",
   "sync.browser.cantPick": "This browser can’t save to a folder. Try Chrome or Edge.",
   "sync.browser.gone": "The folder isn’t available any more. Choose it again in Settings → Sync.",
   // {name} is the folder's name.
-  "sync.browser.permission": "lines needs your permission to use “{name}” again. Open Settings → Sync and allow it.",
+  "sync.browser.permission": "Lines needs your permission to use “{name}” again. Open Settings → Sync and allow it.",
 
   /* End-to-end encryption. */
   "sync.e2e.title": "End-to-end encryption",
@@ -128,7 +128,7 @@ export default {
   "sync.error.changedElsewhere": "Encryption was changed on another device. Sync, then try again.",
   // {file} is the key file's name, encryption.json.
   "sync.error.keyFileMissing": "The notes’ key file ({file}) is missing. If the drive is still downloading it, this clears up by itself.",
-  "sync.error.keyFileDamaged": "{file} is damaged or from a newer version of lines, so nothing was synced.",
+  "sync.error.keyFileDamaged": "{file} is damaged or from a newer version of Lines, so nothing was synced.",
   "sync.error.turnedOff": "Encryption was turned off on another device. Turn it off here too to keep syncing.",
   "sync.error.rekeyed": "Encryption was set up again on another device. Enter its new passphrase to keep syncing.",
   "sync.error.encrypted": "The notes there are encrypted. Enter the passphrase to sync them.",

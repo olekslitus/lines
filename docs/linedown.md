@@ -1,6 +1,6 @@
 # Linedown
 
-Linedown is the Markdown that lines reads and writes: [CommonMark](https://commonmark.org) with [GitHub's extensions](https://github.github.com/gfm/), plus a few additions of its own. This page describes the additions, and the places where lines reads standard Markdown in a particular way.
+Linedown is the Markdown that Lines reads and writes: [CommonMark](https://commonmark.org) with [GitHub's extensions](https://github.github.com/gfm/), plus a few additions of its own. This page describes the additions, and the places where Lines reads standard Markdown in a particular way.
 
 Everything here is plain text that other Markdown apps open without trouble. An app that doesn't know an addition shows its characters as they are (`==highlight==`, `#tag`), or, for cards and callouts, as a Pandoc fenced div.
 
@@ -50,7 +50,7 @@ A note has no separate title field: its title is its **first line with text on i
 
 ## Dividers and underlined headings
 
-`---` on a line of its own is a divider, under a line of text too: a heading is written with `#`. CommonMark also has headings written by underlining text, with `===` (an H1) or `---` (an H2) on the line under it, which make `---` typed under text turn that text into a heading. lines leaves them out unless **Settings → Editor → Underlined headings** is on, so `---` under text is a divider in lines, and `===` text. Another app that reads them may show such a note's text above `---` as a heading; a blank line between them keeps it a divider everywhere.
+`---` on a line of its own is a divider, under a line of text too: a heading is written with `#`. CommonMark also has headings written by underlining text, with `===` (an H1) or `---` (an H2) on the line under it, which make `---` typed under text turn that text into a heading. Lines leaves them out unless **Settings → Editor → Underlined headings** is on, so `---` under text is a divider in Lines, and `===` text. Another app that reads them may show such a note's text above `---` as a heading; a blank line between them keeps it a divider everywhere.
 
 With Underlined headings on, they're headings as CommonMark has them, every line of the text above the underline drawn as one, the underline as written; while the cursor's on the underline, the text above is drawn as text, as a dash or two being typed would already make it a heading.
 
@@ -87,7 +87,7 @@ The first chapter ends here.
 ## Chapter two
 ```
 
-It's drawn as a dashed line across the note, named; over a backdrop (Settings → Plugins → Paper), as a gap between two pages, as Craft draws them. With the cursor on its line, its Markdown shows above it. The PDF and print start a new page at each (two in a row leave one empty); a picture of the note (PNG) is one long page, without them. lines also reads the empty `<div style="page-break-after: always"></div>` that Obsidian's, Typora's and VS Code's PDF exports break pages at, so notes from them keep theirs, though it needs a blank line after it: Markdown counts the lines after an HTML block's `<div>` as part of it up to a blank line. In a card, a list or a quote, either stays as written. Other apps show the comment as nothing, and break no pages at it.
+It's drawn as a dashed line across the note, named; over a backdrop (Settings → Plugins → Paper), as a gap between two pages, as Craft draws them. With the cursor on its line, its Markdown shows above it. The PDF and print start a new page at each (two in a row leave one empty); a picture of the note (PNG) is one long page, without them. Lines also reads the empty `<div style="page-break-after: always"></div>` that Obsidian's, Typora's and VS Code's PDF exports break pages at, so notes from them keep theirs, though it needs a blank line after it: Markdown counts the lines after an HTML block's `<div>` as part of it up to a blank line. In a card, a list or a quote, either stays as written. Other apps show the comment as nothing, and break no pages at it.
 
 ## Underline
 
@@ -127,11 +127,11 @@ A card groups any Markdown, drawn as a rounded panel:
 :::
 ```
 
-- The opening fence is three or more colons followed by a name: `::: card`, `:::card`, `:::: section`. The name is free text without colons. lines doesn't use it, except for callouts (below).
+- The opening fence is three or more colons followed by a name: `::: card`, `:::card`, `:::: section`. The name is free text without colons. Lines doesn't use it, except for callouts (below).
 - A fence with nothing after it, `:::` (three or more colons), closes the innermost open card. A `:::` line inside a code block is code, and closes nothing.
 - Anything goes inside, other cards included. Inner cards nest inside outer ones.
 - A card that's never closed runs to the end of the note.
-- Leave a blank line before and after a card. lines doesn't need it, but Pandoc does, so other apps read it as a card too. lines adds these blank lines itself when it makes a card.
+- Leave a blank line before and after a card. Lines doesn't need it, but Pandoc does, so other apps read it as a card too. Lines adds these blank lines itself when it makes a card.
 - Tables, diagrams, images and file attachments are drawn at the top level of a note and inside cards. Inside quotes and list items they stay as plain Markdown.
 
 This is Pandoc's [fenced div](https://pandoc.org/MANUAL.html#divs-and-spans) syntax, so Pandoc and its tools read a card as `<div class="card">`.
@@ -156,15 +156,15 @@ Back up the folder before you move it.
 
 - Names are matched without case, and a space after the colons is allowed (`::: warning`).
 - A name that isn't one of these makes a plain card (`:::tip`). So does `:::!!`.
-- **Icon:** `icon=<name>` after the kind picks another icon from lines' icon set: `:::! icon=flag`. `icon=none` shows no icon, and the text then starts at the card's edge like a plain card's. An unknown icon name shows the kind's default. Clicking the icon in lines writes this for you, and leaves it out when you pick the kind's own icon.
+- **Icon:** `icon=<name>` after the kind picks another icon from Lines' icon set: `:::! icon=flag`. `icon=none` shows no icon, and the text then starts at the card's edge like a plain card's. An unknown icon name shows the kind's default. Clicking the icon in Lines writes this for you, and leaves it out when you pick the kind's own icon.
 - Anything else after the name is ignored.
 - Callouts close, nest and mix with cards exactly as cards do.
 
-Pandoc reads `::: warning` as a div with class `warning`. The short names (`:::!`) and `icon=` are lines' own. Other apps show them as fences, or as a div with an unusual class.
+Pandoc reads `::: warning` as a div with class `warning`. The short names (`:::!`) and `icon=` are Lines' own. Other apps show them as fences, or as a div with an unusual class.
 
 ## Code blocks
 
-Fenced code blocks (` ``` ` or `~~~`) are as in CommonMark. lines reads the info string like this:
+Fenced code blocks (` ``` ` or `~~~`) are as in CommonMark. Lines reads the info string like this:
 
 - The first word names the language, for syntax highlighting: ` ```sql `, ` ```ts `, ` ```python `. Any language in CodeMirror's language data works, by name or alias.
 - A block with no language whose text starts with `{` or `[` is treated as JSON, so it can be tidied.
@@ -254,7 +254,7 @@ KaTeX covers most of LaTeX's math mode (the [list of functions](https://katex.or
 
 ## Attachments
 
-Images and other files added to a note are stored by lines and linked with ordinary relative links into an `attachments` folder next to the notes:
+Images and other files added to a note are stored by Lines and linked with ordinary relative links into an `attachments` folder next to the notes:
 
 ```markdown
 ![Lake at dawn](../attachments/3f2a9c0d1e8b4a7f6c5d2e1f0a9b8c7d.jpg)
@@ -274,7 +274,7 @@ Images and other files added to a note are stored by lines and linked with ordin
 - An SVG image that holds its [Excalidraw](https://excalidraw.com) scene is a **drawing**: `/drawing` makes one, and excalidraw.com's exports with *Embed scene* are too. It's drawn like any image (clear behind it, and light on dark in dark themes), with a button that opens it in Excalidraw; so do double-clicking it and Enter while it's selected. Save puts the drawing in as a new SVG attachment and changes the link to it, so undo brings back the one before. Other Markdown apps show it as the picture it is.
 - Images from the web (`![](https://…)`) show too. Links to anything else are ordinary links.
 - An image whose address is a photo's page on [Unsplash](https://unsplash.com) shows that photo: `![Snow-covered mountain peak illuminated by sunset light](https://unsplash.com/photos/snow-covered-mountain-peak-illuminated-by-sunset-light-mevyYnC5xCo)`. Pasting such a link (or the picture's own address) on an empty line adds it this way, described by the words in the link, and so does choosing a photo with `/unsplash`. Other Markdown apps don't know these links and show a broken image.
-- `/giphy` adds a GIF from [GIPHY](https://giphy.com) as an image from the web: `![Happy dance](https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif)`, which any Markdown app shows. With reduced motion, lines shows GIPHY's GIFs still.
+- `/giphy` adds a GIF from [GIPHY](https://giphy.com) as an image from the web: `![Happy dance](https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif)`, which any Markdown app shows. With reduced motion, Lines shows GIPHY's GIFs still.
 
 ## Terminal recordings
 
@@ -305,7 +305,7 @@ A link to a song, album, playlist, artist, podcast or episode on [Spotify](https
 ```
 
 - **Until it's played** it's a card like an audio file's, named by the link's text (or "Track on Spotify", where the text is only the site's name), saying the site's player loads when it's played; Spotify's says too that it plays 30-second previews without a Spotify login. Nothing is asked of the site until then: its player loads from the site, which can then tell someone's listening.
-- **Played** (its button, or Enter with it selected), the card becomes the site's player, as wide as the card was, and plays where the browser lets a page start it (Chrome); elsewhere (Safari) the player's own play button starts it. SoundCloud's is in the theme's accent. Starting it pauses whatever else plays in lines (the podcast player, a sound in a note, another site's player), and the other way round. Enter on a player that's loaded plays it again.
+- **Played** (its button, or Enter with it selected), the card becomes the site's player, as wide as the card was, and plays where the browser lets a page start it (Chrome); elsewhere (Safari) the player's own play button starts it. SoundCloud's is in the theme's accent. Starting it pauses whatever else plays in Lines (the podcast player, a sound in a note, another site's player), and the other way round. Enter on a player that's loaded plays it again.
 - **Spotify** plays 30 seconds of each song, episode or show to someone not logged in to Spotify in that browser; the apps can't see a login. **SoundCloud** plays whole tracks, as its site does.
 - **Open on Spotify** (or SoundCloud), beside it, opens the link in the browser: in the apps, the links in the players themselves go nowhere.
 - A player that hasn't loaded within ten seconds (offline, or what it plays is gone or private) says it couldn't be, with Open on its site.
@@ -316,8 +316,8 @@ A link to a song, album, playlist, artist, podcast or episode on [Spotify](https
 
 A link to a `file://` address leads to a folder or a file on this computer, kept where it is rather than in the note: `[Projects](file:///Users/me/Projects/)`, a folder's address ending in `/`. It's drawn with a folder's or a file's icon before its text, its path shown on pointing at it.
 
-- **Making one:** in lines for Mac, drop a folder from Finder onto a note (files dropped are attached, as always, and a folder among them is a link), or type `/folder` and choose one. The link is named after the folder, and written as an address needs it: `file:///Users/me/My%20Projects/`.
-- **Following one** (as Settings → Editor → Links says for links, ⌘-click to begin with): in the desktop apps, a folder opens in Finder (the system's file manager elsewhere) and a file in its app; one that runs something (an app, a script) is shown in Finder instead, as attached files are. If it isn't there any more, lines says so. A web page can't open what's on a computer, so on the web following one copies its path.
+- **Making one:** in Lines for Mac, drop a folder from Finder onto a note (files dropped are attached, as always, and a folder among them is a link), or type `/folder` and choose one. The link is named after the folder, and written as an address needs it: `file:///Users/me/My%20Projects/`.
+- **Following one** (as Settings → Editor → Links says for links, ⌘-click to begin with): in the desktop apps, a folder opens in Finder (the system's file manager elsewhere) and a file in its app; one that runs something (an app, a script) is shown in Finder instead, as attached files are. If it isn't there any more, Lines says so. A web page can't open what's on a computer, so on the web following one copies its path.
 - In LaTeX notes it's `\href{file:///Users/me/Projects/}{Projects}`, drawn and followed the same way, and dropped folders and `/folder` write that.
 - Synced to another device, a link leads to the same path there, which may not be.
 
@@ -329,7 +329,7 @@ Links to some sites are drawn short, the way the site writes them, with a mark i
 - Tables draw them the same way, and so do LaTeX notes (`\url{…}`, and `\href{…}{…}` with the mark in front). Printed from a Markdown note, a bare link reads short too.
 - With the site's plugin off, its links are ordinary links.
 
-This changes nothing about the Markdown; it's only how lines draws the link.
+This changes nothing about the Markdown; it's only how Lines draws the link.
 
 ### GitHub
 
@@ -349,7 +349,7 @@ GitHub's mark, then the reference as GitHub writes it:
 
 ### arXiv
 
-A paper on [arXiv](https://arxiv.org) reads the way arXiv says to cite it, after a graduation cap (lines' own mark: arXiv's logo is only for crediting its API):
+A paper on [arXiv](https://arxiv.org) reads the way arXiv says to cite it, after a graduation cap (Lines' own mark: arXiv's logo is only for crediting its API):
 
 | URL | Drawn as |
 |---|---|
@@ -376,7 +376,7 @@ Plate: 3WBZ56
 - Only the value is copied, without its Markdown.
 - A value that's a score, a number out of 2 to 10, whole or with a half (`Rating: 4/5`, `Score: 5 / 7`, `3.5/5`, `1.5/2` too), is drawn as that many marks, so many filled and a half one half filled: stars, hearts or circles, or as written (Settings → Little Touches, where the copy buttons can be turned off too). In a list or a task too (`- Score: 2/5`). With the cursor on its line it's as written, to change; a click on a mark sets it there, and a click on the one that's the score makes it 0, each one change that ⌘Z takes back. Properties' values are drawn the same, and a library note's ratings on its kind's scale ([below](#ratings)).
 
-This changes nothing about the Markdown; it's only how lines draws the line.
+This changes nothing about the Markdown; it's only how Lines draws the line.
 
 ## Ratings
 
@@ -394,7 +394,7 @@ music: A
 
 | Scale | Written | Drawn |
 |---|---|---|
-| Marks, out of 2 to 10 (Out of 5, lines' default, or one of yours in an icon of its own) | `4/5`, `3.5/5` (halves too) | That many marks, so many filled, as Little Touches draws scores |
+| Marks, out of 2 to 10 (Out of 5, Lines' default, or one of yours in an icon of its own) | `4/5`, `3.5/5` (halves too) | That many marks, so many filled, as Little Touches draws scores |
 | Points, out of up to 1,000 (Out of 10, Out of 100, or yours) | `85/100`, `7.5/10` (to a tenth) | The number, what it's out of, and a short bar filled as far |
 | Words, the best first (Grades, S to F, or yours: `Masterpiece`, `Great`…) | `A`, `Masterpiece` (in any case) | The word, as a chip in the accent |
 | Thumbs | `thumbs up`, `thumbs down` | A thumb up and a thumb down, the one chosen filled |
@@ -424,7 +424,7 @@ company: @Acme
 - Settings → Layout → Properties draws them at the top (as above), beside the note's text on its left or right, or after its last line, with the line above them. Beside the text, they're a column level with its first line, the two a two-column page centred in the window; where the window's too narrow for both at their widths, the text gives them some of its own, down to 30 times its size, and narrower than that (a phone, most panes beside another note) they're at the top. Only where they're drawn changes: the note still starts with them, as its file, sync and other apps have it. They're edited as they are at the top, and ↑ from the note's first line goes into them (↓ from its last, when they're after it), and back out, as if they were the line next to it; ⌘Z undoes what was done in either. Properties added, typed or with `/properties`, go there once they're properties, the cursor with them.
 - `type: person` puts the note under **Types → Person** in the sidebar. Types are matched without case, like tags. A type can have an icon and a color (right-click it in the sidebar → Icon and Color); notes of that type show the icon in the list unless they have their own, and so do mentions of them. Right-click → Rename renames a type everywhere: the `type` of each of its notes and each `@type.…` of it (not in code, and not in locked notes). Notes keep their dates; renamed onto a type there already is, the two become one. Common types start with a fitting one (`person`, `company`, `project`, `meeting`, `book`, `place`…).
 - `date`, `due`, `start` and `end` put the note on the **Calendar** (in the sidebar), when their value starts with a date written `2026-11-30` (a time after it, `2026-11-30 14:00`, is fine): on the day of its `date` and its `due`, and on every day from its `start` to its `end` (up to a year). A time after the date puts the note at that time in the Calendar's week and day: an hour long, or from its `start` to its `end` when both are on that day. Times are read as the clock reads them (24-hour, `14:00`, and an `end` at `24:00` is midnight, the day's end), and anything after them, like seconds or a time zone, is read past. Other ways of writing a date are text to the Calendar. Keys are matched as above, so `Date` and `DUE` count too.
-- `repeat` makes it come round again on the Calendar, from its dates on, as you'd say it: `daily`, `every 3 days`, `every weekday`, `weekly`, `every 2 weeks`, `every monday and thursday`, `every 2 weeks on tue, fri`, `monthly` (on the same date, or the month's last day when it's shorter), `monthly on the last friday`, `every month on the 2nd tuesday`, `yearly`; and when it stops, `until 2027-03-01` or `10 times` (`every week until 2027-03-01`). Its own dates are the first time, as in other calendars, and each time after is as long as they are. The words are English, as the dates are numbers, whatever language lines is in; a value it can't read doesn't repeat. An event's menu on the Calendar (Repeat) writes the usual ones.
+- `repeat` makes it come round again on the Calendar, from its dates on, as you'd say it: `daily`, `every 3 days`, `every weekday`, `weekly`, `every 2 weeks`, `every monday and thursday`, `every 2 weeks on tue, fri`, `monthly` (on the same date, or the month's last day when it's shorter), `monthly on the last friday`, `every month on the 2nd tuesday`, `yearly`; and when it stops, `until 2027-03-01` or `10 times` (`every week until 2027-03-01`). Its own dates are the first time, as in other calendars, and each time after is as long as they are. The words are English, as the dates are numbers, whatever language Lines is in; a value it can't read doesn't repeat. An event's menu on the Calendar (Repeat) writes the usual ones.
 - `feed`, a link to a feed, makes the note a subscription to it, read in the Library's Feeds; `stream` (a list, `stream: Must read, Work`) puts that feed in those streams, and `include` and `exclude` (lists of words and phrases, `exclude: sponsored, web3 summit`) show only its posts with one of those, or hide those with one ([library.md](library.md#feeds)).
 - The note's title, excerpt, word count and plain text leave its properties out; search finds them.
 - Only Markdown notes have properties. Other apps that read front matter (Obsidian, Jekyll, Pandoc, static site generators) read these the same way.
@@ -484,7 +484,7 @@ As in GFM. Some details:
 
 ## Symbols
 
-lines shows some pairs of characters as the symbol they stand for, without changing the note. The note still holds what was typed, and that's what's copied, exported and synced.
+Lines shows some pairs of characters as the symbol they stand for, without changing the note. The note still holds what was typed, and that's what's copied, exported and synced.
 
 | Typed | Shown | Typed | Shown |
 | --- | --- | --- | --- |
@@ -501,7 +501,7 @@ lines shows some pairs of characters as the symbol they stand for, without chang
 
 ## Files on disk
 
-When lines saves notes to a folder or a bucket, each note is a Markdown file named after its id, with a small front matter block (id, dates, pin, trash, icon, format) ahead of its Linedown; a note's own properties come after it, as part of its text. Locked notes and end-to-end encryption change what's stored. See [sync.md](sync.md). An export (Settings → Export and Import) writes plain Linedown files named after their titles, without front matter.
+When Lines saves notes to a folder or a bucket, each note is a Markdown file named after its id, with a small front matter block (id, dates, pin, trash, icon, format) ahead of its Linedown; a note's own properties come after it, as part of its text. Locked notes and end-to-end encryption change what's stored. See [sync.md](sync.md). An export (Settings → Export and Import) writes plain Linedown files named after their titles, without front matter.
 
 ## Other formats
 
@@ -509,4 +509,4 @@ A note can be written in LaTeX instead ([latex.md](latex.md)), or be a spreadshe
 
 ## Changing Linedown
 
-When a feature adds or changes syntax, or changes how lines reads existing Markdown, update this page, the QA notes (`scripts/qa-notes.mjs`), and the QA checklist (`qa/checklist.md`), as described in [qa/README.md](../qa/README.md).
+When a feature adds or changes syntax, or changes how Lines reads existing Markdown, update this page, the QA notes (`scripts/qa-notes.mjs`), and the QA checklist (`qa/checklist.md`), as described in [qa/README.md](../qa/README.md).

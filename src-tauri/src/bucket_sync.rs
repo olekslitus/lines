@@ -59,7 +59,7 @@ pub async fn sync_bucket_transfer(request: Request<'_>) -> Result<Response, Fail
 async fn transfer(client: &reqwest::Client, signed: Signed, file: Vec<u8>) -> Result<Vec<u8>, Failure> {
   let url = Url::parse(&signed.url).map_err(Failure::unsent)?;
   if !reachable(&url) {
-    return Err(Failure::unsent(format!("Not a bucket lines may reach: {url}")));
+    return Err(Failure::unsent(format!("Not a bucket Lines may reach: {url}")));
   }
   let mut headers = header::HeaderMap::new();
   for (name, value) in &signed.headers {

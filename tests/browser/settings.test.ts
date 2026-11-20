@@ -102,7 +102,7 @@ test("what only a theme or palette of your own has, found with one of lines' own
 
   await search.fill("add a color");
   await found.filter({ hasText: /^Add a Color/ }).click();
-  await onMakeCopy("One of lines’ own. Make a copy to change it.");
+  await onMakeCopy("One of Lines’ own. Make a copy to change it.");
 });
 
 test("spreadsheet notes are off at first, blocks in notes on; a spreadsheet note here turns them on, unless they were turned off", async () => {

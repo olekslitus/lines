@@ -1,6 +1,6 @@
 # Performance
 
-lines should feel instant with a big library: a key shows on screen within two frames, a click is answered within 100 ms, and nothing stalls when thousands of notes change at once. `bun run bench` measures that, in the engines lines runs on, and fails when something takes longer than its budget.
+Lines should feel instant with a big library: a key shows on screen within two frames, a click is answered within 100 ms, and nothing stalls when thousands of notes change at once. `bun run bench` measures that, in the engines Lines runs on, and fails when something takes longer than its budget.
 
 ## Running the benchmarks
 
@@ -64,16 +64,16 @@ On a MacBook Pro (M1 Pro, macOS 27), headless, with Playwright 1.64 (WebKit 27.2
 
 Every measure is within its budget in Chromium. In WebKit, three can miss, now and then, and `bun run bench` shows them as known misses rather than failing: the first few keys after jumping to the end of the 12,000-line note (up to 100 ms, [#126](https://github.com/olekslitus/lines/issues/126)), and a key in the list's search that changes which rows are drawn, or a frame while scrolling when a spreadsheet block is first drawn (35–60 ms, [#133](https://github.com/olekslitus/lines/issues/133)).
 
-Headless browsers aren't the Mac app's web view, and this isn't an iPhone: the numbers compare changes, and show where lines stands, rather than promise times on every device.
+Headless browsers aren't the Mac app's web view, and this isn't an iPhone: the numbers compare changes, and show where Lines stands, rather than promise times on every device.
 
 ## Keeping it fast
 
-What these benchmarks have taught, for code in lines:
+What these benchmarks have taught, for code in Lines:
 
 - **Work per keystroke must not grow with the library.** The editor hands its text to the store 120 ms after typing pauses; whatever reacts to the store (the note list, counts, tags) runs then, and delays the next key if it's slow.
 - **Change many notes in one go.** Changing a reactive collection item by item (a `SvelteSet`'s `add` in a loop) wakes everything that reads it each time: with 5,000 notes, 25 million wake-ups. Build the new set, then assign it once.
 - **Draw what's on screen.** A list of thousands of rows, each a component, makes every change walk all of them. And WebKit pays for every element in the page on every frame, even ones nothing changed: with 5,000 note rows, each key in the editor took 100 ms or more, and neither `contain` nor `content-visibility` helped; drawing 60 rows brought it to 15. Long notes and spreadsheets draw only their visible part too.
-- **Redraw only what a change touches.** A key or a cursor move changes a line or two of a note. What the editor draws within lines (styles, hidden markup) is drawn only for the part in view (a `ViewPlugin` over `view.viewport`). What changes the layout (tables, math and diagrams drawn as blocks) has to be known for the whole note, so it's kept in the editor's state, moved along with each change, and drawn again only for the top-level blocks a change or the cursor touched (`drawnBlocks` in `src/lib/editor/util.ts`). LaTeX notes are drawn the same way.
+- **Redraw only what a change touches.** A key or a cursor move changes a line or two of a note. What the editor draws within Lines (styles, hidden markup) is drawn only for the part in view (a `ViewPlugin` over `view.viewport`). What changes the layout (tables, math and diagrams drawn as blocks) has to be known for the whole note, so it's kept in the editor's state, moved along with each change, and drawn again only for the top-level blocks a change or the cursor touched (`drawnBlocks` in `src/lib/editor/util.ts`). LaTeX notes are drawn the same way.
 - **Read text once.** A parser rule that reads from each `$` to the end of its paragraph is quadratic: a 3,000-row sheet, read as one Markdown paragraph full of prices, took a second to open. Find what such a rule needs in one pass, and give each note its own language's parser from the start.
 - **Load ahead what stalls the frame it arrives in.** KaTeX's script and fonts load once a note with math opens, not when the first formula scrolls into view: arriving mid-scroll, they cost WebKit a 60 ms frame. A stylesheet added later restyles the whole page, so KaTeX's comes with the app's.
 - **Make costly things once.** `Intl` formatters, regular expressions and parsed notes are cached rather than rebuilt for each cell or keystroke. A spreadsheet's rows keep their identity while unchanged, so the formula engine, column widths and CSV skip them, and a change measures only the cells it touched.

@@ -101,7 +101,7 @@ export async function lookUpAny(link: string, signal: AbortSignal, asking: Askin
   // As Web Pages read it, if it was asked: the address as `lookUp` gave it, the same.
   const page = await getPage(new URL(link).href, signal, asking);
   if (!page) return null;
-  if (gated(link, page.address)) throw new LookupError(`${new URL(link).hostname} sent lines to sign in`);
+  if (gated(link, page.address)) throw new LookupError(`${new URL(link).hostname} sent Lines to sign in`);
   if (missing(page.title) || missing(page.meta.get("og:title") ?? "")) throw new LookupError(`${new URL(link).hostname} says its page isn't there`);
   return pageResource(page, link);
 }

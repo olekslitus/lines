@@ -9,14 +9,14 @@ export default {
   "readwise.waiting": "Readwise asked to wait; asking again in {seconds} seconds…",
   // What an import would do, said before anything's written: "Found 3 books, 2 articles and 1 episode, with 42 highlights."
   "readwise.found": "Found {things}, with {highlights, plural, one {# highlight} other {# highlights}}.",
-  "readwise.nothingNew": "Everything in Readwise is in lines already.",
+  "readwise.nothingNew": "Everything in Readwise is in Lines already.",
   "readwise.count.book": "{count, plural, one {# book} other {# books}}",
   "readwise.count.article": "{count, plural, one {# article} other {# articles}}",
   "readwise.count.episode": "{count, plural, one {# episode} other {# episodes}}",
   "readwise.count.video": "{count, plural, one {# video} other {# videos}}",
   "readwise.count.paper": "{count, plural, one {# paper} other {# papers}}",
-  // The notes there already that get highlights they haven't got: "Adds 3 highlights to notes in lines already: Walden and Moby-Dick."
-  "readwise.adding": "{count, plural, one {Adds # highlight to notes in lines already: {notes}.} other {Adds # highlights to notes in lines already: {notes}.}}",
+  // The notes there already that get highlights they haven't got: "Adds 3 highlights to notes in Lines already: Walden and Moby-Dick."
+  "readwise.adding": "{count, plural, one {Adds # highlight to notes in Lines already: {notes}.} other {Adds # highlights to notes in Lines already: {notes}.}}",
   "readwise.more": "{count, plural, one {# more} other {# more}}",
   "readwise.leftOut": "{count, plural, one {# supplemental book, Readwise’s suggestion, is left out.} other {# supplemental books, Readwise’s suggestions, are left out.}}",
   "readwise.import": "Import",

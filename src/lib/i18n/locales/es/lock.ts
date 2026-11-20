@@ -16,21 +16,21 @@ export default {
 
   "lock.app.title": "Bloqueo de la app",
   "lock.app.intro":
-    "Bloquea lines con una frase de contraseña. Tus notas, archivos adjuntos y ajustes de sincronización de este dispositivo se cifran, y lines te pide la frase de contraseña al abrirse.",
+    "Bloquea Lines con una frase de contraseña. Tus notas, archivos adjuntos y ajustes de sincronización de este dispositivo se cifran, y Lines te pide la frase de contraseña al abrirse.",
   "lock.app.setUp": "Configurar el bloqueo de la app…",
   "lock.app.turnOn": "Activar el bloqueo de la app",
   "lock.app.encrypting": "Cifrando las notas…",
-  "lock.app.turnedOn": "El bloqueo de la app está activado. lines te pedirá la frase de contraseña al abrirse.",
+  "lock.app.turnedOn": "El bloqueo de la app está activado. Lines te pedirá la frase de contraseña al abrirse.",
   "lock.app.forget":
-    "Si la olvidas, las notas de este dispositivo no se podrán abrir, ni siquiera con lines. Las notas sincronizadas siguen a salvo en tu almacenamiento de sincronización.",
-  "lock.app.on": "Las notas de este dispositivo están cifradas, y lines te pide la frase de contraseña al abrirse.",
+    "Si la olvidas, las notas de este dispositivo no se podrán abrir, ni siquiera con Lines. Las notas sincronizadas siguen a salvo en tu almacenamiento de sincronización.",
+  "lock.app.on": "Las notas de este dispositivo están cifradas, y Lines te pide la frase de contraseña al abrirse.",
   "lock.app.after": "Bloquear tras",
   "lock.app.afterLabel": "Bloquear tras este tiempo sin uso",
   "lock.app.never": "Nunca",
   "lock.app.minutes": "{count} min",
   "lock.app.hour": "1 hora",
-  "lock.app.afterHint": "Tras ese tiempo sin uso, lines se bloquea solo.",
-  "lock.app.neverHint": "lines se bloquea al salir, o cuando lo bloqueas tú.",
+  "lock.app.afterHint": "Tras ese tiempo sin uso, Lines se bloquea solo.",
+  "lock.app.neverHint": "Lines se bloquea al salir, o cuando lo bloqueas tú.",
   "lock.app.askTurnOff": "Desactivar…",
   "lock.app.askChange": "Cambiar la frase de contraseña…",
   "lock.app.change": "Cambiar la frase de contraseña",
@@ -78,14 +78,14 @@ export default {
     "Para cifrar las notas antes de que salgan de este dispositivo, de modo que tu proveedor de almacenamiento no pueda leerlas, activa el cifrado de extremo a extremo en Ajustes → Sincronización.",
   "lock.synced.open": "Ir a Sincronización",
 
-  "lock.screen.title": "lines está bloqueado",
+  "lock.screen.title": "Lines está bloqueado",
   "lock.screen.hint": "Introduce tu frase de contraseña para abrir tus notas.",
   "lock.screen.unlock": "Desbloquear",
   "lock.screen.unlocking": "Desbloqueando…",
   "lock.screen.unlockFailed": "No se ha podido desbloquear: {error}",
   "lock.screen.forgot": "¿Has olvidado tu frase de contraseña?",
   "lock.screen.forgotHint":
-    "Sin ella, las notas de este dispositivo no se pueden abrir, ni siquiera con lines. Si sincronizas, tus notas siguen en tu almacenamiento de sincronización: borra este dispositivo y vuelve a conectar la sincronización.",
+    "Sin ella, las notas de este dispositivo no se pueden abrir, ni siquiera con Lines. Si sincronizas, tus notas siguen en tu almacenamiento de sincronización: borra este dispositivo y vuelve a conectar la sincronización.",
   "lock.screen.askErase": "Borrar este dispositivo…",
   "lock.screen.eraseQuestion":
     "¿Borrar todas las notas y archivos adjuntos de este dispositivo, y sus ajustes de sincronización? Las notas que se sincronizaron siguen en tu almacenamiento de sincronización. Esta acción no se puede deshacer.",
@@ -101,13 +101,13 @@ export default {
   "lock.note.opening": "Abriendo…",
   "lock.note.forgot": "¿Has olvidado la contraseña?",
   "lock.note.forgotHint":
-    "Sin su contraseña, una nota bloqueada no se puede abrir, ni siquiera con lines. Puedes establecer una nueva contraseña para las notas que bloquees a partir de ahora.",
+    "Sin su contraseña, una nota bloqueada no se puede abrir, ni siquiera con Lines. Puedes establecer una nueva contraseña para las notas que bloquees a partir de ahora.",
   "lock.note.openPrivacy": "Abrir los ajustes de privacidad",
 
   "lock.dialog.setTitle": "Establece una contraseña para las notas bloqueadas",
   "lock.dialog.setIntro":
     "Abre todas las notas que bloquees, aquí y en tus otros dispositivos. Los títulos de las notas bloqueadas siguen apareciendo en la lista.",
-  "lock.dialog.setHint": "Si la olvidas, las notas que bloquees con ella no se podrán abrir, ni siquiera con lines.",
+  "lock.dialog.setHint": "Si la olvidas, las notas que bloquees con ella no se podrán abrir, ni siquiera con Lines.",
   "lock.dialog.openTitle": "Introduce la contraseña de las notas bloqueadas",
   "lock.dialog.openIntro": "Tus notas bloqueadas también se abren, hasta que las vuelvas a bloquear.",
   "lock.dialog.secretIntro": "Tus secretos se guardan en una nota bloqueada. Tus otras notas bloqueadas también se abren, hasta que vuelvas a bloquearlas.",
@@ -119,7 +119,7 @@ export default {
   "lock.error.wrongPassphrase": "Esa frase de contraseña no es correcta.",
   "lock.error.wrongPassword": "Esa contraseña no es correcta.",
   "lock.error.otherPassword": "Se han abierto otras notas bloqueadas, pero esta se bloqueó con otra contraseña.",
-  "lock.error.notEncrypted": "Esto no lo ha cifrado lines.",
+  "lock.error.notEncrypted": "Esto no lo ha cifrado Lines.",
   "lock.error.unreadable": "No se ha podido descifrar: se modificó, se dañó o se cifró con otra clave.",
-  "lock.error.unknownFormat": "Esta clave tiene un formato que lines no conoce, quizá de una versión más reciente de lines.",
+  "lock.error.unknownFormat": "Esta clave tiene un formato que Lines no conoce, quizá de una versión más reciente de Lines.",
 } satisfies Translation<typeof en>;

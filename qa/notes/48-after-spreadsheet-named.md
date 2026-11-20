@@ -508,7 +508,7 @@ Total, =costs!B2*2
 ```
 ---
 
-#### 31. Named spreadsheet (csv name=), and a formula in another block using it, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Named spreadsheet (csv name=), and a formula in another block using it, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 ```csv name=costs
 Item, Cost, Day

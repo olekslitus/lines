@@ -5,14 +5,14 @@ test("downloads are named by the system they're for, their signatures too", () =
   const named = (file: string) => downloadName(file, "0.3.3");
   expect(
     [
-      "lines_0.3.3_universal.dmg",
-      "lines.app.tar.gz",
-      "lines.app.tar.gz.sig",
-      "lines_0.3.3_x64-setup.exe",
-      "lines_0.3.3_x64_en-US.msi.sig",
-      "lines_0.3.3_amd64.AppImage",
-      "lines_0.3.3_amd64.deb",
-      "lines-0.3.3-1.x86_64.rpm",
+      "Lines_0.3.3_universal.dmg",
+      "Lines.app.tar.gz",
+      "Lines.app.tar.gz.sig",
+      "Lines_0.3.3_x64-setup.exe",
+      "Lines_0.3.3_x64_en-US.msi.sig",
+      "Lines_0.3.3_amd64.AppImage",
+      "Lines_0.3.3_amd64.deb",
+      "Lines-0.3.3-1.x86_64.rpm",
       "app-universal-release.apk",
       "app-universal-release.aab",
     ].map(named),
@@ -32,5 +32,5 @@ test("downloads are named by the system they're for, their signatures too", () =
   expect(named("app-universal-release-unsigned.apk")).toBe("app-universal-release-unsigned.apk");
   // Named once, and nothing else is.
   expect(named("lines_0.3.3_macos_universal.dmg")).toBe("lines_0.3.3_macos_universal.dmg");
-  expect([named("lines.app"), named("latest.json")]).toEqual(["lines.app", "latest.json"]);
+  expect([named("Lines.app"), named("latest.json")]).toEqual(["Lines.app", "latest.json"]);
 });

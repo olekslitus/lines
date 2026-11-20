@@ -32,7 +32,7 @@ export default {
   "books.failed": "This book couldn’t be opened.",
   "books.fromFile": "Add a Book from a File…",
   "books.added": "Added {title} to Books",
-  "books.notABook": "{name} isn’t a book lines can read: PDF or EPUB.",
-  "books.tooBig": "{name} is too big to keep as a book: lines keeps books up to {size} MB.",
+  "books.notABook": "{name} isn’t a book Lines can read: PDF or EPUB.",
+  "books.tooBig": "{name} is too big to keep as a book: Lines keeps books up to {size} MB.",
   "books.addFailed": "{name} couldn’t be added.",
 };

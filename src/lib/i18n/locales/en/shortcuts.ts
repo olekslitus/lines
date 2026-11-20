@@ -24,7 +24,7 @@ export default {
   "shortcuts.textBigger": "Make text bigger",
   "shortcuts.textSmaller": "Make text smaller",
   "shortcuts.textUsual": "Usual text size",
-  "shortcuts.lock": "Lock lines",
+  "shortcuts.lock": "Lock Lines",
   "shortcuts.lockNote": "When the app lock is on",
   "shortcuts.closeFloating": "Close a floating note",
   "shortcuts.undoTrash": "Bring back the note just moved to the Trash",

@@ -61,6 +61,6 @@ jsonpath "$.is_legendary" == false
 
 Requests are written in the `.http` format that JetBrains' IDEs, VS Code and Visual Studio read too. A whole note can be requests, as the next one, **Pokédex**, is: switch a note to HTTP Requests in its ⓘ panel, or import a `.http` file.
 
-In the browser, only APIs that allow requests from other sites answer, as these do. The lines app sends to any.
+In the browser, only APIs that allow requests from other sites answer, as these do. The Lines app sends to any.
 
 #tour

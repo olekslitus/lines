@@ -1,24 +1,24 @@
 # Importing from other apps
 
-Notes from another notes app come into lines from **Settings → Export and Import**, where each app has a group of its own saying what to export from it and how. Each is a [plugin](plugins.md), on to begin with; turned off, its group leaves Settings, and what it brought stays. Markdown, LaTeX, CSV and Excel files of your own are imported with **Import Files…** in the same place, and the Library's bookmarks and Readwise in Settings → Library ([library.md](library.md#bookmarks)).
+Notes from another notes app come into Lines from **Settings → Export and Import**, where each app has a group of its own saying what to export from it and how. Each is a [plugin](plugins.md), on to begin with; turned off, its group leaves Settings, and what it brought stays. Markdown, LaTeX, CSV and Excel files of your own are imported with **Import Files…** in the same place, and the Library's bookmarks and Readwise in Settings → Library ([library.md](library.md#bookmarks)).
 
 ## How an import goes
 
 1. **Choose** what the app exported: a folder (an Obsidian vault, a Logseq graph, Bear's Markdown), or files (Bear's backup, Notion's export, Evernote's notebooks, a ZIP; a ZIP of nothing but ZIPs, as Notion splits a large export, is unpacked in turn: [below](#zips-and-how-big-an-export-can-be)). Nothing is written yet, and nothing in it is run: its notes are read as text.
-2. **What it would do** comes first: how many notes, attachments and folders, and on lines of their own, what won't come across as it was, each kind with how many and a few examples (`^37066d (Plan)`): what's kept as text because lines has nothing like it, and what's left out. Notes imported from it before are left out too, and said so, with which ([below](#importing-again)).
-3. **Import** (focused, so Enter imports) copies the pictures and files the notes show into lines' attachments, then makes the notes a few hundred at a time, with a bar showing how far it's got; Stop stops either, keeping what's made (stopped while copying, no note is made, and it says so). Ten thousand notes take a few seconds. Closing Settings doesn't stop it, and opening it again shows how it's going, or how it went.
+2. **What it would do** comes first: how many notes, attachments and folders, and on lines of their own, what won't come across as it was, each kind with how many and a few examples (`^37066d (Plan)`): what's kept as text because Lines has nothing like it, and what's left out. Notes imported from it before are left out too, and said so, with which ([below](#importing-again)).
+3. **Import** (focused, so Enter imports) copies the pictures and files the notes show into Lines' attachments, then makes the notes a few hundred at a time, with a bar showing how far it's got; Stop stops either, keeping what's made (stopped while copying, no note is made, and it says so). Ten thousand notes take a few seconds. Closing Settings doesn't stop it, and opening it again shows how it's going, or how it went.
 4. **What it did**, with what didn't come across said again, and **Undo Import**, which moves every note it made to the Trash (but one you've changed since, which is yours now). Nothing an import made is ever deleted outright: empty the Trash for that. Choosing something else to import keeps the last import's Undo, under what the next would do; an import with nothing to bring can't be started, so it never takes that Undo's place.
 
 What carries over, from any app:
 
 - **Titles.** A note's title is its first line ([linedown.md](linedown.md#title)), so a note whose text doesn't start with its title as a heading gets one: `# Plan`.
-- **Text**, in [Linedown](linedown.md): what the app writes that lines has too is translated into lines' way of writing it; what lines has nothing for stays as readable text, and is counted.
-- **Folders.** lines has tags rather than folders, so with **Tag notes with their folders** on (as it is to begin with), a note in `Projects › 2026` is tagged `#projects/2026`, a tag in a tag in the sidebar. The tag goes on the note's last line, with its other tags.
+- **Text**, in [Linedown](linedown.md): what the app writes that Lines has too is translated into Lines' way of writing it; what Lines has nothing for stays as readable text, and is counted.
+- **Folders.** Lines has tags rather than folders, so with **Tag notes with their folders** on (as it is to begin with), a note in `Projects › 2026` is tagged `#projects/2026`, a tag in a tag in the sidebar. The tag goes on the note's last line, with its other tags.
 - **Tags**, nested ones too, as `#tags` in the note's text.
-- **Pins, and the trash.** A note pinned or bookmarked there is pinned here; one in the app's trash is in lines' Trash.
+- **Pins, and the trash.** A note pinned or bookmarked there is pinned here; one in the app's trash is in Lines' Trash.
 - **Dates.** When each note was made and last changed, from what the app keeps (a note's properties, or its file's date).
-- **Attachments.** Pictures and files the notes show are kept as lines keeps any ([linedown.md](linedown.md#attachments)), by their content: a file shown by several notes, or imported before, is kept once. A file no note shows is left out, and said so.
-- **Links between notes** become wiki links (`[[Plan]]`, `[[Plan#Goals|the goals]]`), which lines draws as mentions. A link to a note that isn't there stays one, which lines offers to create.
+- **Attachments.** Pictures and files the notes show are kept as Lines keeps any ([linedown.md](linedown.md#attachments)), by their content: a file shown by several notes, or imported before, is kept once. A file no note shows is left out, and said so.
+- **Links between notes** become wiki links (`[[Plan]]`, `[[Plan#Goals|the goals]]`), which Lines draws as mentions. A link to a note that isn't there stays one, which Lines offers to create.
 
 ### ZIPs, and how big an export can be
 
@@ -26,13 +26,13 @@ A ZIP in a folder chosen is one of its files, like any other, never unpacked: on
 
 ### Importing again
 
-Importing the same export again adds only the notes that aren't here yet, and says which are (a few by name): lines keeps, with each note it imports, where it came from (the app, the note's id there and its name there), in the note's own record rather than its text. It's written in the header lines keeps above a synced note's text ([sync.md](sync.md)) as `source: {"app":"obsidian","collection":{"id":"9c2e…","name":"Vault"},"id":"Projects/Plan.md","name":"Plan"}`, so it goes to your other devices too, and isn't in an export. A note you've changed since isn't changed again, nor brought back as a second copy. One in the Trash counts as not here (an import undone, say), unless it was in the other app's trash too. A conflicted copy sync makes of an imported note doesn't say where it came from: only the note does. A locked note keeps only a hash of its id there, and not its name there ([sync.md](sync.md#locked-notes)): importing again still knows it, but links brought with it don't find it by its old name once it's renamed.
+Importing the same export again adds only the notes that aren't here yet, and says which are (a few by name): Lines keeps, with each note it imports, where it came from (the app, the note's id there and its name there), in the note's own record rather than its text. It's written in the header Lines keeps above a synced note's text ([sync.md](sync.md)) as `source: {"app":"obsidian","collection":{"id":"9c2e…","name":"Vault"},"id":"Projects/Plan.md","name":"Plan"}`, so it goes to your other devices too, and isn't in an export. A note you've changed since isn't changed again, nor brought back as a second copy. One in the Trash counts as not here (an import undone, say), unless it was in the other app's trash too. A conflicted copy sync makes of an imported note doesn't say where it came from: only the note does. A locked note keeps only a hash of its id there, and not its name there ([sync.md](sync.md#locked-notes)): importing again still knows it, but links brought with it don't find it by its old name once it's renamed.
 
-Some apps' notes have ids of their own everywhere (Bear's). An Obsidian vault's are only its notes' paths, which another vault can have too, and a vault has no id lines can read. So each vault gets an id of lines' own when it's first imported (`collection` above), and when one is chosen that may be a vault imported before (the same name, or notes with the same paths, as when it's been renamed or moved) lines asks: **The same as "Vault", imported before** is on to begin with, and says how many of its notes have the same paths. On, what's here already is left out; off, it's another vault, and all of it is imported.
+Some apps' notes have ids of their own everywhere (Bear's). An Obsidian vault's are only its notes' paths, which another vault can have too, and a vault has no id Lines can read. So each vault gets an id of Lines' own when it's first imported (`collection` above), and when one is chosen that may be a vault imported before (the same name, or notes with the same paths, as when it's been renamed or moved) Lines asks: **The same as "Vault", imported before** is on to begin with, and says how many of its notes have the same paths. On, what's here already is left out; off, it's another vault, and all of it is imported.
 
 ### Links, once a note's renamed
 
-A mention finds a note by its title ([linedown.md](linedown.md#mentions)), and renaming a note doesn't change the mentions of it. Links brought from another app still find a note renamed in lines by the name it had there: in a note imported with it (from the same vault), `[[Plan]]` finds the note imported as Plan after it's retitled "Q3 plan", as long as no note is titled Plan; of two once called Plan, the one edited last. In a note of lines' own, `[[Plan]]` finds only a note titled Plan, or offers to create one.
+A mention finds a note by its title ([linedown.md](linedown.md#mentions)), and renaming a note doesn't change the mentions of it. Links brought from another app still find a note renamed in Lines by the name it had there: in a note imported with it (from the same vault), `[[Plan]]` finds the note imported as Plan after it's retitled "Q3 plan", as long as no note is titled Plan; of two once called Plan, the one edited last. In a note of Lines' own, `[[Plan]]` finds only a note titled Plan, or offers to create one.
 
 ## Obsidian
 
@@ -40,35 +40,35 @@ A mention finds a note by its title ([linedown.md](linedown.md#mentions)), and r
 
 **What comes across:**
 
-| In Obsidian | In lines |
+| In Obsidian | In Lines |
 | --- | --- |
 | A note, `Projects/Plan.md` | A note titled Plan, tagged `#projects` |
-| Properties (front matter) | Properties, as they were, but `tags:`, which become `#tags` in the text. `aliases:` and the rest stay properties; lines reads them the same way |
+| Properties (front matter) | Properties, as they were, but `tags:`, which become `#tags` in the text. `aliases:` and the rest stay properties; Lines reads them the same way |
 | `[[Plan]]`, `[[Projects/Plan]]`, `[[Plan#Goals]]`, `[[Plan\|the plan]]` | `[[Plan]]`, `[[Plan#Goals]]`, `[[Plan\|the plan]]`, to the note Obsidian would open: by its path in the vault, from the note's folder, or the shortest path ending in it |
 | Markdown links to notes, `[the plan](Projects/Plan.md)` | `[[Plan\|the plan]]` |
-| `![[photo.png]]`, `![[photo.png\|300]]`, `![](photo.png)` | `![](../attachments/….png)`, `![\|300](../attachments/….png)`: the picture, kept in lines, at its width |
+| `![[photo.png]]`, `![[photo.png\|300]]`, `![](photo.png)` | `![](../attachments/….png)`, `![\|300](../attachments/….png)`: the picture, kept in Lines, at its width |
 | `![[Report.pdf]]`, `![[talk.mp3]]`, `[[Report.pdf]]` | `[Report.pdf](../attachments/….pdf)`: a file's card, or a player for audio and video |
 | Pictures and files wherever the vault keeps them (its attachment folder setting, a folder of each note's) | Found as Obsidian finds them, by their name |
-| `> [!tip] Title` callouts | lines' callouts (`:::info icon=lightbulb`), the title in bold on their first line; note, info, tip, success, example and the like as info, with Obsidian's icon; question; warning; danger, bug and failure as error. Nested ones nest. One of a kind lines doesn't know is a card of its name. Folding ones are open |
-| `==highlight==`, `#tag`, `#nested/tag`, `$math$`, ` ```mermaid `, tables, tasks | The same: lines writes them alike |
-| `%%comment%%` | `<!--comment-->`, Markdown's own: faint in lines, and not shown by other Markdown apps. One within text ends in its paragraph (or heading, or table cell), or its `%%` stays text, and is said so; one that starts a paragraph runs on to the next `%%`, past blank lines too. One that runs past a code block, or holds what would end an HTML comment (`-->`), is kept as written, and said so |
+| `> [!tip] Title` callouts | Lines' callouts (`:::info icon=lightbulb`), the title in bold on their first line; note, info, tip, success, example and the like as info, with Obsidian's icon; question; warning; danger, bug and failure as error. Nested ones nest. One of a kind Lines doesn't know is a card of its name. Folding ones are open |
+| `==highlight==`, `#tag`, `#nested/tag`, `$math$`, ` ```mermaid `, tables, tasks | The same: Lines writes them alike |
+| `%%comment%%` | `<!--comment-->`, Markdown's own: faint in Lines, and not shown by other Markdown apps. One within text ends in its paragraph (or heading, or table cell), or its `%%` stays text, and is said so; one that starts a paragraph runs on to the next `%%`, past blank lines too. One that runs past a code block, or holds what would end an HTML comment (`-->`), is kept as written, and said so |
 | A bar in a table: `[[Plan\|the plan]]`, `![[photo.png\|300]]`, escaped | Every bar the import writes in a table escaped, `\|`: a link's, a Markdown link made a wiki link (`[[Plan\|the plan]]`), a picture's width (`![\|300](…)`), so the table keeps its columns |
 | Bookmarked notes (and starred, in older vaults) | Pinned |
 | Daily notes, named as Daily notes' settings say (`2026-11-14`) in their folder, or any note named like a day | `date: 2026-11-14`, so it's on the Calendar on that day |
 | Notes in the vault's `.trash` | In the Trash |
 | `created:` and `updated:` properties (or `date created`, `modified`…) | When the note was made and changed; otherwise its file's date |
 
-**Code is left as it is**, read as lines reads Markdown: fenced and indented code blocks, in lists and quotes too, inline code, math and HTML. A link, an embed or a `%%` in them stays as written; so does a `%%` in a link (`[50%% off](Sale.md)`, `[[Sale|50%%]]`).
+**Code is left as it is**, read as Lines reads Markdown: fenced and indented code blocks, in lists and quotes too, inline code, math and HTML. A link, an embed or a `%%` in them stays as written; so does a `%%` in a link (`[50%% off](Sale.md)`, `[[Sale|50%%]]`).
 
 **Links never lead into the vault's trash** (`.trash`), as in Obsidian: only its notes are imported, into the Trash; its pictures and files aren't.
 
-**Kept as text, and said so:** block ids (`^37066d`; lines doesn't link to a line), links to a heading in their own note (`[[#Goals]]`), tasks with a status lines doesn't have (`- [/]`, `- [-]`), [Dataview](https://blacksmithgu.github.io/obsidian-dataview/) queries (kept as their code), `cssclasses` (kept as a property, which lines doesn't use), properties lines can't read (a key in quotes, say: kept as a YAML code block at the note's top), and links to files that aren't in the vault (kept as written).
+**Kept as text, and said so:** block ids (`^37066d`; Lines doesn't link to a line), links to a heading in their own note (`[[#Goals]]`), tasks with a status Lines doesn't have (`- [/]`, `- [-]`), [Dataview](https://blacksmithgu.github.io/obsidian-dataview/) queries (kept as their code), `cssclasses` (kept as a property, which Lines doesn't use), properties Lines can't read (a key in quotes, say: kept as a YAML code block at the note's top), and links to files that aren't in the vault (kept as written).
 
-**Made something else, and said so:** a note shown in another (`![[Recipe]]`) is a link to it, as lines doesn't show one note in another.
+**Made something else, and said so:** a note shown in another (`![[Recipe]]`) is a link to it, as Lines doesn't show one note in another.
 
 **Left out, and said so:** files no note shows (a canvas, a picture nothing uses), and Obsidian's settings, workspace and plugins (`.obsidian`).
 
-**Notes with the same name** in different folders are both imported, and said so: Obsidian tells them apart by their paths, but lines finds a note by its title, so a link to that name finds the one with a type, then the one edited last ([linedown.md](linedown.md#mentions)).
+**Notes with the same name** in different folders are both imported, and said so: Obsidian tells them apart by their paths, but Lines finds a note by its title, so a link to that name finds the one with a type, then the one edited last ([linedown.md](linedown.md#mentions)).
 
 **Where it's read:** in a browser (and the apps), with the folder's files read only as text, never run, and nothing sent anywhere. The code is in `src/plugins/obsidian/`: `vault.ts` reads the vault, `markdown.ts` its notes.
 
@@ -78,19 +78,19 @@ A mention finds a note by its title ([linedown.md](linedown.md#mentions)), and r
 
 **What comes across:**
 
-| In Bear | In lines |
+| In Bear | In Lines |
 | --- | --- |
 | A note, its first line its title | A note, titled the same |
 | `#tag`, `#nested/tag` | The same |
-| `#tag of several words#`, `#work/next steps#` | `#tag-of-several-words`, `#work/next-steps`: lines' tags have no spaces (said so) |
+| `#tag of several words#`, `#work/next steps#` | `#tag-of-several-words`, `#work/next-steps`: Lines' tags have no spaces (said so) |
 | `#tag#` | `#tag` |
 | `==highlight==`, `~~strikethrough~~`, tasks, tables, code, `$math$` | The same; a table right under a line of text gets a blank line before it, which Markdown needs |
 | `~underline~` | `<u>underline</u>` |
 | `[[Note]]`, `[[Note/Heading]]`, `[[Note\|text]]` | `[[Note]]`, `[[Note#Heading]]`, `[[Note\|text]]` |
 | A link to a note, `bear://x-callback-url/open-note?id=…` | `[[Note\|text]]`, by Bear's id of the note |
-| Pictures and files (`assets/`, or a folder beside an exported note), with a size: `![](photo.png)<!-- {"width":320} -->` | Kept in lines, `![\|320](../attachments/….png)`, the size its width |
+| Pictures and files (`assets/`, or a folder beside an exported note), with a size: `![](photo.png)<!-- {"width":320} -->` | Kept in Lines, `![\|320](../attachments/….png)`, the size its width |
 | Pinned | Pinned |
-| Archived | Tagged `#archived`, as lines has no archive (said so) |
+| Archived | Tagged `#archived`, as Lines has no archive (said so) |
 | In Bear's trash | In the Trash |
 | When it was made and changed | The same |
 
@@ -106,7 +106,7 @@ Bear's older markup (Bear 1's "Polar Bear" `::highlight::`, `*bold*`, `/italic/`
 
 **What comes across:**
 
-| In Logseq | In lines |
+| In Logseq | In Lines |
 | --- | --- |
 | A page, `pages/Plan.md` | A note titled Plan (or as its `title::` says) |
 | A namespace's page, `Projects/Acme` (`Projects___Acme.md`, or `Projects%2FAcme.md` as older versions wrote it) | A note titled `Projects/Acme`, as links name it, tagged `#projects` |
@@ -118,16 +118,16 @@ Bear's older markup (Bear 1's "Polar Bear" `::highlight::`, `*bold*`, `/italic/`
 | `DOING`, `NOW`, `WAITING` | `- [ ] DOING …`: open, the state kept as a word (said so) |
 | `CANCELED` | `- [x] ~~…~~` (said so) |
 | `[[Page]]`, `[text]([[Page]])`, `#[[two words]]` | `[[Page]]`, `[[Page\|text]]`, `#two-words` (said so) |
-| `((block reference))`, `{{embed ((…))}}` | The block's text, and a link to its page if it's another's (said so): lines doesn't link to a block |
+| `((block reference))`, `{{embed ((…))}}` | The block's text, and a link to its page if it's another's (said so): Lines doesn't link to a block |
 | `{{embed [[Page]]}}` | `[[Page]]` (said so) |
 | `{{video …}}`, `{{youtube …}}`, `{{tweet …}}` | The link |
 | `^^highlight^^` | `==highlight==` |
-| `![photo](../assets/photo.png){:width 320}` | Kept in lines, at its width |
+| `![photo](../assets/photo.png){:width 320}` | Kept in Lines, at its width |
 | Favorites (`:favorites` in config.edn) | Pinned |
 
-**Prose or a list:** Logseq writes every line as a block, so a page of paragraphs reads as a list of them. A run of blocks at a page's top (between headings) becomes paragraphs only when it's clearly prose: each block a sentence or more (40 characters or longer, ending as a sentence does), with nothing under it, no task, no properties lines would keep; or a page of one such block alone. Anything else, a block with blocks under it, a short item, a task, stays the list it was, so nothing that was an outline is flattened.
+**Prose or a list:** Logseq writes every line as a block, so a page of paragraphs reads as a list of them. A run of blocks at a page's top (between headings) becomes paragraphs only when it's clearly prose: each block a sentence or more (40 characters or longer, ending as a sentence does), with nothing under it, no task, no properties Lines would keep; or a page of one such block alone. Anything else, a block with blocks under it, a short item, a task, stays the list it was, so nothing that was an outline is flattened.
 
-**Kept as text, and said so:** a block's own properties (`owner:: Ada`, as lines' properties are a note's; but its `id::`, which references used, and `collapsed::`, which is Logseq's), task priorities (`[#A]`), `SCHEDULED:` and `DEADLINE:` dates, and queries and other macros (`{{query …}}`).
+**Kept as text, and said so:** a block's own properties (`owner:: Ada`, as Lines' properties are a note's; but its `id::`, which references used, and `collapsed::`, which is Logseq's), task priorities (`[#A]`), `SCHEDULED:` and `DEADLINE:` dates, and queries and other macros (`{{query …}}`).
 
 **Left out, and said so:** empty pages (Logseq makes some itself, as Contents, and a journal for each day opened), pages written in Org mode, and files no page shows (an unused asset, a drawing, a whiteboard). Logseq's own folder (`logseq/`: its settings, backups and versions) isn't read but for config.edn.
 
@@ -135,23 +135,23 @@ The code is in `src/plugins/logseq/`: `graph.ts` reads the graph, `outline.ts` i
 
 ## Notion
 
-**What to choose:** in Notion, **Settings → Export all workspace content** (or a page's **•••** menu → **Export**), with **Markdown & CSV** as its format, **Include subpages** and **Create folders for subpages** on. Choose the ZIP it downloads with **Choose Export ZIP…**, as it is: a large export is a ZIP of other ZIPs, which lines unpacks too. Or unpack it and choose the folder with **Choose Unpacked Folder…**: a large export's folder of ZIPs, unpacked once, is unpacked the rest of the way.
+**What to choose:** in Notion, **Settings → Export all workspace content** (or a page's **•••** menu → **Export**), with **Markdown & CSV** as its format, **Include subpages** and **Create folders for subpages** on. Choose the ZIP it downloads with **Choose Export ZIP…**, as it is: a large export is a ZIP of other ZIPs, which Lines unpacks too. Or unpack it and choose the folder with **Choose Unpacked Folder…**: a large export's folder of ZIPs, unpacked once, is unpacked the rest of the way.
 
 **What comes across:**
 
-| In Notion | In lines |
+| In Notion | In Lines |
 | --- | --- |
 | A page, `Plan 1a2b….md` | A note titled Plan, without the id Notion adds to names |
 | A sub-page, in its page's folder | A note of its own, linked from its page as in Notion, tagged with the pages it's in (`#home`), as sub-pages are folders here |
 | A link to a page, `[Plan](Plan%201a2b….md)` | `[[Plan]]`, to the note, whatever the page is renamed to (Notion's ids are its own everywhere, so importing again knows each page) |
 | A database, `Reading List 3c4d….csv` and its folder of rows | A note titled Reading List, with a table of its rows (`@type.reading_list(Author, Status, …)`, [linedown.md](linedown.md#type-tables)) |
-| A database's row | A note of the type named after the database (`type: Reading List`), its columns its properties: relations as links to their pages, dates as lines writes them (`November 14, 2024 9:30 PM` → `2024-11-14 21:30`), the rest as written; its Created and Last edited columns its dates. A property's name and a type's have only letters, digits, spaces, `_` and `-`, so the rest is left out of them, and said so: `Price ($)` is `Price`, `📚 Reading List` the type `Reading List`; two that come out the same are told apart (`Done`, `Done 2`), and a column called Type is `Type 2`. A database whose name has nothing left is no type: its note lists its rows, and says so |
-| Pictures and files, in a page's folder | Kept in lines |
-| Callouts (`<aside>` 💡 …, on one line or several) | lines' callouts, info, or warning, error and question by their icon (⚠️, ❗, ❓), the icon kept as text |
+| A database's row | A note of the type named after the database (`type: Reading List`), its columns its properties: relations as links to their pages, dates as Lines writes them (`November 14, 2024 9:30 PM` → `2024-11-14 21:30`), the rest as written; its Created and Last edited columns its dates. A property's name and a type's have only letters, digits, spaces, `_` and `-`, so the rest is left out of them, and said so: `Price ($)` is `Price`, `📚 Reading List` the type `Reading List`; two that come out the same are told apart (`Done`, `Done 2`), and a column called Type is `Type 2`. A database whose name has nothing left is no type: its note lists its rows, and says so |
+| Pictures and files, in a page's folder | Kept in Lines |
+| Callouts (`<aside>` 💡 …, on one line or several) | Lines' callouts, info, or warning, error and question by their icon (⚠️, ❗, ❓), the icon kept as text |
 | Toggles (`<details>`) | Their title in bold, what's in them under it, open (said so) |
 | To-dos, headings, lists, tables, code, equations | The same |
 
-**Said so:** links to pages that aren't in the export (kept as written), toggles, files no page shows (left out), and pages with the same name (lines finds notes by title, so a link to that name finds one of them).
+**Said so:** links to pages that aren't in the export (kept as written), toggles, files no page shows (left out), and pages with the same name (Lines finds notes by title, so a link to that name finds one of them).
 
 Notion's Markdown export doesn't say when a page was made, so pages are dated when they were exported, but rows, by their Created and Last edited columns where the database has them. The code is in `src/plugins/notion/`: `export.ts` reads the export and its databases, `markdown.ts` its pages.
 
@@ -161,19 +161,19 @@ Notion's Markdown export doesn't say when a page was made, so pages are dated wh
 
 **What comes across:**
 
-| In Evernote | In lines |
+| In Evernote | In Lines |
 | --- | --- |
 | A note | A note, titled as it was ("Untitled" for one without a title), dated when it was made and changed |
 | Its notebook (the .enex file's name) | A tag of its name, with folder tags on |
 | Tags | Tags (`big ideas` as `#big-ideas`) |
-| Its text (ENML, Evernote's HTML) | Linedown, read as lines reads a feed's HTML ([library.md](library.md#feeds)), where nothing in it runs or loads: paragraphs, headings, bold, italics, links (to the web and mail), lists, quotes, tables, pictures from the web. Scripts, forms and the like are left out, and its words are only words (a `#` in them isn't a tag) |
-| Its files (`<en-media>`, found by their MD5) | Kept in lines, pictures at their width; a file its text doesn't show, under it |
+| Its text (ENML, Evernote's HTML) | Linedown, read as Lines reads a feed's HTML ([library.md](library.md#feeds)), where nothing in it runs or loads: paragraphs, headings, bold, italics, links (to the web and mail), lists, quotes, tables, pictures from the web. Scripts, forms and the like are left out, and its words are only words (a `#` in them isn't a tag) |
+| Its files (`<en-media>`, found by their MD5) | Kept in Lines, pictures at their width; a file its text doesn't show, under it |
 | Checklists, old (`<en-todo>`) and new | Tasks, ticked where they were: each box a task wherever it is in a line, checklists nested as they were, in bullet lists too |
 | Code blocks | Code blocks |
 | Highlights | `==highlights==` |
 | Author, source URL | `author:` and `url:` properties |
 | A reminder not done | `due:`, so it's on the Calendar |
-| An encrypted part (`<en-crypt>`) | Text saying so, with its hint, and the encrypted text as Evernote wrote it, in code (said so): lines can't decrypt it, and nothing is lost |
+| An encrypted part (`<en-crypt>`) | Text saying so, with its hint, and the encrypted text as Evernote wrote it, in code (said so): Lines can't decrypt it, and nothing is lost |
 
 Evernote's .enex has no id for a note, so importing again knows a note by its notebook, title and when it was made, whichever notebooks are chosen with it.
 

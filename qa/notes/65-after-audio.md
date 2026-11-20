@@ -298,7 +298,7 @@ Total, =costs!B2*2
 [Chime.mp3](attachment:chime.mp3)
 ---
 
-#### 31. Audio, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Audio, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 [Chime.mp3](attachment:chime.mp3)
 Before the break.

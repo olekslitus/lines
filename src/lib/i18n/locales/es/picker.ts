@@ -41,7 +41,7 @@ export default {
   "picker.color.again": "{name} {count}",
   "picker.writtenIn": "Escrita en",
   "picker.languageOff": "Escrita en {language}, cuyo complemento está desactivado: se muestra como texto sin formato.",
-  "picker.languageMissing": "Escrita en {language}, que lines no puede mostrar aquí: se muestra como texto sin formato.",
+  "picker.languageMissing": "Escrita en {language}, que Lines no puede mostrar aquí: se muestra como texto sin formato.",
   "picker.turnOn": "Activar",
   "picker.words": "Palabras",
   "picker.characters": "Caracteres",

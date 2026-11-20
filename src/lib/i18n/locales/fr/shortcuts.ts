@@ -26,7 +26,7 @@ export default {
   "shortcuts.textBigger": "Agrandir le texte",
   "shortcuts.textSmaller": "Réduire le texte",
   "shortcuts.textUsual": "Taille de texte habituelle",
-  "shortcuts.lock": "Verrouiller lines",
+  "shortcuts.lock": "Verrouiller Lines",
   "shortcuts.lockNote": "Quand le verrouillage de l’app est activé",
   "shortcuts.closeFloating": "Fermer une note flottante",
   "shortcuts.undoTrash": "Récupérer la note que vous venez de placer dans la Corbeille",

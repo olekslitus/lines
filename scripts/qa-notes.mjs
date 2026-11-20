@@ -97,7 +97,7 @@ const ELEMENTS = [
   { id: "divider", name: "Divider", md: "---" },
   {
     id: "page-break",
-    name: "Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)",
+    name: "Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)",
     md: 'Before the break.\n\n<!-- pagebreak -->\nAfter it, on a new page.\n\n<div style="page-break-after: always"></div>\n\nAnd another.',
   },
   { id: "key-value", name: "Key: Value line", md: "**Wi-Fi password:** correct-horse-battery" },

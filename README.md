@@ -1,4 +1,4 @@
-# lines
+# Lines
 
 **Calm, local-first notes in plain Markdown.** Type Markdown and see it formatted as you write. Your notes stay on your device, as ordinary text you can open anywhere.
 
@@ -6,13 +6,13 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/images/app-dark.webp">
-  <img alt="lines: tags in the sidebar, the list of notes, and a note with a callout, todos and a table" src="site/images/app-light.webp">
+  <img alt="Lines: tags in the sidebar, the list of notes, and a note with a callout, todos and a table" src="site/images/app-light.webp">
 </picture>
 
 > [!WARNING]
-> **lines is in alpha.** It changes often and may have bugs, so please don't rely on it for important work yet, and export your notes now and then (Settings → Export and Import → Export).
+> **Lines is in alpha.** It changes often and may have bugs, so please don't rely on it for important work yet, and export your notes now and then (Settings → Export and Import → Export).
 
-## Why lines
+## Why Lines
 
 - **Just Markdown.** What you type is exactly what's stored. There's no hidden format, so your notes open in any other app.
 - **Yours.** Notes live on your device and work offline. There's no account and no server. Sync is optional, through storage you choose.
@@ -57,7 +57,7 @@ The [web app](https://olekslitus.com/lines/app/) opens with a tour: one short no
 - **Research papers.** `/paper` searches [arXiv](https://arxiv.org) by title, author or topic and links to the paper you pick by its title, in Markdown and LaTeX notes (in the apps). More sources of papers can be added as plugins.
 - **API requests.** Write requests in an ` ```http ` block (`/request`) and send them from the note, a lighter Postman or Bruno: variables, one request using another's response, curl commands pasted in or copied out. The `.http` format JetBrains' IDEs, VS Code and Visual Studio read, so a whole note of requests opens there too, or [Hurl](https://hurl.dev)'s, whose captures and asserts check each response. See [docs/requests.md](docs/requests.md).
 - **Terminal recordings** from [asciinema](https://asciinema.org) play right in the note, in your theme's colors. Paste a recording's link, or drop in a `.cast` file.
-- **Spotify and SoundCloud** links on a line of their own play in the note with the site's own player, which loads only when you press play, so nothing reaches the site before. It takes turns with lines' podcast player. Spotify plays 30-second previews without a Spotify login.
+- **Spotify and SoundCloud** links on a line of their own play in the note with the site's own player, which loads only when you press play, so nothing reaches the site before. It takes turns with Lines' podcast player. Spotify plays 30-second previews without a Spotify login.
 - **GitHub and arXiv links** read short, like `olekslitus/lines#12` with GitHub's mark, or `arXiv:1706.03762`.
 
 ### LaTeX notes
@@ -79,8 +79,8 @@ Put one in a Markdown note with `/spreadsheet` (a ` ```csv ` block), or, with Sp
 
 - **Tags, not folders.** Write `#tag` or `#nested/tag` anywhere in a note, or drag a note onto a tag (or a type, the Inbox, the Trash) in the sidebar. Give tags and types icons and colors, synced to your other devices, and rename them everywhere at once.
 - **Library.** Paste a link to a book, a comic (manga, manhwa, a webtoon), a movie, a show, an anime, a video, a song, a podcast, an article or a paper into a new note, and it fills itself in: its title, cover, who made it, when and what it's about, from the site and open catalogs (Open Library, Wikidata, AniList, MyAnimeList, MusicBrainz, Apple Podcasts, SoundCloud, YouTube, arXiv), with only the link sent. One undo puts the link back. Or search the catalogs from the Library's +, or turn a link in any note into a mention of its own library note from the link's menu. The sidebar's Library lists them by kind, each with its cover, where you've got to (to read, reading, read) and its rating, set from its menu or with a click on its stars: on 5 stars, out of 10 or 100, thumbs, grades or a scale of your own, chosen for each kind, with ratings of its own beside the overall one (a show's Story, Music), all plain properties (`rating: 4/5`) any app reads. Import your bookmarks from any browser (or Pocket, Pinboard, Raindrop) as resources, with their folders, dates and tags, and look each up when you want. Sign in to AniList or MyAnimeList, and your anime list there and the Library keep each other up to date, both ways: status, rating and episodes watched. Moving from Readwise? Your books, articles, podcasts and tweets come over with their highlights, and what you saved in Reader with where you'd got to; importing again adds only what's new. Bring in a YouTube playlist by its link, or Watch Later from Google Takeout, each video one to watch. See [docs/library.md](docs/library.md).
-- **Books you keep.** Add a PDF or an EPUB from its file (or drop it on lines) and read it in its note's place: by pages or scrolling, with its contents and a search, an EPUB in your theme's colors and font, a PDF as printed or in your theme's colors. Keep what you choose as a quote in the note, linked to its page. lines remembers where you are, and the Library shows how far through. A book's scripts never run. See [docs/library.md](docs/library.md#books-you-keep).
-- **Feeds and podcasts.** Subscribe to a blog, a site or a podcast (its feed's link, the site's, its Apple Podcasts page, or in the apps its maker's SoundCloud), or in the apps a YouTube channel, and read its posts in the Library's RSS, Atom, JSON, Podcast and Video Feeds (or all in one Feeds, as you choose), a channel's videos playing in place, drawn as notes, read and unread kept, Save to Library for the ones to keep. Group feeds into streams by topic or priority (Must read, Work), each a row of its feeds' posts together, and filter a feed's posts, or every feed's, by their words. Dismiss a post you're done with, or one that isn't interesting (E, N), to keep a feed as an inbox at zero; Undo, or Show Dismissed, brings one back, and what's read and dismissed syncs between devices. A Hacker News post has its discussion under it, threaded, to fold and go through by keyboard. RSS, Atom, RSS 1.0 and JSON Feed, fetched in the apps every 30 minutes, asking only whether they changed; OPML in and out. Episodes play in lines, in a mini player that goes on across notes, starts each where it stopped, and answers the media keys. Take notes as you listen: each starts with the time it's taken at, and a time in a note (`[12:34]`) plays the episode from there; keys play, pause and skip without leaving the text, and a transcript, where the feed has one, follows along and quotes a line into the note. See [docs/library.md](docs/library.md#feeds).
+- **Books you keep.** Add a PDF or an EPUB from its file (or drop it on Lines) and read it in its note's place: by pages or scrolling, with its contents and a search, an EPUB in your theme's colors and font, a PDF as printed or in your theme's colors. Keep what you choose as a quote in the note, linked to its page. Lines remembers where you are, and the Library shows how far through. A book's scripts never run. See [docs/library.md](docs/library.md#books-you-keep).
+- **Feeds and podcasts.** Subscribe to a blog, a site or a podcast (its feed's link, the site's, its Apple Podcasts page, or in the apps its maker's SoundCloud), or in the apps a YouTube channel, and read its posts in the Library's RSS, Atom, JSON, Podcast and Video Feeds (or all in one Feeds, as you choose), a channel's videos playing in place, drawn as notes, read and unread kept, Save to Library for the ones to keep. Group feeds into streams by topic or priority (Must read, Work), each a row of its feeds' posts together, and filter a feed's posts, or every feed's, by their words. Dismiss a post you're done with, or one that isn't interesting (E, N), to keep a feed as an inbox at zero; Undo, or Show Dismissed, brings one back, and what's read and dismissed syncs between devices. A Hacker News post has its discussion under it, threaded, to fold and go through by keyboard. RSS, Atom, RSS 1.0 and JSON Feed, fetched in the apps every 30 minutes, asking only whether they changed; OPML in and out. Episodes play in Lines, in a mini player that goes on across notes, starts each where it stopped, and answers the media keys. Take notes as you listen: each starts with the time it's taken at, and a time in a note (`[12:34]`) plays the episode from there; keys play, pause and skip without leaving the text, and a transcript, where the feed has one, follows along and quotes a line into the note. See [docs/library.md](docs/library.md#feeds).
 - **Objects and mentions.** Give a note properties and a type (`type: person`) and it's listed under Types. Type `@` or `[[` to mention another note, `@Ada.email` to show one of its properties, and `@type.recipe` for a table of every recipe.
 - **Inbox.** New notes and imports land in the Inbox, first in the sidebar, until you file them (or send new notes straight to Notes, in Settings).
 - **Calendar.** Notes on their days: a `date` or `due` in a note's properties, or every day from its `start` to its `end`. Its row counts what's on today. Events repeat (`repeat: every weekday`, `monthly on the last friday until 2027-06-01`, or from an event's menu). Events in their colors: a note's own, or its type's or tag's. A month above the list, and beside it the week or the day by the hour, with notes at their times (`date: 2026-11-30 14:00`). Drag down the hours to make an event, or across All day for one of whole days, drag one to another time or day, or its edge to change how long it is (<kbd>⌘Z</kbd> moves it back). Choose a day for its notes, or press <kbd>↵</kbd> on a day for a note dated that day.
@@ -106,24 +106,24 @@ Put one in a Markdown note with `/spreadsheet` (a ` ```csv ` block), or, with Sp
 
 ### Sync and privacy
 
-- **Save to a folder** (web, in Chrome and Edge). lines keeps your notes there as `.md` files, both ways.
+- **Save to a folder** (web, in Chrome and Edge). Lines keeps your notes there as `.md` files, both ways.
 - **Sync through your cloud drive** (desktop apps): iCloud Drive, Google Drive, Proton Drive, Dropbox, OneDrive or any folder.
 - **Sync with your own storage**: any S3-compatible bucket, such as Cloudflare R2, Backblaze B2, Amazon S3 or MinIO. Conflicts never lose an edit. See [docs/sync.md](docs/sync.md).
 - **End-to-end encryption** (optional). Notes are encrypted on your device before they reach the bucket or drive.
 - **Locked notes**, like in Apple Notes: one password (or Touch ID on the Mac) opens them.
 - **Secrets.** Keep API keys and passwords in a locked note, and use them by name, `{{github}}`, in requests and other notes, which show the name and dots, to reveal or copy. See [docs/secrets.md](docs/secrets.md).
-- **App lock** (optional). lines asks for your passphrase or Touch ID when it opens, and after a while without use.
+- **App lock** (optional). Lines asks for your passphrase or Touch ID when it opens, and after a while without use.
 
 ### Make it yours
 
-- **Plugins.** Like a code editor, lines is a small core with plugins around it: the formats notes are written in, what draws math and diagrams, ways to make a PDF, themes and icons. Turn off what you don't use in Settings → Plugins; nothing in your notes changes. See [docs/plugins.md](docs/plugins.md).
+- **Plugins.** Like a code editor, Lines is a small core with plugins around it: the formats notes are written in, what draws math and diagrams, ways to make a PDF, themes and icons. Turn off what you don't use in Settings → Plugins; nothing in your notes changes. See [docs/plugins.md](docs/plugins.md).
 - **Presets**: the whole look in one, not just the colors. Classic, a desktop of the late 90s with bevels and a title bar; Pixel, one-bit and minimal in a pixel font; Neon, glowing lines on a grid; Adventure, a 2D adventure game's pixel art, with framed slots and grass; Aero, glossy 2000s glass; Brutalist, thick rules and big type; Constructivist, 1920s avant-garde posters in red, black and paper; Void, heavy minimalism, its toolbars out of sight until reached for and words in place of icons. Save your own (theme, type, paper, cursor and all) and share it as a file. See [docs/themes.md](docs/themes.md#presets).
-- **Twenty-six themes**, each light and dark, including High Contrast and two for color blindness, each a palette (Nord's, Solarized's, Catppuccin's, lines' own) and what its colors are for. **Make your own** from any of them, bit by bit by right-clicking anything to change its color, down to each heading level, bold, italics and links, or from a picture (a wallpaper's colors, read on your device); make **palettes of your own** too, from a picture, pasted colors or another palette, and draw any theme of yours in any palette; share them as files, or import a theme made for VS Code, Zed, Base16, iTerm2, Alacritty, Kitty, Ghostty and other terminals, or KDE and GTK. See [docs/themes.md](docs/themes.md).
+- **Twenty-six themes**, each light and dark, including High Contrast and two for color blindness, each a palette (Nord's, Solarized's, Catppuccin's, Lines' own) and what its colors are for. **Make your own** from any of them, bit by bit by right-clicking anything to change its color, down to each heading level, bold, italics and links, or from a picture (a wallpaper's colors, read on your device); make **palettes of your own** too, from a picture, pasted colors or another palette, and draw any theme of yours in any palette; share them as files, or import a theme made for VS Code, Zed, Base16, iTerm2, Alacritty, Kitty, Ghostty and other terminals, or KDE and GTK. See [docs/themes.md](docs/themes.md).
 - **Dark panes**: the sidebar, the note list or both in the theme's dark colors, while the note stays light. See [docs/themes.md](docs/themes.md#dark-panes).
 - **Monochrome and Invert**: any theme in greys, or turned light for dark, with the contrast it had.
 - **Paper to write on.** Ruled lines that every line of text sits on, and dots, squares or graph paper with a row of cells for each line (or any size you like), isometric paper, in your theme's colors or any color, as faint or strong as you like, and a grain or linen texture (Settings → Plugins → Paper).
 - **A backdrop behind the page.** Put a soft gradient, a color or a picture of your own behind your notes, which then sit on it as pages, solid or frosted like glass (Settings → Plugins → Paper → Backdrop).
-- **Fonts, text size, note width and spacing**, with a live preview: your system's font, a serif, rounded or monospaced one, or IBM Plex Sans, Fira Sans or Agave, which come with lines, or any font installed on your device, and fonts of their own for headings, bold, italics, links, quotes, code and other formatting; headings in the accent or a color of your own; <kbd>⌘+</kbd> and <kbd>⌘−</kbd> size the text as you read. Notes can be narrow, medium, wide, any width between, or fill the window.
+- **Fonts, text size, note width and spacing**, with a live preview: your system's font, a serif, rounded or monospaced one, or IBM Plex Sans, Fira Sans or Agave, which come with Lines, or any font installed on your device, and fonts of their own for headings, bold, italics, links, quotes, code and other formatting; headings in the accent or a color of your own; <kbd>⌘+</kbd> and <kbd>⌘−</kbd> size the text as you read. Notes can be narrow, medium, wide, any width between, or fill the window.
 - **A mascot.** A cat, an alien, a slime in your accent or a pixel girl, in pixel art, that walks along the bottom of your note, hops up to sit at the end of the sentence you're writing, cheers you on, naps when you're away, pounces on the pointer, and can be picked up and dropped. Plugins can add their own.
 - **Cursors.** A text cursor as a bar, a thick one, a block or an underline (as wide as the letter it's on, or always even), in the accent or any color, blinking, fading or steady, that glides or trails where it goes as some terminals' do, glows, turns through the rainbow or throws sparks as you type. And a pointer of 90s pixels or a dot in the accent, with a comet's tail or sparkles behind it.
 - **Typing sounds.** Hear a keyboard as you type: creamy or clacky linears, tactile, clicky, Topre, or a typewriter that rings its bell at Return. Or add a recorded one: any [Mechvibes](https://mechvibes.com) sound pack, from a .zip or its folder. Off to begin with.
@@ -132,7 +132,7 @@ Put one in a Markdown note with `/spreadsheet` (a ` ```csv ` block), or, with Sp
 - **Your layout.** Put the sidebar and the note list on the left or the right, each its own way, a note's properties beside its text or after it, and turn on tabs for the notes you open, as in a code editor (Settings → Layout). Scroll bars can be turned off everywhere, the toolbars kept out of sight until you reach for them, and icons swapped for words.
 - **Outline.** Turn on short lines beside the note, on its right or left, one for each heading, darker for the part you're reading. Point at them to see the headings by name, and click one to glide there. Markdown and LaTeX notes both have it.
 - **Native touches**: SF Symbols on Apple devices, see-through windows on the Mac (all of the window, or only its sidebar, or its sidebar and note list), and Settings in its own window if you like.
-- **Updates itself** (desktop apps). A new version downloads in the background once it's been out a week, and installs when you quit lines, or straight away with Restart to update. Choose how long to wait, or turn it off, in Settings → About.
+- **Updates itself** (desktop apps). A new version downloads in the background once it's been out a week, and installs when you quit Lines, or straight away with Restart to update. Choose how long to wait, or turn it off, in Settings → About.
 - **English, Spanish and French**, following your system or chosen in Settings. See [docs/translations.md](docs/translations.md) to add a language.
 - **Accessible.** Everything works from the keyboard and with a screen reader, at large text sizes, with reduced motion and with increased contrast. See [docs/accessibility.md](docs/accessibility.md).
 
@@ -157,41 +157,41 @@ Press <kbd>⌘/</kbd> to see them all. On Windows and Linux, use <kbd>Ctrl</kbd>
 | <kbd>F6</kbd> <kbd>⇧F6</kbd> | Move between the sidebar, the note list and the note |
 | <kbd>⌘P</kbd> | Preview as PDF, then print or save |
 | <kbd>⌘+</kbd> / <kbd>⌘−</kbd> / <kbd>⌘0</kbd> | Make notes' text bigger, smaller, or its usual size |
-| <kbd>⌃⌘L</kbd> | Lock lines, when the app lock is on |
+| <kbd>⌃⌘L</kbd> | Lock Lines, when the app lock is on |
 
 ## Documentation
 
 Also on the website: [olekslitus.com/lines/docs](https://olekslitus.com/lines/docs/).
 
-### Using lines
+### Using Lines
 
 | | |
 | --- | --- |
-| [Linedown](docs/linedown.md) | The Markdown lines reads and writes, including its few additions (callouts, highlights, tags…) |
+| [Linedown](docs/linedown.md) | The Markdown Lines reads and writes, including its few additions (callouts, highlights, tags…) |
 | [LaTeX notes](docs/latex.md) | What's drawn in notes written in LaTeX |
 | [Spreadsheets](docs/spreadsheets.md) | Formulas in tables, spreadsheet notes, and opening and saving CSV and Excel files |
-| [Themes](docs/themes.md) | Making, sharing and importing themes, and lines' theme files |
+| [Themes](docs/themes.md) | Making, sharing and importing themes, and Lines' theme files |
 | [API requests](docs/requests.md) | Sending requests from notes, in the `.http` and Hurl formats |
 | [Secrets](docs/secrets.md) | API keys and passwords kept in a locked note, and used by name |
-| [Library](docs/library.md) | Books, movies, music and the rest as notes, filled in from a link, and where lines looks them up |
+| [Library](docs/library.md) | Books, movies, music and the rest as notes, filled in from a link, and where Lines looks them up |
 | [Importing](docs/importing.md) | Bringing notes in from other apps (Obsidian, Bear, Logseq, Notion, Evernote): what to export, what comes across and what doesn't |
-| [Plugins](docs/plugins.md) | How lines is made of plugins, turning them off, and writing one |
+| [Plugins](docs/plugins.md) | How Lines is made of plugins, turning them off, and writing one |
 | [Sync](docs/sync.md) | How sync and encryption work |
 | [Storage](docs/storage.md) | Where the web app and the desktop apps keep your notes, and for how long |
 | [Accessibility](docs/accessibility.md) | Keyboard and screen reader use, and how it's checked |
 | [Limitations](docs/limitations.md) | What doesn't work yet, and what hasn't been tried on real devices |
 | [What's new](CHANGELOG.md) | What changed in each release |
 
-### Working on lines
+### Working on Lines
 
 | | |
 | --- | --- |
 | [Contributing](CONTRIBUTING.md) | Setting up, making a change, and the pull requests main takes |
-| [Performance](docs/performance.md) | How fast lines is with thousands of notes, and the benchmarks that check it |
+| [Performance](docs/performance.md) | How fast Lines is with thousands of notes, and the benchmarks that check it |
 | [Translations](docs/translations.md) | How translations work, and adding a language |
 | [Releasing](docs/releasing.md) | Versions, release notes, and how the apps are built and published |
-| [Theme tools](docs/theme-tools.md) | Swatches of the colors in pictures and videos, and themes from them, or from lines' own, for VS Code, GTK and Base24 |
-| [Lessons from Mem](docs/lessons-from-mem.md) | What Mem, an AI notes app closing in January 2027, did, what people liked and didn't, and what lines takes from it |
+| [Theme tools](docs/theme-tools.md) | Swatches of the colors in pictures and videos, and themes from them, or from Lines' own, for VS Code, GTK and Base24 |
+| [Lessons from Mem](docs/lessons-from-mem.md) | What Mem, an AI notes app closing in January 2027, did, what people liked and didn't, and what Lines takes from it |
 
 ## Development
 
@@ -225,7 +225,7 @@ rustup target add aarch64-apple-ios aarch64-apple-ios-sim
 # Build for the simulator, then install and open it there
 bun run tauri ios build --target aarch64-sim --debug --no-sign
 xcrun simctl boot "iPhone 17"
-xcrun simctl install "iPhone 17" src-tauri/gen/apple/build/arm64-sim/lines.app
+xcrun simctl install "iPhone 17" src-tauri/gen/apple/build/arm64-sim/Lines.app
 xcrun simctl launch "iPhone 17" com.olekslitus.lines
 
 # Or run it with the dev server, reloading as you change things
@@ -256,7 +256,7 @@ adb install src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-univ
 bun run tauri android dev
 ```
 
-An emulator to run it on: `avdmanager create avd -n phone -k "system-images;android-36;google_apis;arm64-v8a" -d pixel_8`, then `$ANDROID_HOME/emulator/emulator -avd phone`. A debug build's web view can be inspected from Chrome (`chrome://inspect`). The debug app is `com.olekslitus.lines.debug`, so it installs beside a release one. A release build (`bun run tauri android build --apk --aab`) is signed when `src-tauri/gen/android/keystore.properties` names a key (`keyAlias`, `password` and `storeFile`, as in [Tauri's guide](https://v2.tauri.app/distribute/sign/android/)); it's kept out of git, and without it the build is unsigned and won't install. A key of your own makes an app that can't install over lines' own.
+An emulator to run it on: `avdmanager create avd -n phone -k "system-images;android-36;google_apis;arm64-v8a" -d pixel_8`, then `$ANDROID_HOME/emulator/emulator -avd phone`. A debug build's web view can be inspected from Chrome (`chrome://inspect`). The debug app is `com.olekslitus.lines.debug`, so it installs beside a release one. A release build (`bun run tauri android build --apk --aab`) is signed when `src-tauri/gen/android/keystore.properties` names a key (`keyAlias`, `password` and `storeFile`, as in [Tauri's guide](https://v2.tauri.app/distribute/sign/android/)); it's kept out of git, and without it the build is unsigned and won't install. A key of your own makes an app that can't install over Lines' own.
 
 </details>
 
@@ -291,9 +291,9 @@ The website workflow reads them from the repository's secrets `UNSPLASH_ACCESS_K
 <details>
 <summary><b>AniList and MyAnimeList client ids</b></summary>
 
-Keeping an anime list in step with AniList or MyAnimeList (Settings → Library) needs lines' client id with each, set when building: `VITE_ANILIST_CLIENT_ID` and `VITE_MAL_CLIENT_ID` in `.env.local`. The release and website workflows read them from the repository's secrets `ANILIST_CLIENT_ID` and `MAL_CLIENT_ID`. Without one, that site's group in Settings says it isn't in this build. To make them:
+Keeping an anime list in step with AniList or MyAnimeList (Settings → Library) needs Lines' client id with each, set when building: `VITE_ANILIST_CLIENT_ID` and `VITE_MAL_CLIENT_ID` in `.env.local`. The release and website workflows read them from the repository's secrets `ANILIST_CLIENT_ID` and `MAL_CLIENT_ID`. Without one, that site's group in Settings says it isn't in this build. To make them:
 
-- **AniList**: [anilist.co/settings/developer](https://anilist.co/settings/developer) → Create New Client, named lines, with the redirect URL `https://anilist.co/api/v2/oauth/pin` (AniList then shows the token to paste into lines, which works the same in the apps and on the web). Its ID is the client id; its secret isn't needed.
+- **AniList**: [anilist.co/settings/developer](https://anilist.co/settings/developer) → Create New Client, named Lines, with the redirect URL `https://anilist.co/api/v2/oauth/pin` (AniList then shows the token to paste into Lines, which works the same in the apps and on the web). Its ID is the client id; its secret isn't needed.
 - **MyAnimeList**: [myanimelist.net/apiconfig](https://myanimelist.net/apiconfig) → Create ID, App Type **other** (an app without a secret, which signs in with PKCE), App Redirect URL `http://127.0.0.1:45291/myanimelist` (where the apps listen as you sign in), and a homepage, `https://github.com/olekslitus/lines`. Its Client ID is the client id.
 </details>
 
@@ -321,7 +321,7 @@ bunx vite preview --outDir dist-site
 | Icons | [Lucide](https://lucide.dev), or SF Symbols on Apple platforms |
 | Build | [Vite](https://vite.dev) and TypeScript |
 
-**Why this editor?** Block editors like Notion keep a rich document model and translate between it and the screen, and that translation is where cursor jumps, lost characters and odd input-method behavior come from. lines keeps each note as **plain Markdown text** in CodeMirror, which is built for fast, correct text input on desktop and mobile (input methods, spellcheck, accessibility). Formatting is drawn *over* the text, and the markup hides when the cursor isn't on it. Only the visible part of a note is drawn, so very long notes stay fast. The editor is also *uncontrolled*: nothing pushes text back into it while you type.
+**Why this editor?** Block editors like Notion keep a rich document model and translate between it and the screen, and that translation is where cursor jumps, lost characters and odd input-method behavior come from. Lines keeps each note as **plain Markdown text** in CodeMirror, which is built for fast, correct text input on desktop and mobile (input methods, spellcheck, accessibility). Formatting is drawn *over* the text, and the markup hides when the cursor isn't on it. Only the visible part of a note is drawn, so very long notes stay fast. The editor is also *uncontrolled*: nothing pushes text back into it while you type.
 
 <details>
 <summary><b>Project structure</b></summary>
@@ -331,7 +331,7 @@ src/
   App.svelte                 App shell and responsive layout
   app.css                    Design tokens (the theme's colors, one scale of sizes) as Tailwind's, light and dark
   bench/                     The benchmarks' library of notes and in-page timing, only in `--mode bench` builds
-  plugins/                   lines' own plugins, one folder each (docs/plugins.md)
+  plugins/                   Lines' own plugins, one folder each (docs/plugins.md)
     markdown/                Markdown, the format notes are written in by default (its editor is lib/editor)
     latex/                   LaTeX notes: editor.ts draws them, syntax.ts reads them, text.ts for the list and
                              exports, print.ts lays them out on paper
@@ -388,7 +388,7 @@ src/
       adding.ts              Add to Library (components/AddToLibrary.svelte): what a search found, as a note filled in from its page
       addLink.ts             Add to Library from a link's menu: makes its note and mentions it in its place
       bookmarks.ts           A browser's exported bookmarks read (Netscape's file, Firefox's backup), as resources; bookmarkImport.ts, what importing them writes
-      page.ts  web.ts        What a page says about itself, read as text; asking the web as lines
+      page.ts  web.ts        What a page says about itself, read as text; asking the web as Lines
       shelves.svelte.ts      The Library's rows in the sidebar; rows.ts, what a note's row on its shelf shows
       ratings.svelte.ts      What each kind is rated on (Settings → Library → Ratings); ratings.ts, those choices as ratings.json keeps and merges them
     imports/
@@ -400,14 +400,14 @@ src/
       feeds.svelte.ts        Feeds subscribed to (notes with `feed:`), fetching them in turn, their posts, read, unread and dismissed, saving one to the Library
       marks.ts               What was done with posts, synced as a file for each feed and merged mark by mark
       parse.ts  markdown.ts  Reading RSS, Atom, RSS 1.0 (mended where they're broken) and JSON Feed; a post's HTML as Markdown, by walking it
-      html.ts  text.ts       Reading HTML from the web where nothing in it runs; a comment's HTML as text lines draws itself
+      html.ts  text.ts       Reading HTML from the web where nothing in it runs; a comment's HTML as text Lines draws itself
       thread.svelte.ts       A post's discussion as the reader shows it (components/Discussion.svelte): folding, and the keys from comment to comment
       fetch.ts  find.ts      Fetching a feed, asking whether it changed; finding the feed a site's page names
       posts.ts  storage.ts   Keeping the newest 200 posts of each, on this device (`lines-feeds`), encrypted under the app lock
       opml.ts  dates.ts      OPML in and out; the dates and durations feeds write
       groups.ts              Which of the sidebar's kinds a feed is: RSS, Atom, JSON Feed or a podcast's
     player/
-      player.svelte.ts       The podcast player: one audio element for all of lines, where each episode was stopped, the media keys
+      player.svelte.ts       The podcast player: one audio element for all of Lines, where each episode was stopped, the media keys
       episodes.ts  notePlay.ts  A post's or an `episode` note's episode; the Play button in an episode note
       times.ts  noteTimes.ts    Times in an episode written in notes (`[12:34]`), drawn as chips that play from there
       keys.ts                   The player's keys, from anywhere in the window
@@ -489,7 +489,7 @@ src/
       ui/                    Shared parts: buttons, switches, selects, sliders, setting rows and groups
       settings/              Settings: its list of sections, and one component per section
     windows/                 Floating notes, the Settings window, and messages between windows
-    icons/                   Icon component (drawn by the icon set plugin chosen) and the icons lines uses
+    icons/                   Icon component (drawn by the icon set plugin chosen) and the icons Lines uses
     i18n/                    Translations: t(), the language, and each language's messages (locales/)
     a11y.ts                  Saying things to screen readers
     prefs.svelte.ts          Theme, appearance, font, text size, note width, spacing, icon set (themes and icon sets by plugin id), layout, links, updates
@@ -508,7 +508,7 @@ site/                        The website (bun run build:site): the home page (ho
 qa/                          Release checklist and QA notes (generated by scripts/qa-notes.mjs)
 tests/                       Unit tests (unit/, bun test) and browser tests (browser/, the app built with src/test/)
 scripts/bench.mjs            The benchmarks (bun run bench): builds, seeds 5,000 notes, drives WebKit and Chromium
-scripts/qa-shots.mjs         Pictures of lines for QA (bun run qa-shots), into qa/shots/ with a page to see them on
+scripts/qa-shots.mjs         Pictures of Lines for QA (bun run qa-shots), into qa/shots/ with a page to see them on
 scripts/release.mjs          Versions and release notes from the commits (docs/releasing.md)
 tools/themes/                Swatches from pictures and videos (swatch.ts) and themes for other apps (adapt.ts, targets/), docs/theme-tools.md
 .github/workflows/           Checks on every pull request, the release pull request, releases, the website
@@ -538,7 +538,7 @@ What's planned next. Known limits of what's already there are in [docs/limitatio
 
 **Plugins**
 - [ ] More formats as plugins, drawn as you type, printed and exported: Org mode, AsciiDoc, WikiText (MediaWiki) and reStructuredText
-- [ ] Plugins made by others: a plugin format, installing one from Settings → Plugins, and running its code safely (the apps only run lines' own scripts now)
+- [ ] Plugins made by others: a plugin format, installing one from Settings → Plugins, and running its code safely (the apps only run Lines' own scripts now)
 - [ ] Icon sets from a file, which need no code
 - [x] Palettes in Settings: see, change and share them, and draw a theme of yours in any; the color picker offering the theme's palette
 - [ ] Sync your themes and palettes between devices, and open a VS Code extension (`.vsix`) to pick its themes
@@ -567,8 +567,8 @@ What's planned next. Known limits of what's already there are in [docs/limitatio
 
 **Library**
 - [x] Add to the Library by searching the catalogs (Open Library, Wikidata, AniList, MusicBrainz, Apple Podcasts, arXiv), without a link; and a link in a note, as a mention of its own note
-- [x] Subscribe to podcasts and RSS, Atom and JSON feeds, and read their posts in lines
-- [x] Play podcast episodes in lines
+- [x] Subscribe to podcasts and RSS, Atom and JSON feeds, and read their posts in Lines
+- [x] Play podcast episodes in Lines
 - [x] A Hacker News post's discussion under it, to read
 - [ ] Other sites' discussions (Lobsters, Reddit), and the replies Algolia leaves out under deleted comments
 - [x] Move from Readwise: highlights, and what was saved in Reader, as library notes
@@ -602,7 +602,7 @@ What's planned next. Known limits of what's already there are in [docs/limitatio
 - [ ] More of TeX Live for TeX's PDFs (packages beyond the basic ones, fetched as a note needs them)
 
 **Export**
-- [ ] Save lines' PDF straight to a file in the apps, without the print dialog
+- [ ] Save Lines' PDF straight to a file in the apps, without the print dialog
 - [ ] Export a note as HTML
 
 **Platforms**
@@ -682,4 +682,4 @@ bun run build
 
 ## License
 
-lines is free software under the [GNU Affero General Public License v3.0](LICENSE). You can use, study, change and share it. If you distribute a modified version, or run one as a service other people use, you must share its source code with them under the same license.
+Lines is free software under the [GNU Affero General Public License v3.0](LICENSE). You can use, study, change and share it. If you distribute a modified version, or run one as a service other people use, you must share its source code with them under the same license.

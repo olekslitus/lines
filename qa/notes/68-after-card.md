@@ -358,7 +358,7 @@ Text in a card.
 :::
 ---
 
-#### 31. Card, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Card, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 ::: card
 Text in a card.

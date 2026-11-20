@@ -2,7 +2,7 @@
 
 Notes can hold requests to an API, to try it, explore it and keep what you learned beside it: a lighter [Bruno](https://www.usebruno.com) or Postman. The API Requests [plugin](plugins.md) sends them and shows the responses. ([#165](https://github.com/olekslitus/lines/issues/165))
 
-Requests are written in the `.http` format, or in [Hurl](#hurl)'s, which adds checks of the response. The `.http` format is the one the JetBrains IDEs' HTTP Client, VS Code (REST Client and httpYac), Visual Studio and Neovim (kulala) read. It has a [published spec](https://github.com/JetBrains/http-request-in-editor-spec), so requests written in lines open in those editors, and theirs in lines.
+Requests are written in the `.http` format, or in [Hurl](#hurl)'s, which adds checks of the response. The `.http` format is the one the JetBrains IDEs' HTTP Client, VS Code (REST Client and httpYac), Visual Studio and Neovim (kulala) read. It has a [published spec](https://github.com/JetBrains/http-request-in-editor-spec), so requests written in Lines open in those editors, and theirs in Lines.
 
 ## Where requests go
 
@@ -52,14 +52,14 @@ The response shows under the request (under the code block, in a Markdown note):
 - **A web address** has Send's icon after it: clicking it adds `GET` and the address to the note as a request, after the one it came from (at the end of its block, in a Markdown note), with that one's headers (its `Authorization`, say), and sends it. Following an API's links this way leaves the trail in the note.
 - **A JSON value's line** has a copy button while it's hovered: a string copies without its quotes, an object or array as indented JSON.
 
- Responses last while lines is open, and aren't saved in the note.
+ Responses last while Lines is open, and aren't saved in the note.
 
-- **In the apps**, requests go through lines' native code, so any API answers, with every header as written, `Cookie` and `Origin` included.
+- **In the apps**, requests go through Lines' native code, so any API answers, with every header as written, `Cookie` and `Origin` included.
 - **In the browser** (the demo website), they're ordinary web requests, so only APIs that allow requests from other sites (CORS) answer, and the browser leaves out headers it doesn't let pages set, such as `Cookie`.
 
 ## Hurl
 
-[Hurl](https://hurl.dev) files are entries one after another: a request, and what its response should be. lines reads them itself and sends them as it sends `.http` requests, so they work in the browser too, without the `hurl` program.
+[Hurl](https://hurl.dev) files are entries one after another: a request, and what its response should be. Lines reads them itself and sends them as it sends `.http` requests, so they work in the browser too, without the `hurl` program.
 
 ```hurl
 # Sign in
@@ -90,7 +90,7 @@ duration < 1000
 
 The response shows how its checks went beside its status (**3 passed**, **1 failed**), and **Checks** lists each, with what the response had when it failed; it opens on Checks when one did. **Send all** stops at the first entry that fails, as Hurl does.
 
-What lines can't do from a fetch, and the `hurl` program can: the HTTP version (`HTTP/2 200` checks the status only, and `version` isn't read), `ip`, `certificate`, `redirects` and `rawbytes`; not following redirects in the browser (the apps can); `[Multipart]`, `file,` bodies, `md5`, GraphQL bodies, and the options that tune curl or repeat entries (`retry`, `delay`, `repeat`, `skip`), which are read and left alone. Entries share no cookie store, as Hurl's do. A check lines can't make says so.
+What Lines can't do from a fetch, and the `hurl` program can: the HTTP version (`HTTP/2 200` checks the status only, and `version` isn't read), `ip`, `certificate`, `redirects` and `rawbytes`; not following redirects in the browser (the apps can); `[Multipart]`, `file,` bodies, `md5`, GraphQL bodies, and the options that tune curl or repeat entries (`retry`, `delay`, `repeat`, `skip`), which are read and left alone. Entries share no cookie store, as Hurl's do. A check Lines can't make says so.
 
 ## curl
 

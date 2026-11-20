@@ -50,7 +50,7 @@ export default {
   "library.rating.rated": "Rated {score}",
   "library.rating.cleared": "Rating removed",
   "library.rating.didUndo": "Rating put back",
-  // lines' own scales, by name; the thumbs' words as they show (the note keeps "thumbs up" in English).
+  // Lines' own scales, by name; the thumbs' words as they show (the note keeps "thumbs up" in English).
   "library.rating.scale.5": "Out of 5",
   "library.rating.scale.10": "Out of 10",
   "library.rating.scale.100": "Out of 100",
@@ -84,7 +84,7 @@ export default {
   "library.rating.removed": "Removed {name}",
   // Your own scales: marks in an icon, points, or words, the best first.
   "library.rating.scales": "Scales",
-  "library.rating.scalesNote": "Besides lines’ own, scales of your own: marks out of up to 10, points, or words from the best to the worst.",
+  "library.rating.scalesNote": "Besides Lines’ own, scales of your own: marks out of up to 10, points, or words from the best to the worst.",
   "library.rating.newScale": "New Scale",
   "library.rating.noScales": "None yet.",
   "library.rating.editScale": "Change {name}",
@@ -120,17 +120,17 @@ export default {
   // AniList and MyAnimeList (Settings → Library): signing in, keeping your list in step with the Library, and importing it.
   "library.list.anilist.note": "Sign in to keep your anime list on AniList and the Library in step: status, rating and episodes watched, both ways. Your list comes in as notes.",
   "library.list.myanimelist.note": "Sign in to keep your anime list on MyAnimeList and the Library in step: status, rating and episodes watched, both ways. Your list comes in as notes.",
-  "library.list.notInBuild": "Keeping your {name} list in step isn’t in this build of lines: it needs lines’ client id for {name} when it’s built.",
-  "library.list.appsOnly": "Only in the lines app: {name} doesn’t let web pages ask it.",
+  "library.list.notInBuild": "Keeping your {name} list in step isn’t in this build of Lines: it needs Lines’ client id for {name} when it’s built.",
+  "library.list.appsOnly": "Only in the Lines app: {name} doesn’t let web pages ask it.",
   "library.list.signIn": "Sign in",
   "library.list.tokenNote": "Say yes on {name}, then paste the token it shows here. It’s kept on this device, encrypted under the app lock.",
-  "library.list.browserNote": "lines opens {name} in your browser; say yes there, and it comes back here. What it’s given is kept on this device, encrypted under the app lock.",
+  "library.list.browserNote": "Lines opens {name} in your browser; say yes there, and it comes back here. What it’s given is kept on this device, encrypted under the app lock.",
   "library.list.getToken": "Get Your Token on {name}",
   "library.list.signInButton": "Sign In",
   "library.list.signInBrowser": "Sign In…",
   "library.list.waitingForBrowser": "Waiting for {name} in your browser…",
-  // The page the browser shows once MyAnimeList sends it back to lines.
-  "library.list.signedInPage": "<!doctype html><meta charset=\"utf-8\"><title>lines</title><p style=\"font: 16px system-ui; margin: 40px\">Signed in to {name}. You can close this tab and go back to lines.</p>",
+  // The page the browser shows once MyAnimeList sends it back to Lines.
+  "library.list.signedInPage": "<!doctype html><meta charset=\"utf-8\"><title>Lines</title><p style=\"font: 16px system-ui; margin: 40px\">Signed in to {name}. You can close this tab and go back to Lines.</p>",
   "library.list.signedIn": "Signed in as {user}",
   "library.list.signedInAs": "Signed in to {name} as {user}",
   "library.list.signedOut": "Signed out of {name}",
@@ -207,7 +207,7 @@ export default {
   "library.bookmarks.imported":
     "{count, plural, =0 {Nothing new to import} one {Imported # resource} other {Imported # resources}}{there, plural, =0 {} one {; # was already there} other {; # were already there}}",
   "library.bookmarks.undone": "{count, plural, one {Import undone: # resource moved to the Trash} other {Import undone: # resources moved to the Trash}}",
-  "library.bookmarks.unreadable": "{name} isn’t a file of bookmarks lines can read.",
+  "library.bookmarks.unreadable": "{name} isn’t a file of bookmarks Lines can read.",
   "library.settings.links": "Links",
   "library.settings.countAgain": "Count adding again",
   "library.settings.countAgainNote":
@@ -217,6 +217,6 @@ export default {
     "A new note that’s just a link is filled in with what it is: a book, a movie, a song, an article… with its cover and details, from the site and open catalogs. Only the link is sent, and undoing puts it back.",
   // {names}: the sources a web page can ask, listed ("Open Library, Wikidata and YouTube").
   "library.settings.web":
-    "In the browser, only {names} can be asked: other sites don’t let web pages read them. The lines app reads any page.",
+    "In the browser, only {names} can be asked: other sites don’t let web pages read them. The Lines app reads any page.",
   "library.settings.sources": "Each place links are looked up can be turned off in Settings → Plugins.",
 };

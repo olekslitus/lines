@@ -6,9 +6,9 @@ export default {
   "print.paper": "Paper",
   "print.a4": "A4",
   "print.letter": "Letter",
-  // How a note becomes a PDF: by lines itself, or by a typesetter a plugin adds, like TeX for LaTeX notes.
+  // How a note becomes a PDF: by Lines itself, or by a typesetter a plugin adds, like TeX for LaTeX notes.
   "print.typesetter": "Typeset with",
-  "print.lines": "lines",
+  "print.lines": "Lines",
   "print.pages": "{count, plural, one {# page} other {# pages}}",
   "print.page": "Page {page} of {count}",
   "print.layingOut": "Laying out pages…",
@@ -31,7 +31,7 @@ export default {
   "print.texDownloadSize": "The first time only: about 125 MB.",
   "print.compiling": "Typesetting with {name}…",
   "print.typesetReady": "Typeset with {name}",
-  "print.typesetterMissing": "{name} isn't included in this version of lines. Typeset with lines instead.",
+  "print.typesetterMissing": "{name} isn't included in this version of Lines. Typeset with Lines instead.",
   "print.typesetterOffline": "Couldn't download {name}. Check your internet connection and try again.",
   "print.typesetError": "{name} stopped with an error",
   "print.typesetErrorAt": "{name} stopped at line {line} of the note",

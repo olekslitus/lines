@@ -45,7 +45,7 @@ jobs:
           title="chore(release): v$VERSION"
           body="$RUNNER_TEMP/body.md"
           {
-            echo "Merging this releases lines $VERSION: it's tagged, and the Mac, Windows and Linux apps are built and attached to its GitHub release. It's kept up to date as more is merged."
+            echo "Merging this releases Lines $VERSION: it's tagged, and the Mac, Windows and Linux apps are built and attached to its GitHub release. It's kept up to date as more is merged."
             echo
             bun scripts/release.mjs notes "$VERSION"
           } > "$body"

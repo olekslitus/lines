@@ -2,7 +2,7 @@
 name = "lines"
 version = "0.7.0"
 description = "Beautiful, simple, local-first notes"
-authors = ["lines contributors"]
+authors = ["Lines contributors"]
 license = "AGPL-3.0-only"
 repository = "https://github.com/olekslitus/lines"
 edition = "2024"

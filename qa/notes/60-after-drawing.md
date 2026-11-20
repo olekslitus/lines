@@ -298,7 +298,7 @@ Total, =costs!B2*2
 ![A sample drawing](attachment:drawing.svg)
 ---
 
-#### 31. Drawing, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Drawing, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 ![A sample drawing](attachment:drawing.svg)
 Before the break.

@@ -36,7 +36,7 @@ export default {
   "settings.backdropImageNote": "Kept on this device, no larger than it needs to be. It doesn’t sync.",
   "settings.backdropChoose": "Choose Image…",
   "settings.backdropRemove": "Remove Image",
-  "settings.backdropImageError": "That couldn’t be the backdrop: it isn’t a picture lines can read, or there’s no room left to keep it.",
+  "settings.backdropImageError": "That couldn’t be the backdrop: it isn’t a picture Lines can read, or there’s no room left to keep it.",
   "settings.page": "Page",
   "settings.pageNote": "The note over the backdrop.",
   "settings.pageCustomColor": "Page color",
@@ -74,7 +74,7 @@ export default {
   "settings.openLinksNote": "In Lines, a web page opens over your notes, and closing it brings you back to where you were. Mail addresses and phone numbers go to their apps either way.",
   "settings.language": "Language",
   "settings.languageSystem": "System",
-  "settings.languageNote": "lines starts again in the language chosen. System follows your device's language when lines speaks it, and English when it doesn't.",
+  "settings.languageNote": "Lines starts again in the language chosen. System follows your device's language when Lines speaks it, and English when it doesn't.",
   "settings.theme": "Theme",
   "settings.themes": "Themes",
   "settings.presets": "Presets",
@@ -104,7 +104,7 @@ export default {
   "settings.presetPastePlaceholder": "Paste a preset’s text here",
   "settings.presetPastedName": "the pasted text",
   "settings.presetsImported": "Added {names}.",
-  "settings.presetUnreadable": "lines found no preset in {names}. A preset is a .lines-preset.json file someone shared from lines.",
+  "settings.presetUnreadable": "Lines found no preset in {names}. A preset is a .lines-preset.json file someone shared from Lines.",
   // The heading over the themes made for low vision and color blindness, and their names.
   "settings.themesAccessibility": "Accessibility",
   "settings.themeHighContrast": "High Contrast",
@@ -144,9 +144,9 @@ export default {
   "settings.paletteForLight": "Palette for light",
   "settings.paletteForDark": "Palette for dark",
   "settings.paletteShared": "Light and dark share it.",
-  "settings.paletteBuiltInNote": "{name} is one of lines’ own. To add colors to it, make a copy.",
-  "settings.paletteBuiltIn": "One of lines’ own. Make a copy to change it.",
-  "settings.themeBuiltInNote": "One of lines’ own, and what it’s made of. Make a copy to change it.",
+  "settings.paletteBuiltInNote": "{name} is one of Lines’ own. To add colors to it, make a copy.",
+  "settings.paletteBuiltIn": "One of Lines’ own. Make a copy to change it.",
+  "settings.themeBuiltInNote": "One of Lines’ own, and what it’s made of. Make a copy to change it.",
   "settings.makeCopy": "Make a Copy",
   "settings.paletteChosen": "Drawn in {name}.",
   "settings.paletteColors": "{name}: {colors}",
@@ -182,7 +182,7 @@ export default {
   "settings.palettePastePlaceholder": "Paste a palette, or colors like #0e7a7e",
   "settings.palettePastedName": "Pasted Colors",
   "settings.palettesImported": "Added {names}.",
-  "settings.paletteUnreadable": "No colors in {names}. lines reads its own palette files, and text with colors in it, like #0e7a7e or rgb(14 122 126).",
+  "settings.paletteUnreadable": "No colors in {names}. Lines reads its own palette files, and text with colors in it, like #0e7a7e or rgb(14 122 126).",
   "settings.paletteNew": "New",
   "settings.paletteNewLabel": "New Palette",
   "settings.paletteNewFromTheme": "From the Colors of {name}",
@@ -197,12 +197,12 @@ export default {
   "settings.themePastedName": "Pasted Theme",
   // {names} is a list of the themes' names: "Dracula and Nord".
   "settings.themesImported": "Added {names}.",
-  // {names}: the files, in quotes; {formats}: the apps whose theme files lines reads ("lines, VS Code, Zed…").
-  "settings.themeUnreadable": "lines found no theme it can read in {names}. It reads theme files from {formats}.",
+  // {names}: the files, in quotes; {formats}: the apps whose theme files Lines reads ("Lines, VS Code, Zed…").
+  "settings.themeUnreadable": "Lines found no theme it can read in {names}. It reads theme files from {formats}.",
   "settings.themeDeleted": "Deleted {name}.",
   // Under Light or dark, while a theme with only one scheme is chosen.
-  "settings.themeOnlyDarkMode": "{name} has only dark colors, so lines is dark with it.",
-  "settings.themeOnlyLightMode": "{name} has only light colors, so lines is light with it.",
+  "settings.themeOnlyDarkMode": "{name} has only dark colors, so Lines is dark with it.",
+  "settings.themeOnlyLightMode": "{name} has only light colors, so Lines is light with it.",
   // Changing one of your themes.
   "settings.themeBy": "By {author}",
   "settings.themeName": "Name",
@@ -232,7 +232,7 @@ export default {
   "settings.themePalette": "Tags and events",
   "settings.themeCode": "Code",
   "settings.themeFormatting": "Formatting",
-  "settings.themeFormattingNote": "In notes. Left on Auto, each is as lines draws it: most in the color of the text around them, links and bullets in the accent.",
+  "settings.themeFormattingNote": "In notes. Left on Auto, each is as Lines draws it: most in the color of the text around them, links and bullets in the accent.",
   // Each color a theme sets: where it's seen.
   "settings.color.bg": "Note",
   "settings.color.bgList": "Note list",
@@ -278,7 +278,7 @@ export default {
   "settings.color.textBullet": "Bullets",
   "settings.color.textNumber": "List numbers",
   "settings.picking": "Change colors by right-clicking",
-  "settings.pickingNote": "Right-click anything in lines (or press its menu key) to change the colors it's drawn in, a bit at a time. Changes show at once and wait here to be saved.",
+  "settings.pickingNote": "Right-click anything in Lines (or press its menu key) to change the colors it's drawn in, a bit at a time. Changes show at once and wait here to be saved.",
   "settings.pickingChanged": "{count, plural, one {# color changed in {name}} other {# colors changed in {name}}}",
   "settings.pickingChangedNote": "Not saved yet. Save them as a theme of your own, or discard them to have the theme as it was.",
   "settings.pickingDiscard": "Discard Changes",
@@ -292,7 +292,7 @@ export default {
   "picking.changed": "{count, plural, one {# color changed, not saved} other {# colors changed, not saved}}",
   "picking.save": "Save in Settings",
   "picking.done": "Done",
-  // A color's swatch, which opens lines' color picker.
+  // A color's swatch, which opens Lines' color picker.
   "settings.colorPick": "Choose a color for {name}",
   // An optional color left empty, which follows from the theme's others.
   "settings.colorAuto": "Auto",
@@ -347,9 +347,9 @@ export default {
   "settings.placeTop": "Top",
   "settings.placeBottom": "Bottom",
   "settings.sidebarAbout": "Version and GitHub in the sidebar",
-  "settings.sidebarAboutNote": "The version badge and the button to lines' source, at the bottom of the sidebar. Off, a new version ready to install still shows its restart button there.",
+  "settings.sidebarAboutNote": "The version badge and the button to Lines' source, at the bottom of the sidebar. Off, a new version ready to install still shows its restart button there.",
   "settings.scrollbars": "Scroll bars",
-  "settings.scrollbarsNote": "Off hides them everywhere in lines. You can still scroll with a trackpad, a mouse wheel, touch or the keyboard.",
+  "settings.scrollbarsNote": "Off hides them everywhere in Lines. You can still scroll with a trackpad, a mouse wheel, touch or the keyboard.",
   "settings.hideBars": "Hide toolbars",
   "settings.hideBarsNote": "The bars over the note and the note list, and the sidebar's top and bottom, stay out of sight until you point near them or Tab to them. On a touch screen they always show.",
   "settings.showIcons": "Icons",
@@ -407,7 +407,7 @@ export default {
   // A note shown in the preview, in Markdown. Keep its # headings, **bold**, *italics* and - [x] checkboxes.
   "settings.previewNote":
     "# Weekend in the mountains\n\nA slow morning, then the **farmers market**. Pick up bread, cheese and *something green* for dinner.\n\nLeave by noon to beat the traffic.\n\n## Packing\n- [x] Book the cabin\n- [ ] Rain jackets\n- [ ] Trail map",
-  // Settings → Typography: the font notes are in. Recommended are those lines suggests; any other installed on this device can be chosen too.
+  // Settings → Typography: the font notes are in. Recommended are those Lines suggests; any other installed on this device can be chosen too.
   "settings.fontFamily": "Font family",
   "settings.fontRecommended": "Recommended",
   "settings.fontInstalled": "Installed font",
@@ -428,7 +428,7 @@ export default {
   "settings.fontSameAsText": "Same as text",
   // The first choice for code's font: the code font, as it always is unless another is chosen.
   "settings.fontCodeFont": "Code font",
-  // Fonts installed on this device, under lines' recommended ones.
+  // Fonts installed on this device, under Lines' recommended ones.
   "settings.fontInstalledGroup": "Installed",
   "settings.fontNotUsedHere": "{name} isn’t installed on this device, so it isn’t used here.",
   "settings.fontPluginOff": "{name} comes from the {plugin} plugin, which is off, so it isn’t used.",
@@ -538,7 +538,7 @@ export default {
   "settings.dragBlocks": "Drag to move lines",
   "settings.dragBlocksNote": "A grip beside the line or block you point at, which drags it somewhere else in the note.",
   "settings.typingSounds": "Typing sounds",
-  "settings.typingSoundsNote": "The sound of a keyboard as you type, in lines' windows.",
+  "settings.typingSoundsNote": "The sound of a keyboard as you type, in Lines' windows.",
   "settings.typingSoundsOn": "Play typing sounds",
   "settings.keyboard": "Keyboard",
   "settings.keyboardUnplayable": "This system can't play this pack's sounds. Try another pack, or one in WAV or MP3.",
@@ -552,7 +552,7 @@ export default {
   "settings.soundPackFolder": "From a Folder",
   "settings.soundPackRemove": "Remove {name}",
   "settings.soundPackAdded": "Added {name}.",
-  "settings.soundPackError": "That isn't a sound pack lines can read: it needs a Mechvibes config.json and the sounds it names.",
+  "settings.soundPackError": "That isn't a sound pack Lines can read: it needs a Mechvibes config.json and the sounds it names.",
   // Who recorded a sound pack.
   "settings.soundPackBy": "By {author}",
   "settings.ligatures": "Font ligatures",
@@ -603,13 +603,13 @@ export default {
   "settings.license": "License",
   // {license} is a link: "GNU Affero General Public License v3.0".
   "settings.licenseText":
-    "lines is free software under the {license}. You may use, study, share and change it under its terms. If you offer a modified version to others over a network, you must make its source available to them as well.",
+    "Lines is free software under the {license}. You may use, study, share and change it under its terms. If you offer a modified version to others over a network, you must make its source available to them as well.",
   "settings.openSource": "Open source",
-  "settings.openSourceText": "lines is built on these projects, with thanks to everyone who works on them.",
+  "settings.openSourceText": "Lines is built on these projects, with thanks to everyone who works on them.",
   // Credits: {name} is a project's name, "Lucide" or "Nord".
   "settings.creditIcons": "{name} icons",
   "settings.creditColors": "{name} colors",
-  "settings.sfSymbolsCredit": "SF Symbols belong to Apple. In the Mac and iPhone apps, macOS and iOS draw them on your device; they aren’t included in lines.",
+  "settings.sfSymbolsCredit": "SF Symbols belong to Apple. In the Mac and iPhone apps, macOS and iOS draw them on your device; they aren’t included in Lines.",
   "settings.showNotices": "Show all third-party licenses",
   "settings.hideNotices": "Hide all third-party licenses",
   // For screen readers: the scrolling box with every license's text.
@@ -620,23 +620,23 @@ export default {
   "settings.updates": "Updates",
   "settings.updatesIdle": "Not checked yet.",
   "settings.updatesChecking": "Checking for updates…",
-  "settings.updatesUpToDate": "lines is up to date.",
+  "settings.updatesUpToDate": "Lines is up to date.",
   "settings.updatesAvailable": "Version {version} is out.",
   // {date} is a day, "November 15".
-  "settings.updatesWaiting": "Version {version} is out. lines updates to it on its own from {date}.",
+  "settings.updatesWaiting": "Version {version} is out. Lines updates to it on its own from {date}.",
   "settings.updatesDownloading": "Downloading version {version}…",
   // {percent} is how much has come, "40%".
   "settings.updatesDownloadingPercent": "Downloading version {version}… {percent}",
-  "settings.updatesReady": "Version {version} is ready. It’s installed when you quit lines.",
-  "settings.updatesFailed": "Couldn’t update lines.",
+  "settings.updatesReady": "Version {version} is ready. It’s installed when you quit Lines.",
+  "settings.updatesFailed": "Couldn’t update Lines.",
   "settings.checkNow": "Check now",
   "settings.installNow": "Install and restart",
   "settings.restartToUpdate": "Restart to update",
   "settings.tryAgain": "Try again",
   "settings.autoUpdate": "Update automatically",
-  "settings.autoUpdateNote": "lines downloads new versions in the background and installs them when you quit it. Off, it only looks when you check.",
+  "settings.autoUpdateNote": "Lines downloads new versions in the background and installs them when you quit it. Off, it only looks when you check.",
   "settings.updateWait": "Wait before updating",
-  "settings.updateWaitNote": "lines only updates to a version that’s been out this long, which gives time for problems in it to be found and fixed.",
+  "settings.updateWaitNote": "Lines only updates to a version that’s been out this long, which gives time for problems in it to be found and fixed.",
   "settings.updateWaitNone": "Don’t wait",
   "settings.updateWaitDays": "{count, plural, one {# day} other {# days}}",
   "settings.updateWaitWeeks": "{count, plural, one {# week} other {# weeks}}",
@@ -665,11 +665,11 @@ export default {
   "settings.importFiles": "Import Files…",
   "settings.importing": "Importing…",
   "settings.imported": "{count, plural, =0 {No notes imported} one {Imported # note} other {Imported # notes}}",
-  "settings.importSkipped": "Not imported, as lines doesn’t read files like them: {names}",
+  "settings.importSkipped": "Not imported, as Lines doesn’t read files like them: {names}",
   // Data: sample notes.
   "settings.samples": "Sample notes",
   "settings.samplesText":
-    "The feature tour shows what lines can do, a note per feature. The examples are notes written in LaTeX: a short paper, lecture notes and a problem set. The QA notes show everything a note can hold, on its own and combined, with a checklist for testing a release. They’re added alongside your notes.",
+    "The feature tour shows what Lines can do, a note per feature. The examples are notes written in LaTeX: a short paper, lecture notes and a problem set. The QA notes show everything a note can hold, on its own and combined, with a checklist for testing a release. They’re added alongside your notes.",
   "settings.addTour": "Add Feature Tour",
   "settings.addExamples": "Add LaTeX Examples",
   "settings.addQa": "Add QA Notes",

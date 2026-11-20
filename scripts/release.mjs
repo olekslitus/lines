@@ -15,7 +15,7 @@
 //                           bundle folders, or Android's outputs) by the system they're for:
 //                           lines_0.3.3_macos_universal.dmg, lines_0.3.3_android_universal.apk
 //   check-android-signatures <dir>
-//                           whether every APK and .aab in <dir> is signed by lines' Android key
+//                           whether every APK and .aab in <dir> is signed by Lines' Android key
 //                           alone; exits 1, saying which isn't, if not
 //
 // The version is in package.json (the app's About shows it), src-tauri/tauri.conf.json,
@@ -141,7 +141,7 @@ function setVersion(version) {
   replace("src-tauri/Cargo.lock", /(\nname = "lines"\nversion = ")[^"]+(")/, "lines package");
 }
 
-const HEADER = "# Changelog\n\nWhat changed in each release of lines. Written by `bun scripts/release.mjs prepare` from the commits since the release before (docs/releasing.md).\n";
+const HEADER = "# Changelog\n\nWhat changed in each release of Lines. Written by `bun scripts/release.mjs prepare` from the commits since the release before (docs/releasing.md).\n";
 
 /** Adds a release's notes at the top of CHANGELOG.md. */
 function addToChangelog({ version, previous, notes: body }) {
@@ -205,10 +205,11 @@ const SYSTEMS = [
 ];
 
 /**
- * A download's name with the system it's for after the version, as Tauri names it otherwise:
+ * A download's name with the system it's for after the version, as Tauri names it otherwise, and
+ * in lower case, as Tauri names it after the app (`Lines_0.3.3_universal.dmg`):
  * `lines_0.3.3_macos_universal.dmg`, `lines_0.3.3_windows_x64.msi`, `lines_0.3.3_linux_amd64.deb`,
- * and `lines_0.3.3_linux_x86_64.rpm` (`lines-0.3.3-1.x86_64.rpm`). The Mac's update package,
- * `lines.app.tar.gz`, gets the version and `universal` too: the Mac app is one for both kinds of Mac.
+ * and `lines_0.3.3_linux_x86_64.rpm` (`Lines-0.3.3-1.x86_64.rpm`). The Mac's update package,
+ * `Lines.app.tar.gz`, gets the version and `universal` too: the Mac app is one for both kinds of Mac.
  * Android's, `app-universal-release.apk` and `.aab`, become `lines_0.3.3_android_universal.apk`; an
  * unsigned one (`app-universal-release-unsigned.apk`) isn't renamed. Signatures (`.sig`) follow their
  * file. Other files keep their names.
@@ -216,9 +217,10 @@ const SYSTEMS = [
 export function downloadName(file, version) {
   const system = SYSTEMS.find(([end]) => file.replace(/\.sig$/, "").endsWith(end))?.[1];
   if (!system) return file;
-  const named = file.startsWith("lines.app.tar.gz")
-    ? `lines_${version}_universal${file.slice("lines".length)}`
-    : file.replace(/^app-(\w+)-release\./, `lines_${version}_$1.`);
+  const lower = file.replace(/^Lines(?=[_.-])/, "lines");
+  const named = lower.startsWith("lines.app.tar.gz")
+    ? `lines_${version}_universal${lower.slice("lines".length)}`
+    : lower.replace(/^app-(\w+)-release\./, `lines_${version}_$1.`);
   const versioned = new RegExp(`^lines[_-]${version.replaceAll(".", "\\.")}(?:-1)?[_.](?!${system}_)`);
   return named.replace(versioned, `lines_${version}_${system}_`).replace("_en-US", "");
 }
@@ -281,10 +283,10 @@ function checkAndroidSignatures(dir) {
     const { ok, output } = verify(join(dir, file));
     const signers = [...output.matchAll(/(?:certificate SHA-256 digest: |SHA256: )([0-9A-Fa-f:]+)/g)].map((match) => hex(match[1]));
     if (ok && signers.length && signers.every((signer) => signer === hex(ANDROID_CERTIFICATE))) {
-      console.log(`${file}: signed by lines' key`);
+      console.log(`${file}: signed by Lines' key`);
     } else {
       wrong++;
-      console.error(`${file}: not signed by lines' key alone${signers.length ? ` (signed by ${signers.join(", ")})` : ""}\n${output.trim()}`);
+      console.error(`${file}: not signed by Lines' key alone${signers.length ? ` (signed by ${signers.join(", ")})` : ""}\n${output.trim()}`);
     }
   }
   if (wrong) process.exit(1);

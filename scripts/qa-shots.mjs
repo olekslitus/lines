@@ -801,7 +801,7 @@ const SCENES = [
   ...["lines", "ember", "ink", "indigo", "plum", "moss", "amber", "mono", "graphite", "sepia", "forest", "ocean", "green-world", "miku", "teto", "solarized", "nord", "dracula", "catppuccin", "tokyo-night", "gruvbox", "everforest", "ayu", "void", "puddle", "lightbulb"].map((theme) => ({
     id: `theme-colors-${theme}`,
     title: `Theme colors: ${theme}`,
-    look: "The highlight, callouts and marks in the theme's own colors, sitting with its accent rather than lines' own; the highlighted text readable; each callout's icon clear on its tint.",
+    look: "The highlight, callouts and marks in the theme's own colors, sitting with its accent rather than Lines' own; the highlighted text readable; each callout's icon clear on its tint.",
     prefs: { theme },
     note: THEME_COLORS,
   })),
@@ -1303,7 +1303,7 @@ const SCENES = [
   {
     id: "lists-signed-out",
     title: "Settings → Library → AniList and MyAnimeList, signed out",
-    look: "AniList's group: its note, then Sign in with its note (say yes on AniList, paste the token), the token's field and Sign In (dimmed until something's typed) at its end, and Get Your Token on AniList quiet under it. MyAnimeList's: a note that it's only in the lines app (on the web). Both like Readwise's group below them.",
+    look: "AniList's group: its note, then Sign in with its note (say yes on AniList, paste the token), the token's field and Sign In (dimmed until something's typed) at its end, and Get Your Token on AniList quiet under it. MyAnimeList's: a note that it's only in the Lines app (on the web). Both like Readwise's group below them.",
     act: async (page) => {
       await page.getByRole("button", { name: "Settings", exact: true }).click();
       const dialog = page.getByRole("dialog");
@@ -1732,7 +1732,7 @@ const SCENES = [
   {
     id: "obsidian-again",
     title: "Settings → Export and Import → From Obsidian, the vault chosen again",
-    look: "Everything in Vault is in lines already, then which are, a few by name, quieter; The same as “Vault”, imported before, on, with how many notes have the same paths; Cancel; under it, the last import's check and Undo Import, quiet at its end.",
+    look: "Everything in Vault is in Lines already, then which are, a few by name, quieter; The same as “Vault”, imported before, on, with how many notes have the same paths; Cancel; under it, the last import's check and Undo Import, quiet at its end.",
     act: async (page) => {
       await obsidian(page, { importing: true });
       const group = page.getByRole("dialog").getByRole("region", { name: "From Obsidian" });
@@ -1790,7 +1790,7 @@ const SCENES = [
   {
     id: "logseq-note",
     title: "A page brought from Logseq",
-    look: "Welcome: its alias as a property; the outline as a nested list, bullets as lines draws them; tasks as boxes, DOING with its word, the cancelled one ticked and struck; the reference as Planned: 100 and a mention of Projects/Acme; the picture at 320 px; the code block as code.",
+    look: "Welcome: its alias as a property; the outline as a nested list, bullets as Lines draws them; tasks as boxes, DOING with its word, the cancelled one ticked and struck; the reference as Planned: 100 and a mention of Projects/Acme; the picture at 320 px; the code block as code.",
     act: async (page) => {
       await page.getByRole("button", { name: "Settings", exact: true }).click();
       await page.getByRole("dialog").getByRole("navigation").getByText("Export and Import", { exact: true }).first().click();
@@ -1933,7 +1933,7 @@ const SCENES = [
       {
         id: `palette-editor-${style}`,
         title: `A palette of yours, in ${name}`,
-        look: "Its name, then a row for each color: its swatch and hex, its name (or the one lines gives it, greyed), and arrows and a cross that line up row to row; Add a Color at the end. Nothing cut off or crowded.",
+        look: "Its name, then a row for each color: its swatch and hex, its name (or the one Lines gives it, greyed), and arrows and a cross that line up row to row; Add a Color at the end. Nothing cut off or crowded.",
         prefs: { style, theme: style },
         act: async (page) => {
           await yours(page, (dialog) => dialog.getByRole("radiogroup", { name: "Palettes" }));
@@ -2141,7 +2141,7 @@ writeFileSync(
   `${out}index.html`,
   `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>lines · QA pictures</title>
+<title>Lines · QA pictures</title>
 <style>
   :root { color-scheme: light dark; font: 15px/1.5 system-ui, sans-serif; }
   body { max-width: 1400px; margin: 0 auto; padding: 24px; }
@@ -2153,7 +2153,7 @@ writeFileSync(
   img { width: 100%; height: auto; border: 1px solid color-mix(in srgb, currentColor 15%, transparent); border-radius: 8px; }
   figcaption { font-size: 13px; opacity: 0.7; }
 </style></head>
-<body><h1>lines · QA pictures</h1><p>${esc(`${engine}, ${new Date().toISOString().slice(0, 16).replace("T", " ")}`)}. Look at each picture for what it says; anything else that looks wrong counts too. qa/README.md has more.</p>
+<body><h1>Lines · QA pictures</h1><p>${esc(`${engine}, ${new Date().toISOString().slice(0, 16).replace("T", " ")}`)}. Look at each picture for what it says; anything else that looks wrong counts too. qa/README.md has more.</p>
 ${cards}
 </body></html>
 `,

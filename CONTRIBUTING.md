@@ -1,6 +1,6 @@
-# Contributing to lines
+# Contributing to Lines
 
-Thanks for helping. This is how changes get into lines, for people and for coding agents alike: setting up, making a change, and the commits and pull requests main takes.
+Thanks for helping. This is how changes get into Lines, for people and for coding agents alike: setting up, making a change, and the commits and pull requests main takes.
 
 ## Setting up
 
@@ -27,9 +27,9 @@ bun run tauri dev    # the desktop app
    bun run i18n           # every message translated
    ```
 
-   A change to what lines does adds or updates a test of it: a unit test for logic that doesn't need a page (colors, files, what a note's text means), a browser test for what needs the app. Browser tests drive the app as built with `--mode test`, whose helpers (`src/test/harness.ts`, `window.testing`) open notes and reach Settings directly. A change to what people see also takes the QA pictures again (`bun run qa-shots`, [qa/README.md](qa/README.md)) to look at.
+   A change to what Lines does adds or updates a test of it: a unit test for logic that doesn't need a page (colors, files, what a note's text means), a browser test for what needs the app. Browser tests drive the app as built with `--mode test`, whose helpers (`src/test/harness.ts`, `window.testing`) open notes and reach Settings directly. A change to what people see also takes the QA pictures again (`bun run qa-shots`, [qa/README.md](qa/README.md)) to look at.
 
-   And, when they apply: `bun run qa-notes` after changing how Markdown is read (commit the notes it writes), `bun site/build.mjs` after changing the docs or the README (it builds the website's pages into `dist-site/` and fails on a link that leads nowhere; `bunx vite preview --outDir dist-site` shows them), `bun run bench` before and after anything that could make lines slower ([docs/performance.md](docs/performance.md)), and `cargo clippy` and `cargo test` in `src-tauri/` after changing Rust.
+   And, when they apply: `bun run qa-notes` after changing how Markdown is read (commit the notes it writes), `bun site/build.mjs` after changing the docs or the README (it builds the website's pages into `dist-site/` and fails on a link that leads nowhere; `bunx vite preview --outDir dist-site` shows them), `bun run bench` before and after anything that could make Lines slower ([docs/performance.md](docs/performance.md)), and `cargo clippy` and `cargo test` in `src-tauri/` after changing Rust.
 4. Try it where people will use it. A change to what people see or do is tried in WebKit (Safari, or the Mac app) as well as Chrome, as they differ; say in the pull request where it wasn't tried.
 5. Open a pull request (below).
 
@@ -62,8 +62,8 @@ docs: say how releases are made
 | `revert` | Undoing an earlier change (`revert: feat(list): …`) | as what it undoes |
 | `style` | Formatting only | no |
 
-- **Scope** (optional): the part of lines it's about, as a folder or doc names it: `editor`, `list`, `notes`, `sync`, `spreadsheets`, `latex`, `pdf`, `settings`, `plugins`, `themes`, `i18n`, `a11y`, `native` (the Rust side), `bench`, `release`, `deps`.
-- **What changed**: plain words, as someone using lines would put it, starting in lower case, no full stop, the whole title within 100 characters. The title says what; the description says why.
+- **Scope** (optional): the part of Lines it's about, as a folder or doc names it: `editor`, `list`, `notes`, `sync`, `spreadsheets`, `latex`, `pdf`, `settings`, `plugins`, `themes`, `i18n`, `a11y`, `native` (the Rust side), `bench`, `release`, `deps`.
+- **What changed**: plain words, as someone using Lines would put it, starting in lower case, no full stop, the whole title within 100 characters. The title says what; the description says why.
 - **Breaking changes**: anything that makes people or plugins do something (notes, sync or the plugin API changing in a way older versions can't read): `!` after the type or scope (`feat(sync)!: …`), and a paragraph in the description starting `BREAKING CHANGE:` that says what to do. Before 1.0 it makes a minor release.
 
 The `conventions` check fails on a title that doesn't follow this; `bun scripts/release.mjs check-title "…"` checks one locally.
@@ -95,9 +95,9 @@ The same rules, and:
 
 ## Contributor agreement
 
-Before your first pull request is merged, you agree to lines' [contributor agreement](CLA.md): a bot asks on the pull request, and you reply with the sentence it gives. Once covers everything you contribute afterwards.
+Before your first pull request is merged, you agree to Lines' [contributor agreement](CLA.md): a bot asks on the pull request, and you reply with the sentence it gives. Once covers everything you contribute afterwards.
 
-You keep the copyright in what you contribute. You give lines' maintainer a broad license to it, and every version of lines that includes it stays open source. lines asks because it's under the AGPL: without the agreement, every contributor's code could only be passed on under the AGPL's terms, and Apple's App Store terms (iPhone, iPad, the Mac App Store) add restrictions the AGPL doesn't allow, so lines couldn't be published there, nor its license ever changed.
+You keep the copyright in what you contribute. You give Lines' maintainer a broad license to it, and every version of Lines that includes it stays open source. Lines asks because it's under the AGPL: without the agreement, every contributor's code could only be passed on under the AGPL's terms, and Apple's App Store terms (iPhone, iPad, the Mac App Store) add restrictions the AGPL doesn't allow, so Lines couldn't be published there, nor its license ever changed.
 
 Contributing for an employer: make sure you may, as the agreement asks you to confirm. A coding agent's pull request is covered by the person it works for, who agrees once on their own account.
 
@@ -107,4 +107,4 @@ Merging into main never releases by itself. A bot keeps a pull request titled `c
 
 ## Dependencies
 
-Only versions published at least 10 days ago are installed (`bunfig.toml`), so a compromised release has time to be caught; Dependabot proposes updates weekly under the same rule. A new dependency needs a reason in its pull request, a license that fits the AGPL, and `bun run notices` (the third-party licenses lines shows in About).
+Only versions published at least 10 days ago are installed (`bunfig.toml`), so a compromised release has time to be caught; Dependabot proposes updates weekly under the same rule. A new dependency needs a reason in its pull request, a license that fits the AGPL, and `bun run notices` (the third-party licenses Lines shows in About).

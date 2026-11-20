@@ -1,6 +1,6 @@
 # Changelog
 
-What changed in each release of lines. Written by `bun scripts/release.mjs prepare` from the commits since the release before (docs/releasing.md).
+What changed in each release of Lines. Written by `bun scripts/release.mjs prepare` from the commits since the release before (docs/releasing.md).
 
 ## [0.7.0](https://github.com/olekslitus/lines/compare/v0.6.0...v0.7.0) (2026-11-17)
 

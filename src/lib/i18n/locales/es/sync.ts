@@ -37,7 +37,7 @@ export default {
     "Tus claves solo se guardan en este dispositivo, en el almacenamiento de este navegador. Usa una clave que solo pueda acceder a este bucket.",
   "sync.bucket.corsTitle": "En el navegador, el bucket necesita una regla CORS para {origin}",
   "sync.bucket.corsHelp": "Pega esto en los ajustes CORS del bucket (S3, R2, MinIO). Para Backblaze B2, consulta {file}.",
-  "sync.bucket.works": "Conectado. lines puede leer y escribir en este bucket.",
+  "sync.bucket.works": "Conectado. Lines puede leer y escribir en este bucket.",
   "sync.bucket.test": "Probar la conexión",
   "sync.bucket.testing": "Probando…",
 
@@ -51,14 +51,14 @@ export default {
     "Cualquier almacenamiento compatible con S3: MinIO, Wasabi, Tigris, DigitalOcean Spaces, Garage, Hetzner…",
 
   "sync.folder.intro":
-    "Tus notas van a una carpeta “{folder}” en la unidad, y la app de la unidad las sincroniza con tus otros dispositivos. Activa allí la misma unidad y conecta lines a ella.",
+    "Tus notas van a una carpeta “{folder}” en la unidad, y la app de la unidad las sincroniza con tus otros dispositivos. Activa allí la misma unidad y conecta Lines a ella.",
   "sync.folder.looking": "Buscando unidades en la nube…",
   "sync.folder.drives": "Unidad en la nube",
   "sync.folder.none":
     "No se han encontrado unidades en la nube en este Mac. Activa iCloud Drive en Ajustes del Sistema → tu nombre → iCloud, o instala Google Drive, Proton Drive, Dropbox u OneDrive. O usa cualquier carpeta:",
   "sync.folder.chooseOther": "Elegir otra carpeta…",
   "sync.folder.pickPrompt": "Usar esta carpeta",
-  "sync.folder.pickMessage": "Elige dónde guarda lines tus notas. Una carpeta de una unidad en la nube las sincroniza.",
+  "sync.folder.pickMessage": "Elige dónde guarda Lines tus notas. Una carpeta de una unidad en la nube las sincroniza.",
   "sync.folder.icloud":
     "iCloud Drive mantiene tus Mac al día. La sincronización con la app para iPhone y el inicio de sesión con iCloud en la web están en camino.",
   "sync.folder.showInFinder": "Mostrar en el Finder",
@@ -67,17 +67,17 @@ export default {
   "sync.folder.failed": "No se ha podido usar la carpeta: {error}",
 
   "sync.browser.intro":
-    "Guarda tus notas en una carpeta de este ordenador, como archivos Markdown que cualquier app puede abrir. lines las mantiene al día mientras escribes, y tus notas también se quedan en este navegador.",
+    "Guarda tus notas en una carpeta de este ordenador, como archivos Markdown que cualquier app puede abrir. Lines las mantiene al día mientras escribes, y tus notas también se quedan en este navegador.",
   "sync.browser.allow": "Permitir el acceso",
-  "sync.browser.asksAgain": "Tu navegador vuelve a preguntar tras reiniciarse antes de que lines pueda usar la carpeta.",
+  "sync.browser.asksAgain": "Tu navegador vuelve a preguntar tras reiniciarse antes de que Lines pueda usar la carpeta.",
   "sync.browser.unsupported":
-    "Este navegador no puede guardar en una carpeta. Abre lines en Chrome o Edge para guardar tus notas como archivos, o expórtalas desde Ajustes → Exportar e importar. Mientras tanto, tus notas se guardan en este navegador.",
+    "Este navegador no puede guardar en una carpeta. Abre Lines en Chrome o Edge para guardar tus notas como archivos, o expórtalas desde Ajustes → Exportar e importar. Mientras tanto, tus notas se guardan en este navegador.",
   "sync.browser.choose": "Elegir una carpeta…",
   "sync.browser.chooseAnother": "Elegir otra carpeta…",
   "sync.browser.cantPick": "Este navegador no puede guardar en una carpeta. Prueba con Chrome o Edge.",
   "sync.browser.gone": "La carpeta ya no está disponible. Vuelve a elegirla en Ajustes → Sincronización.",
   "sync.browser.permission":
-    "lines necesita tu permiso para volver a usar “{name}”. Abre Ajustes → Sincronización y permítelo.",
+    "Lines necesita tu permiso para volver a usar “{name}”. Abre Ajustes → Sincronización y permítelo.",
 
   "sync.e2e.title": "Cifrado de extremo a extremo",
   "sync.e2e.intro":
@@ -112,7 +112,7 @@ export default {
   "sync.error.changedElsewhere": "El cifrado se cambió en otro dispositivo. Sincroniza y vuelve a intentarlo.",
   "sync.error.keyFileMissing":
     "Falta el archivo de clave de las notas ({file}). Si la unidad aún lo está descargando, se resolverá solo.",
-  "sync.error.keyFileDamaged": "{file} está dañado o es de una versión más reciente de lines, así que no se ha sincronizado nada.",
+  "sync.error.keyFileDamaged": "{file} está dañado o es de una versión más reciente de Lines, así que no se ha sincronizado nada.",
   "sync.error.turnedOff": "El cifrado se desactivó en otro dispositivo. Desactívalo también aquí para seguir sincronizando.",
   "sync.error.rekeyed":
     "El cifrado se volvió a configurar en otro dispositivo. Introduce su nueva frase de contraseña para seguir sincronizando.",

@@ -76,7 +76,7 @@ export default {
   "library.rating.moved": "{name}, {place} de {count}",
   "library.rating.removed": "{name} quitada",
   "library.rating.scales": "Escalas",
-  "library.rating.scalesNote": "Además de las de lines, escalas tuyas: marcas sobre hasta 10, puntos o palabras de la mejor a la peor.",
+  "library.rating.scalesNote": "Además de las de Lines, escalas tuyas: marcas sobre hasta 10, puntos o palabras de la mejor a la peor.",
   "library.rating.newScale": "Nueva escala",
   "library.rating.noScales": "Ninguna todavía.",
   "library.rating.editScale": "Cambiar {name}",
@@ -111,16 +111,16 @@ export default {
   "library.rating.saveScale": "Guardar",
   "library.list.anilist.note": "Inicia sesión para mantener al día tu lista de anime de AniList y la biblioteca: estado, valoración y episodios vistos, en ambos sentidos. Tu lista llega como notas.",
   "library.list.myanimelist.note": "Inicia sesión para mantener al día tu lista de anime de MyAnimeList y la biblioteca: estado, valoración y episodios vistos, en ambos sentidos. Tu lista llega como notas.",
-  "library.list.notInBuild": "Mantener al día tu lista de {name} no está en esta versión de lines: necesita el identificador de cliente de lines en {name} al compilarla.",
-  "library.list.appsOnly": "Solo en la app de lines: {name} no deja que las páginas web le pregunten.",
+  "library.list.notInBuild": "Mantener al día tu lista de {name} no está en esta versión de Lines: necesita el identificador de cliente de Lines en {name} al compilarla.",
+  "library.list.appsOnly": "Solo en la app de Lines: {name} no deja que las páginas web le pregunten.",
   "library.list.signIn": "Iniciar sesión",
   "library.list.tokenNote": "Acepta en {name} y pega aquí el token que te muestra. Se guarda en este dispositivo, cifrado con el bloqueo de la app.",
-  "library.list.browserNote": "lines abre {name} en tu navegador; acepta allí y vuelve aquí. Lo que recibe se guarda en este dispositivo, cifrado con el bloqueo de la app.",
+  "library.list.browserNote": "Lines abre {name} en tu navegador; acepta allí y vuelve aquí. Lo que recibe se guarda en este dispositivo, cifrado con el bloqueo de la app.",
   "library.list.getToken": "Obtener tu token en {name}",
   "library.list.signInButton": "Iniciar sesión",
   "library.list.signInBrowser": "Iniciar sesión…",
   "library.list.waitingForBrowser": "Esperando a {name} en tu navegador…",
-  "library.list.signedInPage": "<!doctype html><meta charset=\"utf-8\"><title>lines</title><p style=\"font: 16px system-ui; margin: 40px\">Sesión iniciada en {name}. Puedes cerrar esta pestaña y volver a lines.</p>",
+  "library.list.signedInPage": "<!doctype html><meta charset=\"utf-8\"><title>Lines</title><p style=\"font: 16px system-ui; margin: 40px\">Sesión iniciada en {name}. Puedes cerrar esta pestaña y volver a Lines.</p>",
   "library.list.signedIn": "Sesión iniciada como {user}",
   "library.list.signedInAs": "Sesión iniciada en {name} como {user}",
   "library.list.signedOut": "Sesión cerrada en {name}",
@@ -180,7 +180,7 @@ export default {
   "library.bookmarks.imported":
     "{count, plural, =0 {Nada nuevo que importar} one {Se ha importado # recurso} other {Se han importado # recursos}}{there, plural, =0 {} one {; # ya estaba} other {; # ya estaban}}",
   "library.bookmarks.undone": "{count, plural, one {Importación deshecha: # recurso movido a la Papelera} other {Importación deshecha: # recursos movidos a la Papelera}}",
-  "library.bookmarks.unreadable": "{name} no es un archivo de marcadores que lines pueda leer.",
+  "library.bookmarks.unreadable": "{name} no es un archivo de marcadores que Lines pueda leer.",
   "library.settings.links": "Enlaces",
   "library.settings.countAgain": "Contar cuando se añade otra vez",
   "library.settings.countAgainNote":
@@ -189,6 +189,6 @@ export default {
   "library.settings.lookUpNote":
     "Una nota nueva que es solo un enlace se completa con lo que es: un libro, una película, una canción, un artículo… con su portada y sus datos, del propio sitio y de catálogos abiertos. Solo se envía el enlace, y al deshacer vuelve a ser el enlace.",
   "library.settings.web":
-    "En el navegador solo se puede consultar {names}: los demás sitios no dejan que las páginas web los lean. La app de lines lee cualquier página.",
+    "En el navegador solo se puede consultar {names}: los demás sitios no dejan que las páginas web los lean. La app de Lines lee cualquier página.",
   "library.settings.sources": "Cada sitio donde se buscan los enlaces puede desactivarse en Ajustes → Complementos.",
 } satisfies Translation<typeof en>;

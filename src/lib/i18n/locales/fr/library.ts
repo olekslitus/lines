@@ -76,7 +76,7 @@ export default {
   "library.rating.moved": "{name}, {place} sur {count}",
   "library.rating.removed": "{name} retirée",
   "library.rating.scales": "Échelles",
-  "library.rating.scalesNote": "En plus de celles de lines, vos propres échelles : des marques sur 10 au plus, des points, ou des mots, du meilleur au pire.",
+  "library.rating.scalesNote": "En plus de celles de Lines, vos propres échelles : des marques sur 10 au plus, des points, ou des mots, du meilleur au pire.",
   "library.rating.newScale": "Nouvelle échelle",
   "library.rating.noScales": "Aucune pour l’instant.",
   "library.rating.editScale": "Modifier {name}",
@@ -111,16 +111,16 @@ export default {
   "library.rating.saveScale": "Enregistrer",
   "library.list.anilist.note": "Connectez-vous pour garder votre liste d’anime sur AniList et la bibliothèque à jour l’une de l’autre : état, évaluation et épisodes vus, dans les deux sens. Votre liste arrive en notes.",
   "library.list.myanimelist.note": "Connectez-vous pour garder votre liste d’anime sur MyAnimeList et la bibliothèque à jour l’une de l’autre : état, évaluation et épisodes vus, dans les deux sens. Votre liste arrive en notes.",
-  "library.list.notInBuild": "Garder votre liste {name} à jour n’est pas dans cette version de lines : il lui faut l’identifiant client de lines sur {name} à la compilation.",
-  "library.list.appsOnly": "Seulement dans l’app lines : {name} ne répond pas aux pages web.",
+  "library.list.notInBuild": "Garder votre liste {name} à jour n’est pas dans cette version de Lines : il lui faut l’identifiant client de Lines sur {name} à la compilation.",
+  "library.list.appsOnly": "Seulement dans l’app Lines : {name} ne répond pas aux pages web.",
   "library.list.signIn": "Connexion",
   "library.list.tokenNote": "Acceptez sur {name}, puis collez ici le jeton qu’il affiche. Il est gardé sur cet appareil, chiffré par le verrou de l’app.",
-  "library.list.browserNote": "lines ouvre {name} dans votre navigateur ; acceptez-y, et il revient ici. Ce qu’il reçoit est gardé sur cet appareil, chiffré par le verrou de l’app.",
+  "library.list.browserNote": "Lines ouvre {name} dans votre navigateur ; acceptez-y, et il revient ici. Ce qu’il reçoit est gardé sur cet appareil, chiffré par le verrou de l’app.",
   "library.list.getToken": "Obtenir votre jeton sur {name}",
   "library.list.signInButton": "Se connecter",
   "library.list.signInBrowser": "Se connecter…",
   "library.list.waitingForBrowser": "En attente de {name} dans votre navigateur…",
-  "library.list.signedInPage": "<!doctype html><meta charset=\"utf-8\"><title>lines</title><p style=\"font: 16px system-ui; margin: 40px\">Connecté à {name}. Vous pouvez fermer cet onglet et revenir à lines.</p>",
+  "library.list.signedInPage": "<!doctype html><meta charset=\"utf-8\"><title>Lines</title><p style=\"font: 16px system-ui; margin: 40px\">Connecté à {name}. Vous pouvez fermer cet onglet et revenir à Lines.</p>",
   "library.list.signedIn": "Connecté en tant que {user}",
   "library.list.signedInAs": "Connecté à {name} en tant que {user}",
   "library.list.signedOut": "Déconnecté de {name}",
@@ -180,7 +180,7 @@ export default {
   "library.bookmarks.imported":
     "{count, plural, =0 {Rien de nouveau à importer} one {# ressource importée} other {# ressources importées}}{there, plural, =0 {} one { ; # y était déjà} other { ; # y étaient déjà}}",
   "library.bookmarks.undone": "{count, plural, one {Import annulé : # ressource placée dans la Corbeille} other {Import annulé : # ressources placées dans la Corbeille}}",
-  "library.bookmarks.unreadable": "{name} n’est pas un fichier de signets que lines peut lire.",
+  "library.bookmarks.unreadable": "{name} n’est pas un fichier de signets que Lines peut lire.",
   "library.settings.links": "Liens",
   "library.settings.countAgain": "Compter les ajouts répétés",
   "library.settings.countAgainNote":
@@ -189,6 +189,6 @@ export default {
   "library.settings.lookUpNote":
     "Une nouvelle note qui n’est qu’un lien est complétée avec ce qu’il désigne : un livre, un film, un morceau, un article… avec sa couverture et ses détails, tirés du site et de catalogues ouverts. Seul le lien est envoyé, et annuler rétablit le lien.",
   "library.settings.web":
-    "Dans le navigateur, seuls {names} peuvent être consultés : les autres sites ne se laissent pas lire par les pages web. L’app lines lit n’importe quelle page.",
+    "Dans le navigateur, seuls {names} peuvent être consultés : les autres sites ne se laissent pas lire par les pages web. L’app Lines lit n’importe quelle page.",
   "library.settings.sources": "Chaque source de recherche peut être désactivée dans Réglages → Extensions.",
 } satisfies Translation<typeof en>;

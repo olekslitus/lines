@@ -86,7 +86,7 @@ function noteLine(source: string, document: string, line: number): number | null
  * it, drawing its rules as plain ones, so they still typeset.
  */
 const BOOKTABS = String.raw`\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{booktabs}[2026/10/29 lines' stand-in: plain rules]
+\ProvidesPackage{booktabs}[2026/10/29 Lines' stand-in: plain rules]
 \def\toprule{\hline}
 \def\midrule{\hline}
 \def\bottomrule{\hline}

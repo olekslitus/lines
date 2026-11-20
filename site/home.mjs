@@ -108,7 +108,7 @@ const megabytes = (bytes) => `${Math.round(bytes / 1e6)} MB`;
 
 function downloads(release) {
   if (!release) {
-    return `<p class="mt-4 text-center text-muted">The apps for Mac, Windows, Linux and Android are on <a href="${REPO}/releases">lines' releases</a>.</p>`;
+    return `<p class="mt-4 text-center text-muted">The apps for Mac, Windows, Linux and Android are on <a href="${REPO}/releases">Lines' releases</a>.</p>`;
   }
   const date = new Date(release.date).toLocaleDateString("en", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
   const extension = (asset) => asset.name.slice(asset.name.lastIndexOf(".") + 1);
@@ -122,11 +122,11 @@ function downloads(release) {
             ${others.length ? `<p class="mt-3 text-sm text-muted">Or ${others.map((asset) => `<a href="${asset.url}">.${extension(asset)}</a>`).join(", ")}</p>` : ""}
           </li>`;
   }).join("\n          ");
-  return `<p class="mt-3 text-center text-muted">lines ${release.version}, ${date}. <a href="docs/changelog.html">What's new</a></p>
+  return `<p class="mt-3 text-center text-muted">Lines ${release.version}, ${date}. <a href="docs/changelog.html">What's new</a></p>
         <ul class="mt-10 grid gap-4 md:grid-cols-2">
           ${systems}
         </ul>
-        <p class="mx-auto mt-6 max-w-3xl text-center text-sm text-muted">lines is in alpha, so export your notes now and then. The desktop apps aren't signed yet: on a Mac, open lines the first time with right-click → Open; on Windows, choose More info → Run anyway. On Android, open the downloaded file and allow your browser or Files app to install apps when asked. <a href="${release.url}">All of this release's files</a></p>`;
+        <p class="mx-auto mt-6 max-w-3xl text-center text-sm text-muted">Lines is in alpha, so export your notes now and then. The desktop apps aren't signed yet: on a Mac, open Lines the first time with right-click → Open; on Windows, choose More info → Run anyway. On Android, open the downloaded file and allow your browser or Files app to install apps when asked. <a href="${release.url}">All of this release's files</a></p>`;
 }
 
 /** The download button offers the visitor's system's app, when there's one for it. */
@@ -166,19 +166,19 @@ export function home({ release }) {
             <p class="mt-3 text-lg text-muted">${kind.text}</p>
             <a href="${kind.link[0]}" class="more mt-4">${kind.link[1]}${icon("arrow-right", "size-4")}</a>
           </div>
-          <div class="md:col-span-3">${picture(kind.picture, `A note in lines: ${kind.title.toLowerCase()}`)}</div>
+          <div class="md:col-span-3">${picture(kind.picture, `A note in Lines: ${kind.title.toLowerCase()}`)}</div>
         </div>`,
   ).join("\n        ");
 
   const themes = THEMES.map((theme) => {
     const file = `theme-${theme.toLowerCase()}.webp`;
     const { width, height } = size(file);
-    return `<li><img src="images/${file}" width="${width}" height="${height}" alt="lines in ${theme}" class="shot" loading="lazy" decoding="async" /><p class="mt-2 text-center text-sm text-muted">${theme}</p></li>`;
+    return `<li><img src="images/${file}" width="${width}" height="${height}" alt="Lines in ${theme}" class="shot" loading="lazy" decoding="async" /><p class="mt-2 text-center text-sm text-muted">${theme}</p></li>`;
   }).join("\n          ");
 
   return layout({
     page: "index.html",
-    title: "lines: calm, beautiful notes that stay yours",
+    title: "Lines: calm, beautiful notes that stay yours",
     description: "A quiet place to write, calculate, sketch and think. Free and open source, private, and on your own device.",
     head: `\n    ${script(openInstalled)}`,
     body: `    <main id="main">
@@ -192,10 +192,10 @@ export function home({ release }) {
         <p class="mt-4 text-sm text-faint">Mac, Windows, Linux and the web. No account.</p>
       </section>
       <div class="mx-auto mt-14 max-w-6xl px-4 sm:px-6">
-        ${picture("app", "lines: tags in the sidebar, the list of notes, and a note with a callout, todos and a table", { lazy: false })}
+        ${picture("app", "Lines: tags in the sidebar, the list of notes, and a note with a callout, todos and a table", { lazy: false })}
       </div>
 
-      <section aria-label="Why lines" class="mx-auto mt-28 max-w-5xl px-4 sm:px-6">
+      <section aria-label="Why Lines" class="mx-auto mt-28 max-w-5xl px-4 sm:px-6">
         <ul class="grid gap-x-12 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           ${values}
         </ul>
@@ -229,15 +229,15 @@ export function home({ release }) {
           <div class="md:col-span-2">
             <p class="flex items-center gap-2 text-sm font-semibold text-accent">${icon("puzzle", "size-4")}Plugins</p>
             <h2 id="plugins" class="mt-3 section-title">Made of plugins</h2>
-            <p class="mt-3 text-lg text-muted">Like a code editor, lines is a small core with plugins around it: the kinds of notes, what draws math and diagrams, themes and icons. Turn off what you don't use, and nothing in your notes changes.</p>
+            <p class="mt-3 text-lg text-muted">Like a code editor, Lines is a small core with plugins around it: the kinds of notes, what draws math and diagrams, themes and icons. Turn off what you don't use, and nothing in your notes changes.</p>
             <a href="docs/plugins.html" class="more mt-4">How plugins work${icon("arrow-right", "size-4")}</a>
           </div>
-          <div class="md:col-span-3">${picture("plugins", "Settings in lines, listing its plugins, each with a switch")}</div>
+          <div class="md:col-span-3">${picture("plugins", "Settings in Lines, listing its plugins, each with a switch")}</div>
         </div>
       </section>
 
       <section aria-labelledby="download" class="mx-auto mt-32 max-w-5xl scroll-mt-6 px-4 sm:px-6">
-        <h2 id="download" class="section-title text-center">Download lines</h2>
+        <h2 id="download" class="section-title text-center">Download Lines</h2>
         ${downloads(release)}
       </section>
     </main>

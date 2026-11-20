@@ -135,7 +135,7 @@ function capture(line: string): Capture {
     const { query: read, rest } = query(tokens(match[2]));
     // `redact` hides a captured value in Hurl's logs; lines writes none.
     const left = rest.filter((token) => !(token.kind === "word" && token.text === "redact"));
-    if (left.length) throw new Error("more after the query than lines reads");
+    if (left.length) throw new Error("more after the query than Lines reads");
     return { name: unescape(match[1]), query: read, text: line };
   } catch (error) {
     return { name: unescape(match[1]), query: NONE, text: line, problem: (error as Error).message };
@@ -158,7 +158,7 @@ function assert(line: string): Assert {
       if (next?.kind !== "value") throw new Error(`${predicate.text} needs a value`);
       value = next.value;
     }
-    if (rest.length) throw new Error("more after the predicate than lines reads");
+    if (rest.length) throw new Error("more after the predicate than Lines reads");
     return { query: read, not, predicate: predicate.text, value, text: line };
   } catch (error) {
     return { query: NONE, not: false, predicate: "", value: null, text: line, problem: (error as Error).message };

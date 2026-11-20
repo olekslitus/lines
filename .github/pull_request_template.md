@@ -5,7 +5,7 @@ fix(sync): keep edits made while a pass is running. See CONTRIBUTING.md.
 
 ## What and why
 
-<!-- What changes for people using lines, and why. "Closes #123" if it does. -->
+<!-- What changes for people using Lines, and why. "Closes #123" if it does. -->
 
 ## How it was checked
 
@@ -18,6 +18,6 @@ fix(sync): keep edits made while a pass is running. See CONTRIBUTING.md.
 - [ ] Docs, the QA checklist and the feature tour are updated where people will see the change (CLAUDE.md lists which)
 - [ ] Text the app shows is translated (`bun run i18n`)
 - [ ] Usable by keyboard and screen reader
-- [ ] `bun run bench` before and after, if it could make lines slower
+- [ ] `bun run bench` before and after, if it could make Lines slower
 - [ ] Screenshots or a recording, if it changes what people see
 - [ ] A breaking change has `!` in the title and a `BREAKING CHANGE:` paragraph saying what to do

@@ -191,7 +191,7 @@ function strftime(date: Date, format: string) {
 /** A date written in `format`: ISO 8601 (`%+`) or whatever the browser reads; others aren't read yet. */
 function strptime(value: string, format: string) {
   const date = new Date(format === "%+" || format === "%Y-%m-%dT%H:%M:%S%.fZ" ? value : value.replace(/ /, "T"));
-  if (Number.isNaN(date.getTime())) throw new Error(`${JSON.stringify(value)} isn't a date lines reads (${format})`);
+  if (Number.isNaN(date.getTime())) throw new Error(`${JSON.stringify(value)} isn't a date Lines reads (${format})`);
   return date;
 }
 

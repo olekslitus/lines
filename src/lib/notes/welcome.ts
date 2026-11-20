@@ -1,6 +1,6 @@
-export const WELCOME_NOTE = `# Welcome to lines
+export const WELCOME_NOTE = `# Welcome to Lines
 
-lines is a calm place for your thoughts. Write in **Markdown** and watch it turn into formatted text as you go. Move your cursor onto any line to see its Markdown again.
+Lines is a calm place for your thoughts. Write in **Markdown** and watch it turn into formatted text as you go. Move your cursor onto any line to see its Markdown again.
 
 :::i
 Type \`/\` at the start of a line for headings, lists, tables, callouts, code, images and more.
@@ -18,7 +18,7 @@ Type \`/\` at the start of a line for headings, lists, tables, callouts, code, i
 
 ## Todos
 
-- [x] Open lines
+- [x] Open Lines
 - [ ] Write your first note
 - [ ] Organize it with a tag
 
@@ -34,7 +34,7 @@ Start a note with \`/properties\` to give it a type, like \`type: person\`, and 
 
 ## Books, movies and music
 
-Paste a link to a book, a comic, a movie, a video, a song or an article into a new note, and it fills itself in with its title, cover and details. It's kept in the sidebar's **Library**, on its shelf; right-click it there to mark where you've got to (to read, reading, read) and to rate it. Drop a book's PDF or EPUB on lines to keep it with its note and read it there. The Library's + also subscribes to blogs and podcasts, whose posts you read under Feeds.
+Paste a link to a book, a comic, a movie, a video, a song or an article into a new note, and it fills itself in with its title, cover and details. It's kept in the sidebar's **Library**, on its shelf; right-click it there to mark where you've got to (to read, reading, read) and to rate it. Drop a book's PDF or EPUB on Lines to keep it with its note and read it there. The Library's + also subscribes to blogs and podcasts, whose posts you read under Feeds.
 
 ## Callouts and cards
 
@@ -91,7 +91,7 @@ Paste or drop an image or any other file into a note, or type \`/image\` or \`/f
 
 ## Private by design
 
-Your notes are stored on this device. Sync them through your own cloud drive or S3 bucket, encrypted end to end if you like, from Settings. Lock a note with a password from its toolbar, or lock all of lines from Settings → Privacy.
+Your notes are stored on this device. Sync them through your own cloud drive or S3 bucket, encrypted end to end if you like, from Settings. Lock a note with a password from its toolbar, or lock all of Lines from Settings → Privacy.
 
 ---
 

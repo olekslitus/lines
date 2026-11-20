@@ -11,7 +11,7 @@ export default {
   "models.reading": "Reading the model…",
   "models.unreadable": "Couldn’t read this {kind} file.",
   "models.empty": "Nothing to show: the model is empty.",
-  "models.noOpenScad": "This copy of lines doesn’t have OpenSCAD, which makes the model from its code.",
+  "models.noOpenScad": "This copy of Lines doesn’t have OpenSCAD, which makes the model from its code.",
   "models.noWebGL": "This device can’t draw 3D.",
   "models.tooLong": "This took too long, so it was stopped.",
   "models.failed": "Something went wrong.",

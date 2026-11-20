@@ -2,7 +2,7 @@
 
 [Mem](https://get.mem.ai) was an AI notes app: write without filing, and let the app find, connect and organize. It [announced on 2026-11-16 that it's shutting down](https://get.mem.ai/blog/mem-is-shutting-down). Notes go read-only on 2026-12-18 and the service closes on 2027-01-15. It was built for seven years on about $29M of venture money: a $5.6M seed from Andreessen Horowitz in 2021, and a $23.5M Series A led by the OpenAI Startup Fund in November 2022 ([TechCrunch](https://techcrunch.com/2022/11/10/ai-powered-note-taking-app-mem-raises-23-5m-openai/)).
 
-This page records what Mem did, what people liked and didn't, and what lines takes from it, written in November 2026. The spikes that came out of it are listed [at the end](#what-lines-is-doing-about-it).
+This page records what Mem did, what people liked and didn't, and what Lines takes from it, written in November 2026. The spikes that came out of it are listed [at the end](#what-lines-is-doing-about-it).
 
 ## What Mem was
 
@@ -45,26 +45,26 @@ From reviews, forums and Hacker News over the years. Review aggregators are summ
   - "the price is getting hard to justify for a personal note-taker when competitors are catching up on AI features" (a review quoted by [Saner](https://blog.saner.ai/mem-ai-reviews), a competitor).
 - **An unclear way out.** Mem's export is a ZIP its guide says can be opened as an Obsidian vault, and its format isn't documented ([migration guide](https://help.mem.ai/migration)). The migration guide recommends no successor. On the shutdown thread on Hacker News, the first comment asked whether anyone still used Mem ([HN, 2026](https://news.ycombinator.com/item?id=50526537)).
 
-## What lines takes from it
+## What Lines takes from it
 
-1. **Capture without deciding is the feature.** Mem's best-loved idea was the absence of a question: no folder, no file, no title, just write. lines already has an Inbox that takes new notes until they're filed, and tags instead of folders. Quick Note from anywhere ([#74](https://github.com/olekslitus/lines/issues/74)) is the next step, and the most important one for anyone coming from Mem.
-2. **AI that organizes has to show its work, and ask.** Mem's organizing grew opaque, and its agent sometimes edited the wrong note. In lines, suggestions are visible (a tag offered, not applied), applied with a click, and undone with Undo. Answers link to the notes they came from ([#374](https://github.com/olekslitus/lines/issues/374)).
-3. **Your notes stay yours, on your device.** The longest-running complaint about Mem was where the notes lived, who read them, and that losing a Google account or the company meant losing them. lines' notes are files and a database on the device, synced where the person chooses. Its AI, if any, runs on the device first, and sends nothing anywhere unless asked ([#374](https://github.com/olekslitus/lines/issues/374)). When Mem closes, its users lose the service. lines can't close on anyone like that: the app keeps working and the notes stay on the device.
-4. **Don't take features away.** Mem cut tasks, templates, daily notes, the Inbox and email twice, and each time people rebuilt their habits or left. lines makes features plugins that can be turned off, rather than removing them, and keeps its formats readable without lines (Markdown, Linedown).
-5. **Fast first, smart second.** Mem was called sluggish, its search slow. lines keeps search instant and adds meaning-based results below as they come ([#376](https://github.com/olekslitus/lines/issues/376)), never making typing or capture wait on a model. `bun run bench` guards it.
-6. **Mobile is not an afterthought.** Mem's neglected iPhone app and missing Android app lost it users. lines builds for iPhone, iPad and Android from the same code as the desktop and web apps, and what doesn't work there yet is written down ([limitations.md](limitations.md#the-iphone-ipad-and-android-apps)).
-7. **Let people see all their notes.** Mem never showed the whole of what you'd written. lines has the note list, tags, types, the calendar and the Library, each a way to look at everything.
-8. **Keep it affordable to run.** A product that sends every note to a paid model has to charge per message, and Mem's caps grew while its price rose. On-device models cost the person nothing per question. Remote ones use the person's own key, so lines never needs to meter thinking.
-9. **Be a good place to land.** Mem's users have until 2027-01-15. An importer that keeps their collections, links, dates and meetings ([#375](https://github.com/olekslitus/lines/issues/375)), with a page saying where each Mem feature is in lines, is worth more to them now than any new feature.
+1. **Capture without deciding is the feature.** Mem's best-loved idea was the absence of a question: no folder, no file, no title, just write. Lines already has an Inbox that takes new notes until they're filed, and tags instead of folders. Quick Note from anywhere ([#74](https://github.com/olekslitus/lines/issues/74)) is the next step, and the most important one for anyone coming from Mem.
+2. **AI that organizes has to show its work, and ask.** Mem's organizing grew opaque, and its agent sometimes edited the wrong note. In Lines, suggestions are visible (a tag offered, not applied), applied with a click, and undone with Undo. Answers link to the notes they came from ([#374](https://github.com/olekslitus/lines/issues/374)).
+3. **Your notes stay yours, on your device.** The longest-running complaint about Mem was where the notes lived, who read them, and that losing a Google account or the company meant losing them. Lines' notes are files and a database on the device, synced where the person chooses. Its AI, if any, runs on the device first, and sends nothing anywhere unless asked ([#374](https://github.com/olekslitus/lines/issues/374)). When Mem closes, its users lose the service. Lines can't close on anyone like that: the app keeps working and the notes stay on the device.
+4. **Don't take features away.** Mem cut tasks, templates, daily notes, the Inbox and email twice, and each time people rebuilt their habits or left. Lines makes features plugins that can be turned off, rather than removing them, and keeps its formats readable without Lines (Markdown, Linedown).
+5. **Fast first, smart second.** Mem was called sluggish, its search slow. Lines keeps search instant and adds meaning-based results below as they come ([#376](https://github.com/olekslitus/lines/issues/376)), never making typing or capture wait on a model. `bun run bench` guards it.
+6. **Mobile is not an afterthought.** Mem's neglected iPhone app and missing Android app lost it users. Lines builds for iPhone, iPad and Android from the same code as the desktop and web apps, and what doesn't work there yet is written down ([limitations.md](limitations.md#the-iphone-ipad-and-android-apps)).
+7. **Let people see all their notes.** Mem never showed the whole of what you'd written. Lines has the note list, tags, types, the calendar and the Library, each a way to look at everything.
+8. **Keep it affordable to run.** A product that sends every note to a paid model has to charge per message, and Mem's caps grew while its price rose. On-device models cost the person nothing per question. Remote ones use the person's own key, so Lines never needs to meter thinking.
+9. **Be a good place to land.** Mem's users have until 2027-01-15. An importer that keeps their collections, links, dates and meetings ([#375](https://github.com/olekslitus/lines/issues/375)), with a page saying where each Mem feature is in Lines, is worth more to them now than any new feature.
 
-## What lines is doing about it
+## What Lines is doing about it
 
 The spikes this research produced, and the issues they build on:
 
 | Issue | What |
 |---|---|
 | [#375](https://github.com/olekslitus/lines/issues/375) | Import from Mem, before it shuts down |
-| [#374](https://github.com/olekslitus/lines/issues/374) | AI in lines, local-first: where models run, what they may read, off by default |
+| [#374](https://github.com/olekslitus/lines/issues/374) | AI in Lines, local-first: where models run, what they may read, off by default |
 | [#376](https://github.com/olekslitus/lines/issues/376) | Related notes and search by meaning, on the device |
 | [#377](https://github.com/olekslitus/lines/issues/377) | Ask your notes, with answers that link to them, and Clean Up and write from them |
 | [#378](https://github.com/olekslitus/lines/issues/378) | Suggested tags and types, and themes noticed across new notes |
@@ -73,7 +73,7 @@ The spikes this research produced, and the issues they build on:
 | [#61](https://github.com/olekslitus/lines/issues/61) | An MCP server for AI apps, off by default |
 | [#13](https://github.com/olekslitus/lines/issues/13) | Voice notes and meeting recordings, with on-device transcripts |
 | [#77](https://github.com/olekslitus/lines/issues/77) | Calendar: meeting notes from events |
-| [#64](https://github.com/olekslitus/lines/issues/64) | Save to lines from anywhere |
+| [#64](https://github.com/olekslitus/lines/issues/64) | Save to Lines from anywhere |
 
 ## Sources, and how far to trust them
 

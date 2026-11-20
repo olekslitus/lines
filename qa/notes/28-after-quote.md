@@ -328,7 +328,7 @@ Total, =costs!B2*2
 > two lines.
 ---
 
-#### 31. Quote, then Page breaks (as lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
+#### 31. Quote, then Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)
 
 > A quote that runs over
 > two lines.

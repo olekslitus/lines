@@ -1,4 +1,4 @@
-/** Plugins (Settings → Plugins), and what lines' own plugins are called and do. */
+/** Plugins (Settings → Plugins), and what Lines' own plugins are called and do. */
 export default {
   // Groups in the list.
   "plugins.groupFormats": "Formats",
@@ -11,8 +11,8 @@ export default {
   "plugins.offSettings": "Turn {name} on to change its settings.",
   // How a note shows while its format's plugin is off.
   "plugins.plainText": "Plain Text",
-  // lines' own plugins. Markdown, LaTeX, Lucide and SF Symbols are names, not translated.
-  "plugins.markdown.description": "Notes written in Markdown, formatted as you type, with lines’ additions: callouts, highlights, tags and mentions.",
+  // Lines' own plugins. Markdown, LaTeX, Lucide and SF Symbols are names, not translated.
+  "plugins.markdown.description": "Notes written in Markdown, formatted as you type, with Lines’ additions: callouts, highlights, tags and mentions.",
   "plugins.latex.description": "Notes written in LaTeX, drawn as you type, and exported as documents that compile.",
   "plugins.spreadsheet": "Spreadsheets",
   "plugins.spreadsheet.description": "In Markdown notes, ```csv blocks are spreadsheets: cells and formulas, with the keys you know from Excel and Numbers. /spreadsheet starts one.",
@@ -35,13 +35,13 @@ export default {
   "plugins.ironcalc": "Formulas (IronCalc)",
   "plugins.ironcalc.description": "Works out formulas like =SUM(B2:B4) in tables and spreadsheets, and reads and writes Excel workbooks.",
   "plugins.tex": "TeX Typesetting",
-  "plugins.tex.description": "Typesets a LaTeX note’s PDF with TeX itself, instead of lines’ own pages.",
+  "plugins.tex.description": "Typesets a LaTeX note’s PDF with TeX itself, instead of Lines’ own pages.",
   "plugins.themes": "Themes",
   "plugins.themes.description": "Lines and twenty-five more, including High Contrast and two for color blindness. Reads themes made for VS Code, Zed, Base16, terminals and Linux desktops too.",
   "plugins.styles": "Styles",
   "plugins.styles.description": "Whole looks for the app beyond its colors: Classic, a desktop of the 90s; Pixel, one-bit and minimal; Neon; Puddle, a rainy day in a picture book; Lightbulb, a spark of lightning drawn as a cartoon; Adventure, a 2D adventure game's pixel art; Aero, glossy 2000s glass; Brutalist; Constructivist, 1920s posters; and Void, heavy minimalism. Each comes with colors of its own.",
   "plugins.fonts": "Fonts",
-  "plugins.fonts.description": "Fonts to write notes in, beside your system's: IBM Plex Sans, Fira Sans and Agave, a monospaced one. They come with lines, so notes look the same on every computer.",
+  "plugins.fonts.description": "Fonts to write notes in, beside your system's: IBM Plex Sans, Fira Sans and Agave, a monospaced one. They come with Lines, so notes look the same on every computer.",
   "plugins.keyboards": "Keyboards",
   "plugins.keyboards.description": "Keyboards to hear as you type, made from sound: deep and creamy, clacky, tactile, clicky, Topre, and a typewriter with its bell.",
   // Keyboards to hear as you type, and what each sounds like.
@@ -110,7 +110,7 @@ export default {
   "plugins.paper.meadow": "Meadow",
   "plugins.paper.night": "Night",
   "plugins.paper.mist": "Mist",
-  "plugins.lucide.description": "lines’ icons, from Lucide.",
+  "plugins.lucide.description": "Lines’ icons, from Lucide.",
   "plugins.sfSymbols.description": "Apple’s icons, drawn by your Mac, iPhone or iPad.",
   // Unsplash and GIPHY are names, not translated. {name} is one of them.
   "plugins.unsplash.description": "Adds /unsplash, to search Unsplash’s free photos and put one in a note. What you search for goes to Unsplash.",
@@ -118,7 +118,7 @@ export default {
   "plugins.giphy.description": "Adds /giphy, to search GIPHY’s GIFs and put one in a note. What you search for goes to GIPHY.",
   // asciinema is a name, not translated.
   "plugins.asciinema.description": "Plays terminal recordings in notes: asciinema.org’s embed code, and .cast files you add. Recordings on asciinema.org load from there.",
-  "plugins.noKey": "Needs an API key from {name}, which this copy of lines wasn’t built with.",
+  "plugins.noKey": "Needs an API key from {name}, which this copy of Lines wasn’t built with.",
   // GitHub and arXiv are names, not translated.
   "plugins.github.description": "Shows links to GitHub short, the way GitHub writes them, with its mark: olekslitus/lines#12.",
   "plugins.arxiv.description":
@@ -130,7 +130,7 @@ export default {
   "plugins.webPages.name": "Web Pages",
   "plugins.webPages.description":
     "Looks up a link to any page for what it says it is (a book, a movie, an article…), as most sites say for search engines: IMDb, Letterboxd, Goodreads, Spotify, Bandcamp, Substack, blogs and news. The link goes to its site.",
-  "plugins.webPages.apps": "Needs the lines app: sites don’t let web pages read them.",
+  "plugins.webPages.apps": "Needs the Lines app: sites don’t let web pages read them.",
   "plugins.youtube.description": "Looks up links to YouTube’s videos (their title, channel and picture, and in the apps when they came out and how long they are) and its channels, which are subscribed to for their videos; plays a video linked to on a line of its own. Only the links go to YouTube, and its player loads only once it’s played.",
   // A YouTube channel as a kind of thing in the Library: one, and its row.
   "plugins.youtube.channel": "Channel",
@@ -230,6 +230,6 @@ export default {
   "typing.sample3": "A good note is short and plain. Write what you mean in the words you would say it in, then read it back once. If a sentence can lose a word, let it go. Tomorrow you will be glad of every clear line.",
   "plugins.wallhaven.description": "/wallhaven: search Wallhaven's wallpapers and put one in a note, kept with it; and make a theme of one's colors, and the backdrop, in Settings → Theme → New. Only wallpapers safe for work.",
   "plugins.wallhaven.credit": "Wallpapers from Wallhaven",
-  "plugins.wallhaven.apps": "Needs the lines app: Wallhaven's site doesn't answer web pages.",
+  "plugins.wallhaven.apps": "Needs the Lines app: Wallhaven's site doesn't answer web pages.",
   "plugins.wallhaven.wallpaper": "Wallpaper",
 };

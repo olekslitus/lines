@@ -2,7 +2,7 @@
 
 **Calm, local-first notes in plain Markdown.** Type Markdown and see it formatted as you write. Your notes stay on your device, as ordinary text you can open anywhere.
 
-**[Try it in your browser →](https://olekslitus.com/lines/app/)** No account, nothing to install. Or download the apps for Mac, Windows and Linux from [the website](https://olekslitus.com/lines/#download), which also has [the docs](https://olekslitus.com/lines/docs/).
+**[Try it in your browser →](https://olekslitus.com/lines/app/)** No account, nothing to install. Or download the apps for Mac, Windows, Linux and Android from [the website](https://olekslitus.com/lines/#download), which also has [the docs](https://olekslitus.com/lines/docs/).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/images/app-dark.webp">
@@ -213,7 +213,7 @@ In a debug build of the desktop app, <kbd>F12</kbd> (or View → Developer Tools
 <details>
 <summary><b>Mobile</b></summary>
 
-The Xcode project is in `src-tauri/gen/apple` and the Android Studio one in `src-tauri/gen/android`; there's no need to run `tauri ios init` or `tauri android init` again. CI checks that the native side compiles for the iOS simulator and Android; the apps themselves are built by hand. What doesn't work on phones yet is in [limitations.md](docs/limitations.md#the-iphone-ipad-and-android-apps).
+The Xcode project is in `src-tauri/gen/apple` and the Android Studio one in `src-tauri/gen/android`; there's no need to run `tauri ios init` or `tauri android init` again. CI checks that the native side compiles for the iOS simulator and Android; each release builds the Android app, signed ([releasing.md](docs/releasing.md#android)), and the iOS app is built by hand. What doesn't work on phones yet is in [limitations.md](docs/limitations.md#the-iphone-ipad-and-android-apps).
 
 **iOS** needs Xcode with the iOS platform its SDK is for (Xcode → Settings → Components, or `xcodebuild -downloadPlatform iOS`), CocoaPods (`brew install cocoapods`; Tauri's CLI adds XcodeGen and libimobiledevice itself), and Rust's iOS targets:
 
@@ -254,7 +254,7 @@ adb install src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-univ
 bun run tauri android dev
 ```
 
-An emulator to run it on: `avdmanager create avd -n phone -k "system-images;android-36;google_apis;arm64-v8a" -d pixel_8`, then `$ANDROID_HOME/emulator/emulator -avd phone`. A debug build's web view can be inspected from Chrome (`chrome://inspect`). The debug app is `com.olekslitus.lines.debug`, so it installs beside a release one. A release APK or app bundle has to be signed with a keystore of your own.
+An emulator to run it on: `avdmanager create avd -n phone -k "system-images;android-36;google_apis;arm64-v8a" -d pixel_8`, then `$ANDROID_HOME/emulator/emulator -avd phone`. A debug build's web view can be inspected from Chrome (`chrome://inspect`). The debug app is `com.olekslitus.lines.debug`, so it installs beside a release one. A release build (`bun run tauri android build --apk --aab`) is signed when `src-tauri/gen/android/keystore.properties` names a key (`keyAlias`, `password` and `storeFile`, as in [Tauri's guide](https://v2.tauri.app/distribute/sign/android/)); it's kept out of git, and without it the build is unsigned and won't install. A key of your own makes an app that can't install over lines' own.
 
 </details>
 
@@ -604,6 +604,10 @@ What's planned next. Known limits of what's already there are in [docs/limitatio
 - [ ] Export a note as HTML
 
 **Platforms**
+- [x] The Android app with each release, signed, to install from the website
+- [ ] The Android app on Google Play, and registered with Google's developer verification so it keeps installing from the website after 2027
+- [ ] Updates in the Android app installed from the website
+- [ ] TeX in the Android app, without a copy for each kind of processor
 - [ ] Offline support for the web app (service worker)
 - [ ] Browser extensions (Chrome, Edge, Firefox, Safari)
 - [ ] Try the forced-colors styles (Windows' contrast themes) on Windows

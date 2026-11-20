@@ -811,7 +811,8 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 ## 21. Website and demo
 
 - [ ] The home page (olekslitus.com/lines/) and its pictures show in light and dark as the system is, with no flash of the other
-- [ ] **Download** offers the visitor's system's app (Mac, Windows or Linux), and the Download section lists the latest release's files with their sizes; each link downloads
+- [ ] **Download** offers the visitor's system's app (Mac, Windows, Linux or Android), and the Download section lists the latest release's files with their sizes; each link downloads
+- [ ] [Android] The release's `.apk`, downloaded on a phone and opened, installs once the browser or Files app is allowed to install apps, and opens lines; a newer one installs over it and keeps the notes
 - [ ] **Open in your browser** and **Open lines** open the web app (olekslitus.com/lines/app/)
 - [ ] lines installed from the web app before it moved to app/ opens the app, not the home page
 - [ ] Docs: every page in the README's Documentation tables is listed, the open one marked; links between pages and to their headings land; the outline beside a page jumps to its headings; on a phone, All docs opens the list

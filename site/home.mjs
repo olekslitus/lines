@@ -66,6 +66,7 @@ const SYSTEMS = [
   { id: "mac", name: "Mac", about: "Apple silicon and Intel", files: [".dmg"] },
   { id: "windows", name: "Windows", about: "64-bit, Windows 10 and later", files: ["-setup.exe", ".msi"] },
   { id: "linux", name: "Linux", about: "64-bit, Ubuntu 22.04 and later", files: [".AppImage", ".deb", ".rpm"] },
+  { id: "android", name: "Android", about: "Phones and tablets, Android 7 and later", files: [".apk"] },
 ];
 
 /** One of the icons the app draws (Lucide's), as SVG. */
@@ -107,7 +108,7 @@ const megabytes = (bytes) => `${Math.round(bytes / 1e6)} MB`;
 
 function downloads(release) {
   if (!release) {
-    return `<p class="mt-4 text-center text-muted">The apps for Mac, Windows and Linux are on <a href="${REPO}/releases">lines' releases</a>.</p>`;
+    return `<p class="mt-4 text-center text-muted">The apps for Mac, Windows, Linux and Android are on <a href="${REPO}/releases">lines' releases</a>.</p>`;
   }
   const date = new Date(release.date).toLocaleDateString("en", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
   const extension = (asset) => asset.name.slice(asset.name.lastIndexOf(".") + 1);
@@ -122,10 +123,10 @@ function downloads(release) {
           </li>`;
   }).join("\n          ");
   return `<p class="mt-3 text-center text-muted">lines ${release.version}, ${date}. <a href="docs/changelog.html">What's new</a></p>
-        <ul class="mt-10 grid gap-4 md:grid-cols-3">
+        <ul class="mt-10 grid gap-4 md:grid-cols-2">
           ${systems}
         </ul>
-        <p class="mx-auto mt-6 max-w-3xl text-center text-sm text-muted">lines is in alpha, so export your notes now and then. The apps aren't signed yet: on a Mac, open lines the first time with right-click → Open; on Windows, choose More info → Run anyway. <a href="${release.url}">All of this release's files</a></p>`;
+        <p class="mx-auto mt-6 max-w-3xl text-center text-sm text-muted">lines is in alpha, so export your notes now and then. The desktop apps aren't signed yet: on a Mac, open lines the first time with right-click → Open; on Windows, choose More info → Run anyway. On Android, open the downloaded file and allow your browser or Files app to install apps when asked. <a href="${release.url}">All of this release's files</a></p>`;
 }
 
 /** The download button offers the visitor's system's app, when there's one for it. */
@@ -133,8 +134,9 @@ function offerYourSystem() {
   const platform = (navigator.userAgentData?.platform || navigator.platform).toLowerCase();
   // iPads say they're Macs.
   const mac = platform.startsWith("mac") && navigator.maxTouchPoints < 2;
-  const linux = platform.includes("linux") && !/android/i.test(navigator.userAgent);
-  const system = mac ? "mac" : platform.startsWith("win") ? "windows" : linux ? "linux" : "";
+  const android = /android/i.test(navigator.userAgent);
+  const linux = platform.includes("linux") && !android;
+  const system = mac ? "mac" : platform.startsWith("win") ? "windows" : linux ? "linux" : android ? "android" : "";
   const app = system && document.querySelector(`[data-system="${system}"]`);
   const button = document.getElementById("download-button");
   if (!app || !button) return;

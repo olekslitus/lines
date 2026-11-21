@@ -622,10 +622,22 @@ class SyncEngine {
       syncRecords.put({ id: note.id, etag, hash: hash(text), ...baseOf(note) });
 
     /**
+     * Whether another tab stored the note since this one last heard, which it takes up now: then
+     * what this pass found of it here is out of date, and the next pass, in a moment, syncs it.
+     */
+    const storedElsewhere = async (id: string) => {
+      if (!(await notes.catchUp(id))) return false;
+      this.schedule();
+      return true;
+    };
+
+    /**
      * Uploads the note over what was there, `expected` by its tag (null: nothing). Not if another
-     * device wrote it since (false): the next pass, in a moment, brings that in and compares.
+     * device wrote it since, or another tab stored it (false): the next pass, in a moment, brings
+     * that in and compares.
      */
     const upload = async (note: Note, expected: string | null) => {
+      if (await storedElsewhere(note.id)) return false;
       const text = serialize(note);
       const etag = await remote.put(keyOf(note.id), text, expected);
       if (etag === false) {
@@ -641,9 +653,10 @@ class SyncEngine {
       return object && { ...object, note: { ...deserialize(object.text, id), id } };
     };
 
-    /** Apply a remote version, unless the note was edited while we were busy. */
+    /** Apply a remote version, unless the note was edited while we were busy, here or in another tab. */
     const applyIfUnchanged = async (id: string, expected: string | null, note: Note) => {
       await notes.flush();
+      await storedElsewhere(id);
       const current = notes.get(id);
       return (current ? serialize(current.note) : null) === expected && notes.applyRemote(note);
     };
@@ -657,8 +670,9 @@ class SyncEngine {
 
       if (!object) {
         if (last && !dirty) {
-          // Deleted on another device, and untouched here since.
+          // Deleted on another device, and untouched here since, nor in another tab.
           await notes.flush();
+          await storedElsewhere(note.id);
           if (notes.get(note.id) && serialize(notes.get(note.id)!.note) === text) {
             await notes.removeRemote(note.id);
           }
@@ -706,6 +720,8 @@ class SyncEngine {
 
     const remoteOnly = [...remoteById].filter(([id]) => !localIds.has(id));
     await pool(remoteOnly, async ([id, object]) => {
+      // Not deleted here, nor new to this device, if another tab has it.
+      if (await storedElsewhere(id)) return;
       const last = records.get(id);
       if (last && last.etag === object.etag) {
         // Deleted here.

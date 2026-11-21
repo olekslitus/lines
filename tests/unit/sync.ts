@@ -189,3 +189,15 @@ export function editElsewhere(id: string, changes: Partial<Note>) {
   const file = drive.get(fileOf(id))!;
   drive.set(fileOf(id), { text: serialize({ ...deserialize(file.text, id), updatedAt: Date.now() + 1000, ...changes }), etag: `${++writes}` });
 }
+
+/**
+ * Runs `work` as another tab of lines on the device that's open would: what it stores and syncs is
+ * in the database the tabs share and in the folder, but this tab hasn't heard of it yet (the
+ * message saying so is still on its way), its notes as they were.
+ */
+export async function inAnotherTab(work: () => Promise<void>) {
+  const entries = notes.entries;
+  await work();
+  await notes.flush();
+  notes.entries = entries;
+}

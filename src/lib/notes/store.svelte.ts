@@ -945,20 +945,34 @@ class NotesStore {
    */
   async reload(id: string, local: boolean) {
     if (this.#typingWins(id, local)) return;
+    if ((await this.#takeUp(id, () => this.#typingWins(id, local))) && local) this.#notify();
+  }
+
+  /**
+   * Picks up the note as stored, if another tab stored it since this one heard (sync, before it
+   * compares: the message saying so may not be here yet); whether it did. Not over unsaved typing,
+   * the newer.
+   */
+  async catchUp(id: string) {
+    return !this.#hasUnsaved(id) && (await this.#takeUp(id, () => this.#hasUnsaved(id)));
+  }
+
+  /** Puts the note here as it's stored, unless `typing` here says to keep it as it is by then; whether it changed. */
+  async #takeUp(id: string, typing: () => boolean) {
     const found = await this.#storage.get(id);
     if (found) noteKeys.notice(found);
     const note = found && (await opened(found));
-    if (this.#typingWins(id, local)) return;
+    if (typing()) return false;
     const current = this.get(id);
     if (!note) {
-      if (!current) return;
+      if (!current) return false;
       this.#drop(id);
     } else {
-      if (current && JSON.stringify(stored(current.note)) === JSON.stringify(found)) return;
+      if (current && JSON.stringify(stored(current.note)) === JSON.stringify(found)) return false;
       this.#put(entryOf(note));
       if (current?.note.body !== note.body) this.#changedOutside([id]);
     }
-    if (local) this.#notify();
+    return true;
   }
 
   /**

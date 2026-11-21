@@ -1,3 +1,4 @@
+import { modifiedOf } from "../imports/exported";
 import { DEFAULT_LANGUAGE, plugins } from "../plugins/registry.svelte";
 import { deserialize } from "../sync/format";
 import type { Note } from "./types";
@@ -30,7 +31,7 @@ export async function notesFromFiles(files: File[]): Promise<{ notes: Note[]; sk
     const data = new Uint8Array(await file.arrayBuffer());
     // With Windows line endings too, so a file's properties are read.
     const bodies = language.read ? await language.read({ name: file.name, data }) : [new TextDecoder().decode(data).replace(/\r\n?/g, "\n")];
-    const time = file.lastModified || Date.now();
+    const time = modifiedOf(file) ?? Date.now();
     for (const body of bodies) {
       const note: Note = { id: crypto.randomUUID(), body, createdAt: time, updatedAt: time, pinned: false, trashed: false };
       const synced = !language.read && deserialize(body, note.id);

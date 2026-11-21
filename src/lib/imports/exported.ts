@@ -48,11 +48,17 @@ function bundled(name: string, files: ExportedFile[]) {
   return files.map((file) => ({ ...file, path: `${bundle}/${file.path}` }));
 }
 
+/**
+ * When a file chosen was last changed, if the system says: none before 1970, as Android's picker
+ * gives some files a time of 0 in Windows' reckoning (1601), and others give none at all (0).
+ */
+export const modifiedOf = (file: File) => (file.lastModified > 0 ? file.lastModified : undefined);
+
 /** A file as it was chosen, at `path` in the export. */
 const chosenFile = (file: File, path: string): ExportedFile => ({
   path,
   size: file.size,
-  modified: file.lastModified || undefined,
+  modified: modifiedOf(file),
   text: async () => textOf(new Uint8Array(await file.arrayBuffer())),
   file: async () => typed(file, path),
 });

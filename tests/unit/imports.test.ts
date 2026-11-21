@@ -31,7 +31,7 @@ const { timeOf } = await import("../../src/plugins/evernote/enex");
 const { translate: translateBear } = await import("../../src/plugins/bear/markdown");
 const { translate } = await import("../../src/plugins/obsidian/markdown");
 const { attachmentPath, notesInput, notesWork, planNotes, Tally: Tallies, withTitle } = await import("../../src/lib/imports/notes");
-const { exportedFrom, TooBig } = await import("../../src/lib/imports/exported");
+const { exportedFrom, modifiedOf, TooBig } = await import("../../src/lib/imports/exported");
 const { Unpacking, zip } = await import("../../src/lib/zip");
 const { computeMeta } = await import("../../src/lib/notes/parse");
 const { imageSize, withWidth } = await import("../../src/lib/notes/attachments");
@@ -328,6 +328,13 @@ describe("what's chosen to import", () => {
     expect([parts.name, parts.files.map((file) => file.path)]).toEqual(["Workspace", ["A.md", "B.md"]]);
     const nested = await exportedFrom([new File([zipOf({ "Part-1.zip": zipOf({ "Workspace/A.md": "a" }), "Part-2.zip": zipOf({ "Workspace/B.md": "b" }) })], "Export.zip")]);
     expect([nested.name, nested.files.map((file) => file.path), await nested.files[1].text()]).toEqual(["Workspace", ["A.md", "B.md"], "b"]);
+  });
+
+  test("a file's time where the system gives one, and none before 1970, as Android's picker gives some (1601)", async () => {
+    const dated = (lastModified: number) => Object.defineProperty(new File(["# Hi"], "Hi.md", { lastModified }), "webkitRelativePath", { value: "Vault/Hi.md" });
+    const times = [DAY, 0, -11_644_473_600_000, Number.NaN].map((time) => modifiedOf(dated(time)));
+    expect(times).toEqual([DAY, undefined, undefined, undefined]);
+    expect((await exportedFrom([dated(-11_644_473_600_000)])).files[0].modified).toBeUndefined();
   });
 
   test("a ZIP that can't be read is left out and said so, unless it's all there is; one too big to read here says so", async () => {

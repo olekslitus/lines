@@ -60,6 +60,7 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
+  --color-thumb: var(--thumb);
   --color-selection: var(--selection);
   --color-tag: var(--tag-bg);
   --color-tag-fg: var(--tag-text);
@@ -201,8 +202,11 @@
   --palette-blue: var(--callout-info);
   --palette-purple: var(--callout-question);
   --palette-gray: var(--text-muted);
-  /* Text on an accent-colored button: white on light themes, the background on dark ones. */
+  /* Text on an accent-colored button: white on light themes, the background on dark ones. It's
+     also the knob of a switch that's on, which sits on the accent. */
   --on-accent: #ffffff;
+  /* The knob of a switch that's off and of a slider, in light and dark: on the grey track and the pane. */
+  --thumb: #ffffff;
   /* Text on the danger, success and pin colors (swipe actions, Delete buttons). The pin's orange is
      too light for white, so it gets dark text. */
   --on-danger: #ffffff;

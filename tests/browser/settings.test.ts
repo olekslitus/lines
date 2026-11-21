@@ -127,3 +127,26 @@ test("spreadsheet notes are off at first, blocks in notes on; a spreadsheet note
   await page.waitForTimeout(200);
   expect(await on("spreadsheet-notes")).toBe(false);
 });
+
+test("a switch's knob is in the theme's color for it, and on the accent when it's on, in the color that reads there", async () => {
+  app = await openApp({ scheme: "dark", prefs: { theme: "mono", symbolsInText: true, symbolsInCode: false } });
+  const settings = await app.settings("Typography");
+  /** A knob's color, and the theme's `color` there, as CSS computes them. */
+  const knob = (name: string, color: string) =>
+    settings
+      .getByRole("switch", { name })
+      .locator(".ui-switch-thumb")
+      .evaluate(async (thumb, color) => {
+        await Promise.all(thumb.getAnimations().map((animation) => animation.finished));
+        const probe = thumb.appendChild(document.createElement("span"));
+        probe.style.color = color;
+        const colors = [getComputedStyle(thumb).backgroundColor, getComputedStyle(probe).color];
+        probe.remove();
+        return colors;
+      }, color);
+  const [on, onAccent] = await knob("Show -> as → in text", "var(--on-accent)");
+  expect(on).toBe(onAccent);
+  const [off, thumb] = await knob("Show -> as → in code", "var(--thumb)");
+  expect(off).toBe(thumb);
+  expect(on).not.toBe(off);
+});

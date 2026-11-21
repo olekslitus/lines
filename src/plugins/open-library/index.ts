@@ -2,6 +2,7 @@ import { t } from "../../lib/i18n/index.svelte";
 import { isbnKey } from "../../lib/library/keys";
 import { known, names, yearOf } from "../../lib/library/text";
 import { getJson } from "../../lib/library/web";
+import { plainLine } from "../../lib/notes/stats";
 import type { LibraryItem, LibrarySource, Plugin } from "../../lib/plugins/types";
 
 /*
@@ -72,6 +73,9 @@ const coverOf = (covers: number[] | undefined) => {
   return id ? `https://covers.openlibrary.org/b/id/${id}-L.jpg` : undefined;
 };
 
+/** A work's description, which Open Library writes in Markdown (`**From the *New York Times*…**`), as the plain text a library item's is. */
+const plainDescription = (markdown: string) => markdown.split("\n").map(plainLine).join("\n");
+
 async function lookup(url: URL, signal: AbortSignal): Promise<LibraryItem | null> {
   const book = bookIn(url);
   if (!book) return null;
@@ -81,7 +85,8 @@ async function lookup(url: URL, signal: AbortSignal): Promise<LibraryItem | null
   const title = edition?.title ?? work?.title;
   if (!title) return null;
   const authorKeys = edition?.authors?.map((author) => author.key) ?? work?.authors?.flatMap((each) => (each.author ? [each.author.key] : [])) ?? [];
-  const description = typeof work?.description === "string" ? work.description : work?.description?.value;
+  const written = typeof work?.description === "string" ? work.description : work?.description?.value;
+  const description = written && plainDescription(written);
   return {
     type: "book",
     title,

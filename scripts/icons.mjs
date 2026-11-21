@@ -2,7 +2,8 @@
 // Chromium. Run with `bun run icons` after changing one, and commit what it writes:
 //
 //   src-tauri/icons/                 the desktop apps': the Mac's .icns (on Apple's grid, with its
-//                                    shadow), Windows' .ico and tiles, Linux's PNGs (`tauri icon`)
+//                                    shadow), and for macOS 26 Assets.car from AppIcon.icon below;
+//                                    Windows' .ico and tiles, Linux's PNGs (`tauri icon`)
 //   src-tauri/icons/source/          Lines' own icon's SVGs, as drawn: full bleed, the Mac's, dark, tinted
 //   src-tauri/gen/apple/             iOS and iPadOS: the asset catalog's light, dark and tinted
 //                                    icons, each other icon as an alternate, and AppIcon.icon for
@@ -157,6 +158,23 @@ const iconJson = {
   "supported-platforms": { squares: "shared" },
 };
 writeFileSync(join(composer, "icon.json"), JSON.stringify(iconJson, null, 2) + "\n");
+
+// macOS 26: the same, compiled into the asset catalog the Mac bundle takes as it is
+// (tauri.conf.json), with the arguments Tauri's bundler gives actool. Made here rather than by each
+// build, whose actool fails when Xcode's ibtoold is left in a bad state, and which needs Xcode 26.
+const compiled = mkdtempSync(join(tmpdir(), "lines-car-"));
+const actool = () =>
+  execFileSync("xcrun", ["actool", composer, "--compile", compiled, "--output-format", "human-readable-text", "--errors",
+    "--output-partial-info-plist", join(compiled, "info.plist"), "--app-icon", "AppIcon", "--include-all-app-icons",
+    "--enable-on-demand-resources", "NO", "--development-region", "en", "--target-device", "mac",
+    "--minimum-deployment-target", "26.0", "--platform", "macosx"], { encoding: "utf8" });
+if (/error:/.test(actool())) {
+  execFileSync("pkill", ["-f", "ibtoold"]);
+  const errors = actool();
+  if (/error:/.test(errors)) throw new Error(`actool couldn't compile ${composer}:\n${errors}`);
+}
+cpSync(join(compiled, "Assets.car"), join(icons, "Assets.car"));
+rmSync(compiled, { recursive: true });
 
 // Android 8 and later: an adaptive icon for each, its layers drawn as vectors (a glass one's lines
 // as a picture). The icon's 1024 is the 72 dp the launcher shows of the 108, so the lines keep

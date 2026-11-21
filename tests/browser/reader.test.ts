@@ -137,6 +137,36 @@ test("an aggregator's post (Hacker News'): its title links to it, the site it's 
   ]);
 });
 
+test("a post's picture in an enclosure (NASA's Image of the Day's) shows above what it says, unless what it says has one", async () => {
+  app = await openApp({ timezone: "UTC" });
+  const page = app.page;
+  const nasa = "https://images.example/iotd-feed/";
+  // Trimmed from nasa.gov's Image of the Day feed (November 2026).
+  const feed = `<?xml version="1.0"?><rss version="2.0"><channel><title>NASA Image of the Day</title><link>https://images.example/image-of-the-day/</link><description>The latest image.</description>
+    <item><title>Lake Pelku</title><link>https://images.example/image-detail/lake-pelku/</link><description>Lake Pelku, on the Chinese side of the snow-capped Himalayas, pictured from the International Space Station.</description>
+    <enclosure url="https://images.example/uploads/lake-pelku.jpg" length="1467055" type="image/jpeg" /><pubDate>Thu, 19 Nov 2026 15:33 GMT</pubDate></item>
+    <item><title>Space Selfie</title><link>https://images.example/image-detail/selfie/</link><description><![CDATA[<p><img src="https://images.example/uploads/in-post.jpg" alt="The selfie"></p><p>An astronaut takes a selfie on a spacewalk.</p>]]></description>
+    <enclosure url="https://images.example/uploads/selfie.jpg" length="1" type="image/jpeg" /><pubDate>Wed, 18 Nov 2026 15:33 GMT</pubDate></item></channel></rss>`;
+  await answerPictures(page);
+  await page.route(nasa, (route) => route.fulfill({ body: feed, contentType: "application/rss+xml", headers: { "access-control-allow-origin": "*" } }));
+  await openFeeds(app);
+  await subscribe(app, nasa);
+  const pictures = page.locator(".editor-pane img.cm-lp-image");
+  const rows = page.locator(".note-list [data-post]");
+
+  await rows.first().click();
+  await page.getByRole("textbox", { name: "Post: Lake Pelku" }).waitFor();
+  await pictures.first().waitFor();
+  expect(await pictures.evaluateAll((images) => images.map((image) => (image as HTMLImageElement).src))).toEqual(["https://images.example/uploads/lake-pelku.jpg"]);
+  expect(await app.text()).toContain("Himalayas");
+
+  // One with its own picture in what it says shows only that one.
+  await rows.nth(1).click();
+  await page.getByRole("textbox", { name: "Post: Space Selfie" }).waitFor();
+  await page.waitForFunction(() => document.querySelector<HTMLImageElement>(".editor-pane img.cm-lp-image")?.src.endsWith("in-post.jpg"));
+  expect(await pictures.count()).toBe(1);
+});
+
 test("refreshing asks whether the feed changed, keeps what was read, and adds new posts unread", async () => {
   app = await openApp();
   const asked = await serveBlog(app);

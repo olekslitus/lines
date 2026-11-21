@@ -29,6 +29,7 @@ class BlockSheet implements Sheet {
   cells = $state.raw<Cells>([]);
   readOnly = $state(false);
   name = $state<string | null>(null);
+  width = $state<number | null>(null);
   readonly fills = false;
   focus: Sheet["focus"];
   layout: Sheet["layout"];
@@ -55,6 +56,7 @@ class BlockSheet implements Sheet {
     }
     this.readOnly = this.block.readOnly;
     this.name = this.block.name;
+    this.width = this.block.width;
     this.#doc = this.block.view.state.doc;
   }
 

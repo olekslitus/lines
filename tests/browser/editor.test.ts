@@ -1213,6 +1213,35 @@ describe("fixed", () => {
     await cells.nth(5).filter({ hasText: "450" }).waitFor();
   });
 
+  test("a spreadsheet block with a width after a bar is at most that wide, its columns scrolling sideways inside", async () => {
+    const csv = "Month,January,February,March,April,May,June\nRent,1200,1200,1200,1200,1200,1200\n```";
+    /** How wide the grid is drawn, and how wide its columns are. */
+    const size = () =>
+      app.page.evaluate(() => {
+        const scroller = document.querySelector(".cm-sheet [role=grid]")!.parentElement!;
+        return { shown: scroller.getBoundingClientRect().width, columns: scroller.scrollWidth };
+      });
+    await app.open(`\`\`\`csv\n${csv}`);
+    await app.page.locator(".cm-sheet [role=grid]").waitFor();
+    const own = await size();
+    expect(own.shown).toBeGreaterThan(300);
+
+    await app.open(`\`\`\`csv name=rent |300\n${csv}`);
+    await app.page.locator(".cm-sheet [role=grid]").waitFor();
+    const capped = await size();
+    expect(capped.shown).toBeLessThanOrEqual(300);
+    expect(capped.columns).toBeGreaterThan(capped.shown);
+
+    // Taken out of the fence line, the grid is as wide as its columns again.
+    await app.page.evaluate(() => {
+      const view = window.testing.editor()!;
+      const at = view.state.doc.line(1).text.indexOf(" |300");
+      view.dispatch({ changes: { from: at, to: at + 5 } });
+    });
+    await app.page.waitForFunction((width) => document.querySelector(".cm-sheet [role=grid]")!.parentElement!.getBoundingClientRect().width > width, capped.shown);
+    expect((await size()).shown).toBe(own.shown);
+  });
+
   test("a table with a ``` cell, converted to a spreadsheet, keeps it in the block", async () => {
     await app.open("| Fence |\n| --- |\n| ``` |\n\nAfter the table.");
     await app.page.locator(".editor-pane .cm-lp-table-wrap").hover();

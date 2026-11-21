@@ -311,6 +311,7 @@ class Block implements EditableBlock {
     readonly dom: HTMLElement,
     public source: string,
     public name: string | null,
+    public width: number | null,
   ) {}
 
   get readOnly() {
@@ -378,18 +379,25 @@ class EditableWidget extends WidgetType {
     readonly renderer: Renderer,
     readonly source: string,
     readonly name: string | null,
+    readonly width: number | null,
     readonly inset: CardInset,
   ) {
     super();
   }
   eq(other: EditableWidget) {
-    return other.renderer === this.renderer && other.source === this.source && other.name === this.name && sameInset(other.inset, this.inset);
+    return (
+      other.renderer === this.renderer &&
+      other.source === this.source &&
+      other.name === this.name &&
+      other.width === this.width &&
+      sameInset(other.inset, this.inset)
+    );
   }
   toDOM(view: EditorView) {
     const dom = document.createElement("div");
     dom.className = "cm-lp-editable";
     setInset(dom, this.inset);
-    const block = new Block(view, dom, this.source, this.name);
+    const block = new Block(view, dom, this.source, this.name, this.width);
     editables.set(dom, { renderer: this.renderer, block, editor: this.renderer.editor!(dom, block) });
     // Beside what its editor drew, which sets where that starts and how wide it is (--actions-top, --actions-left).
     addActions(view, dom, this.renderer.actions, dom.firstElementChild ?? dom);
@@ -401,9 +409,10 @@ class EditableWidget extends WidgetType {
     const live = editables.get(dom);
     if (!live || live.renderer !== this.renderer) return false;
     setInset(dom, this.inset);
-    if (live.block.source !== this.source || live.block.name !== this.name) {
+    if (live.block.source !== this.source || live.block.name !== this.name || live.block.width !== this.width) {
       live.block.source = this.source;
       live.block.name = this.name;
+      live.block.width = this.width;
       live.editor.update();
       measure(view, dom, this.source);
     }
@@ -497,7 +506,7 @@ function drawBlock(state: EditorState, node: SyntaxNodeRef) {
   const editing = isEditing(state, node.from, node.to);
   // A block to work in shows its code as it is while the cursor's in it; a drawing, above it.
   if (!rendered.renderer.editor) return drawnBlock(new RenderedWidget(rendered.renderer, source, rendered.width, inset, editing), first.from, last, editing);
-  return editing ? null : drawnBlock(new EditableWidget(rendered.renderer, source, rendered.name, inset), first.from, last);
+  return editing ? null : drawnBlock(new EditableWidget(rendered.renderer, source, rendered.name, rendered.width, inset), first.from, last);
 }
 
 // Drawn blocks are top-level blocks or in cards.

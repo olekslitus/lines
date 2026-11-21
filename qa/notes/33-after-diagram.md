@@ -442,6 +442,7 @@ flowchart LR
   B --> C[Done]
 ```
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Diagram, then Score (Settings → Little Touches)
 

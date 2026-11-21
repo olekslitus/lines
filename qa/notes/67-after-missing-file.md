@@ -314,6 +314,7 @@ And another.
 
 [Not here yet.pdf](../attachments/00000000000000000000000000000000.pdf)
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Missing file, then Score (Settings → Little Touches)
 

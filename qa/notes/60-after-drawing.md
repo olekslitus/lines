@@ -314,6 +314,7 @@ And another.
 
 ![A sample drawing](attachment:drawing.svg)
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Drawing, then Score (Settings → Little Touches)
 

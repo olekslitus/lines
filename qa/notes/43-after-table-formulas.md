@@ -474,6 +474,7 @@ And another.
 | Total | =SUM(B2:B3) |
 | Broken | =B2/0 |
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Table with formulas, then Score (Settings → Little Touches)
 

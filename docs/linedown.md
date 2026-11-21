@@ -373,6 +373,7 @@ Plate: 3WBZ56
 
 - The key is up to 40 characters, starting with a letter or digit, optionally in bold, followed by `:` and a space or tab.
 - The space after the colon keeps out times (`10:30`) and URLs (`https://…`).
+- A value that reads as the rest of a sentence keeps it prose: more than six words, or four or more ending in `.`, `!`, `?` or `…` (`Three slow days: walk everywhere, eat late and sleep in.`). Numbers and codes aren't words, so a phone number or an IBAN is still a value.
 - Only the value is copied, without its Markdown.
 - A value that's a score, a number out of 2 to 10, whole or with a half (`Rating: 4/5`, `Score: 5 / 7`, `3.5/5`, `1.5/2` too), is drawn as that many marks, so many filled and a half one half filled: stars, hearts or circles, or as written (Settings → Little Touches, where the copy buttons can be turned off too). In a list or a task too (`- Score: 2/5`). With the cursor on its line it's as written, to change; a click on a mark sets it there, and a click on the one that's the score makes it 0, each one change that ⌘Z takes back. Properties' values are drawn the same, and a library note's ratings on its kind's scale ([below](#ratings)).
 

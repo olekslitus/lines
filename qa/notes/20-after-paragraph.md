@@ -314,6 +314,7 @@ And another.
 
 A paragraph with **bold**, *italic*, <u>underlined</u>, ~~struck~~, ==highlighted==, `code`, a [link](https://example.com) and a #qa/tag.
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Paragraph, then Score (Settings → Little Touches)
 

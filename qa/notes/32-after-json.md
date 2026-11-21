@@ -378,6 +378,7 @@ And another.
 {"name":"lines","tags":["a","b"],"id":12345678901234567890}
 ```
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. JSON block (no language), then Score (Settings → Little Touches)
 

@@ -378,6 +378,7 @@ $$
 \int_0^1 x^2\,dx = \frac{1}{3}
 $$
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Math block, then Score (Settings → Little Touches)
 

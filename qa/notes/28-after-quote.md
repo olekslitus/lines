@@ -346,6 +346,7 @@ And another.
 > A quote that runs over
 > two lines.
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Quote, then Score (Settings → Little Touches)
 

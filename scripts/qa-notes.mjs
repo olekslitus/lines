@@ -100,7 +100,7 @@ const ELEMENTS = [
     name: "Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop)",
     md: 'Before the break.\n\n<!-- pagebreak -->\nAfter it, on a new page.\n\n<div style="page-break-after: always"></div>\n\nAnd another.',
   },
-  { id: "key-value", name: "Key: Value line", md: "**Wi-Fi password:** correct-horse-battery" },
+  { id: "key-value", name: "Key: Value line", md: "**Wi-Fi password:** correct-horse-battery\nNot a value: a sentence with a colon in it reads on, as prose does." },
   { id: "score", name: "Score (Settings → Little Touches)", md: "Rating: 4/5\nHalf: 3.5/5\nScore: 7 / 10\nNot a score: 12/20" },
   { id: "mention", name: "Mention", md: "Ask @[QA · Ada] at @[QA · Ada].email." },
   { id: "wiki-link", name: "Wiki link", md: "Ask [[QA · Ada]], or [[QA · Ada|her]]." },

@@ -378,6 +378,7 @@ And another.
 Text in a decision callout with no icon.
 :::
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Callout (decision, no icon), then Score (Settings → Little Touches)
 

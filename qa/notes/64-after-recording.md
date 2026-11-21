@@ -314,6 +314,7 @@ And another.
 
 [terminal.cast](attachment:terminal.cast)
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Terminal recording (.cast file), then Score (Settings → Little Touches)
 

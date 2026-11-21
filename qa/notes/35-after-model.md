@@ -538,6 +538,7 @@ translate([25, 0, 0]) color("tomato") cylinder(h = 10, r = 5);
 echo("made");
 ```
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. 3D model (openscad block), a colored part, an echo, then Score (Settings → Little Touches)
 

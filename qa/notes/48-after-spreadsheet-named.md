@@ -538,6 +538,7 @@ Rent, $1200, 2026-01-05
 Total, =costs!B2*2
 ```
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Named spreadsheet (csv name=), and a formula in another block using it, then Score (Settings → Little Touches)
 

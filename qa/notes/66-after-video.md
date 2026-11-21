@@ -314,6 +314,7 @@ And another.
 
 [Sky.mp4](attachment:sky.mp4)
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Video, then Score (Settings → Little Touches)
 

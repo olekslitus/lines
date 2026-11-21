@@ -378,6 +378,7 @@ And another.
 Text in an info callout.
 :::
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Callout (info), then Score (Settings → Little Touches)
 

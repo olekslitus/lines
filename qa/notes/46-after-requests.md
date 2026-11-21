@@ -602,6 +602,7 @@ GET {{api}}/todos/1
 GET {{api}}/users/{{todo.response.body.$.userId}}
 ```
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. API requests (http block): a variable, a named request and one using its response, then Score (Settings → Little Touches)
 

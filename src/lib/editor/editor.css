@@ -2174,6 +2174,14 @@
   transition: opacity 120ms ease, background-color 120ms ease, color 120ms ease;
 }
 
+/*
+ * Where the margin is narrower than the button (a phone's, or a big text size), a Key: Value line
+ * keeps back what the margin lacks, so the button at the end of a full line isn't cut off.
+ */
+.cm-content .cm-line:has(.cm-lp-kv-copy) {
+  padding-inline-end: max(0px, 1.8em - var(--editor-pad-x));
+}
+
 .cm-line:has(.cm-lp-kv-value:hover, .cm-lp-copy:hover) .cm-lp-copy,
 .cm-lp-copy:focus-visible,
 .cm-lp-copy.is-copied {

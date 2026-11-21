@@ -2012,6 +2012,14 @@ const SCENES = [
     width: 390,
     height: 780,
   },
+  {
+    id: "phone-key-values",
+    title: "Phone: Key: Value lines' copy buttons",
+    look: "Each copy button faint after its value and whole on the screen, a full line's too (VIN's, Notes'), in the margin with a little room before the screen's edge: those lines end a little short of the last paragraph's rather than the button being cut off.",
+    note: `# Car\n\nPlate: 3WBZ56\n\nVIN: 3WBZ56 ${"W".repeat(21)}\n\nInsurer: Lemonade, policy LM-0042-77\n\nNotes: 3WBZ56 ${"W".repeat(42)}\n\nThe last paragraph runs long enough to wrap onto a second line, to see where the other lines end.`,
+    width: 390,
+    height: 780,
+  },
   { id: "phone-backdrop", title: "Phone: a backdrop", look: "Room around the page, nothing scrolls sideways.", prefs: { paperBackdrop: "dawn" }, note: PROSE, width: 390, height: 780 },
   {
     id: "phone-settings-shortcuts",

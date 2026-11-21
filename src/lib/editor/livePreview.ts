@@ -323,7 +323,7 @@ function build(view: EditorView): DecorationSet {
       decos.push(Decoration.replace({ widget: new ScoreWidget(score, scale ?? { kind: "marks", of: score.of }, mark, prefs.icons) }).range(from, to));
     } else mark(from, to, "cm-lp-kv-value");
     const plain = valueText(written, shownNote(state));
-    if (prefs.copyValues && plain) decos.push(Decoration.widget({ widget: new CopyWidget(plain, t("editor.copyValue", { value: plain })), side: 1 }).range(to));
+    if (prefs.copyValues && plain) decos.push(Decoration.widget({ widget: new CopyWidget(plain, t("editor.copyValue", { value: plain }), "cm-lp-copy cm-lp-kv-copy"), side: 1 }).range(to));
   };
   /** Marks the value of each "Key: Value" line from `from` to `to`, with a copy button after it. */
   const keyValues = (from: number, to: number) => {

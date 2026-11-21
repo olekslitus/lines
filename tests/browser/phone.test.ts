@@ -117,3 +117,23 @@ test("on a phone the panes' title bars reach the top of the screen, with no line
   expect(await app.page.locator("[data-pane=list] .titlebar").evaluate((element) => element.getBoundingClientRect().top)).toBe(0);
   expect(await app.style("[data-pane=list] .titlebar", "border-top-width")).toBe("0px");
 });
+
+test("on a phone, a Key: Value line's copy button at the end of a full line is all on the screen", async () => {
+  app = await openApp({ phone: true });
+  await app.open("# Car\n\nPlate: 3WBZ56");
+  await app.page.evaluate(() => window.testing.place(0));
+  await app.page.locator(".editor-pane .cm-lp-copy").waitFor();
+  // The value made longer a character at a time, past where the line wraps.
+  const cut = await app.page.evaluate(() => {
+    const view = window.testing.editor()!;
+    const edge = view.scrollDOM.getBoundingClientRect().right;
+    const found: number[] = [];
+    for (let i = 0; i < 60; i++) {
+      const line = view.state.doc.line(3);
+      view.dispatch({ changes: { from: line.from, to: line.to, insert: `Plate: 3WBZ56 ${"W".repeat(i)}` } });
+      if (view.contentDOM.querySelector(".cm-lp-copy")!.getBoundingClientRect().right > edge) found.push(i);
+    }
+    return found;
+  });
+  expect(cut).toEqual([]);
+});

@@ -272,13 +272,21 @@ pub(crate) fn percent_decode(text: &str) -> Option<String> {
   String::from_utf8(bytes).ok()
 }
 
+/// Deletes a file. Given the tag it's `expected` to have, only if it still has it: `false` if the
+/// drive brought in another device's version since.
 #[tauri::command]
-pub async fn sync_folder_delete(dir: String, name: String) -> Result<(), String> {
+pub async fn sync_folder_delete(dir: String, name: String, expected: Option<String>) -> Result<bool, String> {
   blocking(move || {
     let path = file(&dir, &name)?;
+    if let Some(expected) = expected {
+      let etag = etag_of(&path)?;
+      if !etag.is_empty() && etag != expected {
+        return Ok(false);
+      }
+    }
     match std::fs::remove_file(&path) {
       Err(e) if e.kind() != std::io::ErrorKind::NotFound => Err(describe(&path, e)),
-      _ => Ok(()),
+      _ => Ok(true),
     }
   })
   .await
@@ -532,6 +540,25 @@ mod tests {
   }
 
   #[test]
+  fn deletes_only_the_file_expected() {
+    tauri::async_runtime::block_on(async {
+      let dir = std::env::temp_dir().join(format!("lines-folder-delete-{}", std::process::id()));
+      let d = dir.to_string_lossy().into_owned();
+      let delete = |expected: Option<&str>| sync_folder_delete(d.clone(), "a.md".into(), expected.map(Into::into));
+      let mine = sync_folder_write(d.clone(), "a.md".into(), "mine".into(), None).await.unwrap().unwrap();
+      // The drive brings in another device's version after this one listed the folder: kept.
+      sync_folder_write(d.clone(), "a.md".into(), "theirs, longer".into(), None).await.unwrap();
+      assert!(!delete(Some(&mine)).await.unwrap());
+      assert_eq!(sync_folder_read(d.clone(), "a.md".into()).await.unwrap().unwrap().text, "theirs, longer");
+      let theirs = sync_folder_read(d.clone(), "a.md".into()).await.unwrap().unwrap().etag;
+      assert!(delete(Some(&theirs)).await.unwrap());
+      // Gone already, as it's meant to be.
+      assert!(delete(Some(&theirs)).await.unwrap());
+      std::fs::remove_dir_all(&dir).unwrap();
+    });
+  }
+
+  #[test]
   fn reads_notes_another_app_saved() {
     assert_eq!(decode("\u{feff}---\nid: a\n---\n# Café".as_bytes()), "---\nid: a\n---\n# Café");
     // Latin-1, as an older editor saves it: read, not a stop.
@@ -555,14 +582,14 @@ mod tests {
     assert_eq!(listed.len(), 1);
     assert_eq!(listed[0].etag, etag);
     assert_eq!(sync_folder_read(d.clone(), "a.md".into()).await.unwrap().unwrap().text, "hello");
-    sync_folder_delete(d.clone(), "a.md".into()).await.unwrap();
+    sync_folder_delete(d.clone(), "a.md".into(), None).await.unwrap();
     assert!(sync_folder_read(d.clone(), "a.md".into()).await.unwrap().is_none());
     assert!(sync_folder_write(d.clone(), "../x.md".into(), "no".into(), None).await.is_err());
     // A drive's copy of a note is listed, read and deleted.
     write_atomic(&dir.join("a (1).md"), b"theirs").unwrap();
     assert_eq!(sync_folder_list(d.clone()).await.unwrap()[0].name, "a (1).md");
     assert_eq!(sync_folder_read(d.clone(), "a (1).md".into()).await.unwrap().unwrap().text, "theirs");
-    sync_folder_delete(d.clone(), "a (1).md".into()).await.unwrap();
+    sync_folder_delete(d.clone(), "a (1).md".into(), None).await.unwrap();
     assert!(sync_folder_list(d.clone()).await.unwrap().is_empty());
     // An empty attachment is there; a missing one isn't.
     let empty = dir.join("3f9c0a1b2c3d4e5f60718293a4b5c6d7.txt");

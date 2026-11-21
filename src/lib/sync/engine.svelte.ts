@@ -120,7 +120,7 @@ export function checkPassphrase(passphrase: string) {
 
 /** Runs `run` over `items` a few at a time. After a failure the rest are skipped, and it only
  * settles once every worker has stopped, so a failed pass can't overlap the next one. */
-async function pool<T>(items: T[], run: (item: T) => Promise<void>) {
+async function pool<T>(items: T[], run: (item: T) => Promise<unknown>) {
   const queue = [...items];
   let failed = false;
   const worker = async () => {
@@ -736,6 +736,15 @@ class SyncEngine {
       }
     });
 
+    /**
+     * Deletes the note there, deleted here, if it's still the version `expected` by its tag: not if
+     * another device wrote it since, which the next pass, in a moment, brings in, as an edit wins.
+     */
+    const deleteThere = async (id: string, expected: string) => {
+      if (await remote.delete(keyOf(id), expected)) await syncRecords.delete(id);
+      else this.schedule();
+    };
+
     const remoteOnly = [...remoteById].filter(([id]) => !localIds.has(id));
     await pool(remoteOnly, async ([id, object]) => {
       // Not deleted here, nor new to this device, if another tab has it.
@@ -743,15 +752,13 @@ class SyncEngine {
       const last = records.get(id);
       if (last && last.etag === object.etag) {
         // Deleted here.
-        await remote.delete(keyOf(id));
-        await syncRecords.delete(id);
+        await deleteThere(id, object.etag);
         return;
       }
       const fetched = await download(id);
       if (!fetched) return;
       if (last && hash(fetched.text) === last.hash) {
-        await remote.delete(keyOf(id));
-        await syncRecords.delete(id);
+        await deleteThere(id, fetched.etag ?? object.etag);
       } else if (!notes.get(id)) {
         // New on another device, or edited there after we deleted it here.
         if (await notes.applyRemote(fetched.note)) await record(fetched.note, fetched.etag ?? object.etag, fetched.text);

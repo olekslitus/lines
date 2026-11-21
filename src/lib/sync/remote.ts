@@ -12,7 +12,8 @@ export interface Remote {
    * writes only if it still has it, and returns false if not: another device wrote it since.
    */
   put(key: string, text: string, expected?: string | null): Promise<string | null | false>;
-  delete(key: string): Promise<void>;
+  /** Given the tag it's `expected` to have, deletes only if it still has it, and returns false if not: another device wrote it since. */
+  delete(key: string, expected?: string): Promise<boolean>;
   /** Images and other files; null if it's not there (yet). */
   getFile(key: string): Promise<Blob | null>;
   putFile(key: string, data: Blob): Promise<void>;

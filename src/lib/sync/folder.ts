@@ -42,8 +42,8 @@ export class FolderRemote implements Remote {
     return etag ?? false;
   }
 
-  async delete(key: string) {
-    await this.#call<void>("sync_folder_delete", this.#split(key));
+  async delete(key: string, expected?: string) {
+    return this.#call<boolean>("sync_folder_delete", { ...this.#split(key), expected });
   }
 
   async getFile(key: string) {

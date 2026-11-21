@@ -19,7 +19,7 @@ On the web and on phones, use a bucket for now; signing in to iCloud, Google Dri
 
 Lines can also sync through any S3-compatible object storage you control.
 
-Tested API surface: `ListObjectsV2`, `GetObject`, `PutObject` (with `If-Match` and `If-None-Match` where the provider supports them), `DeleteObject`. Any provider that implements these with AWS Signature V4 should work:
+Tested API surface: `ListObjectsV2`, `GetObject`, `PutObject` (with `If-Match` and `If-None-Match` where the provider supports them), `DeleteObject` (with `If-Match` likewise). Any provider that implements these with AWS Signature V4 should work:
 
 - Cloudflare R2
 - Backblaze B2
@@ -103,7 +103,7 @@ What's been done with feeds' posts is a folder of small files beside them, `<buc
 
 Only one sync pass runs at a time, even with Lines open in several browser tabs, so a conflict makes one copy, not one per tab. Before a pass writes a note, here or there, it looks at the note as it's stored on the device, so a tab that hasn't yet heard of another tab's edit or deletion takes it up rather than write over it with its older copy.
 
-A note is only written over the version Lines saw there a moment before, so an edit another device saves while this one syncs isn't overwritten: the next pass brings it in and compares, as above. In a bucket that's a conditional write (`If-Match`, or `If-None-Match` for a new note); a service that ignores those, or doesn't do them (it refuses a write over the very version it holds), is written to as before. In a cloud drive's folder, Lines looks at the file again just before writing it.
+A note is only written over, or deleted as deleted here, if it's the version Lines saw there a moment before, so an edit another device saves while this one syncs isn't overwritten or deleted: the next pass brings it in and compares, as above (an edit wins over a delete). In a bucket that's a conditional request (`If-Match`, or `If-None-Match` for a new note); a service that ignores those, or doesn't do them (it turns them down, or refuses one over the very version it holds), is written to and deleted from as before, writes and deletes each on their own. Amazon S3 does both (deletes since September 2025). Cloudflare R2 and MinIO do conditional writes; R2 doesn't list deletes among its conditional requests. Backblaze B2 turns conditional writes down. In a cloud drive's folder, Lines looks at the file again just before writing or deleting it.
 
 Several devices can share one bucket and folder. To keep separate libraries in one bucket, use different folders.
 

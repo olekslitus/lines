@@ -96,6 +96,6 @@ Findings from a review of the whole repo. Each was checked against the code. Fix
 The first three are on the roadmap in `README.md`.
 
 - [x] **Keychain for S3 secrets.** The secret key, and the end-to-end encryption key, are in the system's keychain on the Mac, iPhone, iPad and Windows, moved there from `localStorage` at the first start ([#105](https://github.com/olekslitus/lines/issues/105)). Linux and Android still keep them in `localStorage`.
-- **Conditional S3 writes** (`If-Match` on PUT/DELETE) to close the window where another device's upload lands between our list and our put. Needs testing against each provider (R2, B2, MinIO).
+- [x] **Conditional S3 writes** (`If-Match` on PUT/DELETE) to close the window where another device's upload lands between our list and our put. Done: writes in #232, deletes after (#106), each falling back to a plain request where a provider turns the condition down; not yet tried against each provider (R2, B2, MinIO).
 - **Narrowing native permissions**: the HTTP plugin may reach any `https://` URL and folder commands accept any absolute path. Tightening means keeping the chosen folder and endpoint on the Rust side.
 - [x] **Unsafe pointer in `window_style.rs` `set_buttons`**: now uses the same clone-the-window pattern as the other functions ([#108](https://github.com/olekslitus/lines/issues/108)).

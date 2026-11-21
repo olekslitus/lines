@@ -143,8 +143,8 @@ export class SealedRemote implements Remote {
     return this.store.put(await this.fileKey(key), toBase64(await seal(this.content, utf8(text), this.#context(key))), expected);
   }
 
-  async delete(key: string) {
-    await this.store.delete(await this.fileKey(key));
+  async delete(key: string, expected?: string) {
+    return this.store.delete(await this.fileKey(key), expected);
   }
 
   async getFile(key: string) {

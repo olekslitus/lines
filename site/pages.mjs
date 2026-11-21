@@ -76,6 +76,7 @@ ${body}
           <a href="${up("docs/")}">Docs</a>
           <a href="${up("docs/changelog.html")}">What's new</a>
           <a href="${up("docs/contributing.html")}">Contributing</a>
+          <a href="${up("privacy/")}">Privacy</a>
           <a href="${REPO}">GitHub</a>
         </nav>
       </div>

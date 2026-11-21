@@ -544,6 +544,7 @@ export default {
   "settings.madeBy": "Créé par Oleksandr Litus.",
   "settings.source": "Code source sur GitHub",
   "settings.reportIssue": "Signaler un problème",
+  "settings.privacyPolicy": "Politique de confidentialité",
   "settings.license": "Licence",
   "settings.licenseText":
     "Lines est un logiciel libre distribué sous la {license}. Vous pouvez l’utiliser, l’étudier, le partager et le modifier selon ses conditions. Si vous proposez une version modifiée à d’autres personnes via un réseau, vous devez aussi mettre son code source à leur disposition.",

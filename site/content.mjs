@@ -15,6 +15,9 @@ export const SITE = "https://olekslitus.com/lines/";
 /** In docs/, but not documentation: a dated snapshot of the code. */
 const UNLISTED = new Set(["docs/AUDIT.md"]);
 
+/** Docs at an address of their own, not docs/<name>.html: the privacy policy, which the app stores link to. */
+const ADDRESSES = new Map([["docs/privacy.md", "privacy/index.html"]]);
+
 export const read = (path) => readFileSync(join(ROOT, path), "utf8");
 
 function need(value, what) {
@@ -42,10 +45,11 @@ function slugger() {
   };
 }
 
-/** A path in the site, as a link from `page` (another path in the site). */
+/** A path in the site, as a link from `page` (another path in the site); a folder's index.html as the folder. */
 export function href(page, path) {
-  const link = posix.relative(posix.dirname(page), path) || ".";
-  return path.endsWith("/") && link !== "." ? `${link}/` : link;
+  const target = path.replace(/(^|\/)index\.html$/, "$1") || "./";
+  const link = posix.relative(posix.dirname(page), target) || ".";
+  return target.endsWith("/") && link !== "." ? `${link}/` : link;
 }
 
 const EXTERNAL = /^[a-z][a-z0-9+.-]*:/i;
@@ -132,7 +136,7 @@ export function docGroups() {
         label,
         path,
         about,
-        page: `docs/${basename(path, ".md").toLowerCase()}.html`,
+        page: ADDRESSES.get(path) ?? `docs/${basename(path, ".md").toLowerCase()}.html`,
       })),
     }));
   const listed = new Set(groups.flatMap((group) => group.pages.map((page) => page.path)));

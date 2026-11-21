@@ -1,14 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#3a3a3d"/>
-      <stop offset="1" stop-color="#121213"/>
-    </linearGradient>
-  </defs>
-  <rect width="1024" height="1024" rx="228" fill="url(#bg)"/>
-  <g stroke="#fafafa" stroke-width="72" stroke-linecap="round">
-    <line x1="272" y1="352" x2="752" y2="352"/>
-    <line x1="272" y1="512" x2="752" y2="512"/>
-    <line x1="272" y1="672" x2="560" y2="672"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6dbf2"/><stop offset="1" stop-color="#cfbfe6"/></linearGradient></defs><rect width="1024" height="1024" rx="228" fill="url(#bg)"/><path d="M214 420.8 C228.17 420.97 265.15 426.28 298.99 421.8 C332.83 417.32 387.21 416.19 417.04 393.92 C446.87 371.65 477.97 313.58 477.97 288.19 C477.97 262.81 437.35 241.6 417.04 241.6 C396.73 241.6 356.11 262.81 356.11 288.19 C356.11 313.58 387.21 371.65 417.04 393.92 C446.87 416.19 474.93 417.32 535.09 421.8 C595.25 426.28 737.51 420.97 778 420.8" stroke-width="56" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#4b2a5e"/><circle cx="229.68" cy="601.6" r="43.68" fill="#4b2a5e"/><path d="M357.36 601.6 L694 601.6" stroke-width="56" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#4b2a5e"/><path d="M214 782.4 L458.32 782.4" stroke-width="56" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#4b2a5e"/><circle cx="558" cy="782.4" r="43.68" fill="#4b2a5e"/></svg>

@@ -1,3 +1,4 @@
+import { MARK } from "../src/lib/appIcon/art";
 import { lines } from "../src/plugins/themes/lines";
 import { themeCss } from "../src/lib/themes/css";
 import { resolveTheme } from "../src/lib/themes/palette";
@@ -50,7 +51,9 @@ export function layout({ page, title, description, head = "", body }) {
     <meta name="description" content="${esc(description)}" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="${LINES.light.bg}" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="${LINES.dark.bg}" />
-    <link rel="icon" type="image/svg+xml" href="${up("../public/icon.svg")}" />
+    <link rel="icon" href="${up("../public/favicon.ico")}" sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href="${up("../public/favicon.svg")}" />
+    <link rel="apple-touch-icon" href="${up("../public/icon-180.png")}" />
     ${script(followSystem)}${head}
     <style>${THEME}</style>
     <link rel="stylesheet" href="${up("site.css")}" />
@@ -59,7 +62,7 @@ export function layout({ page, title, description, head = "", body }) {
     <a class="skip" href="#main">Skip to content</a>
     <header class="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
       <a href="${up("./")}" class="flex items-center gap-2.5 text-lg font-semibold text-fg no-underline">
-        <img src="${up("../public/icon.svg")}" alt="" width="28" height="28" />Lines
+        <img src="${up("../public/icon.svg")}" alt="" width="28" height="28" class="in-data-[scheme=dark]:hidden" /><img src="${up("../public/icon-dark.svg")}" alt="" width="28" height="28" class="hidden in-data-[scheme=dark]:block" />Lines
       </a>
       <nav aria-label="Site" class="ml-auto flex items-center gap-1 text-md">
         <a href="${up("docs/")}" class="${NAV_LINK}"${current(page.startsWith("docs/") && !changelog)}>Docs</a>
@@ -71,7 +74,7 @@ export function layout({ page, title, description, head = "", body }) {
 ${body}
     <footer class="mt-24 border-t border-line">
       <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-8 text-sm text-muted sm:px-6">
-        <p class="m-0">Lines is free software, under the <a href="${REPO}/blob/main/LICENSE">AGPL</a>.</p>
+        <p class="m-0 flex items-center gap-2.5">${MARK.replace("<svg ", '<svg class="size-4 shrink-0 text-fg" aria-hidden="true" ')}<span>Lines is free software, under the <a href="${REPO}/blob/main/LICENSE">AGPL</a>.</span></p>
         <nav aria-label="More" class="flex flex-wrap gap-x-5 gap-y-2 sm:ml-auto">
           <a href="${up("./#download")}">Download</a>
           <a href="${up("docs/")}">Docs</a>

@@ -1013,6 +1013,58 @@ describe("fixed", () => {
     expect(await app.page.locator(".cm-sheet").count()).toBe(1);
   });
 
+  test("spreadsheet cells copied in one window paste into another with their formulas, moved; other apps get their values", async () => {
+    await app.open("```csv\nItem,Cost\nRent,1200\nFood,450\nTotal,=SUM(B2:B3)\n```\n\nAfter the block.");
+    // The total, B4, once it's worked out.
+    const total = app.page.locator(".cm-sheet [role=gridcell]").nth(7);
+    await total.filter({ hasText: "1650" }).waitFor();
+    await total.click();
+    const copied = await app.page.evaluate(() => {
+      const data = new DataTransfer();
+      document.activeElement!.dispatchEvent(new ClipboardEvent("copy", { clipboardData: data, bubbles: true, cancelable: true }));
+      return { plain: data.getData("text/plain"), html: data.getData("text/html") };
+    });
+    expect(copied.plain).toBe("1650");
+
+    // Another window (a floating note, here a tab of its own), pasted into A3.
+    const id = await app.open("```csv\n1,x\n2,y\n,z\n```\n\nAfter the block.");
+    const other = await app.page.context().newPage();
+    await other.goto(globalThis.lines.url);
+    await other.waitForFunction(() => window.testing?.notes.ready);
+    await other.evaluate((id) => window.testing.notes.select(id), id);
+    await other.locator(".cm-sheet [role=gridcell]").nth(4).click();
+    await other.evaluate(({ plain, html }) => {
+      const data = new DataTransfer();
+      data.setData("text/plain", plain);
+      data.setData("text/html", html);
+      document.activeElement!.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
+    }, copied);
+    await other.waitForFunction(() => window.testing.text()!.includes("=SUM"));
+    expect(await other.evaluate(() => window.testing.text())).toBe("```csv\n1,x\n2,y\n=SUM(A1:A2),z\n```\n\nAfter the block.");
+
+    // From another app, only text: its values.
+    await other.locator(".cm-sheet [role=gridcell]").nth(5).click();
+    await other.evaluate(() => {
+      const data = new DataTransfer();
+      data.setData("text/plain", "1650");
+      document.activeElement!.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
+    });
+    await other.waitForFunction(() => window.testing.text()!.includes("1650"));
+    await other.close();
+
+    // The cells' menu copies them the same way.
+    if (engine() !== "chromium") return;
+    await app.page.evaluate(() => navigator.clipboard.writeText("before"));
+    await app.page.locator(".cm-sheet [role=gridcell]").nth(0).click({ button: "right" });
+    await app.page.getByRole("menuitem", { name: "Copy" }).click();
+    await app.page.waitForFunction(async () => (await navigator.clipboard.readText()) !== "before");
+    const html = await app.page.evaluate(async () => {
+      const [item] = await navigator.clipboard.read();
+      return item.types.includes("text/html") ? (await item.getType("text/html")).text() : "";
+    });
+    expect(html).toContain('data-input="1"');
+  });
+
   test("a table with a ``` cell, converted to a spreadsheet, keeps it in the block", async () => {
     await app.open("| Fence |\n| --- |\n| ``` |\n\nAfter the table.");
     await app.page.locator(".editor-pane .cm-lp-table-wrap").hover();

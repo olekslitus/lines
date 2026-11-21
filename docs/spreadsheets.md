@@ -115,7 +115,7 @@ Click a cell, or move to it with the arrow keys, and type: what you type replace
 From the title, Return, Tab or ↓ goes into the grid.
 
 - **Rows and columns** are put in and taken out from the cells' menu, as many as are selected. Formulas still point at the same cells afterwards: insert a row above row 3 and `=SUM(B2:B4)` becomes `=SUM(B2:B5)`.
-- **Copying** gives other apps tab-separated values, as Excel, Numbers and Google Sheets paste them, showing what the cells work out to. Pasted into a spreadsheet, cells copied from one keep their formulas, with relative references moved as in other spreadsheet apps (`=B2*2` pasted a row down is `=B3*2`). One cell pasted over a selection fills it.
+- **Copying** gives other apps tab-separated values, as Excel, Numbers and Google Sheets paste them, showing what the cells work out to, and the same as a table, for apps that take one (Mail, Pages, a note's text, where it's a Markdown table). Pasted into a spreadsheet, in any window or tab of Lines, cells copied from one keep their formulas, with relative references moved as in other spreadsheet apps (`=B2*2` pasted a row down is `=B3*2`). One cell pasted over a selection fills it.
 - **Filling.** Drag the small square on the selection's corner down, up or across, and the cells it's dragged over go on from the selection, as in Excel and Numbers. A dashed outline shows what will fill, and a label by the pointer what goes in the last cell; Esc stops. Each column (or row) goes on by itself:
   - numbers along their trend (1, 2 → 3, 4; 10, 8 → 6, 4), keeping their decimals (1.50, 2.25 → 3.00)
   - text ending in a number counts on (Item 1 → Item 2; Room 007, Room 009 → Room 011)

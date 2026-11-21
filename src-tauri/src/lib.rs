@@ -1,6 +1,7 @@
 use tauri::Manager;
 
 mod addresses;
+mod app_icon;
 mod attachments;
 mod body;
 mod bucket_sync;
@@ -40,6 +41,7 @@ pub fn run() {
   let builder = builder
     .invoke_handler(tauri::generate_handler![
       addresses::host_is_public,
+      app_icon::set_app_icon,
       attachments::open_attachment,
       bucket_sync::sync_bucket_transfer,
       devtools::toggle_devtools,

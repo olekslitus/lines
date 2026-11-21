@@ -12,6 +12,8 @@ interface Window {
   linesSystemBars?: { setColors(background: string, dark: boolean): void };
   /** The Android app's Custom Tabs: a web page over lines, its toolbar `toolbar`'s color; whether it could (MainActivity.kt). */
   linesBrowser?: { open(url: string, toolbar: string, dark: boolean): boolean };
+  /** The Android app's launcher icon: the one `id` names (appIcon/art.ts), through its activity alias (MainActivity.kt). */
+  linesAppIcon?: { set(id: string): void };
 }
 
 /** The messages each of Settings' sections shows, by its id, for its search, each with the part it's in (vite.config.ts). */

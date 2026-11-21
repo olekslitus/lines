@@ -3,6 +3,7 @@ import App from "./App.svelte";
 import "./app.css";
 import { prefs } from "./lib/prefs.svelte";
 import "./lib/themes/show.svelte";
+import "./lib/appIcon/show.svelte";
 import "./lib/paper.svelte";
 // Before the styles, whose rules come after it in the page and outrank it.
 import "./lib/editor/editor.css";

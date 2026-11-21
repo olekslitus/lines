@@ -129,6 +129,20 @@ Two switches in Settings → Theme change whatever theme is chosen, yours or Lin
 
 Both together give the theme in greys, turned. They apply on top of Increased contrast, in every window, and to diagrams, 3D models and recordings, which take the theme's colors. Pictures, and drawings' own pen colors, stay as they are. The theme picker's swatches and your theme's editor show the theme's own colors.
 
+## The app icon
+
+Settings → Theme → **App Icon** chooses Lines' icon from 21: its own, plum lines on lilac, and twenty more in other colors (oat, sand on ink blue, three lines in three colors, a gradient along them, glass…). The icons show light or dark as Lines is. Where it changes is up to each system:
+
+| Where | What changes |
+|---|---|
+| iPhone and iPad | The icon on the Home Screen, in Spotlight and in Settings, with its dark and tinted looks; iOS says so with an alert each time. |
+| Android | The launcher's icon (each icon is an activity alias of Lines', only the chosen one on), its themed icon too. The launcher can take a moment to show it. |
+| Mac | The Dock's while Lines is open, and ⌘Tab's. Finder, Launchpad and the Dock once Lines has quit show Lines' own: the app's own icon can't change without breaking its signature. |
+| Windows and Linux | The taskbar's, the window's icon, while Lines is open. The Start menu's, the desktop's and the launcher's are the installer's. |
+| The web app | The tab's icon. Lines added to a home screen, or installed, keeps the icon it was added with. |
+
+It's kept on this device, as the rest of Settings is, and isn't part of a preset: an icon is the device's home screen's or Dock's. The icons are drawn in `src/lib/appIcon/art.ts`, and `bun run icons` makes every platform's files from them (`scripts/icons.mjs`); they're Lines' own rather than a plugin's, as the phones need every icon in the app as it's built.
+
 ## Sharing a theme
 
 The share button beside your theme's name shares it with its palettes, in one file:

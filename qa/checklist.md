@@ -23,6 +23,9 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] [iOS] The home screen: plum on lilac in Light, lilac on near-black in Dark, the lines in the tint chosen in Tinted (Edit → Customize, iOS 18 and later); on iOS 26 the lines are glass, and Clear shows them clear; Spotlight and Settings show it too
 - [ ] [Android] The launcher's icon is masked to its shape (circle, squircle…) with the lines whole inside it; Themed icons on (Android 13 and later) shows the lines alone, in the wallpaper's colors; the splash screen shows it
 - [ ] [Web] The tab's icon is the lines alone, plum in a light browser and lilac in a dark one; added to a home screen (Safari's Add to Home Screen, Chrome's Install), the icon is the lilac one, whole in Android's mask; the website's header shows the icon (dark with the system), its footer the lines in the text's color
+- [ ] Settings → Theme → **App Icon**: 21 icons in a grid, Lilac (Default) first and ringed while chosen, each light or dark as Lines is; Tab stops once on the grid, ←→↑↓ move through it and choose, VoiceOver reads each icon's name and which is chosen; the note under the title says where this platform shows it
+- [ ] Choosing another: [iOS] the home screen's icon changes, with iOS's alert, and has its dark and tinted looks; [Android] the launcher's icon changes after a moment (themed icons stay the lines alone), Lines stays open, and opening it from the new icon works; [Mac] the Dock's icon changes at once, and is Lines' own again after quitting; [Windows] [Linux] the taskbar's, in every window, floating notes too; [Web] the tab's icon is the lines in its colors. Lilac (Default) puts each back
+- [ ] The icon chosen is kept after quitting and opening Lines again (and is shown again at start on the Mac, Windows and Linux); it isn't synced to other devices, nor kept in a preset
 
 ## 1. Typing and live Markdown
 

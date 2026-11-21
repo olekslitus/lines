@@ -332,6 +332,11 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 - Packs are read from a .zip or a folder; a ZIP64 or encrypted .zip isn't read. Mouse packs are left out, and a pack's `random_pitch` and recommended volume aren't used (every keyboard varies its pitch a little).
 - Packs are kept on this device and don't sync.
 
+## The app icon
+
+- The Mac app's icon is an `.icns`, as the Tauri bundle makes it: macOS 26 shows it as drawn, without Liquid Glass, and doesn't make it dark, clear or tinted. iPhone and iPad have Icon Composer's file, and do.
+- At 16 pixels (Finder's list, a Windows title bar) the icon draws the lines heavier and larger, and the knot's loop is too small to see open.
+
 ## Themes from a picture
 
 - A picture is read in whatever formats the system can show (JPEG, PNG, WebP, GIF; HEIC in the Mac app and Safari); an animated one by its first frame.

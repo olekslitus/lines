@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { iconUrl, LILAC } from "../../appIcon/art";
   import Icon from "../../icons/Icon.svelte";
   import { t } from "../../i18n/index.svelte";
   import { openExternal } from "../../platform";
+  import { prefs } from "../../prefs.svelte";
   import { PRIVACY_POLICY, REPO, VERSION as version } from "../../release";
   import { updates } from "../../updates.svelte";
   import Button from "../ui/Button.svelte";
@@ -55,7 +57,7 @@
 {/snippet}
 
 <section class="flex flex-wrap items-center gap-4 px-1">
-  <img src="{import.meta.env.BASE_URL}icon.svg" alt="" width="64" height="64" class="shrink-0 rounded-xl" />
+  <img src={iconUrl(LILAC, prefs.dark ? "dark" : "light")} alt="" width="64" height="64" class="shrink-0" />
   <div class="min-w-0 flex-1">
     <h3 class="m-0 text-xl font-bold">Lines</h3>
     <p class="tabular m-0 mt-0.5 text-xs text-faint">{t("settings.version", { version })}</p>

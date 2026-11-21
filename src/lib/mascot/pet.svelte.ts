@@ -149,8 +149,8 @@ class Pet {
   #readAccent() {
     const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
     const color = parse(accent);
-    this.#accent = color ? hex(color) : "#0e7a7e";
-    this.#accentDark = color ? hex(mix(color, { r: 0, g: 0, b: 0, a: 1 }, 0.28)) : "#09585b";
+    this.#accent = color ? hex(color) : "#6b3e85";
+    this.#accentDark = color ? hex(mix(color, { r: 0, g: 0, b: 0, a: 1 }, 0.28)) : "#4d2d60";
   }
 
   #say(text: string, ticks = 25) {

@@ -1,8 +1,10 @@
 import type { WithPalette } from "./builtIn";
 
 /**
- * Lines, the theme lines starts with and falls back to: deep teal on cool, quiet greys. On its own,
- * as the website (site/) is drawn in it too.
+ * Lines, the theme lines starts with and falls back to: plum on lilac, as its icon is. Paper with a
+ * breath of lilac, lilac greys and a plum accent in light; the icon's near-black and its lilac in
+ * dark. Questions are in the accent, the callout nearest it in hue. On its own, as the website
+ * (site/) is drawn in it too.
  */
 export const lines: WithPalette = {
   id: "lines",
@@ -10,25 +12,25 @@ export const lines: WithPalette = {
   palette: {
     light: {
       colors: [
-        { id: "white", color: "#ffffff" },
-        { id: "dark-gray", color: "#162120" },
-        { id: "light-gray", color: "#eff4f3" },
-        { id: "teal", color: "#0e7a7e" },
-        { id: "dark-gray-2", color: "#33413f" },
-        { id: "gray", color: "#5b6a68" },
-        { id: "teal-2", color: "#0b6a6e" },
-        { id: "dark-gray-3", color: "#0e2826" },
+        { id: "white", color: "#fdfbff" },
+        { id: "dark-gray", color: "#201824" },
+        { id: "light-gray", color: "#f3eef8" },
+        { id: "purple", color: "#6b3e85" },
+        { id: "dark-gray-2", color: "#443a4a" },
+        { id: "gray", color: "#6a6072" },
+        { id: "purple-2", color: "#5e3675" },
+        { id: "dark-purple", color: "#2a1c32" },
       ],
     },
     dark: {
       colors: [
         { id: "white", color: "#ffffff" },
-        { id: "black", color: "#131819" },
-        { id: "light-gray", color: "#e3ebea" },
-        { id: "dark-gray", color: "#232b2c" },
-        { id: "teal", color: "#45c4c1" },
-        { id: "gray", color: "#94a3a1" },
-        { id: "teal-2", color: "#74d8d4" },
+        { id: "black", color: "#17121d" },
+        { id: "light-gray", color: "#ebe6ef" },
+        { id: "dark-gray", color: "#2a2330" },
+        { id: "purple", color: "#bda2e6" },
+        { id: "gray", color: "#a49cac" },
+        { id: "pale-purple", color: "#cdb6ec" },
       ],
     },
   },
@@ -39,17 +41,19 @@ export const lines: WithPalette = {
     text: "dark-gray",
     "text-sidebar": "dark-gray-2",
     "text-muted": "gray",
-    accent: "teal",
-    "tag-text": "teal-2",
-    ink: "dark-gray-3",
+    accent: "purple",
+    "tag-text": "purple-2",
+    ink: "dark-purple",
+    "callout-question": "purple",
   },
   dark: {
     bg: "black",
     "bg-elevated": "dark-gray",
     text: "light-gray",
     "text-muted": "gray",
-    accent: "teal",
-    "tag-text": "teal-2",
+    accent: "purple",
+    "tag-text": "pale-purple",
     ink: "white",
+    "callout-question": "purple",
   },
 };

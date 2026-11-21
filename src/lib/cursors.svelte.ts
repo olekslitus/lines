@@ -53,7 +53,7 @@ function showPointer() {
   void prefs.monochrome;
   void prefs.invert;
   void prefs.moreContrast;
-  accent = getComputedStyle(root).getPropertyValue("--accent").trim() || "#0e7a7e";
+  accent = getComputedStyle(root).getPropertyValue("--accent").trim() || "#6b3e85";
   if (prefs.pointerStyle === "system") {
     delete root.dataset.pointer;
     return;

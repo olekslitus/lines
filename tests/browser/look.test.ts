@@ -666,16 +666,16 @@ describe("the color picker", () => {
     expect(await color()).toBe("#3d7dd8");
     const swatches = picker.getByRole("radiogroup", { name: "Palette colors" });
     // Lines' own colors are named from their look.
-    expect((await swatches.getByRole("radio").evaluateAll((radios) => radios.map((radio) => radio.getAttribute("aria-label")))).slice(0, 4)).toEqual(["White", "Dark Gray", "Light Gray", "Teal"]);
+    expect((await swatches.getByRole("radio").evaluateAll((radios) => radios.map((radio) => radio.getAttribute("aria-label")))).slice(0, 4)).toEqual(["White", "Dark Gray", "Light Gray", "Purple"]);
     expect(await swatches.getByRole("radio", { checked: true }).count()).toBe(0);
     await focusOn("White");
 
-    await swatches.getByRole("radio", { name: "Teal", exact: true }).click();
-    expect(await color()).toBe("#0e7a7e");
+    await swatches.getByRole("radio", { name: "Purple", exact: true }).click();
+    expect(await color()).toBe("#6b3e85");
     await app.page.keyboard.press("ArrowRight");
-    expect(await color()).toBe("#33413f");
+    expect(await color()).toBe("#443a4a");
     expect(await swatches.getByRole("radio", { name: "Dark Gray 2", exact: true }).getAttribute("aria-checked")).toBe("true");
-    expect(await picker.getByRole("textbox", { name: "Your color" }).inputValue()).toBe("#33413f");
+    expect(await picker.getByRole("textbox", { name: "Your color" }).inputValue()).toBe("#443a4a");
 
     // An eyedropper only where the browser has one (not WebKit); nothing to add to, as the palette is lines'.
     const eyedropper = await app.page.evaluate(() => "EyeDropper" in window);
@@ -738,7 +738,7 @@ describe("the color picker", () => {
     await app.page.getByRole("menuitem", { name: /From Lines/ }).click();
     await settings.getByRole("button", { name: "Choose a color for Text", exact: true }).click();
     const picker = app.page.getByRole("dialog", { name: "Choose a color for Text" });
-    await picker.getByRole("radio", { name: "Teal", exact: true }).click();
+    await picker.getByRole("radio", { name: "Purple", exact: true }).click();
     // Drawn in the palette's color the accent is, which the row names.
     const theme = await app.page.evaluate(() => window.testing.customThemes.get(window.testing.prefs.theme));
     expect(theme?.light?.text).toBe(theme?.light?.accent);

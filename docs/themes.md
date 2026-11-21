@@ -1,8 +1,10 @@
 # Themes
 
-Lines comes with twenty-six themes, each light and dark, and presets that change the whole look beyond the colors: a 90s desktop, one-bit pixels, neon, a rainy day in a picture book, a spark of lightning, a pixel-art adventure game, glossy glass, brutalism, 1920s posters, heavy minimalism. You can also make your own themes and presets, share them as files, and import themes made for other apps: VS Code, Zed, Base16, your terminal or your Linux desktop.
+Lines comes with twenty-seven themes, each light and dark, and presets that change the whole look beyond the colors: a 90s desktop, one-bit pixels, neon, a rainy day in a picture book, a spark of lightning, a pixel-art adventure game, glossy glass, brutalism, 1920s posters, heavy minimalism. You can also make your own themes and presets, share them as files, and import themes made for other apps: VS Code, Zed, Base16, your terminal or your Linux desktop.
 
 Everything here is in Settings → Presets and Settings → Theme.
+
+Lines starts in its own theme, **Lines**: plum on lilac, as its icon is. In light, the note is paper with a breath of lilac, the sidebar a lilac grey, the text a plum-tinged near-black, and links, tags, buttons, focus rings and the selection plum; in dark, the icon's near-black with its lilac. Question callouts are in the accent, the callout nearest it in hue; the highlighter, the pin and the other callouts and status colors are Lines' own. **Teal**, deep teal on cool greys, was Lines' own look before; choose it in Settings → Theme to have it back.
 
 ## Palettes and themes
 

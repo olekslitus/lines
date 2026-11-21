@@ -10,7 +10,8 @@ import { REPO, href, inline } from "./content.mjs";
  */
 
 // Lines, worked out from its palettes for light and dark, written beside it.
-const THEME = themeCss([resolveTheme({ ...lines, palette: { light: "light", dark: "dark" } }, (scheme) => ({ id: scheme, name: lines.name, ...lines.palette[scheme] }))]);
+const LINES = resolveTheme({ ...lines, palette: { light: "light", dark: "dark" } }, (scheme) => ({ id: scheme, name: lines.name, ...lines.palette[scheme] }));
+const THEME = themeCss([LINES]);
 
 /*
  * Scripts the pages run, written here as functions and put in the pages as their source. Before the
@@ -47,8 +48,8 @@ export function layout({ page, title, description, head = "", body }) {
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>${esc(title)}</title>
     <meta name="description" content="${esc(description)}" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="${lines.light.bg}" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="${lines.dark.bg}" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="${LINES.light.bg}" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="${LINES.dark.bg}" />
     <link rel="icon" type="image/svg+xml" href="${up("../public/icon.svg")}" />
     ${script(followSystem)}${head}
     <style>${THEME}</style>

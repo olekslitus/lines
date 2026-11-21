@@ -285,7 +285,7 @@ export function home({ release }) {
       <section aria-labelledby="themes" class="mx-auto mt-32 max-w-6xl px-4 sm:px-6">
         <div class="mx-auto max-w-2xl text-center">
           <h2 id="themes" class="section-title">Make it feel like yours</h2>
-          <p class="mt-4 text-lg text-muted">Twenty-six themes, each light and dark, including High Contrast and two for color blindness. Write on ruled or dotted paper, choose your fonts, or make a theme from a picture you love.</p>
+          <p class="mt-4 text-lg text-muted">Twenty-seven themes, each light and dark, including High Contrast and two for color blindness. Write on ruled or dotted paper, choose your fonts, or make a theme from a picture you love.</p>
         </div>
         <ul class="mt-12 grid grid-cols-2 gap-5 lg:grid-cols-4">
           ${themes}

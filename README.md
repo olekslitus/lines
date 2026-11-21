@@ -62,7 +62,7 @@ Your notes are files on your device, not rows on someone else's server.
 
 ### Make it feel like yours
 
-- Twenty-six themes, each light and dark, including High Contrast and two for color blindness. Make your own, from scratch or from a picture you like, or bring one from VS Code or your terminal. See [Themes](docs/themes.md).
+- Twenty-seven themes, each light and dark, including High Contrast and two for color blindness. Make your own, from scratch or from a picture you like, or bring one from VS Code or your terminal. See [Themes](docs/themes.md).
 - Whole new looks in one click: a 90s desktop, one-bit pixels, neon, glossy glass, 1920s posters, and more.
 - Paper to write on: ruled, dotted, squared or graph paper, and a soft backdrop behind the page.
 - Your fonts, text size, note width and spacing. Put the sidebar and the list where you like, and add tabs.
@@ -335,7 +335,7 @@ src/
     paper/                   Paper to write on: ruled lines, dots, squares, graph and isometric paper, grain and linen, backdrops
     keyboards/               Keyboards to hear as you type, made from sound (synth.ts)
     mascots/                 Companions in the window, as pixel art (art.ts); what they do is lib/mascot/
-    themes/                  The twenty-six themes, each a palette and what its colors are for (Lines, the default, in lines.ts), and the theme files of other apps it reads (formats/)
+    themes/                  The twenty-seven themes, each a palette and what its colors are for (Lines, the default, in lines.ts), and the theme files of other apps it reads (formats/)
     fonts/                   Fonts to write notes in: IBM Plex Sans, Fira Sans and Agave
     styles/                  Whole looks beyond the colors, each a preset: Classic, Pixel, Neon, Puddle, Lightbulb, Adventure, Aero, Brutalist, Constructivist and Void, each a CSS file, its fonts, its colors and the settings it brings
     lucide/  sf-symbols/     Icon sets

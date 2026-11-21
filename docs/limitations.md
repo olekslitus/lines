@@ -39,6 +39,12 @@ How a bad copy of the key is kept out is in [sync.md](sync.md#locked-notes).
 - A copy that's refused is only noted in the app's log, not shown.
 - Someone who can write to the bucket can still delete notes, or damage a locked note so it no longer opens (it stays shut, and the others still open). End-to-end encryption keeps them from writing notes Lines would read.
 
+## The apps' native permissions
+
+- Network: the apps may reach any `https://` address and this computer (`localhost`, `127.0.0.1`). Requests in notes, feeds, link and library lookups, picture searches and the bucket all need it, so it isn't narrowed to the bucket.
+- Sync folders: the native side's file commands work only in a folder chosen for sync ([sync.md](sync.md#cloud-drive-desktop-apps)). Until it has remembered one, it takes a folder that already has a `notes` folder in it, so a folder synced through before keeps working after updating; this stays so on a computer that never syncs through a folder.
+- Tried in the Rust tests and the sync tests, not yet in the Mac, Windows or Linux apps themselves.
+
 ## The web app's own storage
 
 Where the web app keeps everything is in [storage.md](storage.md).

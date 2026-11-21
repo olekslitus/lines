@@ -109,6 +109,9 @@ export const reads: string[] = [];
 /** Each folder listed, and each file written (or tried), by path, in order. */
 export const listings: string[] = [];
 export const written: string[] = [];
+/** Each folder sync said it uses, which the app's native side checks was chosen for it, in order; and those it refuses. */
+export const used: string[] = [];
+export const refused = new Set<string>();
 /** Files the drive lists but hasn't downloaded to this device yet (iCloud's placeholders), by path: read as nothing. */
 export const placeholders = new Set<string>();
 let writes = 0;
@@ -118,10 +121,15 @@ export const beforeWrite: { next?: (path: string) => void } = {};
 /** And just before its next delete. */
 export const beforeDelete: { next?: (path: string) => void } = {};
 
-type FolderArgs = { dir: string; name: string; text: string; expected?: string };
+type FolderArgs = { dir: string; name: string; text: string; expected?: string; path?: string };
 
 mock.module("@tauri-apps/api/core", () => ({
-  invoke: async (command: string, { dir, name, text, expected }: FolderArgs) => {
+  invoke: async (command: string, { dir, name, text, expected, path: root }: FolderArgs) => {
+    if (command === "sync_folder_use") {
+      used.push(root!);
+      if (refused.has(root!)) throw new Error("Choose a folder for sync again.");
+      return;
+    }
     const path = `${dir}/${name}`;
     if (command === "sync_folder_list") {
       listings.push(dir);

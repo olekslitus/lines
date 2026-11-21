@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { downloadName } from "../../scripts/release.mjs";
+import { downloadName, withoutReverted } from "../../scripts/release.mjs";
 
 test("downloads are named by the system they're for, their signatures too", () => {
   const named = (file: string) => downloadName(file, "0.3.3");
@@ -33,4 +33,16 @@ test("downloads are named by the system they're for, their signatures too", () =
   // Named once, and nothing else is.
   expect(named("lines_0.3.3_macos_universal.dmg")).toBe("lines_0.3.3_macos_universal.dmg");
   expect([named("Lines.app"), named("latest.json")]).toEqual(["Lines.app", "latest.json"]);
+});
+
+test("a change reverted in the same release is left out of it, with its revert", () => {
+  const commit = (hash: string, type: string, subject: string, body = "") => ({ hash, type, subject, body });
+  const kept = commit("a1", "feat", "a round + on phones (#387)");
+  const style = commit("b2", "feat", "an iOS style (#386)");
+  const styleOut = commit("c3", "revert", "take out the iOS style (#393)", "(a revert of #386, with the conflicts resolved)");
+  const fix = commit("d4e5f6a0123456789", "fix", "lists bounce (#388)");
+  const fixOut = commit("e5", "revert", 'Revert "lists bounce"', "This reverts commit d4e5f6a.");
+  // What a release before had is still taken out, so its revert stays.
+  const older = commit("f6", "revert", "take out the old menu", "Reverts #120");
+  expect(withoutReverted([older, fixOut, styleOut, fix, style, kept])).toEqual([older, kept]);
 });

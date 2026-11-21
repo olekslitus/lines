@@ -2,6 +2,35 @@
 
 What changed in each release of Lines. Written by `bun scripts/release.mjs prepare` from the commits since the release before (docs/releasing.md).
 
+## [0.8.0](https://github.com/olekslitus/lines/compare/v0.7.0...v0.8.0) (2026-11-21)
+
+### Breaking changes
+
+- **native:** Windows' publisher is olekslitus, and the old identifier's move is gone ([#373](https://github.com/olekslitus/lines/pull/373))
+
+### Features
+
+- **native:** the Mac app's icon goes dark, tinted or clear with macOS, in Liquid Glass ([#409](https://github.com/olekslitus/lines/pull/409))
+- choose Lines' app icon from twenty-one in Settings → Theme, wherever the system lets it change ([#405](https://github.com/olekslitus/lines/pull/405))
+- Lines' new icon, three lines: a knot, a bullet and a full stop, plum on lilac ([#402](https://github.com/olekslitus/lines/pull/402))
+- **themes:** Lines turns plum on lilac, like its icon, and teal stays as Teal ([#404](https://github.com/olekslitus/lines/pull/404))
+- a privacy policy, on the website at /lines/privacy/ and linked from Settings → About ([#401](https://github.com/olekslitus/lines/pull/401))
+- the app is called Lines, with a capital L, everywhere its name is shown ([#392](https://github.com/olekslitus/lines/pull/392))
+- slides spring on from the finger, lists scroll at the first touch, and phones tuck search away ([#396](https://github.com/olekslitus/lines/pull/396))
+- links open over Lines on phones, in Safari's view or a Custom Tab, or in your browser ([#394](https://github.com/olekslitus/lines/pull/394))
+- swipe from the edge to go back, and pull down to search, find or refresh ([#389](https://github.com/olekslitus/lines/pull/389))
+- **list:** a round + at the bottom of the note list on phones, to add where you are ([#387](https://github.com/olekslitus/lines/pull/387))
+- **release:** a signed Android APK with each release, offered on the website ([#385](https://github.com/olekslitus/lines/pull/385))
+
+### Fixes
+
+- **release:** leave a change reverted before its release out of the notes, with its revert ([#408](https://github.com/olekslitus/lines/pull/408))
+- press and hold opens menus at 0.4 s, sinking as it's held, with a tap felt as it opens ([#395](https://github.com/olekslitus/lines/pull/395))
+- **list:** the phone's + is dimmed under the sidebar's overlay, and a tap there closes the sidebar ([#391](https://github.com/olekslitus/lines/pull/391))
+- **import:** an Obsidian vault imports the same however its folder is listed ([#390](https://github.com/olekslitus/lines/pull/390))
+- **native:** phones don't zoom, lists bounce, text is iOS's size, the status bar is in lines' colors ([#388](https://github.com/olekslitus/lines/pull/388))
+- **player:** saying again that nothing's playing isn't cut short by the first time's timer ([#383](https://github.com/olekslitus/lines/pull/383))
+
 ## [0.7.0](https://github.com/olekslitus/lines/compare/v0.6.0...v0.7.0) (2026-11-17)
 
 ### Features

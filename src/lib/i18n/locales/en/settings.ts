@@ -600,6 +600,7 @@ export default {
   "settings.madeBy": "Made by Oleksandr Litus.",
   "settings.source": "Source on GitHub",
   "settings.reportIssue": "Report an issue",
+  "settings.privacyPolicy": "Privacy policy",
   "settings.license": "License",
   // {license} is a link: "GNU Affero General Public License v3.0".
   "settings.licenseText":

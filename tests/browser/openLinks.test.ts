@@ -29,18 +29,18 @@ async function opened(count: number) {
   return (await found.jsonValue()) as Invoked;
 }
 
-/** Settings → General, on a phone: from the sidebar. */
-async function general(app: App) {
+/** A section of Settings (General unless said), on a phone: from the sidebar. */
+async function settings(app: App, section = "General") {
   await app.page.getByRole("button", { name: "Show sidebar" }).click();
   await app.page.locator("[data-pane=sidebar]").getByRole("button", { name: "Settings", exact: true }).click();
   const dialog = app.page.getByRole("dialog");
-  await dialog.getByRole("navigation").getByText("General", { exact: true }).click();
+  await dialog.getByRole("navigation").getByText(section, { exact: true }).click();
   return dialog;
 }
 
 test("Open links is in Settings → General in the phone apps alone, In Lines at first", async () => {
   app = await openApp({ phone: true, app: true });
-  const choice = (await general(app)).getByRole("radiogroup", { name: "Open links", exact: true });
+  const choice = (await settings(app)).getByRole("radiogroup", { name: "Open links", exact: true });
   await choice.waitFor();
   expect(await choice.getByRole("radio", { name: "In Lines", exact: true }).getAttribute("aria-checked")).toBe("true");
   await choice.getByRole("radio", { name: "In your browser", exact: true }).click();
@@ -50,7 +50,7 @@ test("Open links is in Settings → General in the phone apps alone, In Lines at
 
   // Safari on an iPhone, and a computer, open the browser's way.
   app = await openApp({ phone: true });
-  const dialog = await general(app);
+  const dialog = await settings(app);
   await dialog.getByRole("radiogroup", { name: "New notes go to" }).waitFor();
   expect(await dialog.getByRole("radiogroup", { name: "Open links" }).count()).toBe(0);
   noErrors(app);
@@ -92,4 +92,13 @@ test("in the iPhone app a link in a note opens in Safari's view, in the theme's 
   await link.click({ button: "right" });
   await page.getByRole("menuitem", { name: "Open Link" }).waitFor();
   expect(await page.getByRole("menuitem", { name: "Open in Browser" }).count()).toBe(0);
+});
+
+test("Settings → About's Privacy policy opens the policy over Lines in the iPhone app, as other web links do", async () => {
+  app = await openApp({ phone: true, app: true });
+  const dialog = await settings(app, "About");
+  await dialog.getByRole("button", { name: "Privacy policy", exact: true }).click();
+  const [asked] = await opened(1);
+  expect(asked.cmd).toBe("open_safari_view");
+  expect(asked.args.url).toBe("https://olekslitus.com/lines/privacy/");
 });

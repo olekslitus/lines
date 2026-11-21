@@ -1,6 +1,9 @@
 /** Where lines' source is. */
 export const REPO = "https://github.com/olekslitus/lines";
 
+/** Lines' privacy policy (docs/privacy.md), at the address the app stores link to. */
+export const PRIVACY_POLICY = "https://olekslitus.com/lines/privacy/";
+
 /** This build's version (package.json's). lines is in alpha: early, changing, not yet for work that matters. */
 export const VERSION = __APP_VERSION__;
 

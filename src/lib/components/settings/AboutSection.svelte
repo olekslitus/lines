@@ -2,7 +2,7 @@
   import Icon from "../../icons/Icon.svelte";
   import { t } from "../../i18n/index.svelte";
   import { openExternal } from "../../platform";
-  import { REPO, VERSION as version } from "../../release";
+  import { PRIVACY_POLICY, REPO, VERSION as version } from "../../release";
   import { updates } from "../../updates.svelte";
   import Button from "../ui/Button.svelte";
   import FieldGroup from "../ui/FieldGroup.svelte";
@@ -71,6 +71,7 @@
     <div class="mt-1.5 -ml-2.5 flex flex-wrap gap-1">
       <Button variant="quiet" icon="code" onclick={() => openExternal(REPO)}>{t("settings.source")}</Button>
       <Button variant="quiet" icon="message-circle" onclick={() => openExternal(`${REPO}/issues`)}>{t("settings.reportIssue")}</Button>
+      <Button variant="quiet" icon="shield" onclick={() => openExternal(PRIVACY_POLICY)}>{t("settings.privacyPolicy")}</Button>
     </div>
   </div>
 </FieldGroup>

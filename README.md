@@ -96,7 +96,7 @@ Your notes are files on your device, not rows on someone else's server.
 A few honest notes:
 
 - **It's alpha.** Export your notes now and then, and say what breaks in [the issues](https://github.com/olekslitus/lines/issues).
-- **The desktop apps aren't signed yet.** On a Mac, open Lines the first time with right-click → Open. On Windows, choose More info → Run anyway.
+- **The Mac app is signed and notarized by Apple**, so it opens like any other app. The Windows app isn't signed yet: choose More info → Run anyway.
 - **On the web, the browser keeps your notes,** and a browser can clear them. Save to a folder, or export, to be safe ([Storage](docs/storage.md)).
 - What doesn't work yet, and what hasn't been tried on real phones, is all in [Limitations](docs/limitations.md).
 

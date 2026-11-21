@@ -122,7 +122,7 @@ describe("themes' own highlighter, status and callout colors", () => {
   const shared = { light: fromCss(lightCss), dark: { ...fromCss(lightCss), ...fromCss(darkCss) } };
   const NAMED = ["highlight-base", "pin", "danger", "success", "callout-info", "callout-question", "callout-warning", "callout-decision"];
   /** Themes drawn in lines' own colors, which may keep app.css's for these. */
-  const LINES_COLORS = new Set(["lines", "ember", "ink", "indigo", "plum", "moss", "amber", "sepia", "forest", "ocean"]);
+  const LINES_COLORS = new Set(["lines", "teal", "ember", "ink", "indigo", "plum", "moss", "amber", "sepia", "forest", "ocean"]);
 
   const effective = (theme: Theme, scheme: "light" | "dark") => {
     const colors: Record<string, string> = { ...shared[scheme], ...theme[scheme] };

@@ -67,12 +67,12 @@ test("a color's picker opens over the colors here, which stay open while it's us
   const panel = app.page.getByRole("dialog", { name: "Colors here, in Lines" });
   await panel.getByRole("button", { name: "Choose a color for Sidebar", exact: true }).click();
   const picker = app.page.getByRole("dialog", { name: "Choose a color for Sidebar" });
-  await picker.getByRole("radio", { name: "Teal", exact: true }).click();
-  expect(await rootColor("bg-sidebar")).toBe("#0e7a7e");
+  await picker.getByRole("radio", { name: "Purple", exact: true }).click();
+  expect(await rootColor("bg-sidebar")).toBe("#6b3e85");
   // Clicking and dragging in it is inside the colors here too.
   const area = (await picker.getByRole("slider", { name: "Saturation and brightness" }).locator("..").boundingBox())!;
   await app.page.mouse.click(area.x + 4, area.y + 4);
-  expect(await rootColor("bg-sidebar")).not.toBe("#0e7a7e");
+  expect(await rootColor("bg-sidebar")).not.toBe("#6b3e85");
   expect(await panel.isVisible()).toBe(true);
 
   await app.page.keyboard.press("Escape");

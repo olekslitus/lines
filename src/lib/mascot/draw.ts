@@ -17,7 +17,7 @@ function rowsOf(mascot: Mascot, pose: MascotPose): [string[], boolean] {
 }
 
 /** `pose` as a canvas the size of its art: `blink` shuts its eyes, `left` turns it round. */
-export function frame(mascot: Mascot, pose: MascotPose, { blink = false, left = false, accent = "#0e7a7e", accentDark = "#09585b" } = {}) {
+export function frame(mascot: Mascot, pose: MascotPose, { blink = false, left = false, accent = "#6b3e85", accentDark = "#4d2d60" } = {}) {
   const key = [mascot.id, pose, blink, left, accent, accentDark].join(" ");
   const found = cache.get(key);
   if (found) return found;

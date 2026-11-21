@@ -786,7 +786,7 @@ const SCENES = [
       await page.getByRole("option", { name: "Georgia" }).waitFor();
     },
   },
-  ...["ink", "indigo", "plum", "moss", "amber", "mono"].map((theme) => ({ id: `theme-${theme}`, title: `Theme: ${theme[0].toUpperCase()}${theme.slice(1)}`, look: "Text, links, tags and the chosen row read clearly; the accent stands out but isn't loud.", prefs: { theme }, note: PROSE })),
+  ...["teal", "ink", "indigo", "plum", "moss", "amber", "mono"].map((theme) => ({ id: `theme-${theme}`, title: `Theme: ${theme[0].toUpperCase()}${theme.slice(1)}`, look: "Text, links, tags and the chosen row read clearly; the accent stands out but isn't loud.", prefs: { theme }, note: PROSE })),
   ...[
     ["green-world", "Green World", "Violet backgrounds, the accent a leaf's green, tags magenta"],
     ["miku", "Miku", "Cool grey backgrounds with a teal sidebar in dark, the accent teal, tags pink"],
@@ -798,7 +798,7 @@ const SCENES = [
     prefs: { theme },
     note: `${PROSE}\n\n#garden\n\n:::info\nA callout, in the theme's blue.\n:::\n\n\`\`\`js\n// Code in its colors\nconst leaves = grow(3, "green");\n\`\`\``,
   })),
-  ...["lines", "ember", "ink", "indigo", "plum", "moss", "amber", "mono", "graphite", "sepia", "forest", "ocean", "green-world", "miku", "teto", "solarized", "nord", "dracula", "catppuccin", "tokyo-night", "gruvbox", "everforest", "ayu", "void", "puddle", "lightbulb"].map((theme) => ({
+  ...["lines", "teal", "ember", "ink", "indigo", "plum", "moss", "amber", "mono", "graphite", "sepia", "forest", "ocean", "green-world", "miku", "teto", "solarized", "nord", "dracula", "catppuccin", "tokyo-night", "gruvbox", "everforest", "ayu", "void", "puddle", "lightbulb"].map((theme) => ({
     id: `theme-colors-${theme}`,
     title: `Theme colors: ${theme}`,
     look: "The highlight, callouts and marks in the theme's own colors, sitting with its accent rather than Lines' own; the highlighted text readable; each callout's icon clear on its tint.",

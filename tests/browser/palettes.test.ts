@@ -28,7 +28,7 @@ test("Palettes lists lines' and yours; the theme's shows its colors by name, and
   expect(await palettes.getByRole("radio", { name: "Lines Light", exact: true }).getAttribute("aria-checked")).toBe("true");
   expect(await palettes.getByRole("radio", { name: "Nord", exact: true }).count()).toBe(1);
   const shown = settings.getByRole("region", { name: "Lines Light", exact: true });
-  expect(await shown.getByText("Teal", { exact: true }).isVisible()).toBe(true);
+  expect(await shown.getByText("Purple", { exact: true }).isVisible()).toBe(true);
   expect(await shown.getByRole("textbox").count()).toBe(0);
 
   await settings.getByRole("button", { name: "New Palette" }).click();
@@ -39,7 +39,7 @@ test("Palettes lists lines' and yours; the theme's shows its colors by name, and
   expect(await palettes.getByRole("radio", { name: "Sea", exact: true }).getAttribute("aria-checked")).toBe("true");
   const made = await palette(await idOf("Sea"));
   // The background, the sidebar's, the text, the muted text and the accent, each once.
-  expect(made!.colors.map((entry) => entry.color)).toEqual(["#ffffff", "#eff4f3", "#162120", "#5b6a68", "#0e7a7e"]);
+  expect(made!.colors.map((entry) => entry.color)).toEqual(["#fdfbff", "#f3eef8", "#201824", "#6a6072", "#6b3e85"]);
 });
 
 test("a palette of yours: a color changed and named, moved by keyboard, added and taken out", async () => {
@@ -135,7 +135,7 @@ test("pasted colors make a palette, shared as a file; a theme of yours drawn in 
   await app.page.getByRole("option", { name: "Lines Light", exact: true }).click();
   await editor.getByRole("button", { name: "Delete Palette" }).click();
   expect(await palette(pasted)).toBeUndefined();
-  expect(await drawn(["bg", "text"])).toEqual({ light: "lines-light", colors: ["#ffffff", "#162120"] });
+  expect(await drawn(["bg", "text"])).toEqual({ light: "lines-light", colors: ["#fdfbff", "#201824"] });
 });
 
 test("a theme of lines' shows what it's made of, unchanged, until Make a Copy makes one of yours", async () => {

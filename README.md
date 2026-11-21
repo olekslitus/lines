@@ -456,6 +456,7 @@ src/
     windows/                 Floating notes, the Settings window, and messages between windows
     icons/                   Icon component (drawn by the icon set plugin chosen) and the icons Lines uses
     i18n/                    Translations: t(), the language, and each language's messages (locales/)
+    appIcon/                 Lines' icon, drawn: the three lines, its colors, the small mark
     a11y.ts                  Saying things to screen readers
     prefs.svelte.ts          Theme, appearance, font, text size, note width, spacing, icon set (themes and icon sets by plugin id), layout, links, updates
     tabs.svelte.ts           Tabs for open notes: preview tabs, closing, following the selection
@@ -465,7 +466,7 @@ src/
 src-tauri/                   Native shell (Rust); sf_symbols.rs draws SF Symbols, lock.rs shares the
                              unlocked key with floating notes and does Touch ID, updates.rs finds,
                              downloads and installs new versions
-src-tauri/icons/source/      App icon artwork (SVG): Mac layout and full-bleed for iOS/Android
+src-tauri/icons/source/      The app icon as drawn (SVG): full bleed, the Mac's grid, dark and tinted, and the small mark
 docs/                        Linedown, LaTeX, spreadsheets, plugins, sync, storage, limitations, accessibility, translations, performance
 site/                        The website (bun run build:site): the home page (home.mjs), the docs as pages, the web
                              app at app/; build.mjs builds it and checks its links, screenshots.mjs takes the home
@@ -475,6 +476,7 @@ tests/                       Unit tests (unit/, bun test) and browser tests (bro
 scripts/bench.mjs            The benchmarks (bun run bench): builds, seeds 5,000 notes, drives WebKit and Chromium
 scripts/qa-shots.mjs         Pictures of Lines for QA (bun run qa-shots), into qa/shots/ with a page to see them on
 scripts/release.mjs          Versions and release notes from the commits (docs/releasing.md)
+scripts/icons.mjs            Every platform's app icon (bun run icons), from src/lib/appIcon/art.ts
 tools/themes/                Swatches from pictures and videos (swatch.ts) and themes for other apps (adapt.ts, targets/), docs/theme-tools.md
 .github/workflows/           Checks on every pull request, the release pull request, releases, the website
 ```

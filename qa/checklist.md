@@ -17,6 +17,13 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] Spreadsheet Notes (Settings → Plugins) is off on a fresh install, Spreadsheets (```csv blocks, `/spreadsheet`) on: no Spreadsheet in a note's ⓘ format choices, and a CSV file isn't imported as a spreadsheet; a spreadsheet note synced in, imported or added with the tour turns it on by itself, and it opens as a grid; turned off by hand, it stays off however many come (they show as their text, the ⓘ panel offering to turn it on)
 - [ ] Look through every QA note (qa tag in the sidebar) in light and dark, and at phone width; each says what to check at the top
 
+## 0a. The app icon
+
+- [ ] The icon is Lines' three lines (a knot, a bullet then a line, a line ending in a full stop), plum on lilac, everywhere: [Mac] Finder, the Dock and ⌘Tab, on Apple's grid with its shadow, as sharp at 16 as at 512; [Windows] the Start menu, the taskbar and the installer; [Linux] the launcher; Settings → About
+- [ ] [iOS] The home screen: plum on lilac in Light, lilac on near-black in Dark, the lines in the tint chosen in Tinted (Edit → Customize, iOS 18 and later); on iOS 26 the lines are glass, and Clear shows them clear; Spotlight and Settings show it too
+- [ ] [Android] The launcher's icon is masked to its shape (circle, squircle…) with the lines whole inside it; Themed icons on (Android 13 and later) shows the lines alone, in the wallpaper's colors; the splash screen shows it
+- [ ] [Web] The tab's icon is the lines alone, plum in a light browser and lilac in a dark one; added to a home screen (Safari's Add to Home Screen, Chrome's Install), the icon is the lilac one, whole in Android's mask; the website's header shows the icon (dark with the system), its footer the lines in the text's color
+
 ## 1. Typing and live Markdown
 
 - [ ] Code notes: the tour's Code notes (Python) has line numbers level with their lines, a fixed-width font and highlighting in the theme's colors, in light and dark; ⓘ → Code turns any note into JavaScript code at first, Language picks another (typing its name jumps to it) and is remembered for the next; Tab indents, brackets close and match; no spelling marks; importing a `.py`, `.rs` or `.ts` file makes a code note in its language, and downloading one gives that file; the list titles a Python note `# Plan` "Plan", but a C note `#include <stdio.h>` as written; back to Markdown, it's Markdown again

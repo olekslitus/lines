@@ -10,6 +10,7 @@
 		030DA650E7AEA323B93C68D7 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CC44169FE94BB2FA674F83B5 /* QuartzCore.framework */; };
 		4B59208889DD8D9904667FAD /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7A0EEF984076C5BAD706F45 /* UIKit.framework */; };
 		57CB006B72B0C097721AA9E8 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1E7466510E61F6FE09092224 /* main.mm */; };
+		E977C6285EE0F8BBAF367116 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = A667CA5FA826F980B6CF5625 /* AppIcon.icon */; };
 		5866674CACC9DD45C33E332F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9099859626B0024FDA6277F2 /* Assets.xcassets */; };
 		630DFE5DC956B482106D4F7A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 379A1ABEFB53E99909FFFE59 /* LaunchScreen.storyboard */; };
 		6403D9FD1B70E5FE22C696EF /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 40962BF7A6F08A4773AA307F /* Security.framework */; };
@@ -41,6 +42,7 @@
 		810B293DCAAE9230D779A24E /* main.rs */ = {isa = PBXFileReference; path = main.rs; sourceTree = "<group>"; };
 		83FF7E0868427499EE1C502B /* bindings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bindings.h; sourceTree = "<group>"; };
 		8CEFEB47044870740523D203 /* libapp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libapp.a; sourceTree = "<group>"; };
+		A667CA5FA826F980B6CF5625 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		9099859626B0024FDA6277F2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B264D0B5F0A177FAB8AA08D /* folder_sync.rs */ = {isa = PBXFileReference; path = folder_sync.rs; sourceTree = "<group>"; };
 		A550DAB5718FC59B311A0A43 /* updates.rs */ = {isa = PBXFileReference; path = updates.rs; sourceTree = "<group>"; };
@@ -131,6 +133,7 @@
 		9FE946AC63AC1CFD18BFB68E = {
 			isa = PBXGroup;
 			children = (
+				A667CA5FA826F980B6CF5625 /* AppIcon.icon */,
 				F017090473AABAC64B2728E7 /* assets */,
 				9099859626B0024FDA6277F2 /* Assets.xcassets */,
 				379A1ABEFB53E99909FFFE59 /* LaunchScreen.storyboard */,
@@ -242,6 +245,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E977C6285EE0F8BBAF367116 /* AppIcon.icon in Resources */,
 				5866674CACC9DD45C33E332F /* Assets.xcassets in Resources */,
 				630DFE5DC956B482106D4F7A /* LaunchScreen.storyboard in Resources */,
 				80C6F45C7D1BB543881EC7BC /* assets in Resources */,

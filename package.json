@@ -20,6 +20,7 @@
     "qa-notes": "bun scripts/qa-notes.mjs",
     "qa-shots": "bun scripts/qa-shots.mjs",
     "i18n": "bun scripts/i18n-check.mjs",
+    "icons": "bun scripts/icons.mjs",
     "tex-assets": "bun scripts/tex-assets.mjs",
     "openscad-assets": "bun scripts/openscad-assets.mjs",
     "swatch": "bun tools/themes/swatch.ts",

@@ -507,10 +507,8 @@ test("writing the time with nothing in the player says so, after the cursor and 
   await page.keyboard.type("Notes");
   await notice.waitFor({ state: "detached" });
 
+  // Enter at once, whether or not the menu has caught up with "/time".
   await page.keyboard.type(" /time");
-  // Chosen in the menu, which has caught up with "/time": the one for "/t" lists it too, and Enter
-  // there, while the menu's being worked out again, starts a new line.
-  await page.locator(".cm-tooltip-autocomplete [aria-selected=true]").getByText("Time in the Episode").waitFor();
   await page.keyboard.press("Enter");
   await notice.waitFor();
   expect(await app.text()).toBe("# Notes\n\nNotes ");

@@ -607,6 +607,27 @@ test("a block made by a slash command after a line's text goes after it, the tex
   expect(await app.text()).toBe("Some text more\n\n---\n");
 });
 
+test("Enter right after a command's name, before the menu has caught up with it, runs the command", async () => {
+  for (const [note, typed, after] of [
+    ["item", " /quote", "> item"],
+    ["$$\nx\n$$", " \\alph", "$$\nx \\alpha\n$$"],
+  ]) {
+    await app.open(note);
+    const menuShown = await app.page.evaluate((typed) => {
+      const view = window.testing.editor()!;
+      view.focus();
+      const at = view.state.doc.line(Math.min(2, view.state.doc.lines)).to;
+      view.dispatch({ changes: { from: at, insert: typed }, selection: { anchor: at + typed.length }, userEvent: "input.type" });
+      // In the same task as the typing, before the menu is worked out for it.
+      const shown = !!document.querySelector(".cm-tooltip-autocomplete");
+      view.contentDOM.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+      return shown;
+    }, typed);
+    expect(menuShown).toBe(false);
+    expect(await app.text()).toBe(after);
+  }
+});
+
 test("a #tag being typed offers the tags there are, the ones starting with it first; Enter writes the whole tag; not for a lone # or in code", async () => {
   await app.open("One #ideas and #work/meetings");
   await app.open("Two #ideas #idle");

@@ -142,6 +142,7 @@ How to use Lines, and how to work on it. They're on the website too, at [oleksli
 | [Plugins](docs/plugins.md) | How Lines is made of plugins, turning them off, and writing one |
 | [Sync](docs/sync.md) | How sync and end-to-end encryption work |
 | [Storage](docs/storage.md) | Where the web app and the desktop apps keep your notes, and for how long |
+| [Privacy](docs/privacy.md) | Lines' privacy policy: what it collects (nothing), and what leaves your device, when and to whom |
 | [Accessibility](docs/accessibility.md) | Keyboard and screen reader use, and how it's checked |
 | [Limitations](docs/limitations.md) | What doesn't work yet, and what hasn't been tried on real devices |
 | [What's new](CHANGELOG.md) | What changed in each release |

@@ -816,6 +816,7 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] Moving and resizing is remembered; open floating notes come back after relaunch
 - [ ] ⌘W closes it; trashing the note closes it
 - [ ] [Mac] Window buttons on hover or always, as set
+- [ ] A tag's or type's icon and color chosen in the main window show at once in an open floating note (a `#tag` in its text in the tag's color) and in the Settings window, without opening them again; on the web, the same between two tabs
 
 ## 20. Layout
 

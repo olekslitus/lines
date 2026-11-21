@@ -56,6 +56,20 @@ describe("tags' and types' looks", () => {
     expect(tagLooks.inherited("home")).toBeUndefined();
   });
 
+  test("go to the other windows as they're chosen, and those chosen in another at the same moment are taken in beside them", async () => {
+    // Another window, as the app's are on the web (windows/channel.ts).
+    const window = new BroadcastChannel("lines:window");
+    const heard = new Promise<{ looks: string }>((resolve) => (window.onmessage = (event) => resolve(event.data)));
+    tagLooks.setIcon("errands", "house");
+    expect(readLooks((await heard).looks).tags.errands.icon).toBe("house");
+    // Chosen there before it heard of the icon here.
+    const changed = new Promise<void>((resolve) => looks.onChange(resolve));
+    window.postMessage({ type: "looks", looks: writeLooks({ tags: { garden: { color: "green", at: Date.now() } }, types: {} }) });
+    await changed;
+    expect([tagLooks.icon("errands"), tagLooks.color("garden")]).toEqual(["house", "green"]);
+    window.close();
+  });
+
   test("tags in notes take their colors from a stylesheet, nested tags their tag's, a deeper one's own coming after to win", () => {
     const css = tagColorCss({ tags: { "work/meetings": { color: "red", at: 1 }, work: { color: "blue", at: 1 }, home: { icon: "house", at: 1 } }, types: {} });
     const rules = css.split("\n");

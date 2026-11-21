@@ -42,7 +42,7 @@
     {
       "layers": [
         {
-          "image-name": "lines.svg",
+          "image-name": "lines.png",
           "name": "lines",
           "glass": true,
           "fill-specializations": [

@@ -112,11 +112,12 @@ const images = appearances.map(([filename, , list]) => ({ ...(list.length ? { ap
 writeFileSync(join(catalog, "Contents.json"), JSON.stringify({ images, info: { author: "xcode", version: 1 } }, null, 2) + "\n");
 
 // iOS 26: the same, as Icon Composer's layers, so the system draws the lines in Liquid Glass and
-// colors them itself when tinted or clear.
+// colors them itself when tinted or clear. The lines are a picture rather than an SVG, whose
+// strokes Icon Composer fills in, closing the knot's loop.
 const composer = join(apple, "AppIcon.icon");
 rmSync(composer, { recursive: true, force: true });
 mkdirSync(join(composer, "Assets"), { recursive: true });
-writeFileSync(join(composer, "Assets/lines.svg"), `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">${glyph("#000000")}</svg>\n`);
+writeFileSync(join(composer, "Assets/lines.png"), await png(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">${glyph("#000000")}</svg>`, 1024));
 const srgb = (hex) => `srgb:${[1, 3, 5].map((i) => (parseInt(hex.slice(i, i + 2), 16) / 255).toFixed(5)).join(",")},1.00000`;
 const down = { start: { x: 0.5, y: 0 }, stop: { x: 0.5, y: 1 } };
 const iconJson = {
@@ -128,7 +129,7 @@ const iconJson = {
     {
       layers: [
         {
-          "image-name": "lines.svg",
+          "image-name": "lines.png",
           name: "lines",
           glass: true,
           "fill-specializations": [

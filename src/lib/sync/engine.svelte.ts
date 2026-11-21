@@ -108,7 +108,7 @@ async function loadConfig(): Promise<{ config: SyncConfig; inKeychain: boolean }
   }
   const fields = config.kind === "folder" ? ["path"] : ["endpoint", "bucket", "prefix", "region", "accessKeyId", "secretAccessKey"];
   const valid = fields.every((field) => typeof (config as unknown as Record<string, unknown>)[field] === "string");
-  return valid ? { config, inKeychain: !!saved.inKeychain } : null;
+  return valid ? { config, inKeychain: "inKeychain" in saved } : null;
 }
 
 const MIN_PASSPHRASE = 8;

@@ -50,10 +50,19 @@ describe("the sync connection's keys", () => {
   test("saved with the rest before Lines kept them in the keychain, they move there as it starts, and the connection is as it was", async () => {
     await sync.load();
     expect(sync.config).toEqual(bucket);
-    expect([stored().includes(SECRET), stored().includes(bucket.encryption!.key), stored().includes(bucket.accessKeyId)]).toEqual([false, false, true]);
+    // Not even empty: a Lines from before, opened again, finds no keys to try, rather than wrong ones.
+    const { secretAccessKey: _, ...rest } = bucket;
+    expect(JSON.parse(stored())).toEqual({ ...rest, encryption: { id: bucket.encryption!.id }, inKeychain: true });
     expect(JSON.parse(keychain.items.get("sync")!)).toEqual({ secretAccessKey: SECRET, encryption: bucket.encryption!.key });
     await sync.load();
     expect(sync.config).toEqual(bucket);
+  });
+
+  test("a cloud drive folder's encryption key moves there too", async () => {
+    const folder = { kind: "folder", provider: "icloud", name: "iCloud Drive", path: "/drive/lines", encryption: bucket.encryption } as const;
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(folder));
+    await sync.load();
+    expect([sync.config, JSON.parse(stored()).encryption, JSON.parse(keychain.items.get("sync")!)]).toEqual([folder, { id: "library" }, { encryption: bucket.encryption!.key }]);
   });
 
   test("where the keychain won't take them, they stay where they were", async () => {

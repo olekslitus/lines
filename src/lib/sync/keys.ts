@@ -1,5 +1,6 @@
 import { keychain } from "../keychain";
-import type { SyncConfig } from "./providers";
+import { isFolder, type BucketConfig, type FolderConfig, type SyncConfig } from "./providers";
+import type { LibraryKey } from "./sealed";
 
 /*
  * The sync connection's keys, the bucket's secret key and the end-to-end encryption key, are kept in
@@ -8,8 +9,17 @@ import type { SyncConfig } from "./providers";
  * rest, as before.
  */
 
-/** A connection as saved: with its keys, or without them and `inKeychain`. */
-export type SavedConfig = SyncConfig & { inKeychain?: true };
+/**
+ * A connection as saved: with its keys, or without them and `inKeychain`. Without them means
+ * without the fields at all, so a Lines from before finds no bucket key and no encryption key to
+ * use, rather than empty ones it would try.
+ */
+export type SavedConfig =
+  | SyncConfig
+  | ((Omit<BucketConfig, "secretAccessKey" | "encryption"> | Omit<FolderConfig, "encryption">) & {
+      encryption?: Pick<LibraryKey, "id">;
+      inKeychain: true;
+    });
 
 interface Keys {
   secretAccessKey?: string;
@@ -18,26 +28,25 @@ interface Keys {
 
 const NAME = "sync";
 
-const keysOf = (config: SyncConfig): Keys => ({
-  ...("secretAccessKey" in config ? { secretAccessKey: config.secretAccessKey } : {}),
-  ...(config.encryption ? { encryption: config.encryption.key } : {}),
-});
-
 /** The connection as it's saved: its keys in the keychain, where it takes them. */
 export async function stashKeys(config: SyncConfig): Promise<SavedConfig> {
   if (!(await keychain.available())) return config;
-  const keys = JSON.stringify(keysOf(config));
+  const { encryption, ...rest } = config;
+  const keys: Keys = { encryption: encryption?.key };
+  const saved = { ...rest, ...(encryption ? { encryption: { id: encryption.id } } : {}), inKeychain: true as const };
+  if (!isFolder(config)) {
+    keys.secretAccessKey = config.secretAccessKey;
+    delete (saved as Partial<BucketConfig>).secretAccessKey;
+  }
+  const json = JSON.stringify(keys);
   try {
-    await keychain.set(NAME, keys);
+    await keychain.set(NAME, json);
     // Only left out of the rest once they're surely there.
-    if ((await keychain.get(NAME)) !== keys) throw new Error("the keychain gave back something else");
+    if ((await keychain.get(NAME)) !== json) throw new Error("the keychain gave back something else");
   } catch (error) {
     console.error("lines: couldn't keep the sync keys in the keychain", error);
     return config;
   }
-  const saved: SavedConfig = { ...config, inKeychain: true };
-  if ("secretAccessKey" in saved) saved.secretAccessKey = "";
-  if (saved.encryption) saved.encryption = { ...saved.encryption, key: "" };
   return saved;
 }
 
@@ -48,14 +57,13 @@ export async function stashKeys(config: SyncConfig): Promise<SavedConfig> {
  * without keys that saving would then put in place of them.
  */
 export async function withKeys(saved: SavedConfig): Promise<SyncConfig> {
-  const { inKeychain, ...config } = saved;
-  if (!inKeychain) return config;
+  if (!("inKeychain" in saved)) return saved;
+  const { inKeychain: _, encryption, ...config } = saved;
   const json = await keychain.get(NAME);
   const keys: Keys = json ? JSON.parse(json) : {};
-  if ("secretAccessKey" in config) config.secretAccessKey = keys.secretAccessKey ?? "";
-  if (config.encryption && keys.encryption) config.encryption = { ...config.encryption, key: keys.encryption };
-  else delete config.encryption;
-  return config;
+  const library = encryption && keys.encryption ? { encryption: { id: encryption.id, key: keys.encryption } } : {};
+  if (isFolder(config as SyncConfig)) return { ...(config as FolderConfig), ...library };
+  return { ...(config as BucketConfig), secretAccessKey: keys.secretAccessKey ?? "", ...library };
 }
 
 /** Takes the keys out of the keychain, once the connection's gone. */

@@ -65,6 +65,7 @@ Your notes are files on your device, not rows on someone else's server.
 - Twenty-seven themes, each light and dark, including High Contrast and two for color blindness. Make your own, from scratch or from a picture you like, or bring one from VS Code or your terminal. See [Themes](docs/themes.md).
 - Whole new looks in one click: a 90s desktop, one-bit pixels, neon, glossy glass, 1920s posters, and more.
 - Paper to write on: ruled, dotted, squared or graph paper, and a soft backdrop behind the page.
+- An app icon in your colors, from twenty-one: on the home screen on a phone, in the Dock or taskbar on a computer.
 - Your fonts, text size, note width and spacing. Put the sidebar and the list where you like, and add tabs.
 - A text cursor your way, typing sounds from a real keyboard, and a pixel-art cat (or alien, or slime) that keeps you company at the bottom of the page. The sounds and the cat stay off until you want them.
 - Lines is made of [plugins](docs/plugins.md). Turn off what you don't use, and nothing in your notes changes.

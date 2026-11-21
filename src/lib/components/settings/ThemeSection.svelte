@@ -2,7 +2,8 @@
   import { DropdownMenu, RadioGroup } from "bits-ui";
   import { tick } from "svelte";
   import { speak } from "../../a11y";
-  import { locale, t } from "../../i18n/index.svelte";
+  import { ICONS, iconUrl, LILAC } from "../../appIcon/art";
+  import { locale, type MessageKey, t } from "../../i18n/index.svelte";
   import Icon from "../../icons/Icon.svelte";
   import type { IconName } from "../../icons/icons";
   import { plugins } from "../../plugins/registry.svelte";
@@ -18,6 +19,7 @@
   import { paneColors } from "../../themes/css";
   import { schemePalettes } from "../../themes/names";
   import { paletteOf } from "../../themes/palette";
+  import { isDesktopApp, isIOSApp, isMacApp, isMobileApp } from "../../platform";
   import { isDarkPane, schemeShown, shownScheme } from "../../themes/show.svelte";
   import Button from "../ui/Button.svelte";
   import Callout from "../ui/Callout.svelte";
@@ -42,6 +44,18 @@
   ];
   const PANE_NAMES = { none: "settings.darkPanesNone", sidebar: "settings.darkPanesSidebar", list: "settings.darkPanesList", both: "settings.darkPanesBoth" } as const;
   const darkPanes = DARK_PANES.map((id) => ({ id, label: t(PANE_NAMES[id]) }));
+
+  /** Where the app icon chosen shows, which each platform decides (appIcon/show.svelte.ts). */
+  const appIconNote = isIOSApp
+    ? t("settings.appIconNoteIOS")
+    : isMobileApp
+      ? t("settings.appIconNoteAndroid")
+      : isMacApp
+        ? t("settings.appIconNoteMac")
+        : isDesktopApp
+          ? t("settings.appIconNoteDesktop")
+          : t("settings.appIconNoteWeb");
+  const appIconName = (id: string) => t(`settings.appIcon.${id}` as MessageKey);
 
   /** A theme's tile: its colors for the scheme shown, and its sidebar's dark if Dark panes would darken it. */
   function tile(option: Theme) {
@@ -419,6 +433,32 @@
       </Segmented>
     </FieldRow>
   {/if}
+</FieldGroup>
+
+<FieldGroup title={t("settings.appIcon")} note={appIconNote}>
+  <div class="p-3">
+    <!-- A radio group, as the themes are: one Tab stop, the arrow keys going through the icons. -->
+    <RadioGroup.Root
+      value={prefs.appIcon}
+      onValueChange={(id) => (prefs.appIcon = id)}
+      aria-label={t("settings.appIcon")}
+      class="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2"
+    >
+      {#each ICONS as icon (icon.id)}
+        {@const name = icon === LILAC ? t("settings.appIconDefault", { name: appIconName(icon.id) }) : appIconName(icon.id)}
+        <RadioGroup.Item value={icon.id} aria-label={name} class="group flex flex-col items-center gap-1.5 rounded-xl p-1 pb-1.5 text-center hover:bg-hover">
+          <img
+            src={iconUrl(icon, prefs.dark ? "dark" : "light")}
+            alt=""
+            width="52"
+            height="52"
+            class="size-13 rounded-[22.37%] shadow-sm forced-color-adjust-none group-data-[state=checked]:outline-2 group-data-[state=checked]:outline-offset-2 group-data-[state=checked]:outline-accent forced-colors:group-data-[state=checked]:outline-[HighlightText]"
+          />
+          <span class="text-xs font-medium text-muted group-data-[state=checked]:text-fg">{name}</span>
+        </RadioGroup.Item>
+      {/each}
+    </RadioGroup.Root>
+  </div>
 </FieldGroup>
 
 {#key theme}

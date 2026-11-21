@@ -1909,6 +1909,19 @@ const SCENES = [
     shoot: "dialog",
   },
   {
+    id: "settings-app-icon",
+    title: "Settings → Theme → App Icon, Sea chosen",
+    look: "21 icons in an even grid under App Icon and its note, each with its name under it, Lilac (Default) first; Sea ringed in the accent with room between ring and icon; the icons light in light, dark in dark; nothing cut off at the group's edges.",
+    prefs: { appIcon: "sea" },
+    act: async (page) => {
+      await page.getByRole("button", { name: "Settings", exact: true }).click();
+      const dialog = page.getByRole("dialog");
+      await dialog.getByRole("navigation").getByText("Theme", { exact: true }).click();
+      await dialog.getByRole("radiogroup", { name: "App Icon" }).evaluate((group) => group.scrollIntoView({ block: "center" }));
+    },
+    shoot: "dialog",
+  },
+  {
     id: "installed-font-missing",
     title: "Typography, with an installed font this computer hasn't",
     look: "Installed font says “Zz Not A Font isn’t installed on this device, so notes are in the system font.” under its label, the field keeping the name; no recommended font marked; the preview in the system's font.",

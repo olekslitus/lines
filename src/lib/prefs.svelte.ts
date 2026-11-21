@@ -1,3 +1,4 @@
+import { ICON_IDS, LILAC } from "./appIcon/art";
 import { locale, t } from "./i18n/index.svelte";
 import { isMacApp } from "./platform";
 import type { BookFlow } from "./plugins/types";
@@ -330,6 +331,8 @@ export interface Stored {
   copyValues: boolean;
   /** Little Touches: a value like `5/7` drawn as marks, five of seven filled; or as written. */
   scores: ScoreStyle;
+  /** Lines' app icon, by its id (appIcon/art.ts): this device's, as only it can show it (appIcon/show.svelte.ts). */
+  appIcon: string;
   /** A note that's just a link is looked up and filled in, a library item (library/linkNotes.ts). */
   lookUpLinks: boolean;
   /** Something added to the Library again counts it in its note (`times added: 2`), as well as opening it. */
@@ -489,6 +492,7 @@ const DEFAULTS: Stored = {
   symbolsInCode: true,
   copyValues: true,
   scores: "stars",
+  appIcon: LILAC.id,
   lookUpLinks: true,
   countAddedAgain: true,
   sheetStats: ["sum", "average", "count"],
@@ -674,6 +678,7 @@ function read(json?: string): Stored {
     symbolsInCode: flag(raw.symbolsInCode, DEFAULTS.symbolsInCode),
     copyValues: flag(raw.copyValues, DEFAULTS.copyValues),
     scores: oneOf(raw.scores, SCORE_STYLES, DEFAULTS.scores),
+    appIcon: oneOf(raw.appIcon, ICON_IDS, DEFAULTS.appIcon),
     lookUpLinks: flag(raw.lookUpLinks, DEFAULTS.lookUpLinks),
     countAddedAgain: flag(raw.countAddedAgain, DEFAULTS.countAddedAgain),
     links: readLinks(raw.links, version),
@@ -790,6 +795,7 @@ class Prefs {
   symbolsInCode = $state(this.#initial.symbolsInCode);
   copyValues = $state(this.#initial.copyValues);
   scores = $state(this.#initial.scores);
+  appIcon = $state(this.#initial.appIcon);
   lookUpLinks = $state(this.#initial.lookUpLinks);
   countAddedAgain = $state(this.#initial.countAddedAgain);
   sheetStats = $state(this.#initial.sheetStats);
@@ -1008,6 +1014,7 @@ class Prefs {
       symbolsInCode: this.symbolsInCode,
       copyValues: this.copyValues,
       scores: this.scores,
+      appIcon: this.appIcon,
       lookUpLinks: this.lookUpLinks,
       countAddedAgain: this.countAddedAgain,
       links: $state.snapshot(this.links),
@@ -1131,6 +1138,7 @@ class Prefs {
     this.symbolsInCode = next.symbolsInCode;
     this.copyValues = next.copyValues;
     this.scores = next.scores;
+    this.appIcon = next.appIcon;
     this.lookUpLinks = next.lookUpLinks;
     this.countAddedAgain = next.countAddedAgain;
     if (next.sheetStats.join() !== this.sheetStats.join()) this.sheetStats = next.sheetStats;

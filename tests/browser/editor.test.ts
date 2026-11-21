@@ -630,6 +630,27 @@ test("Enter right after a command's name, before the menu has caught up with it,
   }
 });
 
+test("a tag at a line's end wraps whole, its # never on one line and its name on the next", async () => {
+  await app.open("# Tags\n\n#travel");
+  await app.page.evaluate(() => window.testing.place(0));
+  await app.page.locator(".editor-pane .cm-lp-tag-icon").waitFor();
+  // Moved along the line a letter at a time, past where it wraps.
+  const split = await app.page.evaluate(() => {
+    const view = window.testing.editor()!;
+    const found: string[] = [];
+    for (let i = 0; i < 200; i++) {
+      for (const tag of ["#travel", "#work/meetings"]) {
+        const line = view.state.doc.line(3);
+        view.dispatch({ changes: { from: line.from, to: line.to, insert: `${"a".repeat(i)} ${tag}` } });
+        const chip = view.contentDOM.querySelector(".cm-lp-tag")!;
+        if (new Set([...chip.getClientRects()].map((rect) => Math.round(rect.top))).size > 1) found.push(`${i} ${tag}`);
+      }
+    }
+    return found;
+  });
+  expect(split).toEqual([]);
+});
+
 test("a #tag being typed offers the tags there are, the ones starting with it first; Enter writes the whole tag; not for a lone # or in code", async () => {
   await app.open("One #ideas and #work/meetings");
   await app.open("Two #ideas #idle");

@@ -1902,6 +1902,13 @@ const SCENES = [
     shoot: "dialog",
   },
   {
+    id: "settings-about",
+    title: "Settings → About",
+    look: "Lines' icon at the top, the three lines plum on lilac (lilac on near black in dark), its corners rounded, level with the name and version beside it.",
+    settings: "About",
+    shoot: "dialog",
+  },
+  {
     id: "installed-font-missing",
     title: "Typography, with an installed font this computer hasn't",
     look: "Installed font says “Zz Not A Font isn’t installed on this device, so notes are in the system font.” under its label, the field keeping the name; no recommended font marked; the preview in the system's font.",

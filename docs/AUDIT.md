@@ -98,4 +98,4 @@ The first three are on the roadmap in `README.md`.
 - **Keychain for S3 secrets.** The secret key is in `localStorage` in plain text. Moving it to the macOS keychain needs a new native dependency and a migration; worth doing before a public release.
 - **Conditional S3 writes** (`If-Match` on PUT/DELETE) to close the window where another device's upload lands between our list and our put. Needs testing against each provider (R2, B2, MinIO).
 - **Narrowing native permissions**: the HTTP plugin may reach any `https://` URL and folder commands accept any absolute path. Tightening means keeping the chosen folder and endpoint on the Rust side.
-- **Unsafe pointer in `window_style.rs` `set_buttons`**: works today, but should use the same clone-the-window pattern as the other functions.
+- [x] **Unsafe pointer in `window_style.rs` `set_buttons`**: now uses the same clone-the-window pattern as the other functions ([#108](https://github.com/olekslitus/lines/issues/108)).

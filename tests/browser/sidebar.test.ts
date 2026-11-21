@@ -1,4 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
+import type { Page } from "playwright";
 import { type App, noErrors, openApp, toggle } from "./app";
 
 let app: App;
@@ -315,8 +316,8 @@ test("dragged into an empty section, the line takes the place of its words", asy
 });
 
 /** The color a sidebar row's icon is drawn in, and the theme's `color` there (`var(--palette-green)`), as CSS computes them. */
-const iconColor = (app: App, row: string, color: string) =>
-  app.page.evaluate(
+const iconColor = (page: Page, row: string, color: string) =>
+  page.evaluate(
     ([row, color]) => {
       const button = [...document.querySelectorAll<HTMLElement>("nav .row")].find((each) => each.innerText.startsWith(row))!;
       const probe = button.appendChild(document.createElement("span"));
@@ -342,7 +343,7 @@ test("a tag's, a type's and a note's color, chosen in the icon picker, colors th
   const picker = page.getByRole("dialog", { name: "Icon for work" });
   await picker.getByRole("radio", { name: "Green" }).click();
   expect(await picker.getByRole("radio", { name: "Green" }).getAttribute("aria-checked")).toBe("true");
-  const [work, green] = await iconColor(app, "work", "var(--palette-green)");
+  const [work, green] = await iconColor(app.page, "work", "var(--palette-green)");
   expect(work).toBe(green);
   await page.keyboard.press("Escape");
 
@@ -372,7 +373,7 @@ test("a tag's, a type's and a note's color, chosen in the icon picker, colors th
   await sidebar.getByRole("button", { name: /^Meeting/ }).click({ button: "right" });
   await page.getByRole("menuitem", { name: "Icon and Color" }).click();
   await page.getByRole("dialog", { name: "Icon for Meeting" }).getByRole("radio", { name: "Purple" }).click();
-  const [meeting, purple] = await iconColor(app, "Meeting", "var(--palette-purple)");
+  const [meeting, purple] = await iconColor(app.page, "Meeting", "var(--palette-purple)");
   expect(meeting).toBe(purple);
   expect(await look()).toBe(purple);
   // The note shows its type's icon, so in its type's color.
@@ -415,6 +416,27 @@ test("the icon picker finds icons by what they're for: money, cash, finance", as
   await picker.getByText("No icons match “zzz”.").waitFor();
 });
 
+test("a tag's icon and color chosen in one window show in the others at once", async () => {
+  app = await openApp();
+  await app.open("# Budget\n\n#finance");
+  const { page } = app;
+  const other = await page.context().newPage();
+  await other.goto(page.url());
+  await other.waitForFunction(() => window.testing?.notes.ready);
+  const icon = (page: Page) => page.getByRole("navigation", { name: "Library" }).getByRole("button", { name: /^finance/ }).locator("svg").first();
+
+  await page.getByRole("navigation", { name: "Library" }).getByRole("button", { name: /^finance/ }).click({ button: "right" });
+  await page.getByRole("menuitem", { name: "Icon and Color" }).click();
+  const picker = page.getByRole("dialog", { name: "Icon for finance" });
+  await picker.getByRole("radio", { name: "Green" }).click();
+  await picker.getByRole("searchbox", { name: "Search icons" }).fill("banknote");
+  await picker.getByRole("option", { name: "banknote", exact: true }).click();
+  await icon(other).and(other.locator(".icon-banknote")).waitFor();
+  const [shown, green] = await iconColor(other, "finance", "var(--palette-green)");
+  expect(shown).toBe(green);
+  await other.close();
+});
+
 test("a tag whose nested tags are all hidden has no arrow, until one's shown again", async () => {
   app = await openApp();
   await app.open("# Plan\n\n#idea/app #finance");
@@ -444,7 +466,7 @@ test("nested tags have their tag's color, shown first in their picker, until giv
   await page.getByRole("menuitem", { name: "Icon and Color" }).click();
   await page.getByRole("dialog", { name: "Icon for work" }).getByRole("radio", { name: "Blue" }).click();
   await page.keyboard.press("Escape");
-  const [meetings, blue] = await iconColor(app, "meetings", "var(--palette-blue)");
+  const [meetings, blue] = await iconColor(app.page, "meetings", "var(--palette-blue)");
   expect(meetings).toBe(blue);
 
   // Its picker: the first choice is the color it has from #work, and it's the one chosen.
@@ -454,10 +476,10 @@ test("nested tags have their tag's color, shown first in their picker, until giv
   const same = picker.getByRole("radio", { name: "Same as #work" });
   expect(await same.getAttribute("aria-checked")).toBe("true");
   await picker.getByRole("radio", { name: "Red" }).click();
-  const [own, red] = await iconColor(app, "meetings", "var(--palette-red)");
+  const [own, red] = await iconColor(app.page, "meetings", "var(--palette-red)");
   expect(own).toBe(red);
   await same.click();
-  expect((await iconColor(app, "meetings", "var(--palette-blue)"))[0]).toBe(blue);
+  expect((await iconColor(app.page, "meetings", "var(--palette-blue)"))[0]).toBe(blue);
 });
 
 test("a tag in a note is in the color chosen for it in the sidebar, its nested tags too", async () => {

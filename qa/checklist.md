@@ -624,6 +624,7 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] [Desktop] Settings → General → Open Settings: Over the notes (the first choice) opens Settings as a dialog over the notes in the main window, as on the web, from the sidebar's gear, ⌘/ (Shortcuts), the sync status and a locked note's Settings button; In a window closes the dialog and opens the Settings window on General at once, and later opens it there; back to Over the notes in the Settings window closes it and opens the dialog on General in the main window
 - [ ] [Desktop] (Open Settings In a window) Every change in the Settings window shows in the main window and floating notes with no wait you can see, and never goes back: flip a switch (Column letters and row numbers, a theme, appearance) several times quickly and each window ends as Settings shows; drag the text size slider and the note follows each step; turn a plugin off and on the same way
 - [ ] [Desktop] In the Settings window: themes and text settings change the main window and floating notes at once; connecting sync, setting up encryption, Sync Now and the sync status work as in the main window; the app lock turns on and off (Settings stays open, unlocked), Lock Now locks Lines and closes Settings; locked notes' password, Touch ID and reset work; Add Feature Tour adds the notes to the main window's list and shows them there; Export saves every note
+- [ ] [Desktop] Two settings changed at the same moment in two windows (the sidebar's width dragged in the main window as a theme is picked in the Settings window) both stay, in both windows and after a restart; on the web, the same in two tabs
 - [ ] [Desktop] With the app lock on, Lines locking for being idle closes Settings; using Settings counts as using Lines
 - [ ] Shortcuts (also ⌘/ or Ctrl+/, even with the cursor in a note): every shortcut, grouped; shown the Mac way on a Mac (⌘⇧F, ⌃⌘L) and as Ctrl+Shift+F, Ctrl+Alt+L elsewhere, with the switch showing the other system's; new note is ⌘N (Ctrl+N) in the apps and ⌥N (Alt+N) on the web; Close a floating note only in the desktop apps; each shortcut listed does what it says; VoiceOver reads the keys in words ("Shift Command F")
 - [ ] Section names and labels fit in English, French and Spanish, wrapping rather than being cut off
@@ -815,6 +816,7 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] Moving and resizing is remembered; open floating notes come back after relaunch
 - [ ] ⌘W closes it; trashing the note closes it
 - [ ] [Mac] Window buttons on hover or always, as set
+- [ ] A tag's or type's icon and color chosen in the main window show at once in an open floating note (a `#tag` in its text in the tag's color) and in the Settings window, without opening them again; on the web, the same between two tabs
 
 ## 20. Layout
 

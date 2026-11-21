@@ -3,7 +3,7 @@ import { locale, t } from "./i18n/index.svelte";
 import { isMacApp } from "./platform";
 import type { BookFlow } from "./plugins/types";
 import { CURRENCIES, DATE_STYLES, type DateStyle, localCurrency, MONEY_STYLES, type MoneyStyle, NEGATIVE_STYLES, type NegativeStyle } from "./sheets/display";
-import { type FormattingFonts, readFormattingFonts, sameFormattingFonts } from "./themes/formattingFonts";
+import { type FormattingFonts, readFormattingFonts } from "./themes/formattingFonts";
 import { familyName, installedFamily } from "./themes/installedFonts";
 import { announce, onAnnounce, windowLabel } from "./windows/channel";
 
@@ -875,7 +875,7 @@ class Prefs {
     });
     // Another window (Settings, main or floating) changed a setting: take it up, from the message
     // rather than storage, which WebKit brings up to date in other windows only a moment later.
-    void onAnnounce((message) => message.type === "prefs" && this.#reload(message.prefs));
+    void onAnnounce((message) => message.type === "prefs" && this.#takeUp(message.changed));
   }
 
   /** Makes notes' text a step bigger (1) or smaller (-1), or its usual size (0), within its range; returns the new size. */
@@ -1039,127 +1039,27 @@ class Prefs {
   }
 
   #save(json: string) {
+    const before: Record<string, unknown> = JSON.parse(this.#saved);
+    this.#keep(json);
+    // Only what changed, so another window changing something else at the same moment keeps it.
+    const changed = Object.fromEntries(Object.entries(JSON.parse(json)).filter(([key, value]) => JSON.stringify(value) !== JSON.stringify(before[key])));
+    void announce({ type: "prefs", changed });
+  }
+
+  #keep(json: string) {
     this.#saved = json;
     try {
       localStorage.setItem(KEY, json);
     } catch {
       // Private mode or full storage: preferences just won't persist.
     }
-    void announce({ type: "prefs", prefs: json });
   }
 
-  #reload(json: string) {
-    const next = read(json);
-    this.theme = next.theme;
-    this.style = next.style;
-    this.preset = next.preset;
-    this.settingsOpens = next.settingsOpens;
-    this.appearance = next.appearance;
-    this.contrast = next.contrast;
-    this.monochrome = next.monochrome;
-    this.invert = next.invert;
-    this.darkPanes = next.darkPanes;
-    this.font = next.font;
-    this.installedFont = next.installedFont;
-    if (!sameFormattingFonts(this.formattingFonts, next.formattingFonts)) this.formattingFonts = next.formattingFonts;
-    this.textSize = next.textSize;
-    this.icons = next.icons;
-    this.swipe = next.swipe;
-    this.gestures = next.gestures;
-    this.weekStart = next.weekStart;
-    this.calendarView = next.calendarView;
-    this.newNotes = next.newNotes;
-    this.openLinks = next.openLinks;
-    this.calendarEdited = next.calendarEdited;
-    this.feedRefresh = next.feedRefresh;
-    this.feedsInSidebar = next.feedsInSidebar;
-    this.dismissOnRead = next.dismissOnRead;
-    this.playbackRate = next.playbackRate;
-    this.bookFlow = next.bookFlow;
-    this.bookThemeColors = next.bookThemeColors;
-    this.timeNotes = next.timeNotes;
-    if (!sameSpacing(this.spacing, next.spacing)) this.spacing = next.spacing;
-    this.noteWidth = next.noteWidth;
-    this.fullWidth = next.fullWidth;
-    this.windowOpacity = next.windowOpacity;
-    this.windowBlur = next.windowBlur;
-    this.windowSeeThrough = next.windowSeeThrough;
-    this.floatingOpacity = next.floatingOpacity;
-    this.floatingBlur = next.floatingBlur;
-    this.floatingBorder = next.floatingBorder;
-    this.floatingTheme = next.floatingTheme;
-    this.floatingAppearance = next.floatingAppearance;
-    this.floatingButtons = next.floatingButtons;
-    this.floatingOverFullscreen = next.floatingOverFullscreen;
-    this.paper = next.paper;
-    this.paperPattern = next.paperPattern;
-    this.paperTexture = next.paperTexture;
-    this.paperSpacing = next.paperSpacing;
-    this.paperSize = next.paperSize;
-    this.paperColor = next.paperColor;
-    this.paperCustomColor = next.paperCustomColor;
-    this.paperOpacity = next.paperOpacity;
-    this.paperBackdrop = next.paperBackdrop;
-    this.backdropColor = next.backdropColor;
-    this.pageColor = next.pageColor;
-    this.pageCustomColor = next.pageCustomColor;
-    this.pageOpacity = next.pageOpacity;
-    this.typesetter = next.typesetter;
-    this.sidebarWidth = next.sidebarWidth;
-    this.listWidth = next.listWidth;
-    this.sidebarSide = next.sidebarSide;
-    this.listSide = next.listSide;
-    this.tabs = next.tabs;
-    this.outline = next.outline;
-    this.outlineSide = next.outlineSide;
-    this.propertiesPlace = next.propertiesPlace;
-    this.scrollbars = next.scrollbars;
-    this.sidebarAbout = next.sidebarAbout;
-    this.hideBars = next.hideBars;
-    this.showIcons = next.showIcons;
-    this.addButton = next.addButton;
-    this.markdownMode = next.markdownMode;
-    this.dragBlocks = next.dragBlocks;
-    this.underlinedHeadings = next.underlinedHeadings;
-    this.spellcheck = next.spellcheck;
-    this.copyOnSelect = next.copyOnSelect;
-    this.typingSounds = next.typingSounds;
-    this.keyboardSound = next.keyboardSound;
-    this.typingVolume = next.typingVolume;
-    this.headingColor = next.headingColor;
-    this.caretShape = next.caretShape;
-    this.caretColor = next.caretColor;
-    this.caretCustomColor = next.caretCustomColor;
-    this.caretBlink = next.caretBlink;
-    this.caretMotion = next.caretMotion;
-    this.caretEffect = next.caretEffect;
-    this.pointerStyle = next.pointerStyle;
-    this.pointerTrail = next.pointerTrail;
-    this.mascot = next.mascot;
-    this.mascotSize = next.mascotSize;
-    this.mascotTalks = next.mascotTalks;
-    this.headingCustomColor = next.headingCustomColor;
-    this.symbolsInText = next.symbolsInText;
-    this.symbolsInCode = next.symbolsInCode;
-    this.copyValues = next.copyValues;
-    this.scores = next.scores;
-    this.appIcon = next.appIcon;
-    this.lookUpLinks = next.lookUpLinks;
-    this.countAddedAgain = next.countAddedAgain;
-    if (next.sheetStats.join() !== this.sheetStats.join()) this.sheetStats = next.sheetStats;
-    this.sheetDates = next.sheetDates;
-    this.sheetMoney = next.sheetMoney;
-    this.sheetCurrency = next.sheetCurrency;
-    this.sheetNegative = next.sheetNegative;
-    this.sheetMoneyEdge = next.sheetMoneyEdge;
-    this.sheetHeadings = next.sheetHeadings;
-    this.sheetHeaderRow = next.sheetHeaderRow;
-    this.sheetHeaderColumn = next.sheetHeaderColumn;
-    this.autoUpdate = next.autoUpdate;
-    this.updateWait = next.updateWait;
-    if (JSON.stringify(this.links) !== JSON.stringify(next.links)) this.links = next.links;
-    // As already saved, so taking it up here doesn't send it back out.
-    this.#saved = this.#serialize();
+  /** Settings another window changed, over this one's own; kept too, but not sent back out. */
+  #takeUp(changed: Record<string, unknown>) {
+    const next = read(JSON.stringify({ ...JSON.parse(this.#serialize()), ...changed }));
+    Object.assign(this, Object.fromEntries(Object.entries(next).filter(([key, value]) => JSON.stringify(this[key as keyof Stored]) !== JSON.stringify(value))));
+    this.#keep(this.#serialize());
   }
 }
 

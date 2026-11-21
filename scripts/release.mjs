@@ -75,20 +75,39 @@ function lastTag() {
 
 /** The commits since `tag` (every one, before the first release), newest first. */
 function commitsSince(tag) {
-  const log = git("log", "--format=%s%x1f%b%x1e", ...(tag ? [`${tag}..HEAD`] : []));
+  const log = git("log", "--format=%H%x1f%s%x1f%b%x1e", ...(tag ? [`${tag}..HEAD`] : []));
   return log
     .split("\x1e")
     .map((entry) => entry.trim())
     .filter(Boolean)
     .map((entry) => {
-      const [subject, body = ""] = entry.split("\x1f");
+      const [hash, subject, body = ""] = entry.split("\x1f");
       // Only the convention's own types: "lines: …", from before it, is a plain subject.
       const match = CONVENTIONAL.exec(subject);
-      if (match && !TYPES.includes(match.groups.type)) return { subject, body, breaking: false };
+      if (match && !TYPES.includes(match.groups.type)) return { hash, subject, body, breaking: false };
       const breaking = !!match?.groups.breaking || /^BREAKING[ -]CHANGE: /m.test(body);
-      return { subject, body, ...match?.groups, breaking };
+      return { hash, subject, body, ...match?.groups, breaking };
     })
     .filter((commit) => !RELEASE_TITLE.test(commit.subject));
+}
+
+/**
+ * `commits` less the changes reverted among them, and those reverts: neither is in the release.
+ * A revert names what it undoes as "a revert of #386", GitHub's "Reverts #386" or git's
+ * "This reverts commit <sha>."; one of a change released before stays.
+ */
+export function withoutReverted(commits) {
+  const gone = new Set();
+  for (const revert of commits.filter((c) => c.type === "revert")) {
+    const text = `${revert.subject}\n${revert.body}`;
+    const prs = new Set([...text.matchAll(/\brevert(?:s|ing)?(?: of)? #(\d+)/gi)].map((m) => m[1]));
+    const shas = [...text.matchAll(/\bThis reverts commit ([0-9a-f]{7,40})/g)].map((m) => m[1]);
+    const undone = commits.filter(
+      (c) => c !== revert && (prs.has(PR_NUMBER.exec(c.subject)?.[1]) || shas.some((sha) => c.hash?.startsWith(sha))),
+    );
+    if (undone.length) for (const c of [revert, ...undone]) gone.add(c);
+  }
+  return commits.filter((c) => !gone.has(c));
 }
 
 const parse = (version) => version.split(".").map(Number);
@@ -132,7 +151,7 @@ function notes(commits, first) {
 function next() {
   const tag = lastTag();
   const current = JSON.parse(read("package.json")).version;
-  const commits = commitsSince(tag);
+  const commits = withoutReverted(commitsSince(tag));
   // The first release is the version package.json has.
   const version = tag ? bump(tag.slice(1), commits) : current;
   if (!version) return null;

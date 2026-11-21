@@ -56,8 +56,8 @@ test("the Calendar lists the notes on the day chosen, moves by keyboard, and mak
   await calendar.click();
   const grid = page.getByRole("grid");
   const today = grid.locator(`[data-day="${await day()}"]`);
-  await expect(today.getAttribute("aria-current")).resolves.toBe("date");
-  await expect(today.getAttribute("aria-label")).resolves.toEndWith(", 1 note");
+  expect(await today.getAttribute("aria-current")).toBe("date");
+  expect(await today.getAttribute("aria-label")).toEndWith(", 1 note");
   expect(await listed(app)).toContain("Dated today");
   expect(await listed(app)).not.toContain("Undated");
 

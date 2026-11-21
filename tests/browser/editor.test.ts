@@ -582,6 +582,31 @@ test("a slash command after a line's text makes it that block, leaving no space 
   }
 });
 
+test("a block made by a slash command after a line's text goes after it, the text keeping no space at its end", async () => {
+  const cases = [
+    ["Some text", "/table", "Table", "Some text\n\n|"],
+    ["Some text", "/code", "Code block", "Some text\n\n```"],
+    ["Some text", "/divider", "Divider", "Some text\n\n---"],
+    ["Some text", "/properties", "Properties", "---\ntype: \n---\nSome text"],
+  ];
+  for (const [note, command, name, start] of cases) {
+    await app.open(note);
+    await app.page.evaluate(() => window.testing.place());
+    await app.page.keyboard.type(` ${command}`);
+    await app.page.locator(".cm-tooltip-autocomplete [aria-selected=true]").getByText(name, { exact: true }).waitFor();
+    await app.page.keyboard.press("Enter");
+    expect((await app.text())!.startsWith(start), `${command}: ${JSON.stringify(await app.text())}`).toBe(true);
+    expect(await app.text()).not.toContain("Some text \n");
+  }
+  // Out of the middle of the text, it takes one of the spaces around it with it.
+  await app.open("Some text more");
+  await app.page.evaluate(() => window.testing.place(9));
+  await app.page.keyboard.type(" /divider");
+  await app.page.locator(".cm-tooltip-autocomplete [aria-selected=true]").getByText("Divider", { exact: true }).waitFor();
+  await app.page.keyboard.press("Enter");
+  expect(await app.text()).toBe("Some text more\n\n---\n");
+});
+
 test("a #tag being typed offers the tags there are, the ones starting with it first; Enter writes the whole tag; not for a lone # or in code", async () => {
   await app.open("One #ideas and #work/meetings");
   await app.open("Two #ideas #idle");

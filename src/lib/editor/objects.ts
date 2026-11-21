@@ -33,7 +33,7 @@ import type { Note } from "../notes/types";
 import { typeLooks } from "../notes/looks.svelte";
 import { speak } from "../a11y";
 import { announce, windowLabel } from "../windows/channel";
-import { ancestors, editedNote } from "./util";
+import { ancestors, commandStart, editedNote } from "./util";
 
 /*
  * Objects in the editor (see notes/properties.ts): the note's front matter, read from its first
@@ -268,6 +268,7 @@ export function mentionSource(context: CompletionContext): CompletionResult | nu
 
 /** `/properties`: adds front matter with a `type`, or moves to the end of the note's properties. */
 export function editProperties(view: EditorView, from: number, to: number) {
+  from = commandStart(view.state.doc, from);
   const front = view.state.field(frontMatterField, false);
   if (!front) {
     view.dispatch({

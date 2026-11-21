@@ -19,7 +19,7 @@ import { normalizeTag } from "../notes/parse";
 import { prefs } from "../prefs.svelte";
 import { t } from "../i18n/index.svelte";
 import { addActions, fencedBlock, removeActions } from "./rendered";
-import { ancestors, arrowsInto, drawnBlock, drawnBlocks, focused, hasText, isEditing } from "./util";
+import { ancestors, arrowsInto, commandStart, drawnBlock, drawnBlocks, focused, hasText, isEditing } from "./util";
 
 /*
  * GFM tables. Away from the cursor a table shows as a real table; click a cell (or move into the
@@ -209,8 +209,9 @@ export function insertTable(view: EditorView, from: number, to: number) {
   let changes;
   let start: number;
   if (rest) {
-    changes = [{ from, to }, { from: line.to, insert: "\n\n" + text + after }];
-    start = line.to - (to - from) + 2;
+    const cut = commandStart(doc, from);
+    changes = [{ from: cut, to }, { from: line.to, insert: "\n\n" + text + after }];
+    start = line.to - (to - cut) + 2;
   } else {
     const before = hasText(doc, line.number - 1) ? "\n" : "";
     changes = { from: line.from, to: line.to, insert: before + text + after };

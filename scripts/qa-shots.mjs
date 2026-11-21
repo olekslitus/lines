@@ -832,6 +832,18 @@ const SCENES = [
     } },
   { id: "style-void-settings", title: "Void, in Settings", look: "Groups without boxes, buttons and choices as words (the chosen one black), hairline switches and fields, one size of type; everything still clearly a control.", prefs: { style: "void", theme: "void" }, settings: "Editor", shoot: "dialog" },
   { id: "style-pixel-settings", title: "Pixel, in Settings", look: "Each switch's knob all the way across when it's on; the chosen segment turned around.", prefs: { style: "pixel", theme: "pixel" }, settings: "Editor", shoot: "dialog" },
+  ...["lines", "mono", "nord", "high-contrast"].map((theme) => ({
+    id: `switches-${theme}`,
+    title: `Switches and sliders, in ${theme}`,
+    look: "A switch that's on has its knob clear on the accent: white in light, the page's color in dark. Off, and a slider's knob, white. No knob lost on its track.",
+    prefs: { theme, symbolsInText: true, symbolsInCode: false },
+    act: async (page) => {
+      await page.getByRole("button", { name: "Settings", exact: true }).click();
+      await page.getByRole("dialog").getByRole("navigation").getByText("Typography", { exact: true }).first().click();
+      await page.getByRole("switch").last().scrollIntoViewIfNeeded();
+    },
+    shoot: "dialog",
+  })),
   ...["sidebar", "list", "both"].map((panes) => ({
     id: `dark-panes-${panes}`,
     title: `Dark panes: ${panes}`,

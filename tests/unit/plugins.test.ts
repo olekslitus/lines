@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { stubApp } from "./stubs";
 import { readFileSync } from "node:fs";
-import { contrast, over, parse, toLch } from "../../src/lib/themes/color";
+import { contrast, over, parse, type Rgb, toLch } from "../../src/lib/themes/color";
 import { MORE_CONTRAST } from "../../src/lib/themes/css";
 import { BASE_COLORS, paletteOf, resolveTheme } from "../../src/lib/themes/palette";
 import type { AppStyle, Contributions, Mascot, MascotPose, Theme, ThemeColors } from "../../src/lib/plugins/types";
@@ -193,6 +193,33 @@ describe("themes' own highlighter, status and callout colors", () => {
             const measured = ratio(colors, key, surface);
             if (measured < 2.95) misses.push(`${theme.id} ${scheme}: ${key} on ${surface} ${measured.toFixed(2)} < 3`);
           }
+        }
+      }
+    }
+    expect(misses).toEqual([]);
+  });
+
+  /*
+   * A switch that's on has its knob in `on-accent`, on the accent; one that's off, and a slider, in
+   * `thumb`, on the grey track (the ink at 15%) and the pane. In light themes that knob is white on
+   * white, set apart by its shadow and border, as Apple's are; in dark ones it has to read.
+   */
+  test("switches' and sliders' knobs read on what they sit on: 3:1, with Increased contrast too", () => {
+    const misses: string[] = [];
+    for (const theme of withStyles) {
+      for (const scheme of shownSchemes(theme)) {
+        for (const colors of [effective(theme, scheme), { ...effective(theme, scheme), ...MORE_CONTRAST[scheme], ...theme.moreContrast?.[scheme] }]) {
+          const pane = parse(colors["bg-elevated"])!;
+          const accent = over(parse(colors.accent)!, pane);
+          const track = over({ ...parse(colors.ink)!, a: 0.15 }, pane);
+          const check = (what: string, knob: string, under: Rgb) => {
+            const measured = contrast(over(parse(colors[knob])!, under), under);
+            if (measured < 3) misses.push(`${theme.id} ${scheme}: ${what} ${measured.toFixed(2)} < 3`);
+          };
+          check("a switch's knob on", "on-accent", accent);
+          if (scheme === "light") continue;
+          check("a switch's knob off", "thumb", track);
+          check("a slider's knob", "thumb", pane);
         }
       }
     }

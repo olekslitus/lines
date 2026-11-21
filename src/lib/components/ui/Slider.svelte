@@ -40,7 +40,7 @@
       index={0}
       aria-label={label}
       aria-valuetext={(spoken ?? format)?.(value)}
-      class="ui-slider-thumb block size-4 cursor-pointer rounded-full border border-line bg-[#fff] shadow-segment transition-[scale] active:scale-110 coarse:size-6"
+      class="ui-slider-thumb block size-4 cursor-pointer rounded-full border border-line bg-thumb shadow-segment transition-[scale] active:scale-110 coarse:size-6"
     />
   </Slider.Root>
   {#if format}

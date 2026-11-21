@@ -738,6 +738,7 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 ## 14. Sync
 
 - [ ] [Desktop] Cloud drive: the drives on the machine are listed; Choose another folder…; Connect, Switch, Disconnect, Show in Finder
+- [ ] [Mac] [iOS] [Windows] Updated from 0.8 with a bucket connected (encryption on too): it keeps syncing; the bucket's secret key and the encryption key are now in the keychain ("Lines", `sync`, in Keychain Access; `Lines/sync` in Windows' Credential Manager) and not in `lines.sync` (developer tools → localStorage); Connect saves them there, Disconnect and Erase This Device remove them; the web app keeps them in `lines.sync` as before
 - [ ] [Web] [Chromium] Folder: Choose a Folder… saves notes there as Markdown files and keeps them up to date; after a browser restart, Allow access asks once and sync carries on
 - [ ] [Web] Safari and Firefox explain that saving to a folder needs Chrome or Edge
 - [ ] S3 bucket (not on the demo website): every provider's help, Test connection, Connect, Disconnect, the CORS rule [Web]

@@ -1,8 +1,10 @@
 # Lines
 
-**Calm, local-first notes in plain Markdown.** Type Markdown and see it formatted as you write. Your notes stay on your device, as ordinary text you can open anywhere.
+**A calm, private space for everything you keep.**
 
-**[Try it in your browser →](https://olekslitus.com/lines/app/)** No account, nothing to install. Or download the apps for Mac, Windows, Linux and Android from [the website](https://olekslitus.com/lines/#download), which also has [the docs](https://olekslitus.com/lines/docs/).
+Your notes and ideas, the books, films and podcasts you love, and the week ahead, together in one quiet place. Lines lives on your device, so there's no account to make. Sync it where you choose, or not at all. It's free and open source, and it works on your computer and in your browser, with phone apps on the way.
+
+**[Open Lines in your browser →](https://olekslitus.com/lines/app/)** Nothing to install. Or [download the app](https://olekslitus.com/lines/#download) for Mac, Windows or Linux. The website also has [the docs](https://olekslitus.com/lines/docs/).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/images/app-dark.webp">
@@ -10,131 +12,93 @@
 </picture>
 
 > [!WARNING]
-> **Lines is in alpha.** It changes often and may have bugs, so please don't rely on it for important work yet, and export your notes now and then (Settings → Export and Import → Export).
+> **Lines is new, and still in alpha.** It changes often and may have bugs. Please don't keep your only copy of anything important in it yet, and export your notes now and then (Settings → Export and Import → Export).
 
-## Why Lines
+## What you can do with it
 
-- **Just Markdown.** What you type is exactly what's stored. There's no hidden format, so your notes open in any other app.
-- **Yours.** Notes live on your device and work offline. There's no account and no server. Sync is optional, through storage you choose.
-- **Calm.** Inspired by [Bear](https://bear.app): a focused writing space, with tags instead of folders.
-- **Everywhere.** Web, macOS, Windows, Linux, iOS and Android, from one codebase.
-- **Private when you need it.** End-to-end encryption, locked notes and an app lock.
-- **Free and open source**, under the AGPL.
+The quickest way to see it all is [the web app](https://olekslitus.com/lines/app/): it opens with a short tour, one note for each thing Lines does, to read and play with.
 
-## Features
+### Write and think
 
-The [web app](https://olekslitus.com/lines/app/) opens with a tour: one short note per feature, to read and play with.
+A quiet page that gets out of your way. Type the way you think, and Lines tidies it up as you go.
 
-### Writing
+- Headings, lists, todos, tables and callouts take shape as you type. Type `/` for anything else.
+- Underneath, it's plain Markdown, so every note opens in any other app. Put your cursor on a line to see its Markdown again, or hide it for good.
+- Tags instead of folders. New notes wait in the Inbox until you file them.
+- Link notes with `@` or `[[`. Give a note a type, like `person` or `recipe`, and see all of them together.
+- Search finds anything, across every note, as you type.
+- Pictures, files, audio, video, math, drawings and diagrams sit right in the note.
+- Small things help: drag any line to move it, find and replace, arrows that draw themselves (`->` as →), notes side by side, and, on a computer, a note in a small window of its own that can stay on top.
 
-- **Live Markdown.** Type `**bold**`, `# Heading` or `- [ ] todo` and see it formatted. Put the cursor on a line to see its Markdown again, or choose in Settings to keep it all in sight, show it as written, or never show it at all, as in Bear or Notion.
-- **Slash commands.** Type `/` at the start of a line for headings, todos, tables, callouts, code, diagrams, math, images, drawings, today's date and more. <kbd>Tab</kbd> completes, like a shell.
-- **Format toolbar.** Select text to make it bold, italic, underlined, struck through, code or highlighted. Or have what you select copied at once, as in a terminal (Settings → Editor).
-- **Lists and todos.** <kbd>Tab</kbd> and <kbd>⇧Tab</kbd> nest list items. Click a checkbox to tick it; the Todo view gathers every note with open tasks.
-- **Drag to move.** Grab the grip beside any line, list item, heading, table or card to move it, or use <kbd>⌥↑</kbd> / <kbd>⌥↓</kbd>. The grips can be turned off.
-- **Arrows and symbols.** `->` shows as →, `!=` as ≠, and so on, on screen only. The note keeps what you typed.
-- **Copy buttons** on values in `Key: Value` lines and on table cells, and **scores** like `Rating: 4/5` drawn as stars, hearts or circles (Settings → Little Touches, where either can be turned off).
-- **Page breaks.** `/page break` starts a new page in the PDF, and over a backdrop splits the note into pages, as Craft does.
-- **Marks in the margin.** <kbd>⌘⇧M</kbd> puts a colored bar beside lines, with what it means on pointing at it, as a code editor marks changed lines; it's an HTML comment other apps don't show. Plugins mark lines too: Changes marks what you've changed since opening a note.
-- **Find and replace** in a note (<kbd>⌘F</kbd>), matching case, whole words or a regular expression.
+### Keep what you read, watch and listen to
 
-### More than text
+The Library is a home for books, comics, films, shows, anime, music, podcasts, videos and articles. See [the Library](docs/library.md).
 
-- **Tables** that look like tables. <kbd>Tab</kbd> moves between cells, and rows pasted from a spreadsheet become one. A cell like `=SUM(B2:B4)` shows what it works out to.
-- **Cards and callouts.** Group a section into a card, or make it an info, question, warning, error or decision callout: `:::info` … `:::`.
-- **Code blocks** with syntax highlighting in your theme's colors, a copy button, and a wand that tidies JSON, SQL, JavaScript, CSS and more.
-- **Diagrams** from [Mermaid](https://mermaid.js.org) code: flowcharts, sequence diagrams, Gantt charts and more, drawn as you type by [Pele](https://pele.run) in your theme's colors, or by Mermaid itself.
-- **Typing practice.** Put any text in a note to type over (`/typing`): a quote, a page of a book, code. It's timed, shows your speed, your accuracy and the keys you miss, and keeps your best. See [docs/linedown.md](docs/linedown.md#typing-practice).
-- **Timing diagrams** for electronics, from [WaveDrom](https://wavedrom.com) code: clocks, signals and buses over time, a register's bit fields, and logic circuits (`/timing`).
-- **3D models** to turn around and zoom into: [OpenSCAD](https://openscad.org) code in an ` ```openscad ` block (`/model`), made into its model as you type and downloaded as STL for 3D printing, and attached OpenSCAD, STL, OBJ, 3MF, glTF, STEP and IGES files. See [docs/linedown.md](docs/linedown.md#3d-models).
-- **Code notes.** Switch a note to Code and choose its language, from about 120: line numbers, a fixed-width font, highlighting in your theme's colors, and indenting and brackets as in a code editor. It stays the file it is, and downloads and exports as one (`.py`, `.ts`, `.rs`…). Importing a code file makes one.
-- **Math** with [KaTeX](https://katex.org): `$…$` in a line, `$$` for a block.
-- **Drawings** with [Excalidraw](https://excalidraw.com), saved in the note as an SVG any Markdown app can show.
-- **Links to folders on your computer.** Drop a folder from Finder onto a note, or type `/folder`, for a link that opens it in Finder; links to files open them in their apps. See [docs/linedown.md](docs/linedown.md#folders-and-files-on-your-computer).
-- **Images, files, audio and video.** Paste or drop them in. Drag an image's or video's corner to resize it. Audio and video play right in the note, and audio keeps playing while you scroll and write.
-- **Photos and GIFs from the web.** `/unsplash` searches Unsplash's free photos and `/giphy` GIPHY's GIFs, and puts the one you pick in the note.
-- **Wallpapers from Wallhaven.** In the apps, `/wallhaven` searches [Wallhaven](https://wallhaven.cc)'s wallpapers and keeps the one you pick with the note; Settings → Theme → New → From Wallhaven makes a theme of a wallpaper's colors, and puts it behind your notes. See [docs/themes.md](docs/themes.md#your-own-themes).
-- **Research papers.** `/paper` searches [arXiv](https://arxiv.org) by title, author or topic and links to the paper you pick by its title, in Markdown and LaTeX notes (in the apps). More sources of papers can be added as plugins.
-- **API requests.** Write requests in an ` ```http ` block (`/request`) and send them from the note, a lighter Postman or Bruno: variables, one request using another's response, curl commands pasted in or copied out. The `.http` format JetBrains' IDEs, VS Code and Visual Studio read, so a whole note of requests opens there too, or [Hurl](https://hurl.dev)'s, whose captures and asserts check each response. See [docs/requests.md](docs/requests.md).
-- **Terminal recordings** from [asciinema](https://asciinema.org) play right in the note, in your theme's colors. Paste a recording's link, or drop in a `.cast` file.
-- **Spotify and SoundCloud** links on a line of their own play in the note with the site's own player, which loads only when you press play, so nothing reaches the site before. It takes turns with Lines' podcast player. Spotify plays 30-second previews without a Spotify login.
-- **GitHub and arXiv links** read short, like `olekslitus/lines#12` with GitHub's mark, or `arXiv:1706.03762`.
+- Paste a link, and the note fills itself in: the title, the cover, who made it and what it's about. Only the link is sent to look it up.
+- Mark where you've got to (to read, reading, read) and rate it your way: stars, out of ten, thumbs up, or a scale of your own.
+- Read your own PDFs and EPUBs in Lines. Keep the lines you like as quotes, and Lines remembers your page.
+- Follow blogs, sites and podcasts (and, in the apps, YouTube channels). Read them like an inbox you can bring to zero.
+- Listen to episodes in a small player that keeps going as you move between notes. Jot notes as you listen, each one marked with the time.
+- Bring in your browser's bookmarks and your Readwise highlights. Keep your AniList or MyAnimeList list in step, both ways.
 
-### LaTeX notes
+### Plan your days
 
-Switch a note to LaTeX from its ⓘ panel and write `\section`, theorems, citations and math as you would in a paper, drawn as you type. Paste a whole paper and it just works. Export gives you a `.tex` file that compiles, or have TeX itself typeset the PDF, right in the app. See [docs/latex.md](docs/latex.md).
+- A calendar of your notes: give a note a date, or a start and an end, and it's on those days.
+- See your week or a day by the hour. Drag to make an event, move it, or change how long it lasts.
+- Events that repeat, written the way you'd say it: `every weekday`, `monthly on the last friday`.
+- One list of every open todo, gathered from all your notes.
+- Choose a day and press <kbd>↵</kbd> for a note dated that day: a simple way to keep a journal.
 
-### Spreadsheets
+### Yours, private and offline
 
-Put one in a Markdown note with `/spreadsheet` (a ` ```csv ` block), or, with Spreadsheet Notes on in Settings → Plugins, make a whole note a spreadsheet from its ⓘ panel. Formulas are worked out by [IronCalc](https://www.ironcalc.com). See [docs/spreadsheets.md](docs/spreadsheets.md).
+Your notes are files on your device, not rows on someone else's server.
 
-- **Works like Excel**: its keys, functions suggested as you type, cells pointed at with the mouse or the arrow keys, copy and paste with other apps, sorting, and rows and columns inserted with formulas that follow.
-- **Fill and move.** Drag the selection's corner to carry on a series (1, 2 → 3, 4; Monday → Tuesday), or hold cells a moment and drag them elsewhere.
-- **Money, dates and numbers below zero** shown your way, accounting style too, and the sum and average of what's selected.
-- **Formulas across notes.** `=Budget!B4` uses another note's spreadsheet, and follows it when it's renamed.
-- **Plain CSV underneath**, so it syncs and searches like any note. A block turns into a Markdown table, and back, with a button.
-- **CSV and Excel files.** Import them from Settings → Export and Import, or turn a CSV file in a note into a spreadsheet there with its button; download a spreadsheet as CSV (formulas or values) or as an Excel workbook.
+- No account, no ads and no tracking. The apps work without the internet.
+- Sync if you want to: through iCloud Drive, Google Drive, Dropbox, OneDrive, Proton Drive or any folder (in the desktop apps), a folder on your computer (on the web, in Chrome and Edge), or storage of your own, such as Cloudflare R2 or Amazon S3. Edits made on two devices are never lost. See [Sync](docs/sync.md).
+- Turn on end-to-end encryption, and your notes are encrypted on your device before they leave it.
+- Lock single notes with a password, like in Apple Notes (or Touch ID on a Mac), and keep passwords and API keys in a locked note ([Secrets](docs/secrets.md)).
+- Lock the whole app with a passphrase, or Touch ID on a Mac.
+- Export everything as ordinary files whenever you like. Lines is free and open source, so it can't be taken away from you.
 
-### Organizing
+### Make it feel like yours
 
-- **Tags, not folders.** Write `#tag` or `#nested/tag` anywhere in a note, or drag a note onto a tag (or a type, the Inbox, the Trash) in the sidebar. Give tags and types icons and colors, synced to your other devices, and rename them everywhere at once.
-- **Library.** Paste a link to a book, a comic (manga, manhwa, a webtoon), a movie, a show, an anime, a video, a song, a podcast, an article or a paper into a new note, and it fills itself in: its title, cover, who made it, when and what it's about, from the site and open catalogs (Open Library, Wikidata, AniList, MyAnimeList, MusicBrainz, Apple Podcasts, SoundCloud, YouTube, arXiv), with only the link sent. One undo puts the link back. Or search the catalogs from the Library's +, or turn a link in any note into a mention of its own library note from the link's menu. The sidebar's Library lists them by kind, each with its cover, where you've got to (to read, reading, read) and its rating, set from its menu or with a click on its stars: on 5 stars, out of 10 or 100, thumbs, grades or a scale of your own, chosen for each kind, with ratings of its own beside the overall one (a show's Story, Music), all plain properties (`rating: 4/5`) any app reads. Import your bookmarks from any browser (or Pocket, Pinboard, Raindrop) as resources, with their folders, dates and tags, and look each up when you want. Sign in to AniList or MyAnimeList, and your anime list there and the Library keep each other up to date, both ways: status, rating and episodes watched. Moving from Readwise? Your books, articles, podcasts and tweets come over with their highlights, and what you saved in Reader with where you'd got to; importing again adds only what's new. Bring in a YouTube playlist by its link, or Watch Later from Google Takeout, each video one to watch. See [docs/library.md](docs/library.md).
-- **Books you keep.** Add a PDF or an EPUB from its file (or drop it on Lines) and read it in its note's place: by pages or scrolling, with its contents and a search, an EPUB in your theme's colors and font, a PDF as printed or in your theme's colors. Keep what you choose as a quote in the note, linked to its page. Lines remembers where you are, and the Library shows how far through. A book's scripts never run. See [docs/library.md](docs/library.md#books-you-keep).
-- **Feeds and podcasts.** Subscribe to a blog, a site or a podcast (its feed's link, the site's, its Apple Podcasts page, or in the apps its maker's SoundCloud), or in the apps a YouTube channel, and read its posts in the Library's RSS, Atom, JSON, Podcast and Video Feeds (or all in one Feeds, as you choose), a channel's videos playing in place, drawn as notes, read and unread kept, Save to Library for the ones to keep. Group feeds into streams by topic or priority (Must read, Work), each a row of its feeds' posts together, and filter a feed's posts, or every feed's, by their words. Dismiss a post you're done with, or one that isn't interesting (E, N), to keep a feed as an inbox at zero; Undo, or Show Dismissed, brings one back, and what's read and dismissed syncs between devices. A Hacker News post has its discussion under it, threaded, to fold and go through by keyboard. RSS, Atom, RSS 1.0 and JSON Feed, fetched in the apps every 30 minutes, asking only whether they changed; OPML in and out. Episodes play in Lines, in a mini player that goes on across notes, starts each where it stopped, and answers the media keys. Take notes as you listen: each starts with the time it's taken at, and a time in a note (`[12:34]`) plays the episode from there; keys play, pause and skip without leaving the text, and a transcript, where the feed has one, follows along and quotes a line into the note. See [docs/library.md](docs/library.md#feeds).
-- **Objects and mentions.** Give a note properties and a type (`type: person`) and it's listed under Types. Type `@` or `[[` to mention another note, `@Ada.email` to show one of its properties, and `@type.recipe` for a table of every recipe.
-- **Inbox.** New notes and imports land in the Inbox, first in the sidebar, until you file them (or send new notes straight to Notes, in Settings).
-- **Calendar.** Notes on their days: a `date` or `due` in a note's properties, or every day from its `start` to its `end`. Its row counts what's on today. Events repeat (`repeat: every weekday`, `monthly on the last friday until 2027-06-01`, or from an event's menu). Events in their colors: a note's own, or its type's or tag's. A month above the list, and beside it the week or the day by the hour, with notes at their times (`date: 2026-11-30 14:00`). Drag down the hours to make an event, or across All day for one of whole days, drag one to another time or day, or its edge to change how long it is (<kbd>⌘Z</kbd> moves it back). Choose a day for its notes, or press <kbd>↵</kbd> on a day for a note dated that day.
-- **A sidebar your way.** Put Inbox, Notes, Calendar and the rest in sections of your own, named or just a gap, with dividers between them where you like, fold Types and Tags away, sort them by name or by how many notes, hide any row (Show Hidden brings it back), make rows small or big tiles with their count, one by one or a section at once, and drag rows and sections into the order you like.
-- **Drag a note out** of the list onto Finder, the desktop or another app for a copy of it as a file.
-- **Note icons**, shown before the title in the list.
-- **Fast search** across every note.
-- **Pin, trash, restore.** Right-click, long-press or swipe a note.
-- **Gestures on a phone.** On iPhone and iPad, swipe from the screen's edge back to the list or into the sidebar, the note following your finger. Pull the list down to search it, a note to find in it, the feeds to refresh them. Turn them off in Settings → General.
-- **Links open in Lines on a phone.** On iPhone and iPad a link opens in Safari's view over your notes, with Reader and sharing, and closing it takes you back where you were; on Android in a Custom Tab. Or send links to your browser in Settings → General.
-- **Several notes at once.** <kbd>⌘</kbd>-click, <kbd>⇧</kbd>-click or <kbd>⌘A</kbd> in the list, then tag, pin or trash them together.
-- **Notes side by side, and above and below.** Open to the Side or Open Below (or <kbd>⌥</kbd>-click and <kbd>⌥⇧</kbd>-click in the list) opens a note beside the one you're in, to read one while writing another; split as many times as there's room, one on top and two at the bottom, swap any with the open note, and drag the lines between them. Or drag a note from the list onto a pane, by its edge to open it beside or in its middle to open it there, and drag panes around by their grips.
-- **Floating notes** (desktop apps). Pop a note into its own small window that can stay on top.
+- Twenty-six themes, each light and dark, including High Contrast and two for color blindness. Make your own, from scratch or from a picture you like, or bring one from VS Code or your terminal. See [Themes](docs/themes.md).
+- Whole new looks in one click: a 90s desktop, one-bit pixels, neon, glossy glass, 1920s posters, and more.
+- Paper to write on: ruled, dotted, squared or graph paper, and a soft backdrop behind the page.
+- Your fonts, text size, note width and spacing. Put the sidebar and the list where you like, and add tabs.
+- A text cursor your way, typing sounds from a real keyboard, and a pixel-art cat (or alien, or slime) that keeps you company at the bottom of the page. The sounds and the cat stay off until you want them.
+- Lines is made of [plugins](docs/plugins.md). Turn off what you don't use, and nothing in your notes changes.
+- In English, Spanish and French. Everything works with the keyboard and with a screen reader ([Accessibility](docs/accessibility.md)).
 
-### Export and share
+### When a note needs to be more
 
-- **PDF and print.** <kbd>⌘P</kbd> lays a note out on A4 or Letter pages, black on white. Save it as a PDF, or as PNG images.
-- **Share** a note through the system share sheet, copy it as Markdown or plain text, or download it as a file.
-- **Export everything** as files in a .zip, each in its note's format (Markdown, LaTeX, CSV, .http or .hurl), with images and files (Settings → Export and Import).
-- **Import** Markdown, LaTeX, CSV, Excel, `.http` and `.hurl` files as notes (Settings → Export and Import).
-- **Move from Obsidian, Bear, Logseq, Notion or Evernote.** Choose your Obsidian vault's folder, Bear's backup, your Logseq graph, Notion's export or Evernote's notebooks in Settings → Export and Import, and its notes come over with their tags (and folders, as tags), links, pictures and files, pins and dates; Obsidian's callouts and daily notes and Logseq's journals (on the Calendar), Logseq's outlines as lists (and prose as paragraphs), Notion's databases (each row a note of a type, the database a table of them), Evernote's checklists and reminders, and Bear's archive and trash. What won't come across as it was is said first, with examples; importing again adds only what's new, and Undo takes it all back to the Trash. See [docs/importing.md](docs/importing.md).
-- **Sample notes.** Add the feature tour, LaTeX examples or the QA notes from Settings → Export and Import.
+- **Papers in LaTeX**, drawn as you type, with a PDF typeset right in the app ([LaTeX notes](docs/latex.md)).
+- **Spreadsheets** that work like Excel, with formulas, CSV and Excel files in and out ([Spreadsheets](docs/spreadsheets.md)).
+- **Diagrams** from a few lines of text: flowcharts, Gantt charts, timing diagrams, and **3D models** to turn around and print.
+- **Code notes** in about 120 languages, and **API requests** you send from the note, like a lighter Postman ([API requests](docs/requests.md)).
+- **Typing practice** on any text, terminal recordings, Spotify and SoundCloud players, and research papers looked up on arXiv (in the apps).
 
-### Sync and privacy
+### Bring your notes with you
 
-- **Save to a folder** (web, in Chrome and Edge). Lines keeps your notes there as `.md` files, both ways.
-- **Sync through your cloud drive** (desktop apps): iCloud Drive, Google Drive, Proton Drive, Dropbox, OneDrive or any folder.
-- **Sync with your own storage**: any S3-compatible bucket, such as Cloudflare R2, Backblaze B2, Amazon S3 or MinIO. Conflicts never lose an edit. See [docs/sync.md](docs/sync.md).
-- **End-to-end encryption** (optional). Notes are encrypted on your device before they reach the bucket or drive.
-- **Locked notes**, like in Apple Notes: one password (or Touch ID on the Mac) opens them.
-- **Secrets.** Keep API keys and passwords in a locked note, and use them by name, `{{github}}`, in requests and other notes, which show the name and dots, to reveal or copy. See [docs/secrets.md](docs/secrets.md).
-- **App lock** (optional). Lines asks for your passphrase or Touch ID when it opens, and after a while without use.
+- Move from Obsidian, Bear, Logseq, Notion or Evernote. Your notes come over with their tags, links, pictures, files and dates. Lines tells you first what won't come across as it was, and Undo takes it all back. See [Importing](docs/importing.md).
+- Open Markdown and LaTeX files as notes, and CSV and Excel files as spreadsheets.
+- Take them out again any time: every note as a file in a .zip, a note as a PDF or pictures, or shared from the system's share menu.
 
-### Make it yours
+## Get Lines
 
-- **Plugins.** Like a code editor, Lines is a small core with plugins around it: the formats notes are written in, what draws math and diagrams, ways to make a PDF, themes and icons. Turn off what you don't use in Settings → Plugins; nothing in your notes changes. See [docs/plugins.md](docs/plugins.md).
-- **Presets**: the whole look in one, not just the colors. Classic, a desktop of the late 90s with bevels and a title bar; Pixel, one-bit and minimal in a pixel font; Neon, glowing lines on a grid; Adventure, a 2D adventure game's pixel art, with framed slots and grass; Aero, glossy 2000s glass; Brutalist, thick rules and big type; Constructivist, 1920s avant-garde posters in red, black and paper; Void, heavy minimalism, its toolbars out of sight until reached for and words in place of icons. Save your own (theme, type, paper, cursor and all) and share it as a file. See [docs/themes.md](docs/themes.md#presets).
-- **Twenty-six themes**, each light and dark, including High Contrast and two for color blindness, each a palette (Nord's, Solarized's, Catppuccin's, Lines' own) and what its colors are for. **Make your own** from any of them, bit by bit by right-clicking anything to change its color, down to each heading level, bold, italics and links, or from a picture (a wallpaper's colors, read on your device); make **palettes of your own** too, from a picture, pasted colors or another palette, and draw any theme of yours in any palette; share them as files, or import a theme made for VS Code, Zed, Base16, iTerm2, Alacritty, Kitty, Ghostty and other terminals, or KDE and GTK. See [docs/themes.md](docs/themes.md).
-- **Dark panes**: the sidebar, the note list or both in the theme's dark colors, while the note stays light. See [docs/themes.md](docs/themes.md#dark-panes).
-- **Monochrome and Invert**: any theme in greys, or turned light for dark, with the contrast it had.
-- **Paper to write on.** Ruled lines that every line of text sits on, and dots, squares or graph paper with a row of cells for each line (or any size you like), isometric paper, in your theme's colors or any color, as faint or strong as you like, and a grain or linen texture (Settings → Plugins → Paper).
-- **A backdrop behind the page.** Put a soft gradient, a color or a picture of your own behind your notes, which then sit on it as pages, solid or frosted like glass (Settings → Plugins → Paper → Backdrop).
-- **Fonts, text size, note width and spacing**, with a live preview: your system's font, a serif, rounded or monospaced one, or IBM Plex Sans, Fira Sans or Agave, which come with Lines, or any font installed on your device, and fonts of their own for headings, bold, italics, links, quotes, code and other formatting; headings in the accent or a color of your own; <kbd>⌘+</kbd> and <kbd>⌘−</kbd> size the text as you read. Notes can be narrow, medium, wide, any width between, or fill the window.
-- **A mascot.** A cat, an alien, a slime in your accent or a pixel girl, in pixel art, that walks along the bottom of your note, hops up to sit at the end of the sentence you're writing, cheers you on, naps when you're away, pounces on the pointer, and can be picked up and dropped. Plugins can add their own.
-- **Cursors.** A text cursor as a bar, a thick one, a block or an underline (as wide as the letter it's on, or always even), in the accent or any color, blinking, fading or steady, that glides or trails where it goes as some terminals' do, glows, turns through the rainbow or throws sparks as you type. And a pointer of 90s pixels or a dot in the accent, with a comet's tail or sparkles behind it.
-- **Typing sounds.** Hear a keyboard as you type: creamy or clacky linears, tactile, clicky, Topre, or a typewriter that rings its bell at Return. Or add a recorded one: any [Mechvibes](https://mechvibes.com) sound pack, from a .zip or its folder. Off to begin with.
-- **Focus mode** hides everything but the note (<kbd>⇧⌘\\</kbd>).
-- **Fits any screen**: three columns on a desktop, a drawer on a tablet, a stack on a phone. Drag the columns to resize them.
-- **Your layout.** Put the sidebar and the note list on the left or the right, each its own way, a note's properties beside its text or after it, and turn on tabs for the notes you open, as in a code editor (Settings → Layout). Scroll bars can be turned off everywhere, the toolbars kept out of sight until you reach for them, and icons swapped for words.
-- **Outline.** Turn on short lines beside the note, on its right or left, one for each heading, darker for the part you're reading. Point at them to see the headings by name, and click one to glide there. Markdown and LaTeX notes both have it.
-- **Native touches**: SF Symbols on Apple devices, see-through windows on the Mac (all of the window, or only its sidebar, or its sidebar and note list), and Settings in its own window if you like.
-- **Updates itself** (desktop apps). A new version downloads in the background once it's been out a week, and installs when you quit Lines, or straight away with Restart to update. Choose how long to wait, or turn it off, in Settings → About.
-- **English, Spanish and French**, following your system or chosen in Settings. See [docs/translations.md](docs/translations.md) to add a language.
-- **Accessible.** Everything works from the keyboard and with a screen reader, at large text sizes, with reduced motion and with increased contrast. See [docs/accessibility.md](docs/accessibility.md).
+| Where | How |
+| --- | --- |
+| **In your browser** | [Open the web app](https://olekslitus.com/lines/app/). Nothing to install. Your notes stay in that browser, or in a folder you choose in Chrome and Edge. |
+| **Mac, Windows, Linux** | [Download the app](https://olekslitus.com/lines/#download). It updates itself, and syncs through your cloud drive. |
+| **Android** | An app to install yourself comes with each release from Lines 0.8 on, on [the downloads](https://olekslitus.com/lines/#download). It isn't on Google Play yet. |
+| **iPhone and iPad** | Coming soon, through TestFlight. |
+
+A few honest notes:
+
+- **It's alpha.** Export your notes now and then, and say what breaks in [the issues](https://github.com/olekslitus/lines/issues).
+- **The Mac app is signed and notarized by Apple**, so it opens like any other app. The Windows app isn't signed yet: choose More info → Run anyway.
+- **On the web, the browser keeps your notes,** and a browser can clear them. Save to a folder, or export, to be safe ([Storage](docs/storage.md)).
+- What doesn't work yet, and what hasn't been tried on real phones, is all in [Limitations](docs/limitations.md).
 
 ## Keyboard shortcuts
 
@@ -161,22 +125,22 @@ Press <kbd>⌘/</kbd> to see them all. On Windows and Linux, use <kbd>Ctrl</kbd>
 
 ## Documentation
 
-Also on the website: [olekslitus.com/lines/docs](https://olekslitus.com/lines/docs/).
+How to use Lines, and how to work on it. They're on the website too, at [olekslitus.com/lines/docs](https://olekslitus.com/lines/docs/).
 
 ### Using Lines
 
 | | |
 | --- | --- |
-| [Linedown](docs/linedown.md) | The Markdown Lines reads and writes, including its few additions (callouts, highlights, tags…) |
-| [LaTeX notes](docs/latex.md) | What's drawn in notes written in LaTeX |
+| [Linedown](docs/linedown.md) | The Markdown Lines reads and writes, and the few things it adds (callouts, highlights, tags…) |
+| [LaTeX notes](docs/latex.md) | Notes written in LaTeX, and what Lines draws of them as you type |
 | [Spreadsheets](docs/spreadsheets.md) | Formulas in tables, spreadsheet notes, and opening and saving CSV and Excel files |
 | [Themes](docs/themes.md) | Making, sharing and importing themes, and Lines' theme files |
 | [API requests](docs/requests.md) | Sending requests from notes, in the `.http` and Hurl formats |
 | [Secrets](docs/secrets.md) | API keys and passwords kept in a locked note, and used by name |
 | [Library](docs/library.md) | Books, movies, music and the rest as notes, filled in from a link, and where Lines looks them up |
-| [Importing](docs/importing.md) | Bringing notes in from other apps (Obsidian, Bear, Logseq, Notion, Evernote): what to export, what comes across and what doesn't |
+| [Importing](docs/importing.md) | Moving your notes from Obsidian, Bear, Logseq, Notion or Evernote: what to export, what comes across and what doesn't |
 | [Plugins](docs/plugins.md) | How Lines is made of plugins, turning them off, and writing one |
-| [Sync](docs/sync.md) | How sync and encryption work |
+| [Sync](docs/sync.md) | How sync and end-to-end encryption work |
 | [Storage](docs/storage.md) | Where the web app and the desktop apps keep your notes, and for how long |
 | [Accessibility](docs/accessibility.md) | Keyboard and screen reader use, and how it's checked |
 | [Limitations](docs/limitations.md) | What doesn't work yet, and what hasn't been tried on real devices |
@@ -195,7 +159,7 @@ Also on the website: [olekslitus.com/lines/docs](https://olekslitus.com/lines/do
 
 ## Development
 
-You need [Bun](https://bun.com) 1.4+, which installs the packages and runs the scripts, and [Node.js](https://nodejs.org) 22+, which Vite, svelte-check and Tauri's CLI run on. The native apps also need [Rust](https://rustup.rs) and the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
+To build and run Lines yourself, you need [Bun](https://bun.com) 1.4+, which installs the packages and runs the scripts, and [Node.js](https://nodejs.org) 22+, which Vite, svelte-check and Tauri's CLI run on. The native apps also need [Rust](https://rustup.rs) and the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
 
 ```sh
 bun install
@@ -518,7 +482,7 @@ tools/themes/                Swatches from pictures and videos (swatch.ts) and t
 
 ## Roadmap
 
-What's planned next. Known limits of what's already there are in [docs/limitations.md](docs/limitations.md).
+What's planned next, by area. What's already there but has limits is in [docs/limitations.md](docs/limitations.md).
 
 **Sync**
 - [ ] iCloud in the iPhone app (an iCloud container, which needs the app signed with iCloud entitlements)
@@ -672,7 +636,15 @@ What's planned next. Known limits of what's already there are in [docs/limitatio
 
 ## Contributing
 
-Issues and pull requests are welcome; [CONTRIBUTING.md](CONTRIBUTING.md) says how, for people and coding agents alike, including the [contributor agreement](CLA.md) you agree to on your first pull request. In short: one change per pull request, its title a [Conventional Commit](https://www.conventionalcommits.org) (`fix(sync): keep edits made while a pass is running`), since it becomes the commit on main and the release notes. A change people can see also updates the docs, the QA checklist and the feature tour where they're affected. Before opening a pull request, please run:
+Issues and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) says how, for people and coding agents alike, and has the [contributor agreement](CLA.md) you agree to on your first pull request.
+
+In short:
+
+- One change per pull request.
+- Its title is a [Conventional Commit](https://www.conventionalcommits.org) (`fix(sync): keep edits made while a pass is running`), as it becomes the commit on main and the release notes.
+- A change people can see also updates the docs, the QA checklist and the feature tour where they're affected.
+
+Before opening a pull request, please run:
 
 ```sh
 bun run check
@@ -684,4 +656,4 @@ bun run build
 
 ## License
 
-Lines is free software under the [GNU Affero General Public License v3.0](LICENSE). You can use, study, change and share it. If you distribute a modified version, or run one as a service other people use, you must share its source code with them under the same license.
+Lines is free software under the [GNU Affero General Public License v3.0](LICENSE). You can use it, study it, change it and share it. If you share a changed version, or run one as a service other people use, you must give them its source code too, under the same license.

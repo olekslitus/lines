@@ -839,6 +839,11 @@ class Prefs {
   readonly #blur = $derived(isFloating ? this.floatingBlur : this.windowBlur);
   readonly #shadow = $derived(isFloating ? this.floatingBorder : true);
 
+  /** Whether the system is in dark mode, whatever Lines' own appearance. */
+  get systemDark() {
+    return this.#systemDark;
+  }
+
   #isDark(appearance: Appearance) {
     return appearance === "system" ? this.#systemDark : appearance === "dark";
   }

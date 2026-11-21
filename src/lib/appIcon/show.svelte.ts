@@ -8,7 +8,8 @@ import { favicon, type IconArt, iconArt, iconSvg, LILAC } from "./art";
  *   iPhone, iPad   one of the alternate icons in the asset catalog (src-tauri/src/app_icon.rs);
  *                  iOS says it's changed it
  *   Android        the launcher's, through an activity alias for each icon (MainActivity.kt)
- *   Mac            the Dock's while Lines is open; Finder keeps the bundle's own
+ *   Mac            the Dock's while Lines is open, light or dark as the Mac is; Finder keeps the
+ *                  bundle's own, whose Icon Composer file macOS draws light, dark or tinted itself
  *   Windows, Linux the window's, in the taskbar, while Lines is open
  *   web            the tab's favicon
  *
@@ -46,25 +47,28 @@ async function picture(svg: string, size: number) {
   return blob ? [...new Uint8Array(await blob.arrayBuffer())] : null;
 }
 
-/** The icon last shown, so the desktop apps leave the bundle's alone until another is chosen. */
+/** The icon last shown, and in which appearance, so the desktop apps leave the bundle's alone until another is chosen. */
 let shown: string = LILAC.id;
 
-async function show(id: string) {
+async function show(id: string, systemDark: boolean) {
   const art = iconArt(id);
   if (!isTauri) return showFavicon(art);
   if (window.linesAppIcon) return void window.linesAppIcon.set(art.id);
   const { invoke } = await import("@tauri-apps/api/core");
   if (isIOSApp) return invoke("set_app_icon", { alternate: art === LILAC ? null : `AppIcon-${art.id}`, picture: null, size: 0 });
-  if (!isDesktopApp || art.id === shown) return;
-  shown = art.id;
+  // The Dock is light or dark as the Mac is, not as Lines is.
+  const appearance = isMacApp && systemDark ? "dark" : "light";
+  const key = art === LILAC ? art.id : `${art.id} ${appearance}`;
+  if (!isDesktopApp || key === shown) return;
+  shown = key;
   // The Mac's shape, as the bundle's icon has (and Windows' and Linux's .ico and PNGs), at the
   // Dock's largest or a taskbar's.
   const size = isMacApp ? 512 : 256;
-  return invoke("set_app_icon", { alternate: null, picture: art === LILAC ? null : await picture(iconSvg(art, "light", "mac"), size), size });
+  return invoke("set_app_icon", { alternate: null, picture: art === LILAC ? null : await picture(iconSvg(art, appearance, "mac"), size), size });
 }
 
 $effect.root(() => {
   $effect(() => {
-    show(prefs.appIcon).catch((error) => console.error("Couldn't show the app icon:", error));
+    show(prefs.appIcon, prefs.systemDark).catch((error) => console.error("Couldn't show the app icon:", error));
   });
 });

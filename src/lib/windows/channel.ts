@@ -16,8 +16,8 @@ export type WindowMessage =
   | { type: "show"; id: string }
   /** Play this episode in the main window's player (a floating note's Play), from `at` seconds if given. */
   | { type: "play"; episode: import("../player/player.svelte").Episode; at?: number }
-  /** Preferences changed (theme, text, window look): all of them, as saved. */
-  | { type: "prefs"; prefs: string }
+  /** Preferences changed (theme, text, window look): only those, as saved, so the others stay as each window has them. */
+  | { type: "prefs"; changed: Record<string, unknown> }
   /** The app's language was chosen (i18n/index.svelte.ts). */
   | { type: "language"; choice: string }
   /** Your own themes and palettes changed (themes/custom.svelte.ts): all of them, as saved. */

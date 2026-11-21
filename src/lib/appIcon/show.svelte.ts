@@ -8,8 +8,9 @@ import { favicon, type IconArt, iconArt, iconSvg, LILAC } from "./art";
  *   iPhone, iPad   one of the alternate icons in the asset catalog (src-tauri/src/app_icon.rs);
  *                  iOS says it's changed it
  *   Android        the launcher's, through an activity alias for each icon (MainActivity.kt)
- *   Mac            the Dock's while Lines is open, light or dark as the Mac is; Finder keeps the
- *                  bundle's own, whose Icon Composer file macOS draws light, dark or tinted itself
+ *   Mac            the Dock's while Lines is open, light or dark as the Mac is (macOS draws the
+ *                  bundle's own by its icon style, which stays light in dark mode unless changed);
+ *                  Finder keeps the bundle's
  *   Windows, Linux the window's, in the taskbar, while Lines is open
  *   web            the tab's favicon
  *
@@ -56,15 +57,16 @@ async function show(id: string, systemDark: boolean) {
   if (window.linesAppIcon) return void window.linesAppIcon.set(art.id);
   const { invoke } = await import("@tauri-apps/api/core");
   if (isIOSApp) return invoke("set_app_icon", { alternate: art === LILAC ? null : `AppIcon-${art.id}`, picture: null, size: 0 });
-  // The Dock is light or dark as the Mac is, not as Lines is.
+  // The Dock is light or dark as the Mac is, not as Lines is; Lines' own light is the bundle's.
   const appearance = isMacApp && systemDark ? "dark" : "light";
-  const key = art === LILAC ? art.id : `${art.id} ${appearance}`;
+  const bundle = art === LILAC && appearance === "light";
+  const key = bundle ? LILAC.id : `${art.id} ${appearance}`;
   if (!isDesktopApp || key === shown) return;
   shown = key;
   // The Mac's shape, as the bundle's icon has (and Windows' and Linux's .ico and PNGs), at the
   // Dock's largest or a taskbar's.
   const size = isMacApp ? 512 : 256;
-  return invoke("set_app_icon", { alternate: null, picture: art === LILAC ? null : await picture(iconSvg(art, appearance, "mac"), size), size });
+  return invoke("set_app_icon", { alternate: null, picture: bundle ? null : await picture(iconSvg(art, appearance, "mac"), size), size });
 }
 
 $effect.root(() => {

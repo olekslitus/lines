@@ -136,7 +136,7 @@ Settings → Theme → **App Icon** chooses Lines' icon from 21: its own, plum l
 | Where | What changes |
 |---|---|
 | iPhone and iPad | The icon on the Home Screen, in Spotlight and in Settings, with its dark and tinted looks; iOS says so with an alert each time. |
-| Android | The launcher's icon (each icon is an activity alias of Lines', only the chosen one on), its themed icon too. The launcher can take a moment to show it. |
+| Android | The launcher's icon (each icon is an activity alias of Lines', only the chosen one on), its themed icon too, from when you next leave Lines: switching while it's in front would close it. The launcher can take a moment to show it. |
 | Mac | The Dock's while Lines is open, and ⌘Tab's. Finder, Launchpad and the Dock once Lines has quit show Lines' own: the app's own icon can't change without breaking its signature. |
 | Windows and Linux | The taskbar's, the window's icon, while Lines is open. The Start menu's, the desktop's and the launcher's are the installer's. |
 | The web app | The tab's icon. Lines added to a home screen, or installed, keeps the icon it was added with. |

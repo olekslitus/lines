@@ -22,6 +22,16 @@ class MainActivity : TauriActivity() {
   // lines' pages are one page, with no history to go back through: Back asks lines instead.
   override val handleBackNavigation = false
 
+  // The app icon chosen (AppIcon), shown once Lines is out of sight: switching the launcher's entry
+  // closes the task it was opened from, which would close Lines in front of you.
+  @Volatile private var chosenIcon: String? = null
+
+  override fun onStop() {
+    super.onStop()
+    chosenIcon?.let { AppIcon().show(it) }
+    chosenIcon = null
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
@@ -99,12 +109,16 @@ class MainActivity : TauriActivity() {
 
   // The launcher's icon, chosen in Settings → Theme → App Icon (src/lib/appIcon/): each icon is an
   // alias of this activity in the manifest (scripts/icons.mjs writes them), and only the chosen one
-  // is on. Launchers can take a moment to show it.
+  // is on, from when Lines is next out of sight (onStop). Launchers can take a moment to show it.
   inner class AppIcon {
     private val prefix = "${MainActivity::class.java.name.substringBeforeLast('.')}.AppIcon_"
 
     @JavascriptInterface
     fun set(id: String) {
+      chosenIcon = id
+    }
+
+    fun show(id: String) {
       val aliases = packageManager
         .getPackageInfo(packageName, PackageManager.GET_ACTIVITIES or PackageManager.MATCH_DISABLED_COMPONENTS)
         .activities.orEmpty()

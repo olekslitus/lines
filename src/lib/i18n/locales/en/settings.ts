@@ -335,7 +335,7 @@ export default {
   // Settings → Theme → App Icon: Lines' icon, chosen from a few colors. The note says where it shows, by platform.
   "settings.appIcon": "App Icon",
   "settings.appIconNoteIOS": "The icon on the Home Screen. iOS says so each time it changes.",
-  "settings.appIconNoteAndroid": "The icon on the home screen and in the list of apps. The launcher can take a moment to show it.",
+  "settings.appIconNoteAndroid": "The icon on the home screen and in the list of apps, from when you next leave Lines. The launcher can take a moment to show it.",
   "settings.appIconNoteMac": "The icon in the Dock while Lines is open. Finder and Launchpad keep Lines’ own: changing the app’s own icon would break its signature.",
   "settings.appIconNoteDesktop": "The icon in the taskbar while Lines is open. Menus and shortcuts keep Lines’ own.",
   "settings.appIconNoteWeb": "The icon on this tab. Lines added to a home screen, or installed, keeps the icon it was added with.",

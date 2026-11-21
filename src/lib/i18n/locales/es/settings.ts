@@ -307,7 +307,7 @@ export default {
   "settings.sfSymbolsNote": "SF Symbols está disponible en las apps para Mac y iPhone.",
   "settings.appIcon": "Icono de la app",
   "settings.appIconNoteIOS": "El icono de la pantalla de inicio. iOS lo avisa cada vez que cambia.",
-  "settings.appIconNoteAndroid": "El icono de la pantalla de inicio y de la lista de apps. El launcher puede tardar un momento en mostrarlo.",
+  "settings.appIconNoteAndroid": "El icono de la pantalla de inicio y de la lista de apps, en cuanto salgas de Lines. El launcher puede tardar un momento en mostrarlo.",
   "settings.appIconNoteMac": "El icono del Dock mientras Lines está abierto. Finder y Launchpad mantienen el de Lines: cambiar el icono de la propia app rompería su firma.",
   "settings.appIconNoteDesktop": "El icono de la barra de tareas mientras Lines está abierto. Los menús y los accesos directos mantienen el de Lines.",
   "settings.appIconNoteWeb": "El icono de esta pestaña. Lines añadido a una pantalla de inicio, o instalado, mantiene el icono con el que se añadió.",

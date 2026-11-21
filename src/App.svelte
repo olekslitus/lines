@@ -530,11 +530,17 @@
       anchor,
       label: t("app.lockedOpen"),
       items: [
-        { label: t("list.lockNow"), icon: "lock", run: () => void lockedNotes.close() },
+        { label: t("list.lockNow"), icon: "lock", run: () => void lockAgain() },
         { label: t("list.removeLock"), icon: "lock-open", run: () => void notes.removeLock(id) },
       ],
       onclose: () => (lockMenuOpen = false),
     });
+  }
+
+  /** Lock Now from that menu: its button goes as the note closes, so focus moves to the password that opens it again. */
+  async function lockAgain() {
+    await lockedNotes.close();
+    requestAnimationFrame(() => noteArea?.parentElement?.querySelector<HTMLInputElement>("input[type=password]")?.focus());
   }
 
   /** A dialog over the notes (Settings, a PDF's preview, a password): the window's shortcuts wait for it to close. */

@@ -334,7 +334,7 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 ## The app icon
 
-- The Mac app's icon is an `.icns`, as the Tauri bundle makes it: macOS 26 shows it as drawn, without Liquid Glass, and doesn't make it dark, clear or tinted. iPhone and iPad have Icon Composer's file, and do.
+- The Mac app's other icons, chosen in Settings → Theme → App Icon, are pictures Lines gives the Dock while it's open: light or dark as the Mac's appearance is, but not tinted or clear as macOS 26's icon style can ask, nor in Liquid Glass. Lines' own is Icon Composer's file, which macOS draws every way itself.
 - At 16 pixels (Finder's list, a Windows title bar) the icon draws the lines heavier and larger, and the knot's loop is too small to see open.
 - An icon chosen in Settings → Theme → App Icon is the Dock's (Mac) or the taskbar's (Windows, Linux) only while Lines is open: Finder, Launchpad, the Start menu, desktop shortcuts and Linux's launchers show Lines' own. Changing the Mac app's own icon would break its signature, and the others come from the installer. A Linux `.desktop` file's `Icon=` isn't changed.
 - On iPhone and iPad, iOS says with an alert each time the icon changes; the other icons are asset catalog icons, with their dark and tinted looks, but not Icon Composer files, so on iOS 26 they aren't drawn in Liquid Glass as Lines' own is.

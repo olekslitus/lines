@@ -624,11 +624,13 @@ export default {
   "settings.showInFolder": "Mostrar en la carpeta",
 
   "settings.import": "Importar",
-  "settings.importText": "Los archivos de Markdown y LaTeX se convierten en notas. Un archivo CSV se convierte en una hoja de cálculo, y también cada hoja de un libro de Excel.",
+  "settings.importText": "Los archivos de Markdown y LaTeX se convierten en notas. Un archivo CSV se convierte en una hoja de cálculo, y también cada hoja de un libro de Excel. El .zip de una exportación devuelve sus notas con sus imágenes y archivos.",
   "settings.importFiles": "Importar archivos…",
   "settings.importing": "Importando…",
   "settings.imported": "{count, plural, =0 {No se importó ninguna nota} one {Se importó # nota} other {Se importaron # notas}}",
   "settings.importSkipped": "No importados, porque Lines no lee archivos como estos: {names}",
+  "settings.importLeftOut": "Omitidos, porque al descomprimirse ocuparían más de lo que se puede leer aquí: {names}",
+  "settings.importTooBig": "Este ZIP es demasiado grande para leerlo aquí (más de 2 GB), así que no se importó nada.",
 
   "settings.samples": "Notas de ejemplo",
   "settings.samplesText":

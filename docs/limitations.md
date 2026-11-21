@@ -78,7 +78,7 @@ The home page and the docs at https://olekslitus.com/lines/ (`site/`):
 
 ## Import and export
 
-- Import takes files, not an export's .zip. Imported, an export's notes come back without their images and files, whose links then show as missing.
+- An export's .zip comes back as files of notes: a LaTeX note as the document it was exported as, a spreadsheet as its CSV, and the Trash's notes, read by the Trash's name in the language Lines is in now, in the Trash. Its folder, unpacked, can't be chosen; a .zip over 2 GB is to be made smaller.
 - An export holds at most 65,535 files and 4 GB (it doesn't use ZIP64).
 
 ## Unsplash photos

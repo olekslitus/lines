@@ -1,6 +1,6 @@
 # Importing from other apps
 
-Notes from another notes app come into Lines from **Settings → Export and Import**, where each app has a group of its own saying what to export from it and how. Each is a [plugin](plugins.md), on to begin with; turned off, its group leaves Settings, and what it brought stays. Markdown, LaTeX, CSV and Excel files of your own are imported with **Import Files…** in the same place, and the Library's bookmarks and Readwise in Settings → Library ([library.md](library.md#bookmarks)).
+Notes from another notes app come into Lines from **Settings → Export and Import**, where each app has a group of its own saying what to export from it and how. Each is a [plugin](plugins.md), on to begin with; turned off, its group leaves Settings, and what it brought stays. Markdown, LaTeX, CSV and Excel files of your own are imported with **Import Files…** in the same place, as is Lines' own export, its .zip bringing its notes back with their pictures and files; the Library's bookmarks and Readwise in Settings → Library ([library.md](library.md#bookmarks)).
 
 ## How an import goes
 

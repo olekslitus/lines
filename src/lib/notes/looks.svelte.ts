@@ -1,6 +1,7 @@
 import type { IconName } from "../icons/icons";
 import type { PaletteColor } from "../palette";
 import { plugins } from "../plugins/registry.svelte";
+import { announce, onAnnounce } from "../windows/channel";
 import type { Note, NoteMeta } from "./types";
 import { type Chosen, type Look, type LookKind, type Looks, mergeLooks, noLooks, readLooks, writeLooks } from "./looks";
 
@@ -27,6 +28,14 @@ function read(): Looks {
 class LibraryLooks {
   #looks = $state.raw<Looks>(read());
   #listeners = new Set<() => void>();
+
+  constructor() {
+    // Chosen in another window (Settings', a floating note's): taken in here at once, and synced from the main window as if chosen here.
+    void onAnnounce((message) => {
+      if (message.type !== "looks" || !this.#takeIn(readLooks(message.looks), false)) return;
+      for (const listener of this.#listeners) listener();
+    });
+  }
 
   get looks(): Looks {
     return this.#looks;
@@ -59,30 +68,44 @@ class LibraryLooks {
 
   /** Takes in another device's looks; whether any here changed. */
   merge(there: Looks): boolean {
-    const merged = mergeLooks(this.#looks, there);
-    if (writeLooks(merged) === writeLooks(this.#looks)) return false;
-    this.#looks = merged;
-    this.#save();
-    return true;
+    return this.#takeIn(there, true);
   }
 
-  /** Called on each change made here, to sync it. */
+  /** Called on each change made here (or in another window), to sync it. */
   onChange(listener: () => void) {
     this.#listeners.add(listener);
   }
 
   #change(looks: Looks) {
     this.#looks = looks;
-    this.#save();
+    this.#save(true);
     for (const listener of this.#listeners) listener();
   }
 
-  #save() {
+  /**
+   * Another device's or window's looks merged with these, choice by choice, so two windows choosing
+   * at once both keep theirs; whether any here changed.
+   */
+  #takeIn(there: Looks, tell: boolean) {
+    const merged = mergeLooks(this.#looks, there);
+    if (writeLooks(merged) === writeLooks(this.#looks)) return false;
+    this.#looks = merged;
+    this.#save(tell);
+    return true;
+  }
+
+  /**
+   * Kept, and sent to the other windows (unless they came from one), which take them in at once:
+   * in the message, as WebKit brings storage up to date in other windows only a moment later.
+   */
+  #save(tell: boolean) {
+    const text = writeLooks(this.#looks);
     try {
-      localStorage.setItem(KEY, writeLooks(this.#looks));
+      localStorage.setItem(KEY, text);
     } catch {
       // Private mode or full storage: they last until lines is closed, and sync if it's on.
     }
+    if (tell) void announce({ type: "looks", looks: text });
   }
 }
 

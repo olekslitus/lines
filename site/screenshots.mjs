@@ -70,17 +70,33 @@ const settings = async (page, section) => {
   await page.getByRole("dialog").getByText(section, { exact: true }).first().click();
 };
 
+/**
+ * A time zone where it's about ten in the morning now, so the notes, made as the pictures are taken,
+ * say so in the list rather than whatever hour it is here (12:01 AM, taken at midnight).
+ */
+const MORNING = (() => {
+  const ahead = ((10 - new Date().getUTCHours() + 36) % 24) - 12;
+  return ahead === 0 ? "UTC" : `Etc/GMT${ahead > 0 ? "-" : "+"}${Math.abs(ahead)}`;
+})();
+
 /** The app with the sample notes in it, and no feature tour. */
 async function open(scheme, viewport, scale = 2) {
-  const context = await browser.newContext({ viewport, deviceScaleFactor: scale, colorScheme: scheme, reducedMotion: "reduce" });
-  await context.addInitScript(() => localStorage.setItem("lines.seeded", "1"));
+  const context = await browser.newContext({ viewport, deviceScaleFactor: scale, colorScheme: scheme, reducedMotion: "reduce", timezoneId: MORNING });
+  await context.addInitScript(() => {
+    localStorage.setItem("lines.seeded", "1");
+    // Trip budget.csv is imported as a spreadsheet note only with Spreadsheet Notes on, which a fresh start has off.
+    localStorage.setItem("lines.plugins", JSON.stringify({ "spreadsheet-notes": true }));
+  });
   const page = await context.newPage();
   await page.goto(`http://localhost:${server.port}/`);
   await page.locator(".note-list").waitFor();
   await settings(page, "Export and Import");
-  // One at a time, so the list has them in order: the last imported first.
+  // One at a time, so the list has them in order: the last imported first. Through Import Files…, as
+  // the section has other pickers too (a folder, other apps' exports).
   for (const name of IMPORTS) {
-    await page.locator('input[type="file"]').setInputFiles({ name, mimeType: "text/plain", buffer: readFileSync(join(SAMPLES, name)) });
+    const chooser = page.waitForEvent("filechooser");
+    await page.getByRole("button", { name: "Import Files…" }).click();
+    await (await chooser).setFiles({ name, mimeType: "text/plain", buffer: readFileSync(join(SAMPLES, name)) });
     await page.waitForTimeout(400);
   }
   await page.locator(".note-list").getByText("Weekend in Florence", { exact: true }).waitFor();
@@ -107,7 +123,7 @@ for (const scheme of ["light", "dark"]) {
     await save(page, await page.screenshot({ clip: { ...box, height: Math.min(box.height, height) } }), `${name}-${scheme}`);
   }
 
-  await settings(page, "Plugins");
+  await settings(page, "All Plugins");
   await page.waitForTimeout(500);
   await save(page, await page.getByRole("dialog").screenshot(), `plugins-${scheme}`);
   await context.close();
@@ -116,7 +132,7 @@ for (const scheme of ["light", "dark"]) {
 for (const { theme, scheme } of THEMES) {
   const { context, page } = await open(scheme, { width: 1200, height: 750 }, 1);
   await settings(page, "Theme");
-  await page.getByRole("radio", { name: theme }).click();
+  await page.getByRole("radiogroup", { name: "Theme" }).getByRole("radio", { name: theme, exact: true }).click();
   await page.keyboard.press("Escape");
   await show(page, "Weekend in Florence");
   await save(page, await page.screenshot(), `theme-${theme.toLowerCase()}`);

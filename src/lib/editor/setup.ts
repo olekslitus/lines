@@ -1,6 +1,6 @@
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { markdownLanguage, pasteURLAsLink } from "@codemirror/lang-markdown";
-import { HighlightStyle, Language, ParseContext, syntaxHighlighting } from "@codemirror/language";
+import { forceParsing, HighlightStyle, Language, type LanguageDescription, ParseContext, syntaxHighlighting } from "@codemirror/language";
 import type { Parser } from "@lezer/common";
 import { type MarkdownParser, parseCode } from "@lezer/markdown";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
@@ -44,6 +44,22 @@ import { markupMode } from "./markupMode";
 import { linkMenu } from "./linkMenu";
 import { type MarkdownMode, prefs } from "../prefs.svelte";
 
+/** Each open Markdown editor's way to parse its note again, once a code block's language has loaded. */
+const parsers = new Set<() => void>();
+/** The languages whose loading is already followed by parsing again. */
+const loading = new WeakSet<LanguageDescription>();
+
+/**
+ * Parses a note's code blocks as soon as their language loads, rather than when the browser next
+ * has time to spare, as CodeMirror would: half a second later in WebKit, which has no
+ * `requestIdleCallback`.
+ */
+const parseOnLoad = ViewPlugin.define((view) => {
+  const parse = () => forceParsing(view, view.viewport.to, 50);
+  parsers.add(parse);
+  return { destroy: () => parsers.delete(parse) };
+});
+
 /**
  * The parser for a code block's language (```sql, ```ts…). Each language is loaded the first time
  * a note uses it; until then the block shows as plain code.
@@ -54,7 +70,17 @@ function codeParser(info: string): Parser | null {
   if (!name) return null;
   const found = codeLanguage(name);
   if (!found) return null;
-  return found.support ? found.support.language.parser : ParseContext.getSkippingParser(found.load());
+  if (found.support) return found.support.language.parser;
+  const loaded = found.load();
+  if (!loading.has(found)) {
+    loading.add(found);
+    // One that fails is tried again the next time it's parsed, as CodeMirror tries it.
+    void loaded.then(
+      () => parsers.forEach((parse) => parse()),
+      () => loading.delete(found),
+    );
+  }
+  return ParseContext.getSkippingParser(loaded);
 }
 
 /**
@@ -79,7 +105,7 @@ const linedown = (additions: MarkdownAddition[], underlined: boolean) =>
       parseCode({ codeParser }),
       ...additions.flatMap((addition) => addition.syntax ?? []),
     ]),
-    [],
+    [parseOnLoad],
     "markdown",
   );
 

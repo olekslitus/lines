@@ -1,6 +1,7 @@
 import "./silence";
 import { syntaxParserRunning } from "@codemirror/language";
 import { EditorView } from "@codemirror/view";
+import { codeLanguage } from "../lib/editor/codeLanguages";
 import { feeds } from "../lib/feeds/feeds.svelte";
 import { NoFeed } from "../lib/feeds/find";
 import { htmlToMarkdown, saysMore } from "../lib/feeds/markdown";
@@ -98,6 +99,8 @@ const testing = {
   getAttachment,
   editor,
   until,
+  /** The language a code block names (```js), which it's highlighted as once `load()` resolves. */
+  codeLanguage,
   /** The open note's text. */
   text: () => editor()?.state.doc.toString() ?? null,
   /** Adds a note with this text, in `format` (Markdown if left out), and opens it, once its editor shows it. */

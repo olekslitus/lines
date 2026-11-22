@@ -18,7 +18,7 @@ import { quoteInput } from "./quotes";
 import { find } from "./find.svelte";
 import { attachmentBlocks } from "./attachments";
 import { formatToolbar, toggleFormat } from "./formatting";
-import { listKeymap, listPaste } from "./lists";
+import { listKeymap, listMarkerInput, listPaste } from "./lists";
 import { markdownKeymap } from "./markdownKeys";
 import { livePreview, openAtCursor } from "./livePreview";
 import { mathBlocks } from "./math";
@@ -284,6 +284,7 @@ const linedownEditing = (additions: MarkdownAddition[], papers: PaperSource[], m
   formatToolbar,
   fenceInput,
   headingLevelInput,
+  listMarkerInput,
   quoteInput,
   formattingKeymap,
   markdownOutline,

@@ -10,6 +10,7 @@
 1. Numbered lists count for you
 2. Renumbered as you go
 3. And nest the same way
+4. Type `- ` at the start of an item to make it a bullet, `1. ` on a bullet to number it
 
 ## Todos
 

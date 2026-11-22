@@ -941,6 +941,83 @@ test("Tab and ⇧Tab number a numbered item again, and the items around it; Back
   }
 });
 
+describe("a list marker typed at the start of an item's text", () => {
+  /** The note and where the cursor is in it (‸). */
+  const withCursor = async () => {
+    const [text, head] = await app.page.evaluate(() => {
+      const { state } = window.testing.editor()!;
+      return [state.doc.toString(), state.selection.main.head] as const;
+    });
+    return text.slice(0, head) + "‸" + text.slice(head);
+  };
+
+  test("a number makes a bullet item numbered, counting on from the list above; a bullet makes a numbered item one, the items after numbered again", async () => {
+    const cases = [
+      ["- ‸Milk", "1. ", "1. ‸Milk"],
+      ["* ‸Milk\n* Eggs", "2) ", "2) ‸Milk\n* Eggs"],
+      // Counting on from the numbered items above, in their style, and numbering those after it on.
+      ["1. Eggs\n2. Flour\n- ‸Milk", "1. ", "1. Eggs\n2. Flour\n3. ‸Milk"],
+      ["1) Eggs\n- ‸Milk", "7. ", "1) Eggs\n2) ‸Milk"],
+      ["1. Eggs\n- ‸Milk\n1. Flour\n2. Salt", "1. ", "1. Eggs\n2. ‸Milk\n3. Flour\n4. Salt"],
+      // Right under text only 1 starts a list, any other number being read as more of the text.
+      ["- Eggs\n- ‸Milk", "5. ", "- Eggs\n1. ‸Milk"],
+      ["Shopping:\n- ‸Milk", "3. ", "Shopping:\n1. ‸Milk"],
+      ["Shopping:\n\n- ‸Milk", "3. ", "Shopping:\n\n3. ‸Milk"],
+      // Nested, its sub-items moving with its text, in a quote too.
+      ["- Shopping\n  - ‸Milk\n  - Eggs", "1. ", "- Shopping\n  1. ‸Milk\n  - Eggs"],
+      ["- ‸Milk\n  - whole\n  - oat", "1. ", "1. ‸Milk\n   - whole\n   - oat"],
+      ["> - ‸Milk\n>   - oat", "1. ", "> 1. ‸Milk\n>    - oat"],
+      // A bullet on a numbered item.
+      ["1. ‸Milk", "- ", "- ‸Milk"],
+      ["1. Eggs\n2. ‸Milk\n3. Flour\n4. Salt", "- ", "1. Eggs\n- ‸Milk\n1. Flour\n2. Salt"],
+      ["10. ‸Milk\n    - oat", "* ", "* ‸Milk\n  - oat"],
+      ["- Shopping\n  1. Eggs\n  2. ‸Milk", "+ ", "- Shopping\n  1. Eggs\n  + ‸Milk"],
+      // Not after text, in a todo's text, in code or in the properties.
+      ["- Milk ‸and eggs", "1. ", "- Milk 1. ‸and eggs"],
+      ["1. Milk ‸and eggs", "- ", "1. Milk - ‸and eggs"],
+      ["- [ ] ‸Milk", "1. ", "- [ ] 1. ‸Milk"],
+      ["```\n- ‸Milk\n```", "1. ", "```\n- 1. ‸Milk\n```"],
+      ["---\ntags:\n  - ‸work\n---\nText", "1. ", "---\ntags:\n  - 1. ‸work\n---\nText"],
+    ];
+    for (const [note, typed, after] of cases) {
+      await app.open(note.replace("‸", ""));
+      await app.page.evaluate((pos) => window.testing.place(pos), note.indexOf("‸"));
+      await app.page.keyboard.type(typed);
+      expect([note, await withCursor()]).toEqual([note, after]);
+    }
+  });
+
+  test("⌘Z just after leaves it as typed", async () => {
+    await app.open("1. Eggs\n- Milk\n1. Flour");
+    await app.page.evaluate(() => window.testing.place(10));
+    await app.page.keyboard.type("1. ");
+    expect(await withCursor()).toBe("1. Eggs\n2. ‸Milk\n3. Flour");
+    await app.page.keyboard.press(`${mod()}+z`);
+    expect(await withCursor()).toBe("1. Eggs\n- 1. ‸Milk\n1. Flour");
+  });
+
+  test("works where a click after the drawn bullet or number puts the cursor, Markdown live or hidden", async () => {
+    for (const mode of ["live", "hidden"] as const) {
+      await app.page.evaluate((mode) => (window.testing.prefs.markdownMode = mode), mode);
+      await app.open("Shopping\n\n- Milk\n- Eggs");
+      const clickAfter = async (marker: string) => {
+        const box = (await app.page.locator(`.editor-pane ${marker}`).first().boundingBox())!;
+        await app.page.mouse.click(box.x + box.width + 1, box.y + box.height / 2);
+      };
+      await clickAfter(".cm-lp-bullet");
+      await app.page.waitForFunction(() => window.testing.editor()!.state.selection.main.head === 12);
+      await app.page.keyboard.type("1. ");
+      expect(await withCursor()).toBe("Shopping\n\n1. ‸Milk\n- Eggs");
+      await app.page.locator(".editor-pane .cm-line", { hasText: "Shopping" }).click();
+      await app.page.locator(".editor-pane .cm-lp-list-number", { hasText: "1." }).waitFor();
+      await clickAfter(".cm-lp-list-number");
+      await app.page.waitForFunction(() => window.testing.editor()!.state.selection.main.head === 13);
+      await app.page.keyboard.type("- ");
+      expect(await withCursor()).toBe("Shopping\n\n- ‸Milk\n- Eggs");
+    }
+  });
+});
+
 test("Copy what you select copies a selection made with the pointer, not with keys", async () => {
   if (engine() !== "chromium") return;
   await app.page.evaluate(() => (window.testing.prefs.copyOnSelect = true));

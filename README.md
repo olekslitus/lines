@@ -407,7 +407,7 @@ src/
       WebSearchPicker.svelte The picker both use: searching as you type, more on scrolling, the arrow keys
       shortLinks.ts          Links drawn short with a site's mark, as plugins read them (GitHub, arXiv)
       fences.ts              Closes ``` and ::: fences as you type them; ` or : wraps a selection
-      lists.ts               Tab / Shift-Tab nesting for list items; Backspace after a marker
+      lists.ts               Tab / Shift-Tab nesting for list items; Backspace after a marker; `1. ` or `- ` typed over one
       keyValue.ts            Copy buttons for Key: Value lines
       scores.ts              Scores (`Rating: 4/5`) drawn as stars, hearts or circles, and ratings on a scale: points, words
       ratings.ts             Rating in a note: a click on a mark, and a library note's ratings offered as its properties are typed

@@ -686,6 +686,11 @@ export interface NoteLanguage {
    * into that folder instead.
    */
   file(body: string, attachments?: string): string;
+  /**
+   * The reverse of `file` with `attachments`, for a file it wrote that's imported again: its links to
+   * images and files in that folder pointing at the note's own again. Without, links stay as they are.
+   */
+  fromFile?(text: string, attachments: string): string;
   /** The note laid out as a document, for its PDF, printing and images (print/). */
   print(body: string, parts: Parts): HTMLElement;
   /**

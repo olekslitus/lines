@@ -5,6 +5,7 @@ import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { zip } from "../../src/lib/zip";
 import { type App, engine, mod, noErrors, openApp } from "./app";
+import { png } from "./files";
 
 /*
  * Notes from another app, imported from Settings → Export and Import: an Obsidian vault (the unit
@@ -255,6 +256,45 @@ test("Import Files…: a file's time where the system gives one, and now where i
   const times = await app.page.evaluate(() => Object.fromEntries(window.testing.notes.entries.map(({ note }) => [note.body, note.createdAt])));
   expect(times["# Dated"]).toBe(Date.UTC(2024, 10, 14));
   expect(times["# Undated"]).toBeGreaterThanOrEqual(before);
+});
+
+test("Import Files… brings an export's .zip back: its notes, the pictures they show where they show them, and its Trash", async () => {
+  // On disk, so WebKit keeps the attachments.
+  app = await openApp({ onDisk: true });
+  const picture = png(4, 4, () => [200, 80, 40]);
+  const name = await app.page.evaluate(async (bytes) => {
+    const name = await window.testing.saveAttachment(new File([new Uint8Array(bytes)], "dot.png", { type: "image/png" }));
+    const note = (body: string, trashed = false, format?: string) => ({ id: crypto.randomUUID(), body, format, createdAt: 0, updatedAt: Date.UTC(2024, 10, 14), pinned: false, trashed });
+    await window.testing.notes.insert(
+      note(`# Trip\n\n![](../attachments/${name})`),
+      note(`# Old trip\n\n![](../attachments/${name})`, true),
+      note(`\\section{Trip plan}\n\\includegraphics{../attachments/${name}}`, false, "latex"),
+    );
+    return name;
+  }, [...picture]);
+  let settings = await app.settings("Export and Import");
+  await settings.getByRole("switch", { name: /^Include the trash/ }).click();
+  const [download] = await Promise.all([app.page.waitForEvent("download"), settings.getByRole("button", { name: /^Export \d+ notes$/ }).click()]);
+  const exported = readFileSync((await download.path())!);
+  noErrors(app);
+  await app.close();
+
+  // Another browser, or this one after its storage was cleared.
+  app = await openApp({ onDisk: true });
+  settings = await app.settings("Export and Import");
+  await settings.locator("input[type=file][multiple]").first().setInputFiles({ name: download.suggestedFilename(), mimeType: "application/zip", buffer: exported });
+  await settings.getByText("Imported 3 notes").waitFor();
+  const imported = await app.page.evaluate(async () => ({
+    notes: window.testing.notes.entries.filter(({ note }) => /trip/i.test(note.body)).map(({ note }) => [note.format ?? "markdown", note.body, note.trashed]),
+    attachments: await window.testing.attachmentNames(),
+  }));
+  expect(imported.notes.sort()).toEqual([
+    // A LaTeX note comes back as the document it was exported as, its picture where it was.
+    ["latex", expect.stringContaining(`\\includegraphics{../attachments/${name}}`), false],
+    ["markdown", `# Old trip\n\n![](../attachments/${name})`, true],
+    ["markdown", `# Trip\n\n![](../attachments/${name})`, false],
+  ]);
+  expect(imported.attachments).toContain(name);
 });
 
 describe("Evernote", () => {

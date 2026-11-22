@@ -62,6 +62,7 @@ export const latex = (): Plugin => ({
         newNote: ({ tag }) => (tag ? `\n\n% #${tag}` : ""),
         // A document that compiles on its own, its images' \includegraphics pointing into `attachments`.
         file: (body, attachments) => latexDocument(attachments ? body.replaceAll(`{${ATTACHMENT_PATH}`, `{${attachments}`) : body),
+        fromFile: (text, attachments) => text.replaceAll(`{${attachments}`, `{${ATTACHMENT_PATH}`),
         print: printDocument,
         // A comment, which LaTeX ignores; in verbatim, `%` is text.
         lineMarks: commentMarks("%", "", { notAfter: "\\", skip: inVerbatim }),

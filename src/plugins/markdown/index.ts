@@ -61,6 +61,7 @@ export const markdown = (): Plugin => ({
           return lines.length ? `---\n${lines.join("\n")}\n---\n# ` : "# ";
         },
         file: (body, attachments) => (attachments ? body.replaceAll(`](${ATTACHMENT_PATH}`, `](${attachments}`) : body),
+        fromFile: (text, attachments) => text.replaceAll(`](${attachments}`, `](${ATTACHMENT_PATH}`),
         print: markdownDocument,
         // An HTML comment, which Markdown apps don't show.
         lineMarks: commentMarks("<!--", "-->", { skip: notMarkable }),

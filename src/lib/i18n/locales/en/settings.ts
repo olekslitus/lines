@@ -693,11 +693,13 @@ export default {
 
   // Data: importing files.
   "settings.import": "Import",
-  "settings.importText": "Markdown and LaTeX files become notes. A CSV file becomes a spreadsheet, and so does each sheet of an Excel workbook.",
+  "settings.importText": "Markdown and LaTeX files become notes. A CSV file becomes a spreadsheet, and so does each sheet of an Excel workbook. An export’s .zip brings its notes back with their pictures and files.",
   "settings.importFiles": "Import Files…",
   "settings.importing": "Importing…",
   "settings.imported": "{count, plural, =0 {No notes imported} one {Imported # note} other {Imported # notes}}",
   "settings.importSkipped": "Not imported, as Lines doesn’t read files like them: {names}",
+  "settings.importLeftOut": "Left out, as they’d unpack to more than can be read here: {names}",
+  "settings.importTooBig": "This ZIP is too big to read here (over 2 GB), so nothing was imported.",
   // Data: sample notes.
   "settings.samples": "Sample notes",
   "settings.samplesText":

@@ -4,6 +4,7 @@
   import { t } from "../../i18n/index.svelte";
   import Icon from "../../icons/Icon.svelte";
   import { exportNotes } from "../../notes/export";
+  import { TooBig } from "../../imports/exported";
   import { importable } from "../../notes/import";
   import type { SampleSet } from "../../notes/samples";
   import { isClosed, notes } from "../../notes/store.svelte";
@@ -31,7 +32,7 @@
   const canReveal = isDesktopApp;
 
   let importing = $state(false);
-  let imported = $state<{ count: number; skipped: string[] } | null>(null);
+  let imported = $state<{ count: number; skipped: string[]; leftOut: string[] } | null>(null);
   let importError = $state<string | null>(null);
   let picker = $state<HTMLInputElement>();
   let importButton = $state<HTMLElement>();
@@ -76,7 +77,7 @@
         speak(t("settings.imported", { count: imported.count }));
       }
     } catch (e) {
-      importError = e instanceof Error ? e.message : String(e);
+      importError = e instanceof TooBig ? t("settings.importTooBig") : e instanceof Error ? e.message : String(e);
     } finally {
       importing = false;
       picker!.value = "";
@@ -227,7 +228,7 @@
       bind:this={picker}
       type="file"
       multiple
-      accept={[...importable(), ...fileImports.flatMap((each) => each.files.extensions)].map((extension) => `.${extension}`).join(",")}
+      accept={[...importable(), "zip", ...fileImports.flatMap((each) => each.files.extensions)].map((extension) => `.${extension}`).join(",")}
       class="hidden"
       onchange={importChosen}
     />
@@ -235,6 +236,9 @@
       {@render result(t("settings.imported", { count: imported.count }))}
       {#if imported.skipped.length}
         <p class="m-0 text-xs leading-normal text-muted">{t("settings.importSkipped", { names: imported.skipped.join(", ") })}</p>
+      {/if}
+      {#if imported.leftOut.length}
+        <p class="m-0 text-xs leading-normal text-muted">{t("settings.importLeftOut", { names: imported.leftOut.join(", ") })}</p>
       {/if}
     {/if}
     {#if importError}

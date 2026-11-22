@@ -848,7 +848,7 @@ class NotesStore {
   /** Adds notes made from files (import.ts); returns how many, and the files that weren't of a kind lines reads. */
   async importFiles(files: File[]) {
     const { notesFromFiles } = await import("./import");
-    const { notes, skipped } = await notesFromFiles(files);
+    const { notes, skipped, leftOut } = await notesFromFiles(files);
     // A synced note's file keeps its id, unless a note here has it: an import never takes another's place.
     // A copy isn't where the note came from, either: links and importing again find the note itself.
     const ids = new Set(this.entries.map((entry) => entry.note.id));
@@ -863,7 +863,7 @@ class NotesStore {
       noteKeys.notice(note);
     }
     await this.insert(...notes);
-    return { count: notes.length, skipped };
+    return { count: notes.length, skipped, leftOut };
   }
 
   /** Adds a set of sample notes (see samples.ts); returns how many. */

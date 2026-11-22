@@ -163,7 +163,7 @@ test("a file dragged over a note shows a line where it'd go, above or below the 
   if (dropping) await page.waitForFunction(() => /^First paragraph\n\n!\[[^\]]*\]\([^)]+\)\nSecond paragraph/.test(window.testing.text() ?? ""));
 });
 
-test("list items pasted on an empty item take its place at its level, not a list inside it; on an empty line, at its indentation", async () => {
+test("list items pasted on an empty item take its place at its level, not a list inside it; on an empty line, at its indentation; in code, as they are", async () => {
   /** Pastes `text` into a note reading `body`, its cursor at the end; the note after. */
   const paste = async (body: string, text: string) => {
     await app.open(body);
@@ -185,6 +185,8 @@ test("list items pasted on an empty item take its place at its level, not a list
   expect(await paste("Text\n\n", "    - x\n      - y")).toBe("Text\n\n- x\n  - y");
   // In a line with text, as pasted.
   expect(await paste("- Keep ", "- x")).toBe("- Keep - x");
+  // In code, as pasted.
+  expect(await paste("```\n", "  - x\n    - y")).toBe("```\n  - x\n    - y");
 });
 
 test("with Markdown hidden, a spreadsheet selected whole by its grip stays a grid, tinted as selected; with it live, its CSV shows", async () => {
@@ -808,7 +810,47 @@ test("Enter at the start of an item's text puts an empty item above it, under a 
   }
 });
 
-test("Tab and ⇧Tab number a numbered item again, and the items around it", async () => {
+test("⌘B and the other formats wrap what's selected on each line, after its marker, keeping it selected; again takes them off; ⌘Z undoes", async () => {
+  // ⟨ and ⟩ are where the selection starts and ends; ‸ the cursor.
+  const cases = [
+    ["Some ⟨bold⟩ text", "B", "Some **⟨bold⟩** text"],
+    ["Some **⟨bold⟩** text", "B", "Some ⟨bold⟩ text"],
+    ["- ⟨one\n- two⟩", "B", "- **⟨one**\n- **two⟩**"],
+    ["## ⟨Plans⟩", "B", "## **⟨Plans⟩**"],
+    ["a‸b", "B", "a**‸**b"],
+    ["x ⟨word⟩", "I", "x *⟨word⟩*"],
+    ["x ⟨word⟩", "E", "x `⟨word⟩`"],
+    ["x ⟨word⟩", "U", "x <u>⟨word⟩</u>"],
+    ["x ⟨word⟩", "Shift+X", "x ~~⟨word⟩~~"],
+    ["x ⟨word⟩", "Shift+H", "x ==⟨word⟩=="],
+    ["x ~~⟨word⟩~~", "Shift+X", "x ⟨word⟩"],
+  ];
+  const marked = (text: string, anchor: number, head: number) =>
+    anchor === head ? text.slice(0, head) + "‸" + text.slice(head) : text.slice(0, anchor) + "⟨" + text.slice(anchor, head) + "⟩" + text.slice(head);
+  for (const [note, key, after] of cases) {
+    const text = note.replace(/[⟨⟩‸]/g, "");
+    const [anchor, head] = note.includes("‸") ? [note.indexOf("‸"), note.indexOf("‸")] : [note.indexOf("⟨"), note.indexOf("⟩") - 1];
+    await app.open(text);
+    await app.page.evaluate(
+      ([anchor, head]) => {
+        const view = window.testing.editor()!;
+        view.focus();
+        view.dispatch({ selection: { anchor, head } });
+      },
+      [anchor, head],
+    );
+    await app.page.keyboard.press(`${mod()}+${key}`);
+    const [now, from, to] = await app.page.evaluate(() => {
+      const { state } = window.testing.editor()!;
+      return [state.doc.toString(), state.selection.main.anchor, state.selection.main.head] as const;
+    });
+    expect([note, marked(now, from, to)]).toEqual([note, after]);
+    await app.page.keyboard.press(`${mod()}+z`);
+    expect(await app.text()).toBe(text);
+  }
+});
+
+test("Tab and ⇧Tab number a numbered item again, and the items around it; Backspace after a marker moves its item out a level, or out of the list", async () => {
   const cases = [
     ["1. a\n2. b‸\n3. c", "Tab", "1. a\n   1. b\n2. c"],
     ["1. a\n   1. b‸\n2. c", "Shift+Tab", "1. a\n2. b\n3. c"],
@@ -817,6 +859,12 @@ test("Tab and ⇧Tab number a numbered item again, and the items around it", asy
     ["1. a\n   1. b‸\n      1. x\n   2. c\n2. d", "Shift+Tab", "1. a\n2. b\n   1. x\n   2. c\n3. d"],
     ["> 1. a\n> 2. b‸\n> 3. c", "Tab", "> 1. a\n>    1. b\n> 2. c"],
     ["1. a\n   1. ‸b", "Backspace", "1. a\n2. b"],
+    // Numbered on only as far as they were one after another.
+    ["1. a\n2. b‸\n3. c\n7. d", "Tab", "1. a\n   1. b\n2. c\n7. d"],
+    // Backspace right after a top-level item's marker leaves its text, a quote's > kept.
+    ["- ‸milk", "Backspace", "milk"],
+    ["- [ ] ‸milk", "Backspace", "milk"],
+    ["> - ‸milk", "Backspace", "> milk"],
   ];
   for (const [note, key, after] of cases) {
     await app.open(note.replace("‸", ""));

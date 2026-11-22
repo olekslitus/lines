@@ -857,4 +857,32 @@ describe("the import itself", () => {
     expect(notes.get("book")?.note.body).toBe("# Book\n\nTyped too.\n\nFrom the import.\n");
     expect(imports.state).toMatchObject({ kind: "done", appended: 2 });
   });
+
+  test("undone, the notes it made go to the Trash, those added to are as they were; what was changed since is kept", async () => {
+    const { notes, stubPlugins } = await import("./sync");
+    stubPlugins();
+    const { importers } = await import("./stubs");
+    const { imports } = await import("../../src/lib/imports/imports.svelte");
+    const note = (id: string, body: string) => ({ id, body, createdAt: 1, updatedAt: 1, pinned: false, trashed: false });
+    await notes.insert(note("added-to", "# Added to\n"), note("added-to-then-edited", "# Edited since\n"));
+    const made = (id: string): NewNote => ({ body: `# ${id}\n`, source: { app: "undoing", id, name: id } });
+    importers.push({
+      id: "undoing",
+      work: () => ({
+        add: [made("Made"), made("Made, then edited")],
+        append: [
+          { id: "added-to", text: "From the import." },
+          { id: "added-to-then-edited", text: "From the import." },
+        ],
+      }),
+    });
+    await imports.start("undoing", {});
+    const madeNote = (id: string) => notes.entries.find(({ note }) => note.source?.app === "undoing" && note.source.id === id)!.note;
+    notes.update(madeNote("Made, then edited").id, "# Made, then edited\n\nMine now.\n");
+    notes.update("added-to-then-edited", "# Edited since\n\nFrom the import.\n\nMine too.\n");
+    await imports.undo();
+    expect([madeNote("Made").trashed, madeNote("Made, then edited").trashed]).toEqual([true, false]);
+    expect([notes.get("added-to")!.note.body, notes.get("added-to-then-edited")!.note.body]).toEqual(["# Added to\n", "# Edited since\n\nFrom the import.\n\nMine too.\n"]);
+    expect(imports.state).toMatchObject({ kind: "undone", trashed: 1, kept: 1, restored: 1 });
+  });
 });

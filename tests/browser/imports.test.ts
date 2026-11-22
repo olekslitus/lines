@@ -98,6 +98,8 @@ test("an Obsidian vault: what importing it would do, said first; then its notes,
   await group.getByText("Import undone: 4 notes moved to the Trash.").waitFor();
   await group.getByText("1 you’ve changed since is kept.").waitFor();
   const undone = await imported();
+  // In the Trash, not deleted: every one is still here.
+  expect(Object.keys(undone).sort()).toEqual(Object.keys(notes).sort());
   expect(Object.entries(undone).filter(([, note]) => !note.trashed).map(([path]) => path)).toEqual(["Ideas.md"]);
 
   // Imported again, it brings back only what isn't here (the one from Obsidian's trash is, in lines'); and once more, nothing.

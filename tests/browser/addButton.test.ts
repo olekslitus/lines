@@ -86,13 +86,15 @@ test("it goes as the list scrolls down and the keyboard comes up, and comes back
   await list.evaluate((element) => element.scrollTo({ top: 300 }));
   await page.waitForFunction(() => getComputedStyle(document.querySelector(".add-button")!).opacity === "1");
 
-  // The last row scrolls clear of it.
-  await list.evaluate((element) => element.scrollTo({ top: element.scrollHeight }));
-  await list.evaluate((element) => element.scrollTo({ top: element.scrollHeight - element.clientHeight - 20 }));
-  await page.waitForFunction(() => getComputedStyle(document.querySelector(".add-button")!).opacity === "1");
-  const last = (await page.locator(".note-list li").last().boundingBox())!;
+  // The last row scrolls clear of it: at the end of the list, it's above where the + shows.
   const plus = (await button().boundingBox())!;
+  await list.evaluate((element) => element.scrollTo({ top: element.scrollHeight }));
+  // Gone, as the list was scrolled down: the scroll's been taken.
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".add-button")!).opacity === "0");
+  const last = (await page.locator(".note-list [data-id]").last().boundingBox())!;
   expect(last.y + last.height).toBeLessThanOrEqual(plus.y);
+  await list.evaluate((element) => element.scrollTo({ top: 300 }));
+  await page.waitForFunction(() => getComputedStyle(document.querySelector(".add-button")!).opacity === "1");
 
   await page.getByRole("searchbox", { name: "Search notes" }).focus();
   await page.waitForFunction(() => getComputedStyle(document.querySelector(".add-button")!).opacity === "0");

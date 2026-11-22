@@ -61,6 +61,9 @@ export type ScoreStyle = (typeof SCORE_STYLES)[number];
 /** How a note shows its Markdown (editor/markupMode.ts). */
 export const MARKDOWN_MODES = ["source", "visible", "live", "hidden"] as const;
 export type MarkdownMode = (typeof MARKDOWN_MODES)[number];
+/** How a numbered list's sub-lists are numbered, as drawn: 1. a. i., I. A. 1. a. i., or 1. throughout (editor/listNumbers.ts). */
+export const LIST_NUMBERINGS = ["outline", "classic", "numbers"] as const;
+export type ListNumbering = (typeof LIST_NUMBERINGS)[number];
 /** What color a paper pattern is drawn in: the theme's ink or accent, or one of your own. */
 export type PaperColor = "ink" | "accent" | "custom";
 /** The text cursor (Settings → Cursor, cursors.svelte.ts): its shape, color, blink, how it moves, and what it does as you type. */
@@ -300,6 +303,8 @@ export interface Stored {
    * has it first, `---` there is a divider and `===` text.
    */
   underlinedHeadings: boolean;
+  /** How numbered lists inside numbered lists are numbered where they're drawn (editor/listNumbers.ts); the Markdown keeps `1.`. */
+  listNumbering: ListNumbering;
   /** The system checks notes' spelling, and corrects it as you type (code and math never). */
   spellcheck: boolean;
   /** Text selected in a note with the pointer is copied when it's let go, as in a terminal (editor/copyOnSelect.ts). */
@@ -469,6 +474,7 @@ const DEFAULTS: Stored = {
   markdownMode: "live",
   dragBlocks: true,
   underlinedHeadings: false,
+  listNumbering: "outline",
   spellcheck: true,
   copyOnSelect: false,
   typingSounds: false,
@@ -655,6 +661,7 @@ function read(json?: string): Stored {
     markdownMode: oneOf(raw.markdownMode, MARKDOWN_MODES, DEFAULTS.markdownMode),
     dragBlocks: flag(raw.dragBlocks, DEFAULTS.dragBlocks),
     underlinedHeadings: flag(raw.underlinedHeadings, DEFAULTS.underlinedHeadings),
+    listNumbering: oneOf(raw.listNumbering, LIST_NUMBERINGS, DEFAULTS.listNumbering),
     spellcheck: flag(raw.spellcheck, DEFAULTS.spellcheck),
     copyOnSelect: flag(raw.copyOnSelect, DEFAULTS.copyOnSelect),
     typingSounds: flag(raw.typingSounds, DEFAULTS.typingSounds),
@@ -772,6 +779,7 @@ class Prefs {
   markdownMode = $state(this.#initial.markdownMode);
   dragBlocks = $state(this.#initial.dragBlocks);
   underlinedHeadings = $state(this.#initial.underlinedHeadings);
+  listNumbering = $state(this.#initial.listNumbering);
   spellcheck = $state(this.#initial.spellcheck);
   copyOnSelect = $state(this.#initial.copyOnSelect);
   typingSounds = $state(this.#initial.typingSounds);
@@ -996,6 +1004,7 @@ class Prefs {
       markdownMode: this.markdownMode,
       dragBlocks: this.dragBlocks,
       underlinedHeadings: this.underlinedHeadings,
+      listNumbering: this.listNumbering,
       spellcheck: this.spellcheck,
       copyOnSelect: this.copyOnSelect,
       typingSounds: this.typingSounds,

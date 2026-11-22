@@ -699,6 +699,21 @@
   font-variant-numeric: tabular-nums;
 }
 
+/*
+ * A drawn number's slot is the marker's width exactly. The number starts at its left, its margin
+ * taking up the room after it; a number wider than the slot (viii., 100.) leaves no room for the
+ * margin, and flex-end hangs it out to the left rather than pushing its text out of line.
+ */
+.cm-lp-number-slot {
+  display: inline-flex;
+  justify-content: flex-end;
+  width: var(--li-marker);
+}
+
+.cm-lp-number-slot > span {
+  margin-right: auto;
+}
+
 /* A todo's checkbox, in a slot as wide as other list markers. */
 .cm-lp-task-marker {
   display: inline-block;

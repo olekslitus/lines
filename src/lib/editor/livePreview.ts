@@ -33,6 +33,7 @@ import { clickScore } from "./ratings";
 import { MARKS, type Scale, ScoreWidget, scoreIn } from "./scores";
 import { prefs } from "../prefs.svelte";
 import { InlineMathWidget } from "./math";
+import { listNumber } from "./listNumbers";
 import { fenceCode } from "./rendered";
 import { followClick, openHref } from "./links";
 import { drawMention, frontMatterField, heldProperties, objectsChanged, openMention, openTag, shownNote, valueText } from "./objects";
@@ -96,7 +97,8 @@ class SpokenWidget extends WidgetType {
 
 /**
  * An ordered list's number, drawn in a marker-wide slot like a bullet, so the cursor on an empty
- * item goes where its text will start rather than just after the number.
+ * item goes where its text will start rather than just after the number. One wider than the slot
+ * (`viii.`, `100.`) hangs out to its left, its text staying in line with the other items' (editor.css).
  */
 export class NumberWidget extends WidgetType {
   constructor(readonly number: string) {
@@ -107,8 +109,8 @@ export class NumberWidget extends WidgetType {
   }
   toDOM() {
     const el = document.createElement("span");
-    el.className = "cm-lp-list-marker cm-lp-list-number";
-    el.textContent = this.number + " ";
+    el.className = "cm-lp-list-marker cm-lp-list-number cm-lp-number-slot";
+    el.append(Object.assign(document.createElement("span"), { textContent: this.number + " " }));
     return el;
   }
 }
@@ -552,7 +554,9 @@ function build(view: EditorView): DecorationSet {
           if (styleShows(listMark.from, listMark.to)) {
             mark(listMark.from, end, number ? "cm-lp-list-marker cm-lp-list-number" : "cm-lp-list-marker");
           } else if (number) {
-            const widget = new NumberWidget(doc.sliceString(listMark.from, listMark.to));
+            let level = 0;
+            for (let p = node.parent; p; p = p.parent) if (p.name === "OrderedList") level++;
+            const widget = new NumberWidget(listNumber(doc.sliceString(listMark.from, listMark.to), level, prefs.listNumbering));
             decos.push(Decoration.replace({ widget }).range(listMark.from, end));
           } else {
             decos.push(Decoration.replace({ widget: bullets[(depth - 1) % 3] }).range(listMark.from, end));

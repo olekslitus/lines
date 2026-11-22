@@ -564,6 +564,29 @@ const FORMATTING_FONTS = {
   "code-block": { font: "agave" },
 };
 
+/** Numbered lists nested five deep, a bullet list in between, and items far enough to need wide markers. */
+const LIST_NUMBERS = `# Plans
+
+1. Trip to Rome
+   1. Before we go
+      1. Book the flights
+         1. Compare the airlines
+            1. Look at the times
+      2. Pack
+      3. Find the passports
+      4. Water the plants
+      5. Tell the neighbours
+      6. Take out the bins
+      7. Charge everything
+      8. Lock the windows, the back door and the shed, and check the gas is off before leaving for the airport
+   2. While there
+      - Things to see
+        1. The Pantheon
+        2. Trastevere
+2. Back home
+
+End`;
+
 /** Opens `note`, and the note it mentions, once the fonts it's drawn in have loaded. */
 const openFormatting = (note, format) => (page) =>
   page.evaluate(
@@ -613,6 +636,19 @@ const SCENES = [
   { id: "backdrop-pages", title: "Backdrop, with a page break", look: "Two pages over the gradient, a gap between them where the break is; the toolbar frosted; the line before the break looks as any line.", prefs: { paperBackdrop: "dawn" }, note: `${PROSE}\n\n<!-- pagebreak -->\n\n## The second page\n\nIt starts on a page of its own.` },
   { id: "backdrop-nothing-open", title: "A backdrop with no note open", look: "Select a note, or start a new one, and the New Note button on a page of their own over the picture, readable.", prefs: { paperBackdrop: "dawn" } },
   { id: "page-break", title: "A page break, without a backdrop", look: "A dashed line named Page break, with room around it; the line above it in the text's own color and size.", note: "The first page ends here.\n<!-- pagebreak -->\nThe second page starts here." },
+  ...[
+    ["outline", "as an outline (the default)", "1., a., i., then 1. again four deep"],
+    ["classic", "I. A. 1.", "I., A., 1., a., then i. five deep"],
+    ["numbers", "1. 1. 1.", "numbers at every level"],
+  ].map(([numbering, name, levels]) => ({
+    id: `list-numbers-${numbering}`,
+    title: `Numbered sub-lists, ${name}`,
+    look: `Each level of numbered list in the accent, ${levels}; the bullet list in between not counted as a level; each marker at its level's start, the text after it lined up with its siblings' and with wrapped lines; a wider marker (viii.) never overlapping its text.`,
+    prefs: { listNumbering: numbering },
+    note: LIST_NUMBERS,
+    act: (page) => page.evaluate(() => window.testing.place()),
+    shoot: ".editor-pane",
+  })),
   { id: "code-note", title: "A code note", look: "Line numbers beside each line, a fixed-width font, highlighting in the theme's colors.", note: CODE, format: "code-python" },
   { id: "code-note-backdrop", title: "A code note over a backdrop", look: "The page holds the line numbers, each exactly beside its line, with even room on both sides.", prefs: { paperBackdrop: "dawn" }, note: CODE, format: "code-python" },
   ...[

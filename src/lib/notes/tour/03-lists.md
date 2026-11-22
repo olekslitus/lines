@@ -9,7 +9,10 @@
 
 1. Numbered lists count for you
 2. Renumbered as you go
-3. And nest the same way
+3. And nest as an outline does
+   1. Lettered under a number
+      1. Then in Roman numerals
+   2. Settings → Editor numbers them other ways
 4. Type `- ` at the start of an item to make it a bullet, `1. ` on a bullet to number it
 
 ## Todos

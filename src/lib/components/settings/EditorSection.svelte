@@ -1,6 +1,17 @@
 <script lang="ts">
   import { type MessageKey, t } from "../../i18n/index.svelte";
-  import { LINK_ACTIONS, LINK_CLICKS, MARKDOWN_MODES, prefs, type LinkAction, type LinkClick, type LinkKind, type MarkdownMode } from "../../prefs.svelte";
+  import {
+    LINK_ACTIONS,
+    LINK_CLICKS,
+    LIST_NUMBERINGS,
+    MARKDOWN_MODES,
+    prefs,
+    type LinkAction,
+    type LinkClick,
+    type LinkKind,
+    type ListNumbering,
+    type MarkdownMode,
+  } from "../../prefs.svelte";
   import { formatKeys, speakKeys, system } from "../../shortcuts";
   import { canFloat } from "../../windows/floating";
   import FieldGroup from "../ui/FieldGroup.svelte";
@@ -16,6 +27,12 @@
     hidden: ["settings.markdownHidden", "settings.markdownHiddenNote"],
   };
   const modes = $derived(MARKDOWN_MODES.map((id) => ({ id, label: t(MODE_NAMES[id][0]) })));
+  const NUMBERING_NAMES: Record<ListNumbering, MessageKey> = {
+    outline: "settings.listNumberingOutline",
+    classic: "settings.listNumberingClassic",
+    numbers: "settings.listNumberingNumbers",
+  };
+  const numberings = $derived(LIST_NUMBERINGS.map((id) => ({ id, label: t(NUMBERING_NAMES[id]) })));
 
   const LINK_KINDS: { kind: LinkKind; name: MessageKey }[] = [
     { kind: "web", name: "settings.linksWeb" },
@@ -49,6 +66,9 @@
   </FieldRow>
   <FieldRow label={t("settings.underlinedHeadings")} note={t("settings.underlinedHeadingsNote")}>
     <Switch label={t("settings.underlinedHeadings")} checked={prefs.underlinedHeadings} onchange={(on) => (prefs.underlinedHeadings = on)} />
+  </FieldRow>
+  <FieldRow label={t("settings.listNumbering")} note={t("settings.listNumberingNote")}>
+    <Segmented label={t("settings.listNumbering")} options={numberings} value={prefs.listNumbering} onselect={(numbering) => (prefs.listNumbering = numbering)} />
   </FieldRow>
   <FieldRow label={t("settings.spellcheck")} note={t("settings.spellcheckNote")}>
     <Switch label={t("settings.spellcheck")} checked={prefs.spellcheck} onchange={(on) => (prefs.spellcheck = on)} />

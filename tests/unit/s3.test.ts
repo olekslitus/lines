@@ -48,9 +48,12 @@ describe("an S3 bucket", () => {
   });
 
   test("one that turns conditional writes down writes as it did before", async () => {
-    answer = (request) => ({ status: request.headers.has("if-match") ? 501 : 200, etag: "new" });
-    expect(await bucket("declines").put("notes/a.md", "text", "listed")).toBe("new");
-    expect(sent.at(-1)!.headers.has("if-match")).toBe(false);
+    // 501 as Backblaze B2 answers (NotImplemented), or a 400.
+    for (const status of [501, 400]) {
+      answer = (request) => ({ status: request.headers.has("if-match") ? status : 200, etag: "new" });
+      expect(await bucket(`declines-writes-${status}`).put("notes/a.md", "text", "listed")).toBe("new");
+      expect(sent.at(-1)!.headers.has("if-match")).toBe(false);
+    }
   });
 
   test("so does one that refuses them though the note is as expected, which would otherwise never be written", async () => {
@@ -62,6 +65,40 @@ describe("an S3 bucket", () => {
     const before = sent.length;
     expect(await refuses.put("notes/b.md", "text", "listed")).toBe("new");
     expect(sent.length - before).toBe(1);
+  });
+});
+
+describe("an S3 bucket's deletes", () => {
+  test("delete a note only if it's the version expected", async () => {
+    const notes = bucket("deletes");
+    answer = () => ({ status: 204, etag: "" });
+    expect(await notes.delete("notes/a.md", "listed")).toBe(true);
+    expect([sent.at(-1)!.method, sent.at(-1)!.headers.get("if-match")]).toEqual(["DELETE", '"listed"']);
+    // Another device wrote it since.
+    answer = (request) => ({ status: request.method === "DELETE" ? 412 : 200, etag: "theirs" });
+    expect(await notes.delete("notes/a.md", "listed")).toBe(false);
+    // Gone already.
+    answer = () => ({ status: 404, etag: "" });
+    expect(await notes.delete("notes/a.md", "listed")).toBe(true);
+  });
+
+  test("one that turns conditional deletes down, or refuses them though the note is as expected, deletes as before, still writing conditionally", async () => {
+    const refuses = bucket("refuses-deletes");
+    for (const status of [501, 400]) {
+      answer = (request) => ({ status: request.method === "DELETE" && request.headers.has("if-match") ? status : 204, etag: "new" });
+      expect(await bucket(`declines-${status}`).delete("notes/a.md", "listed")).toBe(true);
+      expect([sent.at(-1)!.method, sent.at(-1)!.headers.has("if-match")]).toEqual(["DELETE", false]);
+    }
+    answer = (request) => (request.headers.has("if-match") && request.method === "DELETE" ? { status: 412, etag: "" } : { status: 204, etag: "listed" });
+    expect(await refuses.delete("notes/a.md", "listed")).toBe(true);
+    expect(sent.at(-1)!.headers.has("if-match")).toBe(false);
+    // Remembered for deletes, not writes: the next delete goes at once, a write still with its condition.
+    const before = sent.length;
+    expect(await refuses.delete("notes/b.md", "listed")).toBe(true);
+    expect(sent.length - before).toBe(1);
+    answer = () => ({ status: 200, etag: "new" });
+    await refuses.put("notes/c.md", "text", "listed");
+    expect(sent.at(-1)!.headers.get("if-match")).toBe('"listed"');
   });
 });
 

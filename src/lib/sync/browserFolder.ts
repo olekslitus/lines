@@ -166,14 +166,19 @@ export class BrowserFolderRemote implements Remote {
     return etagOf(await this.#write(key, text));
   }
 
-  async delete(key: string) {
+  async delete(key: string, expected?: string) {
+    if (expected !== undefined) {
+      const file = await this.#file(key);
+      if (file && etagOf(file) !== expected) return false;
+    }
     const place = await this.#locate(key, false);
-    if (!place) return;
+    if (!place) return true;
     try {
       await place.dir.removeEntry(place.name);
     } catch (error) {
       if (!(error instanceof DOMException && error.name === "NotFoundError")) throw error;
     }
+    return true;
   }
 
   async getFile(key: string) {

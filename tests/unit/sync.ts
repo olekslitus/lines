@@ -105,6 +105,8 @@ let writes = 0;
 
 /** Something to do just before the folder's next write, as another device could. */
 export const beforeWrite: { next?: (path: string) => void } = {};
+/** And just before its next delete. */
+export const beforeDelete: { next?: (path: string) => void } = {};
 
 type FolderArgs = { dir: string; name: string; text: string; expected?: string };
 
@@ -133,7 +135,15 @@ mock.module("@tauri-apps/api/core", () => ({
       drive.set(path, file);
       return file.etag;
     }
-    if (command === "sync_folder_delete") return void drive.delete(path);
+    if (command === "sync_folder_delete") {
+      const write = beforeDelete.next;
+      beforeDelete.next = undefined;
+      write?.(path);
+      // Only the file it was expected to be, if it's still there.
+      if (expected !== undefined && drive.has(path) && drive.get(path)!.etag !== expected) return false;
+      drive.delete(path);
+      return true;
+    }
     throw new Error(`No folder command ${command}`);
   },
 }));

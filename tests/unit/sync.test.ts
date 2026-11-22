@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, test } from "bun:test";
 import type { MarkField, Marks } from "../../src/lib/feeds/marks";
-import { beforeWrite, type Device, devices, drive, editElsewhere, FOLDER, fileOf, inAnotherTab, languages, listings, notes, placeholders, reads, serialize, sync, written } from "./sync";
+import { beforeDelete, beforeWrite, type Device, devices, drive, editElsewhere, FOLDER, fileOf, inAnotherTab, languages, listings, notes, placeholders, reads, serialize, sync, written } from "./sync";
 // After ./sync, which sets up the page they run in and the notes' storage in memory: imported first,
 // a module would read a page that isn't there, or bind the real storage (IndexedDB) before it's replaced.
 const { latexContent, markTitle } = await import("../../src/plugins/latex/text");
@@ -153,6 +153,19 @@ describe("sync, as another device writes the same note", () => {
     expect(bodies()).toEqual(both);
     await there.sync();
     expect(bodies()).toEqual(both);
+  });
+
+  test("nor deleted, deleted here, as another device saves an edit of it: the edit wins, as it does over a delete", async () => {
+    const [here] = await devices(1);
+    const id = notes.add("# Shopping\n\nmilk");
+    await here.sync();
+    await notes.deleteForever(id);
+    // Saved by another device after this one listed the folder, before it deleted the note.
+    beforeDelete.next = () => editElsewhere(id, { body: "# Shopping\n\nmilk\nbread" });
+    await here.sync();
+    expect(drive.get(fileOf(id))!.text).toContain("bread");
+    await here.sync();
+    expect(bodies()).toEqual(["# Shopping\n\nmilk\nbread"]);
   });
 
   test("nor is a file the drive brings in under a new note's name", async () => {

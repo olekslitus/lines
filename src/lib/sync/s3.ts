@@ -20,8 +20,8 @@ function encodeKey(key: string) {
   return key.split("/").map(encodeURIComponent).join("/");
 }
 
-/** Buckets found this session not to do conditional writes, though they don't ignore them: written to as before. */
-const unconditional = new Set<string>();
+/** Buckets found this session not to do conditional writes, or deletes, though they don't ignore them: written to as before. */
+const unconditional = { PUT: new Set<string>(), DELETE: new Set<string>() };
 
 /** Why the app's native side couldn't transfer a file: the bucket's answer, or none (status null). */
 interface Failure {
@@ -146,24 +146,30 @@ export class S3Remote implements Remote {
     await this.#put(key, data, data.type || "application/octet-stream");
   }
 
-  /** Conditional (If-Match, or If-None-Match for a new object) where `expected` is given. A service that ignores that writes anyway, as before. */
   async #put(key: string, body: string | Blob, contentType: string, expected?: string | null): Promise<string | null | false> {
-    if (unconditional.has(this.#base)) expected = undefined;
+    const response = await this.#conditional(key, { method: "PUT", body, headers: { "content-type": contentType } }, expected, body instanceof Blob);
+    return response && unquote(response.headers.get("etag"));
+  }
+
+  /**
+   * Sends a write or a delete only if the object is still as `expected` (its ETag; null: not there),
+   * where that's given (If-Match, or If-None-Match): false if not, another device having written it
+   * since. A service that ignores the condition writes anyway, as before; one that turns it down
+   * (400, 501), or refuses it though the object is as expected (412), which would leave it never
+   * written, is sent the request as before, for the rest of the session.
+   */
+  async #conditional(key: string, init: RequestInit & { method: "PUT" | "DELETE"; headers?: Record<string, string> }, expected?: string | null, file = false): Promise<Response | false> {
+    const skipped = unconditional[init.method];
+    if (skipped.has(this.#base)) expected = undefined;
     const condition: Record<string, string> = expected === undefined ? {} : expected === null ? { "if-none-match": "*" } : { "if-match": `"${expected}"` };
-    const response = await this.#request(
-      `/${encodeKey(key)}`,
-      { method: "PUT", body, headers: { "content-type": contentType, ...condition } },
-      expected === undefined ? [404] : [404, 409, 412, 501],
-      body instanceof Blob,
-    );
-    // Another device wrote it since (409: just as this was written). Unless it's still as expected,
-    // and the service can't do conditional writes after all: it would never be written then.
+    const response = await this.#request(`/${encodeKey(key)}`, { ...init, headers: { ...init.headers, ...condition } }, expected === undefined ? [404] : [400, 404, 409, 412, 501], file);
+    // 409: written just as this was.
     if (response.status === 409 || (response.status === 412 && (await this.#etag(key)) !== expected)) return false;
-    if (response.status === 412 || response.status === 501) {
-      unconditional.add(this.#base);
-      return this.#put(key, body, contentType);
+    if ([400, 412, 501].includes(response.status)) {
+      skipped.add(this.#base);
+      return this.#conditional(key, init, undefined, file);
     }
-    return unquote(response.headers.get("etag"));
+    return response;
   }
 
   /** The object's ETag now, or null if it isn't there. From the listing where the bucket doesn't show the header to this page (CORS). */
@@ -173,7 +179,7 @@ export class S3Remote implements Remote {
     return unquote(response.headers.get("etag")) ?? (await this.list(key)).find((object) => object.key === key)?.etag ?? null;
   }
 
-  async delete(key: string) {
-    await this.#request(`/${encodeKey(key)}`, { method: "DELETE" });
+  async delete(key: string, expected?: string) {
+    return (await this.#conditional(key, { method: "DELETE" }, expected)) !== false;
   }
 }

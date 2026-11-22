@@ -621,6 +621,9 @@ test("a feed the site won't let the web app read says why, quietly", async () =>
   await page.getByText("On the web, Lines can read only the feeds whose sites allow it.", { exact: false }).waitFor();
   await openFeeds(app, "https://closed.example/feed");
   await page.getByText("This feed’s site doesn’t let web pages read it. The desktop apps can.").waitFor();
+  // Quietly: nothing goes wrong in the page but the request the browser couldn't make, which Chromium
+  // says itself.
+  expect(app.errors.filter((error) => error !== "Failed to load resource: net::ERR_FAILED")).toEqual([]);
   app.errors.length = 0;
 });
 

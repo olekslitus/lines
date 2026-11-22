@@ -1,9 +1,11 @@
-import { EditorSelection, StateEffect } from "@codemirror/state";
+import { EditorSelection, StateEffect, StateField } from "@codemirror/state";
 import { EditorView, layer, RectangleMarker, ViewPlugin, type ViewUpdate } from "@codemirror/view";
+import { isIOS } from "../platform";
 
 /*
  * The text cursor, drawn by the editor instead of the browser. WebKit (the Mac and iPhone apps)
- * can leave a copy of its own caret behind, so that one is hidden. Selections stay native.
+ * can leave a copy of its own caret behind, so that one is hidden. Selections stay native, and on
+ * iPhone and iPad the cursor is the system's while a finger's on the text (`systemCursor`, below).
  * CodeMirror's base theme makes it blink and shows it only while the editor has focus.
  *
  * How it looks is Settings → Cursor's (cursors.svelte.ts), as the page's attributes: its shape (a
@@ -318,12 +320,40 @@ const report = ViewPlugin.define(
   },
 );
 
+const touch = StateEffect.define<null>();
+
+/** A finger has been on the note since it was last typed in. */
+const touched = StateField.define<boolean>({
+  create: () => false,
+  update: (value, tr) => tr.effects.some((effect) => effect.is(touch)) || (value && !(tr.isUserEvent("input") || tr.isUserEvent("delete"))),
+});
+
+/**
+ * iOS draws a selection's handles, its highlight, the loupe and its own cursor in the caret's
+ * color, so with the caret hidden they were hidden too: what was selected could hardly be seen,
+ * nor stretched. So from a finger's touch until typing, and while text is selected, the cursor is
+ * the system's, in the cursor's color; typing, it's lines' own again. It changes as the finger
+ * goes down rather than once text is selected: iOS can put its menu away as the color changes.
+ */
+const systemCursor = [
+  touched,
+  EditorView.editorAttributes.compute([touched, "selection"], (state): Record<string, string> => (state.field(touched) || !state.selection.main.empty ? { class: "cm-systemCursor" } : {})),
+  EditorView.domEventHandlers({
+    touchstart(_event, view) {
+      if (!view.state.field(touched)) view.dispatch({ effects: touch.of(null) });
+    },
+  }),
+];
+
 export const cursor = [
   cursorLayer,
   effects,
   report,
+  isIOS ? systemCursor : [],
   EditorView.theme({
     ".cm-content, .cm-line": { caretColor: "transparent !important" },
+    "&.cm-systemCursor .cm-content, &.cm-systemCursor .cm-line": { caretColor: "var(--caret-color) !important" },
+    "&.cm-systemCursor .cm-cursorLayer": { display: "none" },
     ".cm-cursorLayer": { animationDuration: "1.2s" },
   }),
 ];

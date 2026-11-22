@@ -198,6 +198,26 @@ describe("themes' own highlighter, status and callout colors", () => {
     }
     expect(misses).toEqual([]);
   });
+
+  // Selected text is tinted with app.css's --selection, a share of the accent: as plain to see as the
+  // systems' own highlights are (about 1.4:1), and the text still reads on it.
+  test("selected text shows: its tint 1.25:1 on the note, the text on it 3:1", () => {
+    const share = (css: string) => Number(/--selection: color-mix\(in srgb, var\(--accent\) (\d+)%/.exec(css)![1]) / 100;
+    const shares = { light: share(lightCss), dark: share(darkCss) };
+    const misses: string[] = [];
+    for (const theme of withStyles) {
+      for (const scheme of shownSchemes(theme)) {
+        const colors = effective(theme, scheme);
+        const bg = parse(colors.bg)!;
+        const selected = over({ ...parse(colors.accent)!, a: shares[scheme] }, bg);
+        const shows = contrast(selected, bg);
+        const reads = contrast(parse(colors.text)!, selected);
+        if (shows < 1.245) misses.push(`${theme.id} ${scheme}: the selection on the note ${shows.toFixed(2)} < 1.25`);
+        if (reads < 2.95) misses.push(`${theme.id} ${scheme}: text on the selection ${reads.toFixed(2)} < 3`);
+      }
+    }
+    expect(misses).toEqual([]);
+  });
 });
 
 describe("styles", () => {

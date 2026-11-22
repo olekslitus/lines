@@ -173,7 +173,7 @@
   --input: color-mix(in srgb, var(--ink) 5%, transparent);
   --code-bg: color-mix(in srgb, var(--ink) 5%, transparent);
   --accent-soft: color-mix(in srgb, var(--accent) 35%, transparent);
-  --selection: color-mix(in srgb, var(--accent) 18%, transparent);
+  --selection: color-mix(in srgb, var(--accent) 30%, transparent);
   /* How much of a tag's color its pill is tinted with: the accent's, or one chosen (editor/tagColors.ts). */
   --tag-tint: 10%;
   --tag-bg: color-mix(in srgb, var(--accent) var(--tag-tint), transparent);

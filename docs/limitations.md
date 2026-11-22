@@ -343,6 +343,8 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 - A note has one cursor and one selection: there are no multiple cursors, nor ⌘D to select the next match as well, as code editors have.
 - The text cursor's look is in notes and Settings' little note; fields (search, renaming) and a spreadsheet's cells keep the system's, in the color chosen.
+- On iPhone and iPad the cursor is the system's, in the color chosen, from a touch on the text until you type, and while text is selected: iOS draws a selection's handles, its highlight and the loupe in the cursor's color, so they need it showing. Its shape, blink, motion and effects are the ones you chose once you type. The highlight is iOS's share of that color, not Lines' own selection color.
+- On iOS 27 (seen in the simulator; earlier versions not tried) the system's menu over selected text (Cut, Copy, Paste…) opens below the selection, where the format toolbar shows on touch screens, and covers it while it's open.
 - The Retro and Dot pointers show over Lines' own windows only, and only where something hasn't asked for a pointer of its own (a resize edge, a diagram you can drag): those keep the system's. Not tried in the Mac app yet, where WebKit draws pointer images itself.
 - Rainbow and the trail need a recent browser (`@property`, the Web Animations API); in an older one the cursor stays its color and jumps.
 - In WebKit (Safari, the Mac app), a block or underline cursor just before Markdown that's hidden (the `**` of bold, with Show Markdown on Hidden) can be drawn narrower than the letter after it, until it moves: it's measured before WebKit has laid the line out.

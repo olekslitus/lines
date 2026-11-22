@@ -1,4 +1,5 @@
 import "./silence";
+import { syntaxParserRunning } from "@codemirror/language";
 import { EditorView } from "@codemirror/view";
 import { feeds } from "../lib/feeds/feeds.svelte";
 import { NoFeed } from "../lib/feeds/find";
@@ -108,6 +109,16 @@ const testing = {
     await until(() => editor()?.state.doc.toString() === body);
     return id;
   },
+  /**
+   * Resolves once the open note is parsed, its code blocks in their languages' colors: each loads
+   * the first time a note uses it (codeLanguages.ts), and CodeMirror parses it again only when idle,
+   * which in WebKit, without `requestIdleCallback`, is half a second later.
+   */
+  highlighted: () =>
+    until(() => {
+      const view = editor();
+      return !view || !syntaxParserRunning(view);
+    }),
   /** Puts the cursor at `pos` in the open note (its end, if left out), with the keyboard in the note. */
   place(pos?: number) {
     const view = editor()!;

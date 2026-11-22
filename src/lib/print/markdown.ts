@@ -4,6 +4,7 @@ import { t } from "../i18n/index.svelte";
 import { CALLOUTS, calloutOf } from "../editor/cards";
 import { shortLink } from "../editor/shortLinks";
 import { valueText } from "../editor/objects";
+import { listNumber } from "../editor/listNumbers";
 import { headingSyntax, linedownParser } from "../editor/syntax";
 import { tableData } from "../editor/typeTables";
 import { fenceCode, fenceLanguage, renderedInfo } from "../editor/rendered";
@@ -382,8 +383,14 @@ function markLists(doc: HTMLElement) {
   for (const li of doc.querySelectorAll<HTMLLIElement>("ul > li:not(.doc-task), ol > li:not(.doc-task)")) {
     const list = li.parentElement!;
     let depth = 0;
-    for (let up = list.parentElement; up && up !== doc; up = up.parentElement) if (up.matches("ul, ol")) depth++;
-    const text = list instanceof HTMLOListElement ? `${list.start + [...list.children].indexOf(li)}.` : BULLETS[depth % BULLETS.length];
+    let level = 1;
+    for (let up = list.parentElement; up && up !== doc; up = up.parentElement) {
+      if (up.matches("ul, ol")) depth++;
+      if (up.matches("ol")) level++;
+    }
+    // Numbered as the editor draws them (Settings → Editor → Numbered sub-lists).
+    const text =
+      list instanceof HTMLOListElement ? listNumber(`${list.start + [...list.children].indexOf(li)}.`, level, prefs.listNumbering) : BULLETS[depth % BULLETS.length];
     const mark = el("span", "doc-mark", text);
     mark.setAttribute("aria-hidden", "true");
     li.prepend(mark);

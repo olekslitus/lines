@@ -240,7 +240,8 @@
   });
 
   // Mentions show other notes' titles, icons and properties, and tags their icons and colors; values
-  // their scores and copy buttons (Settings → Little Touches). Draw them again when those change.
+  // their scores and copy buttons (Settings → Little Touches), and numbered sub-lists their numbers
+  // (Settings → Editor). Draw them again when those change.
   $effect(() => {
     void notes.objectsSignature;
     void looks.looks;
@@ -248,6 +249,7 @@
     void prefs.scores;
     void prefs.icons;
     void prefs.copyValues;
+    void prefs.listNumbering;
     untrack(() => view?.dispatch({ effects: objectsChanged.of(null) }));
   });
 

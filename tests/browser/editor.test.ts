@@ -1042,6 +1042,49 @@ describe("a list marker typed at the start of an item's text", () => {
   });
 });
 
+test("numbered sub-lists are drawn 1. a. i. by level, as Settings → Editor says, on paper too; the Markdown keeps its numbers, shown with the cursor on them", async () => {
+  const NOTE = "1. Plan\n   1. Pack\n      1. Clothes\n         1. Socks\n      2. Books\n   2. Book\n      - Train\n        1. Seat\n2. Go\n\nEnd";
+  await app.open(NOTE);
+  await app.page.evaluate(() => window.testing.place());
+  const numbers = () => app.page.locator(".editor-pane .cm-lp-list-number").evaluateAll((all) => all.map((each) => each.textContent!.trim()));
+  // A bullet list between them isn't a level: Seat, under Train under Book, is in the third.
+  await app.page.waitForFunction(() => document.querySelectorAll(".editor-pane .cm-lp-list-number").length === 8);
+  expect(await numbers()).toEqual(["1.", "a.", "i.", "1.", "ii.", "b.", "i.", "2."]);
+
+  // With the cursor on an item's number, the number as written.
+  await app.page.evaluate((pos) => window.testing.place(pos), NOTE.indexOf("1. Pack") + 2);
+  await app.page.waitForFunction(() => document.querySelectorAll(".editor-pane .cm-lp-list-number")[1]?.textContent?.trim() === "1.");
+  expect(await numbers()).toEqual(["1.", "1.", "i.", "1.", "ii.", "b.", "i.", "2."]);
+  await app.page.evaluate(() => window.testing.place());
+
+  const settings = await app.settings("Editor");
+  await settings.getByRole("radio", { name: "I. A. 1." }).click();
+  await app.page.waitForFunction(() => document.querySelector(".editor-pane .cm-lp-list-number")?.textContent?.trim() === "I.");
+  expect(await numbers()).toEqual(["I.", "A.", "1.", "a.", "2.", "B.", "1.", "II."]);
+  await settings.getByRole("radio", { name: "1. 1. 1." }).click();
+  await app.page.waitForFunction(() => document.querySelector(".editor-pane .cm-lp-list-number")?.textContent?.trim() === "1.");
+  expect(await numbers()).toEqual(["1.", "1.", "1.", "1.", "2.", "2.", "1.", "2."]);
+  await settings.getByRole("radio", { name: "1. a. i." }).click();
+  await app.closeSettings();
+  expect(await app.page.evaluate(() => window.testing.prefs.listNumbering)).toBe("outline");
+  expect(await app.text()).toBe(NOTE);
+
+  // Numbered again by Tab, an item drawn at its new level.
+  await app.page.evaluate((pos) => window.testing.place(pos), NOTE.indexOf("2. Go") + 5);
+  await app.page.keyboard.press("Tab");
+  await app.page.evaluate(() => window.testing.place());
+  await app.page.waitForFunction(() => document.querySelectorAll(".editor-pane .cm-lp-list-number")[7]?.textContent?.trim() === "c.");
+  expect(await app.text()).toBe(NOTE.replace("2. Go", "   3. Go"));
+
+  // On paper, the same, once the note's saved.
+  await app.page.waitForFunction(() => window.testing.notes.selected?.note.body.includes("   3. Go"));
+  await app.page.keyboard.press(`${mod()}+P`);
+  const doc = app.page.getByRole("dialog").locator(".doc-markdown").first();
+  await doc.locator(".doc-mark").first().waitFor();
+  expect(await doc.locator("ol > li > .doc-mark").evaluateAll((all) => all.map((each) => each.textContent))).toEqual(["1.", "a.", "i.", "1.", "ii.", "b.", "i.", "c."]);
+  await app.page.keyboard.press("Escape");
+});
+
 test("Copy what you select copies a selection made with the pointer, not with keys", async () => {
   await app.page.evaluate(() => (window.testing.prefs.copyOnSelect = true));
   await app.open("Copy these words please");

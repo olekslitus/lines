@@ -3,6 +3,7 @@ import { deflateRawSync } from "node:zlib";
 import { excerptAround, findAll, isbnIn } from "../../src/lib/books/text";
 import { cfi, cfiPath, parseCfi, resolveCfi } from "../../src/plugins/epub-reader/cfi";
 import { zip, zipEntries } from "../../src/lib/zip";
+import { cpuTime } from "./cpuTime";
 import { stubApp } from "./stubs";
 
 stubApp();
@@ -188,9 +189,7 @@ describe("a ZIP's files", () => {
     // 450 MB of zeros packs into under half a megabyte: it says 1 KB, and stops there.
     const bomb = deflated(450 * 1024 * 1024, 1024);
     expect(bomb.length).toBeLessThan(500_000);
-    const started = performance.now();
-    await expect(zipEntries(bomb).get("big.bin")!.read()).rejects.toThrow("bigger than it says");
-    expect(performance.now() - started).toBeLessThan(1000);
+    expect(await cpuTime(() => expect(zipEntries(bomb).get("big.bin")!.read()).rejects.toThrow("bigger than it says"))).toBeLessThan(1000);
     // Saying so isn't enough past the limit.
     await expect(zipEntries(deflated(4096, 4096), 1024).get("big.bin")!.read()).rejects.toThrow("bigger than it says");
   });

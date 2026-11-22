@@ -19,6 +19,7 @@ import {
 } from "../../src/lib/notes/calendar";
 import { frontMatter, setProperties } from "../../src/lib/notes/properties";
 import type { Note, NoteMeta } from "../../src/lib/notes/types";
+import { cpuTime } from "./cpuTime";
 
 const properties = (lines: string) => frontMatter(`---\n${lines}\n---\n# Note`)!.properties;
 
@@ -64,13 +65,12 @@ test("each day has the notes on it, a span on each of its days, a trashed note o
   expect(Object.fromEntries([...on].map(([day, notes]) => [day, notes.length]))).toEqual({ "2026-11-29": 1, "2026-11-30": 2 });
 });
 
-test("many notes on one day are counted in time in step with how many there are", () => {
+test("many notes on one day are counted in time in step with how many there are", async () => {
   const one = entry("date: 2026-11-30");
   const many = Array.from({ length: 20_000 }, (_, i) => ({ ...one, note: { ...one.note, id: String(i) } }));
-  const started = performance.now();
-  expect(notesOnDays(many, "2026-11-30", "2026-11-30", false).get("2026-11-30")).toHaveLength(20_000);
+  const took = await cpuTime(() => expect(notesOnDays(many, "2026-11-30", "2026-11-30", false).get("2026-11-30")).toHaveLength(20_000));
   // Copying the day's list for each note took about half a second; adding to it, about 15 ms.
-  expect(performance.now() - started).toBeLessThan(100);
+  expect(took).toBeLessThan(100);
 });
 
 test("moving by months keeps the day, or the month's last", () => {

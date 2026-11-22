@@ -9,6 +9,7 @@ import type { DiscussionComment } from "../../src/lib/plugins/types";
 import { drawable, isDrawing, pictureOf } from "../../src/lib/pictures";
 import { storyId, storyPage } from "../../src/plugins/hacker-news/links";
 import { ico, png } from "../browser/files";
+import { cpuTime } from "./cpuTime";
 import { stubApp } from "./stubs";
 
 stubApp();
@@ -421,11 +422,9 @@ describe("telling a feed from a page", () => {
     expect(isFeed('{"version": "https://jsonfeed.org/version/1.1", "items": [')).toBe(false);
   });
 
-  test("at once, however what comes first was made", () => {
+  test("at once, however what comes first was made", async () => {
     const crafted = ["<?a?>".repeat(50_000), "<!---->".repeat(50_000), " ".repeat(5_000_000), "<?".repeat(100_000), "<!--".repeat(100_000), "<!DOCTYPE [".repeat(100_000)];
-    const start = performance.now();
-    for (const text of crafted) expect(isFeed(`${text}<html>`)).toBe(false);
-    expect(performance.now() - start).toBeLessThan(500);
+    expect(await cpuTime(() => crafted.forEach((text) => expect(isFeed(`${text}<html>`)).toBe(false)))).toBeLessThan(500);
   });
 });
 
@@ -434,11 +433,11 @@ describe("mending a feed that isn't quite XML", () => {
     expect(mend("<rss><title>Tom & Jerry\u0007</title><![CDATA[a & b]]><!-- c & d --></rss>")).toBe("<rss><title>Tom &amp; Jerry</title><![CDATA[a & b]]><!-- c & d --></rss>");
   });
 
-  test("at once, however many comments are left open", () => {
+  test("at once, however many comments are left open", async () => {
     const crafted = [`<rss>${"<!--x".repeat(40_000)}</rss>`, `<rss>${"<![CDATA[a]]><!--b-->&c".repeat(40_000)}</rss>`];
-    const start = performance.now();
-    const [unclosed, many] = crafted.map(mend);
-    expect(performance.now() - start).toBeLessThan(500);
+    let mended: string[] = [];
+    expect(await cpuTime(() => (mended = crafted.map(mend)))).toBeLessThan(500);
+    const [unclosed, many] = mended;
     expect(unclosed).toBe(crafted[0]);
     expect(many).toBe(crafted[1].replaceAll("&c", "&amp;c"));
   });

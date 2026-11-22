@@ -761,6 +761,26 @@ describe("Open Library", () => {
       description: "Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides.",
     });
   });
+
+  test("a work's description, written in Markdown there, is read as the plain text it says", async () => {
+    // Trimmed from openlibrary.org's answer (November 2026).
+    answers.set("https://openlibrary.org/works/OL20893680W.json", {
+      title: "Piranesi",
+      description: {
+        type: "/type/text",
+        value:
+          "**From the *New York Times* bestselling author of *Jonathan Strange & Mr. Norrell*, an intoxicating, hypnotic new novel.**\r\n\r\nPiranesi's house is no ordinary building; its rooms are infinite, its corridors endless.\r\n\r\nFor readers of [Neil Gaiman](https://example.com)'s *The Ocean at the End of the Lane*.",
+      },
+    });
+    const item = await look(openLibrary, "https://openlibrary.org/works/OL20893680W");
+    expect(item?.description).toBe(
+      "From the New York Times bestselling author of Jonathan Strange & Mr. Norrell, an intoxicating, hypnotic new novel.\n\nPiranesi's house is no ordinary building; its rooms are infinite, its corridors endless.\n\nFor readers of Neil Gaiman's The Ocean at the End of the Lane.",
+    );
+    // And the note, and its excerpt in the list, read so.
+    const body = text.libraryNoteText(item!);
+    expect(body).not.toContain("*");
+    expect(computeMeta(body).excerpt).toStartWith("From the New York Times bestselling author");
+  });
 });
 
 describe("Wikidata", () => {

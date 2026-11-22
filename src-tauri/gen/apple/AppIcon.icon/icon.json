@@ -42,7 +42,7 @@
     {
       "layers": [
         {
-          "image-name": "lines.png",
+          "image-name": "lines.svg",
           "name": "lines",
           "glass": true,
           "fill-specializations": [
@@ -70,6 +70,7 @@
         "kind": "neutral",
         "opacity": 0.5
       },
+      "specular": false,
       "translucency": {
         "enabled": false,
         "value": 0.5

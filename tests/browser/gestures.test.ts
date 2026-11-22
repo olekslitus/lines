@@ -30,9 +30,20 @@ const home = async (pane: string) => expect(Math.abs(await left(pane))).toBeLess
 /** Done sliding: nothing the finger set is left on the panes, nor anything still moving them. */
 const settled = () => app.page.waitForFunction(() => [...document.querySelectorAll<HTMLElement>("[data-pane], .editor-pane")].every((pane) => !pane.style.translate && !pane.getAnimations().length));
 
+/**
+ * A note opened on a phone, once it's slid in: at rest, not just near its place (the slide's spring
+ * takes it within a pixel well before it ends), and with what's on its text the note's to a finger
+ * put down there. In WebKit, what's at a point can lag the pane's place for a moment after the slide:
+ * a finger put down then lands on the app behind the pane, and the note never sees it.
+ */
 async function openNote() {
   await app.open("# A note\n\nSome text to read.");
   await app.page.waitForFunction(() => Math.abs(document.querySelector(".editor-pane")!.getBoundingClientRect().x) < 1);
+  await settled();
+  await app.page.waitForFunction(() => {
+    const text = document.querySelector(".editor-pane .cm-scroller")!.getBoundingClientRect();
+    return document.querySelector(".editor-pane")!.contains(document.elementFromPoint(text.x + text.width / 2, text.y + 40));
+  });
 }
 
 test("a swipe from the left edge takes a note back to the list, following the finger, the list coming out from under it", async () => {

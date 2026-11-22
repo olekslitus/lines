@@ -12,7 +12,8 @@ import { readBookmarks } from "../lib/library/bookmarks";
 import { lists } from "../lib/library/lists.svelte";
 import { readTranscript, sentences } from "../plugins/feeds/transcripts";
 import { lock } from "../lib/lock/lock.svelte";
-import { attachmentNames, saveAttachment } from "../lib/notes/attachments";
+import { lockedNotes } from "../lib/notes/locked.svelte";
+import { attachmentNames, getAttachment, saveAttachment } from "../lib/notes/attachments";
 import { readRatings } from "../lib/library/ratings";
 import { ratings } from "../lib/library/ratings.svelte";
 import { noteKeys } from "../lib/notes/noteKeys.svelte";
@@ -71,6 +72,8 @@ const testing = {
   discussions: { htmlToText, readThread },
   /** The app lock, to turn on as Settings does. */
   lock,
+  /** Locked notes' password: opening, locking and changing it, as their dialogs and Settings do. */
+  lockedNotes,
   /** What the Library's kinds are rated on, and reading another device's `ratings.json`, as sync does. */
   ratings,
   /** Lists on other sites kept in step (lib/library/lists.svelte.ts), and lines' own sync, whose first pass they wait for. */
@@ -87,6 +90,7 @@ const testing = {
   writePresetFile,
   saveAttachment,
   attachmentNames,
+  getAttachment,
   editor,
   until,
   /** The open note's text. */

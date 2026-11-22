@@ -1111,6 +1111,19 @@ describe("fixed", () => {
     expect(html).toContain('data-input="1"');
   });
 
+  test("a one-column spreadsheet block keeps its empty rows at the end when a cell is changed", async () => {
+    await app.open('```csv\nMilk\nEggs\n""\n""\n```\n\nAfter the block.');
+    const grid = app.page.locator(".cm-sheet [role=grid]");
+    const rows = await grid.getAttribute("aria-rowcount");
+    await app.page.locator(".cm-sheet [role=gridcell]").first().dblclick();
+    await app.page.keyboard.press(`${mod()}+A`);
+    await app.page.keyboard.type("Tea");
+    await app.page.keyboard.press("Enter");
+    await app.page.waitForFunction(() => window.testing.text()!.includes("Tea"));
+    expect(await app.text()).toBe('```csv\nTea\nEggs\n""\n""\n```\n\nAfter the block.');
+    expect(await grid.getAttribute("aria-rowcount")).toBe(rows);
+  });
+
   test("a table with a ``` cell, converted to a spreadsheet, keeps it in the block", async () => {
     await app.open("| Fence |\n| --- |\n| ``` |\n\nAfter the table.");
     await app.page.locator(".editor-pane .cm-lp-table-wrap").hover();

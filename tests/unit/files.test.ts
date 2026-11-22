@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { deflateRawSync } from "node:zlib";
 import { diffLines } from "../../src/plugins/changes/diff";
 import { isPageBreak, LATEX_PAGE_BREAK, PAGE_BREAK } from "../../src/lib/notes/pageBreak";
-import { csvText } from "../../src/lib/sheets/csv";
+import { csvText, parseCsv, writeCsv } from "../../src/lib/sheets/csv";
 import { readPack } from "../../src/lib/sounds/mechvibes";
 import { V1_KEYS } from "../../src/lib/sounds/v1keys";
 import { unzip, zip } from "../../src/lib/zip";
@@ -156,6 +156,18 @@ describe("CSV files", () => {
     expect(csvText(bytes("﻿Café,€"))).toBe("Café,€");
     expect(csvText(Uint8Array.from([0xff, 0xfe, 0x43, 0, 0xe9, 0]))).toBe("Cé");
     expect(csvText(Uint8Array.from([0xfe, 0xff, 0, 0x43, 0, 0xe9]))).toBe("Cé");
+  });
+
+  test("a one-column block keeps its empty rows at the end, each written as an empty cell in quotes", () => {
+    const cells = [["Milk"], ["Eggs"], [""], [""]];
+    const csv = writeCsv(cells, ",", true);
+    expect(csv).toBe('Milk\nEggs\n""\n""');
+    expect(parseCsv(csv)).toEqual(cells);
+    // Between rows, and with more than one column, as before.
+    expect(writeCsv([["Milk"], [""], ["Eggs"]])).toBe('Milk\n""\nEggs');
+    expect(writeCsv([["a", ""], ["", ""]], ",", true)).toBe("a,\n,");
+    // Tab-separated, for other apps: an empty line.
+    expect(writeCsv([["Milk"], [""], ["Eggs"]], "\t")).toBe("Milk\n\nEggs");
   });
 });
 

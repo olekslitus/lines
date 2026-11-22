@@ -96,11 +96,14 @@ function quote(cell: string, delimiter: string) {
 /** Rows written as CSV lines, kept for the rows they're written from (which are never changed once written). */
 const lines = new WeakMap<string[], string>();
 
-/** A row as a line of CSV, or with another delimiter. */
+/**
+ * A row as a line of CSV, or with another delimiter. In CSV, a row of one empty cell is `""`, as
+ * Python's csv module writes it: an empty line at the end of the text would be read as no row.
+ */
 export function csvLine(row: string[], delimiter = ","): string {
   if (delimiter !== ",") return row.map((cell) => quote(cell, delimiter)).join(delimiter);
   let line = lines.get(row);
-  if (line === undefined) lines.set(row, (line = row.map((cell) => quote(cell, delimiter)).join(delimiter)));
+  if (line === undefined) lines.set(row, (line = row.length === 1 && !row[0] ? '""' : row.map((cell) => quote(cell, delimiter)).join(delimiter)));
   return line;
 }
 

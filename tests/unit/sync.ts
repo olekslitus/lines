@@ -120,26 +120,40 @@ let writes = 0;
 export const beforeWrite: { next?: (path: string) => void } = {};
 /** And just before its next delete. */
 export const beforeDelete: { next?: (path: string) => void } = {};
+/** Something to do just before the file at a path is next read, as the person typing could; by path. */
+export const beforeRead = new Map<string, () => void>();
+/** The folder's attachments, by path, as their bytes. */
+export const driveFiles = new Map<string, Uint8Array>();
 
 type FolderArgs = { dir: string; name: string; text: string; expected?: string; path?: string };
 
 mock.module("@tauri-apps/api/core", () => ({
-  invoke: async (command: string, { dir, name, text, expected, path: root }: FolderArgs) => {
+  invoke: async (command: string, args: FolderArgs | Uint8Array, options?: { headers: Record<string, string> }) => {
     if (command === "sync_folder_use") {
-      used.push(root!);
-      if (refused.has(root!)) throw new Error("Choose a folder for sync again.");
+      const root = (args as FolderArgs).path!;
+      used.push(root);
+      if (refused.has(root)) throw new Error("Choose a folder for sync again.");
       return;
     }
+    if (command === "sync_folder_write_file") {
+      const { "x-dir": dir, "x-name": name } = options!.headers;
+      return void driveFiles.set(`${decodeURIComponent(dir)}/${name}`, new Uint8Array(args as Uint8Array));
+    }
+    const { dir, name, text, expected } = args as FolderArgs;
     const path = `${dir}/${name}`;
+    if (command === "sync_folder_read_file") return driveFiles.get(path)?.slice().buffer ?? null;
     if (command === "sync_folder_list") {
       listings.push(dir);
-      const files = [...drive].map(([file, { etag }]) => [file, etag] as const);
+      const files = [...[...drive].map(([file, { etag }]) => [file, etag] as const), ...[...driveFiles.keys()].map((file) => [file, "file"] as const)];
       return [...files, ...[...placeholders].map((file) => [file, "placeholder"] as const)]
         .filter(([file]) => file.startsWith(`${dir}/`) && !file.slice(dir.length + 1).includes("/"))
         .map(([file, etag]) => ({ name: file.slice(dir.length + 1), etag }));
     }
     if (command === "sync_folder_read") {
       reads.push(path);
+      const read = beforeRead.get(path);
+      beforeRead.delete(path);
+      read?.();
       return placeholders.has(path) ? null : (drive.get(path) ?? null);
     }
     if (command === "sync_folder_write") {
@@ -160,6 +174,7 @@ mock.module("@tauri-apps/api/core", () => ({
       // Only the file it was expected to be, if it's still there.
       if (expected !== undefined && drive.has(path) && drive.get(path)!.etag !== expected) return false;
       drive.delete(path);
+      driveFiles.delete(path);
       return true;
     }
     throw new Error(`No folder command ${command}`);
@@ -205,6 +220,7 @@ export async function devices(count: number) {
   // Once the last test's passes are done.
   await sync.configure(null);
   drive.clear();
+  driveFiles.clear();
   placeholders.clear();
   const all = Array.from({ length: count }, () => new Device());
   await all[0].open();

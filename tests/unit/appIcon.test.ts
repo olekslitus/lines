@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import CanvasKitInit from "canvaskit-wasm";
-import { favicon, ICON_IDS, ICONS, iconArt, iconSvg, iconUrl, LILAC, type Look, MARK } from "../../src/lib/appIcon/art";
+import { favicon, glyph, ICON_IDS, type IconArt, ICONS, iconArt, iconSvg, iconUrl, LILAC, type Look, MARK } from "../../src/lib/appIcon/art";
 import { contrast, parse } from "../../src/lib/themes/color";
 
 /** Every color a look's lines are drawn in. */
@@ -84,30 +84,121 @@ describe("app icon", () => {
   });
 });
 
-describe("iOS and macOS 26's icon (Icon Composer's, from scripts/icons.mjs)", () => {
-  const composer = new URL("../../src-tauri/gen/apple/AppIcon.icon/", import.meta.url);
-  const icon = JSON.parse(readFileSync(new URL("icon.json", composer), "utf8"));
-  const layer = readFileSync(new URL("Assets/lines.svg", composer), "utf8");
+describe("iOS 26's icons and the Mac's (Icon Composer's, from scripts/icons.mjs)", async () => {
+  interface Fill {
+    solid?: string;
+    "linear-gradient"?: string[];
+  }
+  interface Layer {
+    "image-name": string;
+    glass: boolean;
+    "fill-specializations"?: { appearance?: string; value: Fill }[];
+    "hidden-specializations"?: { appearance?: string; value: boolean }[];
+  }
+  interface IconJson {
+    "fill-specializations": { appearance?: string; value: Fill }[];
+    groups: { layers: Layer[]; specular: boolean }[];
+  }
 
-  test("draws the lines from a vector, as glass without the specular highlight that blurs them", () => {
-    const [group] = icon.groups;
-    expect(group.layers[0]["image-name"]).toBe("lines.svg");
-    expect(group.layers[0].glass).toBe(true);
-    expect(group.specular).toBe(false);
-  });
+  const skia = await CanvasKitInit();
+  const apple = new URL("../../src-tauri/gen/apple/", import.meta.url);
+  const srgb = (hex: string) => `srgb:${[1, 3, 5].map((i) => (parseInt(hex.slice(i, i + 2), 16) / 255).toFixed(5)).join(",")},1.00000`;
+  /** The paints art.ts gives the five shapes in `look`: the knot's line, the bullet, its line, the last line, its full stop. */
+  const paints = (look: Look) => [...glyph(look).matchAll(/<(?:path|circle) [^>]*?(?:stroke|fill)="(?!none)([^"]+)"/g)].map(([, paint]) => paint);
+  // A point on each of the five shapes, and on the knot: its end, the loop's sides and top, where it crosses itself.
+  const ON = [[214, 420.8], [229.68, 601.6], [500, 601.6], [300, 782.4], [558, 782.4]];
+  const KNOT = [[778, 420.8], [356.11, 288.19], [477.97, 288.19], [417.04, 241.6], [417.04, 393.92]];
+  // Inside the loop, and off the lines.
+  const OFF = [[417, 300], [417, 270], [417, 200], [600, 470], [800, 601.6]];
 
-  test("has the lines as filled outlines, the knot's loop open under either fill rule", async () => {
-    // Icon Composer fills a stroke's path, which closes the loop: the layer has no strokes.
-    expect(layer).not.toContain("stroke");
-    const skia = await CanvasKitInit();
-    const knot = skia.Path.MakeFromSVGString(layer.match(/<path d="([^"]+)"/)![1])!;
-    for (const fill of [skia.FillType.Winding, skia.FillType.EvenOdd]) {
-      knot.setFillType(fill);
-      // Along the line: its ends, the loop's sides and top, and where it crosses itself.
-      for (const [x, y] of [[214, 420.8], [778, 420.8], [356.11, 288.19], [477.97, 288.19], [417.04, 241.6], [417.04, 393.92]]) expect(knot.contains(x, y)).toBe(true);
-      // Inside the loop, and off the line.
-      for (const [x, y] of [[417, 300], [417, 200], [600, 470]]) expect(knot.contains(x, y)).toBe(false);
+  const files = (icon: IconArt) => {
+    const dir = new URL(icon === LILAC ? "AppIcon.icon/" : `AlternateIcons/AppIcon-${icon.id}.icon/`, apple);
+    const json: IconJson = JSON.parse(readFileSync(new URL("icon.json", dir), "utf8"));
+    return { json, svg: (name: string) => readFileSync(new URL(`Assets/${name}`, dir), "utf8") };
+  };
+  /** Whether `svg`'s paths cover (x, y) under `fill`. */
+  const covers = (svg: string, [x, y]: number[], fill = skia.FillType.Winding) =>
+    [...svg.matchAll(/<path d="([^"]+)"/g)].some(([, d]) => {
+      const path = skia.Path.MakeFromSVGString(d)!;
+      path.setFillType(fill);
+      const inside = path.contains(x, y);
+      path.delete();
+      return inside;
+    });
+  const byAppearance = <T,>(list: { appearance?: string; value: T }[]) => Object.fromEntries(list.map(({ appearance = "light", value }) => [appearance, value]));
+
+  for (const icon of ICONS) {
+    describe(icon.id, () => {
+      const { json, svg } = files(icon);
+      const [lines, ...backgrounds] = json.groups;
+      const colored = lines.layers.filter((layer) => layer["fill-specializations"]);
+
+      test("draws its lines from vectors with no strokes, as glass without the specular highlight that blurs them", () => {
+        expect(json.groups.every((group) => group.specular === false)).toBe(true);
+        for (const layer of json.groups.flatMap((group) => group.layers)) {
+          expect(layer["image-name"]).toEndWith(".svg");
+          // Icon Composer fills a stroke's path, which closes the loop.
+          expect(svg(layer["image-name"])).not.toContain("stroke");
+        }
+        expect(colored.every((layer) => layer.glass)).toBe(true);
+      });
+
+      test("covers the lines, the knot's loop open, under either fill rule", () => {
+        for (const fill of [skia.FillType.Winding, skia.FillType.EvenOdd]) {
+          for (const point of [...ON, ...KNOT]) expect(colored.filter((layer) => covers(svg(layer["image-name"]), point, fill))).toHaveLength(1);
+          for (const layer of lines.layers) for (const point of OFF) expect(covers(svg(layer["image-name"]), point, fill)).toBe(false);
+        }
+      });
+
+      test("draws each line in its colors, light and dark, and in greys when tinted, the lightest white", () => {
+        const tints: number[] = [];
+        for (const [i, point] of ON.entries()) {
+          const layer = colored.find((each) => covers(svg(each["image-name"]), point))!;
+          const fills = byAppearance(layer["fill-specializations"]!);
+          for (const appearance of ["light", "dark"] as const) {
+            const look = icon[appearance];
+            const paint = icon.glass ? look.rim! : paints(look)[i];
+            if (paint === "url(#along)") expect(fills[appearance]["linear-gradient"]).toEqual(look.along!.map(srgb));
+            else expect(fills[appearance].solid).toBe(srgb(paint));
+          }
+          for (const grey of fills.tinted.solid ? [fills.tinted.solid] : fills.tinted["linear-gradient"]!) {
+            const [r, g, b] = grey.slice(5).split(",").map(Number);
+            expect(r).toBe(g);
+            expect(g).toBe(b);
+            tints.push(r);
+          }
+        }
+        expect(Math.max(...tints)).toBe(1);
+      });
+
+      test("has the background art.ts draws: its gradient, a layer where a fill can't draw it", () => {
+        const fills = byAppearance(json["fill-specializations"]);
+        for (const appearance of ["light", "dark"] as const) {
+          const { bg, diagonal } = icon[appearance];
+          expect(fills[appearance]["linear-gradient"]).toEqual([bg[0], bg.at(-1)!].map(srgb));
+          const layer = backgrounds.flatMap((group) => group.layers).find((each) => each["image-name"] === `background-${appearance}.svg`);
+          // A fill takes two colors, top to bottom.
+          expect(Boolean(layer)).toBe(bg.length > 2 || Boolean(diagonal));
+          if (!layer) continue;
+          const drawn = svg(layer["image-name"]);
+          for (const color of bg) expect(drawn).toContain(`stop-color="${color}"`);
+          expect(drawn).toContain(diagonal ? 'x2="1" y2="1"' : 'x2="0" y2="1"');
+          const hidden = byAppearance(layer["hidden-specializations"]!);
+          expect([hidden.light, hidden.dark, hidden.tinted]).toEqual([appearance !== "light", appearance !== "dark", true]);
+        }
+      });
+    });
+  }
+
+  test("the Xcode project has each of the others, for Settings → Theme → App Icon to switch to", () => {
+    const project = readFileSync(new URL("lines.xcodeproj/project.pbxproj", apple), "utf8");
+    expect(readFileSync(new URL("project.yml", apple), "utf8")).toContain("- path: AlternateIcons\n        buildPhase: resources");
+    expect(project).toContain("path = AlternateIcons;");
+    const others = ICONS.filter((icon) => icon !== LILAC);
+    expect(readdirSync(new URL("AlternateIcons/", apple)).sort()).toEqual(others.map((icon) => `AppIcon-${icon.id}.icon`).sort());
+    for (const { id } of others) {
+      expect(project.match(new RegExp(`/\\* AppIcon-${id}\\.icon in Resources \\*/`, "g"))).toHaveLength(2);
+      expect(project).toContain(`/* AppIcon-${id}.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-${id}.icon";`);
     }
-    knot.delete();
   });
 });

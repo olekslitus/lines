@@ -5,9 +5,10 @@
 //                                    shadow), and for macOS 26 Assets.car from AppIcon.icon below;
 //                                    Windows' .ico and tiles, Linux's PNGs (`tauri icon`)
 //   src-tauri/icons/source/          Lines' own icon's SVGs, as drawn: full bleed, the Mac's, dark, tinted
-//   src-tauri/gen/apple/             iOS and iPadOS: the asset catalog's light, dark and tinted
-//                                    icons, each other icon as an alternate, and AppIcon.icon for
-//                                    iOS 26's Liquid Glass
+//   src-tauri/gen/apple/             iOS and iPadOS: each icon as an Icon Composer file, light, dark
+//                                    and tinted, for iOS 26's Liquid Glass and the pictures earlier
+//                                    versions show: Lines' own AppIcon.icon, the others alternates in
+//                                    AlternateIcons/, which the Xcode project lists
 //   src-tauri/gen/android/…/res/     Android: an adaptive icon for each (the lines over a gradient,
 //                                    and alone for themed icons), and PNGs for Android 7; the
 //                                    manifest's activity alias for each
@@ -17,13 +18,14 @@
 // The desktop apps and the web app show the other icons from art.ts as they run (appIcon/show.svelte.ts).
 
 import { execFileSync } from "node:child_process";
-import { cpSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import CanvasKitInit from "canvaskit-wasm";
 import { chromium } from "playwright";
-import { favicon, glyph, ICONS, iconSvg, LILAC, MARK } from "../src/lib/appIcon/art.ts";
+import { ALONG, favicon, GLASS, glyph, gradient as backgroundGradient, ICONS, iconSvg, LILAC, MARK } from "../src/lib/appIcon/art.ts";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const icons = join(root, "src-tauri/icons");
@@ -106,98 +108,255 @@ rmSync(scratch, { recursive: true });
 rmSync(join(icons, "ios"), { recursive: true, force: true });
 rmSync(join(icons, "android"), { recursive: true, force: true });
 
-// iOS and iPadOS: each icon as an app icon set, one 1024 picture in each appearance, which Xcode
-// makes the other sizes from: Lines' own as AppIcon, the others as AppIcon-<id>, which the app
+// iOS and iPadOS: each icon as an Icon Composer file, its layers vectors, which iOS 26 draws in
+// Liquid Glass, sharp at every size, and colors itself when tinted or clear; Xcode draws the
+// pictures earlier versions show from it too (an app icon set of the same name would go unused).
+// Lines' own is AppIcon.icon; the others are AlternateIcons/AppIcon-<id>.icon, which the app
 // switches to (src-tauri/src/app_icon.rs; ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS).
-const catalog = join(apple, "Assets.xcassets");
-for (const name of readdirSync(catalog)) if (name.endsWith(".appiconset")) rmSync(join(catalog, name), { recursive: true });
-for (const icon of ICONS) {
-  const set = join(catalog, `${icon === LILAC ? "AppIcon" : `AppIcon-${icon.id}`}.appiconset`);
-  mkdirSync(set);
-  const appearances = [
-    ["AppIcon.png", "light", []],
-    ["AppIcon-dark.png", "dark", [{ appearance: "luminosity", value: "dark" }]],
-    ["AppIcon-tinted.png", "tinted", [{ appearance: "luminosity", value: "tinted" }]],
-  ];
-  for (const [file, appearance] of appearances) writeFileSync(join(set, file), await png(iconSvg(icon, appearance), 1024));
-  const images = appearances.map(([filename, , list]) => ({ ...(list.length ? { appearances: list } : {}), filename, idiom: "universal", platform: "ios", size: "1024x1024" }));
-  writeFileSync(join(set, "Contents.json"), JSON.stringify({ images, info: { author: "xcode", version: 1 } }, null, 2) + "\n");
-}
-
 const skia = await CanvasKitInit();
 
-/**
- * `svg` with each stroked path as the shape its stroke covers, filled. Skia strokes the line, with
- * the round caps and joins art.ts draws, then unites the outline with itself: the knot's crossing
- * becomes one shape and its loop a hole wound the other way, filled the same under either fill rule.
- */
-function outlined(svg) {
-  return svg.replace(/<path ([^>]*)\/>/g, (_, attrs) => {
+/** The lines' five shapes as art.ts draws them in `look`: the knot's line, the bullet, its line, the last line, its full stop. */
+function shapes(look) {
+  return [...glyph(look).matchAll(/<(path|circle) ([^>]*)\/>/g)].map(([, tag, attrs]) => {
     const get = (name) => attrs.match(new RegExp(`(?:^| )${name}="([^"]+)"`))?.[1];
-    const line = skia.Path.MakeFromSVGString(get("d"));
-    const stroked = line.makeStroked({ width: Number(get("stroke-width")), cap: skia.StrokeCap.Round, join: skia.StrokeJoin.Round });
-    const united = skia.Path.MakeFromOp(stroked, stroked, skia.PathOp.Union);
-    const shape = united.makeAsWinding();
-    const d = shape.toSVGString().replace(/-?\d+\.\d+/g, (n) => String(+Number(n).toFixed(2)));
-    for (const path of [line, stroked, united, shape]) path.delete();
-    return `<path d="${d}" fill="${get("stroke")}"/>`;
+    return tag === "circle"
+      ? { circle: ["cx", "cy", "r"].map((name) => Number(get(name))), paint: get("fill") }
+      : { d: get("d"), width: Number(get("stroke-width")), paint: get("stroke") };
   });
 }
+const SHAPES = shapes("#000000");
 
-// iOS 26: Lines' own, as Icon Composer's layers, so the system draws the lines in Liquid Glass and
-// colors them itself when tinted or clear. The lines are a vector, drawn sharp at every size, and
-// their strokes are outlines, since Icon Composer fills a stroke's path, closing the knot's loop.
-// Without the glass's specular highlight, which blurs lines this thin at home screen sizes.
-const composer = join(apple, "AppIcon.icon");
-rmSync(composer, { recursive: true, force: true });
-mkdirSync(join(composer, "Assets"), { recursive: true });
-writeFileSync(join(composer, "Assets/lines.svg"), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">${outlined(glyph("#000000"))}</svg>\n`);
+/**
+ * What `list` covers, as one Skia path: each line stroked with the round caps and joins art.ts
+ * draws and the dots as circles, grown by `by` on every side (shrunk when it's less than 0) and
+ * moved by `dx`, `dy`, united, so the knot's crossing is one shape around its loop.
+ */
+function cover(list, by = 0, dx = 0, dy = 0) {
+  return list
+    .map(({ d, width, circle }) => {
+      if (circle) return new skia.PathBuilder().addCircle(circle[0] + dx, circle[1] + dy, circle[2] + by).snapshot();
+      const line = new skia.PathBuilder().addPath(skia.Path.MakeFromSVGString(d)).offset(dx, dy).snapshot();
+      return line.makeStroked({ width: width + 2 * by, cap: skia.StrokeCap.Round, join: skia.StrokeJoin.Round });
+    })
+    .reduce((all, shape) => skia.Path.MakeFromOp(all, shape, skia.PathOp.Union), new skia.Path());
+}
+
+const ARGUMENTS = { [skia.MOVE_VERB]: 2, [skia.LINE_VERB]: 2, [skia.QUAD_VERB]: 4, [skia.CONIC_VERB]: 5, [skia.CUBIC_VERB]: 6, [skia.CLOSE_VERB]: 0 };
+const BINOMIALS = [[1], [1, 1], [1, 2, 1], [1, 3, 3, 1]];
+
+/** `path`'s outlines, each a start and its segments (a verb, its points after the start, a conic's weight). */
+function contours(path) {
+  const commands = [...path.toCmds()];
+  const list = [];
+  for (let i = 0; i < commands.length; i += 1 + ARGUMENTS[commands[i]]) {
+    const [verb, ...args] = commands.slice(i, i + 1 + ARGUMENTS[commands[i]]);
+    if (verb === skia.MOVE_VERB) list.push({ start: args, segments: [] });
+    else if (verb === skia.CONIC_VERB) list.at(-1).segments.push({ verb, points: args.slice(0, 4), weight: args[4] });
+    else if (verb !== skia.CLOSE_VERB) list.at(-1).segments.push({ verb, points: args, weight: 1 });
+  }
+  return list;
+}
+
+/** A contour as a polygon through eight points on each of its curves. */
+function polygon({ start, segments }) {
+  const points = [];
+  let from = start;
+  for (const { points: to, weight } of segments) {
+    const controls = [from, ...Array.from({ length: to.length / 2 }, (_, i) => to.slice(2 * i, 2 * i + 2))];
+    const weights = controls.map((_, i) => (i === 0 || i === controls.length - 1 ? 1 : weight));
+    for (let step = 1; step <= 8; step++) {
+      const t = step / 8;
+      const terms = controls.map((_, i) => BINOMIALS[controls.length - 1][i] * t ** i * (1 - t) ** (controls.length - 1 - i) * weights[i]);
+      const sum = terms.reduce((a, b) => a + b);
+      points.push([0, 1].map((axis) => controls.reduce((a, point, i) => a + terms[i] * point[axis], 0) / sum));
+    }
+    from = to.slice(-2);
+  }
+  return points;
+}
+const area = (points) => points.reduce((sum, [x, y], i) => sum + x * points[(i + 1) % points.length][1] - points[(i + 1) % points.length][0] * y, 0);
+const encloses = (points, [x, y]) =>
+  points.reduce((inside, [x1, y1], i) => {
+    const [x2, y2] = points[(i + 1) % points.length];
+    return y1 > y !== y2 > y && x < x1 + ((y - y1) * (x2 - x1)) / (y2 - y1) ? !inside : inside;
+  }, false);
+
+/** A contour drawn the other way round. */
+function reversed({ start, segments }) {
+  const ends = [start, ...segments.map(({ points }) => points.slice(-2))];
+  return {
+    start: ends.at(-1),
+    segments: segments
+      .map((segment, i) => {
+        const controls = Array.from({ length: segment.points.length / 2 - 1 }, (_, k) => segment.points.slice(2 * k, 2 * k + 2)).reverse();
+        return { ...segment, points: [...controls.flat(), ...ends[i]] };
+      })
+      .reverse(),
+  };
+}
+
+/**
+ * `path` as SVG path data that fills the same under either fill rule (Icon Composer fills a layer's
+ * paths, and a stroke's path too, closing the knot's loop): Skia's path operations leave outlines that
+ * don't cross, and each is wound by how many others it's inside, one way for an outline and the
+ * other for a hole, the loop.
+ */
+function pathData(path) {
+  const outlines = contours(path);
+  const polygons = outlines.map(polygon);
+  const commands = outlines.flatMap((outline, i) => {
+    const depth = polygons.filter((other, j) => j !== i && encloses(other, polygons[i][0])).length;
+    const { start, segments } = area(polygons[i]) > 0 === (depth % 2 === 0) ? outline : reversed(outline);
+    return [skia.MOVE_VERB, ...start, ...segments.flatMap(({ verb, points, weight }) => [verb, ...points, ...(verb === skia.CONIC_VERB ? [weight] : [])]), skia.CLOSE_VERB];
+  });
+  return skia.Path.MakeFromCmds(commands).toSVGString().replace(/-?\d+\.\d+/g, (n) => String(+Number(n).toFixed(2)));
+}
+
+/**
+ * Inside glass lines, art.ts's glass (GLASS) as vectors: a core, an inner light, a lit edge and a
+ * sheen, each blur drawn as four outlines a little apart, whose opacities add up to the blur's.
+ */
+function glassShading(look) {
+  const blurred = ({ erode, blur, opacity, dx = 0, dy = 0 }, color) =>
+    [-0.9, -0.3, 0.3, 0.9]
+      .map((t) => `<path d="${pathData(cover(SHAPES, t * blur - erode, dx, dy))}" fill="${color}" fill-opacity="${+(1 - (1 - opacity) ** (1 / 4)).toFixed(3)}"/>`)
+      .join("");
+  const edge = skia.Path.MakeFromOp(cover(SHAPES), cover(SHAPES, -GLASS.edge.width), skia.PathOp.Difference);
+  return (
+    `<defs><linearGradient id="lit" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">${GLASS.lit}</linearGradient></defs>` +
+    blurred(GLASS.core, look.lines) +
+    blurred(GLASS.inner, look.inner) +
+    `<path d="${pathData(edge)}" fill="url(#lit)" fill-opacity="${GLASS.edge.opacity}"/>` +
+    blurred(GLASS.sheen, "#ffffff")
+  );
+}
+
+/** A color as Icon Composer writes one. */
 const srgb = (hex) => `srgb:${[1, 3, 5].map((i) => (parseInt(hex.slice(i, i + 2), 16) / 255).toFixed(5)).join(",")},1.00000`;
+/** How light a color is, as art.ts greys an icon for tinting. */
+const luma = (hex) => [0.2126, 0.7152, 0.0722].reduce((sum, k, i) => sum + (k * parseInt(hex.slice(1 + 2 * i, 3 + 2 * i), 16)) / 255, 0);
 const down = { start: { x: 0.5, y: 0 }, stop: { x: 0.5, y: 1 } };
-const iconJson = {
-  "fill-specializations": [
-    { value: { "linear-gradient": art.light.bg.map(srgb), orientation: down } },
-    { appearance: "dark", value: { "linear-gradient": art.dark.bg.map(srgb), orientation: down } },
-  ],
-  groups: [
-    {
-      layers: [
-        {
-          "image-name": "lines.svg",
-          name: "lines",
-          glass: true,
-          "fill-specializations": [
-            { value: { solid: srgb(art.light.lines) } },
-            { appearance: "dark", value: { solid: srgb(art.dark.lines) } },
-            { appearance: "tinted", value: { solid: srgb("#ffffff") } },
-          ],
-        },
+
+/**
+ * A layer's fill for `paint` in `look`: its color, or the gradient along the lines, whose ends
+ * Icon Composer puts at the edges of the layer's `bounds`. With `brightest`, in greys, as light
+ * beside it as art.ts's tinted icon has them: what iOS colors when it tints the icon.
+ */
+function fill(paint, look, [left, , right], brightest) {
+  const color = (hex) => (brightest ? srgb(`#${Math.round((255 * luma(hex)) / brightest).toString(16).padStart(2, "0").repeat(3)}`) : srgb(hex));
+  if (paint !== "url(#along)") return { solid: color(paint) };
+  const at = (x) => ({ x: +((x - left) / (right - left)).toFixed(4), y: 0.5 });
+  return { "linear-gradient": look.along.map(color), orientation: { start: at(ALONG[0]), stop: at(ALONG[1]) } };
+}
+
+/** A layer seen only in `appearance` (light or dark), never tinted. */
+const onlyIn = (appearance) => [{ value: appearance !== "light" }, { appearance: "dark", value: appearance !== "dark" }, { appearance: "tinted", value: true }];
+
+/**
+ * `icon` as an Icon Composer file at `dir`. Its background is the file's fill, the gradient art.ts
+ * draws, or for one a fill can't draw (three colors, or corner to corner: a fill takes two, top to
+ * bottom) a layer of its own over it, seen only in its appearance. The lines are a layer for
+ * each color they have (each line its own, or the dots theirs), outlines filled, glass without the
+ * specular highlight, which blurs lines this thin at home screen sizes; glass lines have their
+ * shading over them.
+ */
+function composerIcon(icon, dir) {
+  const assets = join(dir, "Assets");
+  mkdirSync(assets, { recursive: true });
+  const svg = (name, body) => writeFileSync(join(assets, name), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">${body}</svg>\n`);
+  const [light, dark] = [shapes(icon.light), shapes(icon.dark)];
+  const brightest = Math.max(...dark.flatMap(({ paint }) => (paint === "url(#along)" ? icon.dark.along : [paint])).map(luma));
+  const colors = [...Map.groupBy(SHAPES.keys(), (i) => `${light[i].paint} ${dark[i].paint}`).values()];
+  const layers = colors.map((indices, n) => {
+    const name = colors.length === 1 ? "lines" : `lines-${n + 1}`;
+    const shape = cover(indices.map((i) => SHAPES[i]));
+    svg(`${name}.svg`, `<path d="${pathData(shape)}" fill="#000000"/>`);
+    const bounds = shape.computeTightBounds();
+    const [paint, darkPaint] = [light[indices[0]].paint, dark[indices[0]].paint];
+    const fills = icon.glass
+      ? [{ solid: srgb(icon.light.rim) }, { solid: srgb(icon.dark.rim) }]
+      : [fill(paint, icon.light, bounds), fill(darkPaint, icon.dark, bounds)];
+    return {
+      "image-name": `${name}.svg`,
+      name,
+      glass: true,
+      // A glass rim is a little see-through, but not when tinted, which is white glass already.
+      ...(icon.glass ? { "opacity-specializations": [{ value: GLASS.rim }, { appearance: "tinted", value: 1 }] } : {}),
+      "fill-specializations": [
+        { value: fills[0] },
+        { appearance: "dark", value: fills[1] },
+        { appearance: "tinted", value: fill(darkPaint, icon.dark, bounds, brightest) },
       ],
-      shadow: { kind: "neutral", opacity: 0.5 },
-      specular: false,
-      translucency: { enabled: false, value: 0.5 },
-    },
-  ],
-  "supported-platforms": { squares: "shared" },
-};
-writeFileSync(join(composer, "icon.json"), JSON.stringify(iconJson, null, 2) + "\n");
+    };
+  });
+  if (icon.glass) {
+    for (const appearance of ["dark", "light"]) {
+      svg(`shading-${appearance}.svg`, glassShading(icon[appearance]));
+      layers.unshift({ "image-name": `shading-${appearance}.svg`, name: `shading (${appearance})`, glass: false, "hidden-specializations": onlyIn(appearance) });
+    }
+  }
+  const backgrounds = ["light", "dark"]
+    .filter((appearance) => icon[appearance].bg.length > 2 || icon[appearance].diagonal)
+    .map((appearance) => {
+      svg(`background-${appearance}.svg`, `<defs>${backgroundGradient(icon[appearance])}</defs><rect width="1024" height="1024" fill="url(#bg)"/>`);
+      return { "image-name": `background-${appearance}.svg`, name: `background (${appearance})`, glass: false, "hidden-specializations": onlyIn(appearance) };
+    });
+  const background = ({ bg }) => ({ "linear-gradient": [bg[0], bg.at(-1)].map(srgb), orientation: down });
+  const flat = { specular: false, translucency: { enabled: false, value: 0.5 } };
+  const iconJson = {
+    "fill-specializations": [{ value: background(icon.light) }, { appearance: "dark", value: background(icon.dark) }],
+    groups: [
+      { layers, shadow: { kind: "neutral", opacity: 0.5 }, ...flat },
+      ...(backgrounds.length ? [{ layers: backgrounds, shadow: { kind: "none", opacity: 0 }, ...flat }] : []),
+    ],
+    "supported-platforms": { squares: "shared" },
+  };
+  writeFileSync(join(dir, "icon.json"), JSON.stringify(iconJson, null, 2) + "\n");
+}
+
+const composer = join(apple, "AppIcon.icon");
+const alternates = join(apple, "AlternateIcons");
+/** Every file in `dir` and what it holds, to tell whether Lines' own icon has changed. */
+const contents = (dir) => (existsSync(dir) ? readdirSync(dir, { recursive: true }).sort().map((name) => [name, statSync(join(dir, name)).isFile() && readFileSync(join(dir, name), "utf8")]) : []);
+const before = JSON.stringify(contents(composer));
+for (const dir of [composer, alternates]) rmSync(dir, { recursive: true, force: true });
+for (const icon of ICONS) composerIcon(icon, icon === LILAC ? composer : join(alternates, `AppIcon-${icon.id}.icon`));
+
+// Xcode: each alternate among the app's resources, as project.yml's AlternateIcons has them, under
+// ids made from their names, so the project changes only as ICONS does.
+const pbxproj = join(apple, "lines.xcodeproj/project.pbxproj");
+const uid = (text) => createHash("sha256").update(text).digest("hex").slice(0, 24).toUpperCase();
+const entries = (line) => others.map((icon) => line(`AppIcon-${icon.id}.icon`)).join("");
+const project = readFileSync(pbxproj, "utf8")
+  .replace(/^.*AppIcon-[a-z]+\.icon.*\n/gm, "")
+  .replace(/^.*\/\* AppIcon\.icon in Resources \*\/ = \{isa = PBXBuildFile.*\n/m, (line) =>
+    line + entries((name) => `\t\t${uid(`${name} in Resources`)} /* ${name} in Resources */ = {isa = PBXBuildFile; fileRef = ${uid(name)} /* ${name} */; };\n`))
+  .replace(/^.*\/\* AppIcon\.icon \*\/ = \{isa = PBXFileReference.*\n/m, (line) =>
+    line + entries((name) => `\t\t${uid(name)} /* ${name} */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "${name}"; sourceTree = "<group>"; };\n`))
+  .replace(/\/\* AlternateIcons \*\/ = \{\n\t+isa = PBXGroup;\n\t+children = \(\n/, (start) => start + entries((name) => `\t\t\t\t${uid(name)} /* ${name} */,\n`))
+  .replace(/^\t+\w+ \/\* AppIcon\.icon in Resources \*\/,\n/m, (line) => line + entries((name) => `\t\t\t\t${uid(`${name} in Resources`)} /* ${name} in Resources */,\n`));
+writeFileSync(pbxproj, project);
 
 // macOS 26: the same, compiled into the asset catalog the Mac bundle takes as it is
 // (tauri.conf.json), with the arguments Tauri's bundler gives actool. Made here rather than by each
 // build, whose actool fails when Xcode's ibtoold is left in a bad state, and which needs Xcode 26.
-const compiled = mkdtempSync(join(tmpdir(), "lines-car-"));
-const actool = () =>
-  execFileSync("xcrun", ["actool", composer, "--compile", compiled, "--output-format", "human-readable-text", "--errors",
-    "--output-partial-info-plist", join(compiled, "info.plist"), "--app-icon", "AppIcon", "--include-all-app-icons",
-    "--enable-on-demand-resources", "NO", "--development-region", "en", "--target-device", "mac",
-    "--minimum-deployment-target", "26.0", "--platform", "macosx"], { encoding: "utf8" });
-if (/error:/.test(actool())) {
-  execFileSync("pkill", ["-f", "ibtoold"]);
-  const errors = actool();
-  if (/error:/.test(errors)) throw new Error(`actool couldn't compile ${composer}:\n${errors}`);
+// Only when the icon has changed: actool's catalog differs each time, by the time and ids in it.
+const car = join(icons, "Assets.car");
+if (JSON.stringify(contents(composer)) !== before || !existsSync(car)) {
+  const compiled = mkdtempSync(join(tmpdir(), "lines-car-"));
+  const actool = () =>
+    execFileSync("xcrun", ["actool", composer, "--compile", compiled, "--output-format", "human-readable-text", "--errors",
+      "--output-partial-info-plist", join(compiled, "info.plist"), "--app-icon", "AppIcon", "--include-all-app-icons",
+      "--enable-on-demand-resources", "NO", "--development-region", "en", "--target-device", "mac",
+      "--minimum-deployment-target", "26.0", "--platform", "macosx"], { encoding: "utf8" });
+  if (/error:/.test(actool())) {
+    execFileSync("pkill", ["-f", "ibtoold"]);
+    const errors = actool();
+    if (/error:/.test(errors)) throw new Error(`actool couldn't compile ${composer}:\n${errors}`);
+  }
+  cpSync(join(compiled, "Assets.car"), car);
+  rmSync(compiled, { recursive: true });
 }
-cpSync(join(compiled, "Assets.car"), join(icons, "Assets.car"));
-rmSync(compiled, { recursive: true });
 
 // Android 8 and later: an adaptive icon for each, its layers drawn as vectors (a glass one's lines
 // as a picture). The icon's 1024 is the 72 dp the launcher shows of the 108, so the lines keep
@@ -212,20 +371,17 @@ const gradient = (attribute, [x1, y1, x2, y2], colors) =>
     .join("")}\n      </gradient>\n    </aapt:attr>\n  `;
 /** The lines as a vector's paths, in their colors (`along`: the look's gradient along them). */
 function vectorLines(look) {
-  return [...glyph(look).matchAll(/<(path|circle) ([^>]*)\/>/g)]
-    .map(([, tag, attrs]) => {
-      const get = (name) => attrs.match(new RegExp(`(?:^| )${name}="([^"]+)"`))?.[1];
-      if (tag === "circle") {
-        const [cx, cy, r] = ["cx", "cy", "r"].map((name) => Number(get(name)));
+  return shapes(look)
+    .map(({ d, width, circle, paint }) => {
+      if (circle) {
+        const [cx, cy, r] = circle;
         const [x, y, rr] = [at(cx - r), at(cy), +((r * 72) / 1024).toFixed(3)];
-        return `<path android:fillColor="${get("fill")}" android:pathData="M${x},${y} a${rr},${rr} 0 1,0 ${2 * rr},0 a${rr},${rr} 0 1,0 ${-2 * rr},0z"/>`;
+        return `<path android:fillColor="${paint}" android:pathData="M${x},${y} a${rr},${rr} 0 1,0 ${2 * rr},0 a${rr},${rr} 0 1,0 ${-2 * rr},0z"/>`;
       }
-      const d = get("d").replace(/(-?[\d.]+) (-?[\d.]+)/g, (_, x, y) => `${at(Number(x))},${at(Number(y))}`);
-      const stroke = get("stroke");
-      const width = +((56 * 72) / 1024).toFixed(3);
-      const common = `android:strokeWidth="${width}" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="${d}"`;
-      if (!stroke.startsWith("url(")) return `<path android:strokeColor="${stroke}" ${common}/>`;
-      return `<path ${common}>${gradient("strokeColor", [at(214), 0, at(814), 0], look.along)}</path>`;
+      const data = d.replace(/(-?[\d.]+) (-?[\d.]+)/g, (_, x, y) => `${at(Number(x))},${at(Number(y))}`);
+      const common = `android:strokeWidth="${+((width * 72) / 1024).toFixed(3)}" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="${data}"`;
+      if (!paint.startsWith("url(")) return `<path android:strokeColor="${paint}" ${common}/>`;
+      return `<path ${common}>${gradient("strokeColor", [at(ALONG[0]), 0, at(ALONG[1]), 0], look.along)}</path>`;
     })
     .join("\n  ");
 }

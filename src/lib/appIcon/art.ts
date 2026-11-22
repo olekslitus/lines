@@ -75,10 +75,13 @@ function markLines(look: Look | string) {
 /** The mark: the small lines in `currentColor`, so they take the color of what they're in. */
 export const MARK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">${markLines("currentColor")}</svg>`;
 
+/** Where a gradient along the lines starts and ends, across the 1024 canvas. */
+export const ALONG = [214, 814] as const;
+
 /** The gradients a look's lines need along them, at 1024 and at the mark's 32. */
 const alongs = (look: Look) =>
   look.along
-    ? `<linearGradient id="along" x1="214" y1="0" x2="814" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${look.along[0]}"/><stop offset="1" stop-color="${look.along[1]}"/></linearGradient><linearGradient id="alongMark" x1="3.4" y1="0" x2="28.6" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${look.along[0]}"/><stop offset="1" stop-color="${look.along[1]}"/></linearGradient>`
+    ? `<linearGradient id="along" x1="${ALONG[0]}" y1="0" x2="${ALONG[1]}" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${look.along[0]}"/><stop offset="1" stop-color="${look.along[1]}"/></linearGradient><linearGradient id="alongMark" x1="3.4" y1="0" x2="28.6" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${look.along[0]}"/><stop offset="1" stop-color="${look.along[1]}"/></linearGradient>`
     : "";
 
 /** The mark in `look`'s colors, plum on a light page and lilac on a dark one for Lines' own: the web app's favicon. */
@@ -92,11 +95,29 @@ export function favicon(art: IconArt) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><defs>${alongs(art.light)}</defs>${markLines(art.light)}</svg>`;
 }
 
+/**
+ * Glass lines, inside: their rim's opacity; a core, an inner light and a sheen, each the lines shrunk
+ * by `erode`, blurred by `blur` (and the sheen moved up and left); a lit edge `width` wide, lit as
+ * `lit` says from the top left corner to the bottom right. scripts/icons.mjs draws the same as vectors
+ * for iOS.
+ */
+export const GLASS = {
+  rim: 0.6,
+  core: { erode: 6, blur: 5, opacity: 0.7 },
+  inner: { erode: 15, blur: 6, opacity: 0.45 },
+  sheen: { erode: 17, blur: 4, opacity: 0.45, dx: -6, dy: -9 },
+  edge: { width: 2.5, blur: 0.7, opacity: 0.75 },
+  lit: `<stop offset="0" stop-color="#fff" stop-opacity="0.9"/><stop offset="0.55" stop-color="#fff" stop-opacity="0.25"/><stop offset="1" stop-color="#fff" stop-opacity="0.5"/>`,
+};
+
 /** The lines as glass: a shadow under them, a tinted body, an inner light, a lit edge and a sheen. */
 function glassLines(look: Look) {
   const color = typeof look.lines === "string" ? look.lines : look.lines[0];
-  const defs = `<mask id="inside" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">${glyph("#fff")}</mask><filter id="glassShadow" x="-20%" y="-20%" width="140%" height="150%"><feGaussianBlur stdDeviation="18"/></filter><filter id="contact" x="-20%" y="-20%" width="140%" height="150%"><feGaussianBlur stdDeviation="6"/></filter><filter id="core" x="-10%" y="-10%" width="120%" height="120%"><feMorphology operator="erode" radius="6"/><feGaussianBlur stdDeviation="5"/></filter><filter id="inner" x="-10%" y="-10%" width="120%" height="120%"><feMorphology operator="erode" radius="15"/><feGaussianBlur stdDeviation="6"/></filter><filter id="sheen" x="-10%" y="-10%" width="120%" height="120%"><feMorphology operator="erode" radius="17"/><feGaussianBlur stdDeviation="4"/></filter><filter id="edge" x="-5%" y="-5%" width="110%" height="110%"><feMorphology in="SourceAlpha" operator="erode" radius="2.5" result="in"/><feComposite in="SourceAlpha" in2="in" operator="out" result="ring"/><feGaussianBlur in="ring" stdDeviation="0.7" result="ring2"/><feFlood flood-color="#ffffff"/><feComposite in2="ring2" operator="in"/></filter><linearGradient id="lit" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.9"/><stop offset="0.55" stop-color="#fff" stop-opacity="0.25"/><stop offset="1" stop-color="#fff" stop-opacity="0.5"/></linearGradient><mask id="litMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><rect width="1024" height="1024" fill="url(#lit)"/></mask>`;
-  const body = `<g opacity="0.55" transform="translate(0 20)" filter="url(#glassShadow)">${glyph("#03060f")}</g><g opacity="0.4" transform="translate(0 8)" filter="url(#contact)">${glyph("#03060f")}</g><g mask="url(#inside)"><g opacity="0.6">${glyph(look.rim ?? color)}</g><g opacity="0.7" filter="url(#core)">${glyph(color)}</g><g opacity="0.45" filter="url(#inner)">${glyph(look.inner ?? color)}</g><g mask="url(#litMask)" opacity="0.75" filter="url(#edge)">${glyph("#000")}</g><g opacity="0.45" transform="translate(-6 -9)" filter="url(#sheen)">${glyph("#ffffff")}</g></g>`;
+  const { rim, core, inner, sheen, edge, lit } = GLASS;
+  const shrunk = (id: string, { erode, blur }: { erode: number; blur: number }) =>
+    `<filter id="${id}" x="-10%" y="-10%" width="120%" height="120%"><feMorphology operator="erode" radius="${erode}"/><feGaussianBlur stdDeviation="${blur}"/></filter>`;
+  const defs = `<mask id="inside" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">${glyph("#fff")}</mask><filter id="glassShadow" x="-20%" y="-20%" width="140%" height="150%"><feGaussianBlur stdDeviation="18"/></filter><filter id="contact" x="-20%" y="-20%" width="140%" height="150%"><feGaussianBlur stdDeviation="6"/></filter>${shrunk("core", core)}${shrunk("inner", inner)}${shrunk("sheen", sheen)}<filter id="edge" x="-5%" y="-5%" width="110%" height="110%"><feMorphology in="SourceAlpha" operator="erode" radius="${edge.width}" result="in"/><feComposite in="SourceAlpha" in2="in" operator="out" result="ring"/><feGaussianBlur in="ring" stdDeviation="${edge.blur}" result="ring2"/><feFlood flood-color="#ffffff"/><feComposite in2="ring2" operator="in"/></filter><linearGradient id="lit" x1="0" y1="0" x2="1" y2="1">${lit}</linearGradient><mask id="litMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><rect width="1024" height="1024" fill="url(#lit)"/></mask>`;
+  const body = `<g opacity="0.55" transform="translate(0 20)" filter="url(#glassShadow)">${glyph("#03060f")}</g><g opacity="0.4" transform="translate(0 8)" filter="url(#contact)">${glyph("#03060f")}</g><g mask="url(#inside)"><g opacity="${rim}">${glyph(look.rim ?? color)}</g><g opacity="${core.opacity}" filter="url(#core)">${glyph(color)}</g><g opacity="${inner.opacity}" filter="url(#inner)">${glyph(look.inner ?? color)}</g><g mask="url(#litMask)" opacity="${edge.opacity}" filter="url(#edge)">${glyph("#000")}</g><g opacity="${sheen.opacity}" transform="translate(${sheen.dx} ${sheen.dy})" filter="url(#sheen)">${glyph("#ffffff")}</g></g>`;
   return { defs, body };
 }
 
@@ -145,7 +166,7 @@ export const iconArt = (id: string) => ICONS.find((icon) => icon.id === id) ?? L
 export type Frame = "bleed" | "rounded" | "mac";
 
 /** The look's background gradient, as an SVG `<linearGradient>` with the id `bg`. */
-function gradient({ bg, diagonal }: Look) {
+export function gradient({ bg, diagonal }: Look) {
   const stops = bg.map((color, i) => `<stop offset="${i / (bg.length - 1)}" stop-color="${color}"/>`).join("");
   return `<linearGradient id="bg" x1="0" y1="0" x2="${diagonal ? 1 : 0}" y2="1">${stops}</linearGradient>`;
 }

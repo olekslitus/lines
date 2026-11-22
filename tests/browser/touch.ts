@@ -4,6 +4,11 @@ import type { Page } from "playwright";
  * A finger on the page, for the touch screen's gestures (gestures.ts): touch events dispatched
  * where it goes, at a finger's pace, timed in the page. Chromium makes them as a phone's browser
  * would; Playwright's WebKit can't make a Touch, so there they're events that say the same.
+ *
+ * Each event's timeStamp is when the finger's pace has it, not when the page's timer ran: on a busy
+ * machine a timer can run hundreds of milliseconds late, and the gestures, which read how fast and
+ * how soon the finger moved from the events' timeStamps, would see a finger held before it moved,
+ * slowed, or stopped before it was lifted.
  */
 
 type Point = { x: number; y: number };
@@ -25,7 +30,9 @@ export function drag(page: Page, from: Point, to: Point, { steps = 10, duration 
   return page.evaluate(
     async ([from, to, steps, duration, lift]) => {
       const target = document.elementFromPoint(from.x, from.y)!;
-      const fire = (type: string, { x, y }: Point) => {
+      const start = performance.now();
+      const interval = duration / steps;
+      const fire = (type: string, { x, y }: Point, step: number) => {
         const point = { identifier: 1, target, clientX: x, clientY: y, pageX: x, pageY: y, screenX: x, screenY: y };
         const touches = type === "touchend" ? [] : [point];
         let event: Event;
@@ -36,19 +43,21 @@ export function drag(page: Page, from: Point, to: Point, { steps = 10, duration 
           event = new Event(type, { bubbles: true, cancelable: true });
           Object.defineProperties(event, { touches: { value: touches }, changedTouches: { value: [point] }, targetTouches: { value: touches } });
         }
+        Object.defineProperty(event, "timeStamp", { value: start + step * interval });
         target.dispatchEvent(event);
         return event.defaultPrevented;
       };
-      const pause = () => new Promise((resolve) => setTimeout(resolve, duration / steps));
-      fire("touchstart", from);
+      const pause = () => new Promise((resolve) => setTimeout(resolve, interval));
+      fire("touchstart", from, 0);
       let stopped = false;
       for (let step = 1; step <= steps; step++) {
         await pause();
-        const move = fire("touchmove", { x: from.x + ((to.x - from.x) * step) / steps, y: from.y + ((to.y - from.y) * step) / steps });
+        const move = fire("touchmove", { x: from.x + ((to.x - from.x) * step) / steps, y: from.y + ((to.y - from.y) * step) / steps }, step);
         if (step === 1) stopped = move;
       }
-      (window as unknown as { liftFinger: () => void }).liftFinger = () => fire("touchend", to);
-      if (lift) fire("touchend", to);
+      // Lifted as it got there, however long after that `lift` is.
+      (window as unknown as { liftFinger: () => void }).liftFinger = () => fire("touchend", to, steps);
+      if (lift) fire("touchend", to, steps);
       return stopped;
     },
     [from, to, steps, duration, lift] as const,

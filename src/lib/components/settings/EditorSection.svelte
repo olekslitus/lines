@@ -70,6 +70,9 @@
   <FieldRow label={t("settings.listNumbering")} note={t("settings.listNumberingNote")}>
     <Segmented label={t("settings.listNumbering")} options={numberings} value={prefs.listNumbering} onselect={(numbering) => (prefs.listNumbering = numbering)} />
   </FieldRow>
+  <FieldRow label={t("settings.renumberLists")} note={t("settings.renumberListsNote")}>
+    <Switch label={t("settings.renumberLists")} checked={prefs.renumberLists} onchange={(on) => (prefs.renumberLists = on)} />
+  </FieldRow>
   <FieldRow label={t("settings.spellcheck")} note={t("settings.spellcheckNote")}>
     <Switch label={t("settings.spellcheck")} checked={prefs.spellcheck} onchange={(on) => (prefs.spellcheck = on)} />
   </FieldRow>

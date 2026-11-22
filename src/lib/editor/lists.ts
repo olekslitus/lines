@@ -1,5 +1,5 @@
 import { isolateHistory } from "@codemirror/commands";
-import { type ChangeSpec, type EditorState, Prec, type Text } from "@codemirror/state";
+import { type ChangeSpec, type EditorState, type Line, Prec, type Text } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import type { SyntaxNode } from "@lezer/common";
 import { inCode } from "./fences";
@@ -14,20 +14,25 @@ import { ancestors } from "./util";
  * Backspace right after an item's marker moves a nested item out a level, and turns a top-level
  * one into plain text. Enter there puts an empty item above it. A number typed there makes a bullet
  * item numbered, and a bullet a numbered one a bullet (listMarkerInput). List items pasted on an
- * empty one take its place, at its level (listPaste).
+ * empty one take its place, at its level (listPaste). Moving items, and numbering them again where
+ * they go, is listMoves.ts's.
  */
 
-/** The list item whose marker is on the cursor's line. */
-function itemAt(state: EditorState): SyntaxNode | null {
-  const { main } = state.selection;
-  const line = state.doc.lineAt(main.head);
-  if (state.doc.lineAt(main.anchor).number !== line.number) return null;
+/** The list item whose marker is on `line`. */
+export function itemOn(state: EditorState, line: Line): SyntaxNode | null {
   for (const node of ancestors(state, line.to, -1)) {
     if (node.name !== "ListItem") continue;
     const mark = node.getChild("ListMark");
     if (mark && state.doc.lineAt(mark.from).number === line.number) return node;
   }
   return null;
+}
+
+/** The list item whose marker is on the cursor's line. */
+function itemAt(state: EditorState): SyntaxNode | null {
+  const { main } = state.selection;
+  const line = state.doc.lineAt(main.head);
+  return state.doc.lineAt(main.anchor).number === line.number ? itemOn(state, line) : null;
 }
 
 /** The column where an item's marker starts. */
@@ -37,13 +42,13 @@ function markerColumn(doc: Text, item: SyntaxNode) {
 }
 
 /** An ordered list item's number. */
-function itemNumber(doc: Text, item: SyntaxNode) {
+export function itemNumber(doc: Text, item: SyntaxNode) {
   const mark = item.getChild("ListMark")!;
   return parseInt(doc.sliceString(mark.from, mark.to), 10);
 }
 
 /** The change that numbers an ordered list's item `number`, if it isn't already. */
-function numbered(doc: Text, item: SyntaxNode, number: number) {
+export function numbered(doc: Text, item: SyntaxNode, number: number) {
   const mark = item.getChild("ListMark")!;
   return itemNumber(doc, item) === number ? [] : [{ from: mark.from, to: mark.to - 1, insert: String(number) }];
 }
@@ -73,17 +78,17 @@ function numberAfter(doc: Text, item: SyntaxNode) {
 }
 
 /** The node before (or after) `node`, a list item's or a list's: in a quote, each line's `>` sits between them. */
-function beside(node: SyntaxNode, after: boolean) {
+export function beside(node: SyntaxNode, after: boolean) {
   let next = after ? node.nextSibling : node.prevSibling;
   while (next?.name === "QuoteMark") next = after ? next.nextSibling : next.prevSibling;
   return next;
 }
 
 /** Quote markers a line starts with; indentation goes after them. */
-const QUOTES = /^(?:[ \t]*>[ ]?)*/;
+export const QUOTES = /^(?:[ \t]*>[ ]?)*/;
 
 /** The changes that shift lines `first` to `last` by `delta` columns, after a quote's `>`. */
-function shifted(doc: Text, first: number, last: number, delta: number) {
+export function shifted(doc: Text, first: number, last: number, delta: number) {
   const changes = [];
   for (let n = first; n <= last; n++) {
     const line = doc.line(n);

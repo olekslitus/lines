@@ -503,7 +503,7 @@ What's planned next, by area. What's already there but has limits is in [docs/li
 - [x] Store sync credentials (the S3 secret key, and the end-to-end encryption key) in the system's keychain on the Mac, iPhone, iPad and Windows instead of local storage
 - [ ] The same on Linux (the Secret Service) and Android (the Keystore)
 - [x] Conditional S3 writes and deletes (`If-Match`), so an upload or a delete fails instead of overwriting a note another device changed in between
-- [ ] Narrow the app's native permissions: limit network access to the configured endpoint and file access to the chosen sync folder
+- [x] Narrow the app's native permissions: file access to the chosen sync folder. Network access stays open to any `https://` address, which requests in notes, feeds and lookups need
 
 **Plugins**
 - [ ] More formats as plugins, drawn as you type, printed and exported: Org mode, AsciiDoc, WikiText (MediaWiki) and reStructuredText

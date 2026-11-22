@@ -1,3 +1,4 @@
+import type { InvokeArgs, InvokeOptions } from "@tauri-apps/api/core";
 import { t } from "../i18n/index.svelte";
 import type { Remote, RemoteObject } from "./remote";
 import { SyncError } from "./remote";
@@ -8,12 +9,20 @@ import { SyncError } from "./remote";
  * Native apps only; the file access is in src-tauri/src/folder_sync.rs.
  */
 export class FolderRemote implements Remote {
+  /** The native side lets the page into a folder chosen for sync only, once told this is the one. */
+  #using: Promise<void> | undefined;
+
   constructor(readonly root: string) {}
 
-  async #call<T>(command: string, args: Record<string, unknown>): Promise<T> {
+  async #call<T>(command: string, args: InvokeArgs, options?: InvokeOptions): Promise<T> {
     const { invoke } = await import("@tauri-apps/api/core");
     try {
-      return await invoke<T>(command, args);
+      await (this.#using ??= invoke<void>("sync_folder_use", { path: this.root }).catch((error: unknown) => {
+        // Asked again next time: a drive that's signed out now may be back.
+        this.#using = undefined;
+        throw error;
+      }));
+      return await invoke<T>(command, args, options);
     } catch (error) {
       // The app's native side says what went wrong in English; this says it's the folder.
       throw new SyncError(t("sync.folder.failed", { error: String(error) }));
@@ -53,16 +62,11 @@ export class FolderRemote implements Remote {
   }
 
   async putFile(key: string, data: Blob) {
-    const { invoke } = await import("@tauri-apps/api/core");
     const { dir, name } = this.#split(key);
-    try {
-      // The bytes go as they are rather than as JSON; the folder is percent-encoded to fit in a header.
-      await invoke("sync_folder_write_file", new Uint8Array(await data.arrayBuffer()), {
-        headers: { "x-dir": encodeURIComponent(dir), "x-name": name },
-      });
-    } catch (error) {
-      throw new SyncError(t("sync.folder.failed", { error: String(error) }));
-    }
+    // The bytes go as they are rather than as JSON; the folder is percent-encoded to fit in a header.
+    await this.#call<void>("sync_folder_write_file", new Uint8Array(await data.arrayBuffer()), {
+      headers: { "x-dir": encodeURIComponent(dir), "x-name": name },
+    });
   }
 }
 

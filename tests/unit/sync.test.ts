@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, test } from "bun:test";
 import type { MarkField, Marks } from "../../src/lib/feeds/marks";
-import { beforeDelete, beforeWrite, type Device, devices, drive, editElsewhere, FOLDER, fileOf, inAnotherTab, languages, listings, notes, placeholders, reads, serialize, sync, written } from "./sync";
+import { beforeDelete, beforeWrite, type Device, devices, drive, editElsewhere, FOLDER, fileOf, inAnotherTab, languages, listings, notes, placeholders, reads, refused, serialize, sync, used, written } from "./sync";
 // After ./sync, which sets up the page they run in and the notes' storage in memory: imported first,
 // a module would read a page that isn't there, or bind the real storage (IndexedDB) before it's replaced.
 const { latexContent, markTitle } = await import("../../src/plugins/latex/text");
@@ -74,6 +74,20 @@ describe("sync", () => {
 
   test("a Markdown note's is marked on its title", async () => {
     expect(await conflictedCopy("# Plan\n\nA")).toBe("# Plan (conflicted copy)\n\nA\n\nthere");
+  });
+
+  test("the folder is named to the app's native side before it's used, and again once it was refused", async () => {
+    const [here] = await devices(1);
+    used.length = 0;
+    listings.length = 0;
+    refused.add(FOLDER.path);
+    const id = notes.add("# Kept");
+    await here.sync();
+    expect([[...new Set(used)], listings, sync.error]).toEqual([[FOLDER.path], [], "Couldn’t use the folder: Error: Choose a folder for sync again."]);
+    refused.delete(FOLDER.path);
+    const asked = used.length;
+    await here.sync();
+    expect([used.length > asked, sync.error, drive.has(fileOf(id))]).toEqual([true, null, true]);
   });
 });
 

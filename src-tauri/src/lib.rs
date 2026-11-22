@@ -56,6 +56,7 @@ pub fn run() {
       folder_sync::sync_folder_write_file,
       folder_sync::sync_folder_delete,
       folder_sync::sync_folder_pick,
+      folder_sync::sync_folder_use,
       fonts::installed_fonts,
       keychain::keychain_available,
       keychain::keychain_get,
@@ -111,6 +112,7 @@ pub fn run() {
   builder
     .register_uri_scheme_protocol(sf_symbols::SCHEME, |_ctx, request| sf_symbols::handle(request))
     .setup(|app| {
+      app.manage(folder_sync::Folders::load(app.path().app_data_dir().ok().map(|dir| dir.join("sync-folders.json"))));
       // The main window starts hidden and shows itself once its look is applied, so it never
       // flashes the wrong shape or color. Should that ever not happen, show it anyway.
       if let Some(window) = app.get_webview_window("main") {

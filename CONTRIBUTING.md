@@ -82,6 +82,8 @@ Every pull request runs [`.github/workflows/checks.yml`](.github/workflows/check
 - `browsers`: the browser tests, in Chromium and WebKit
 - `rust (macos-latest)`, `rust (windows-latest)`, `rust (ubuntu-22.04)`: Clippy (warnings fail) and the tests, for each desktop system
 
+Every night, [`.github/workflows/flakes.yml`](.github/workflows/flakes.yml) runs the browser tests three times in each browser, on a runner of its own and on one kept busy, and notes any failure in the issue "Flaky browser tests". A test that fails only now and then is a bug, in the test or in Lines: find why and fix that, rather than retry it, wait longer or skip it. The workflow can be run by hand on a branch, as many times as it takes to show a fix works.
+
 ### Coding agents
 
 The same rules, and:

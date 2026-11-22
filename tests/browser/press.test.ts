@@ -35,11 +35,11 @@ const menu = () => app.page.getByRole("menu");
 
 test("held 0.4 s, a row's menu opens, the row sinking a little as it's held, with a tap felt; the click after it doesn't open the note", async () => {
   const page = await phone();
-  const { opened, sunk } = await hold(page, ROW);
+  const { opened, sunk, due } = await hold(page, ROW);
   expect(opened).not.toBeNull();
-  // Not before 0.4 s; a frame or two after, as the page is busy.
+  // Not before 0.4 s; a frame or two after the page's 0.4 s timers run, however busy it is.
   expect(opened!).toBeGreaterThanOrEqual(390);
-  expect(opened!).toBeLessThan(500);
+  expect(opened!).toBeLessThan(due + 100);
   expect(sunk).toBeLessThan(1);
   expect(sunk).toBeGreaterThan(0.95);
   expect(await felt()).toEqual([12]);

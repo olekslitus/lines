@@ -72,16 +72,13 @@ export function reorderable(list: string, key: string, onmove: (before: string |
         if (fresh) frame.append(line);
       }
 
-      function onpointermove(move: PointerEvent) {
-        if (!dragging && Math.abs(move.clientY - startY) < DRAG_START) return;
-        dragging = true;
-        areaOf(row).classList.add("reordering");
-        document.documentElement.classList.add("rows-dragging");
+      /** Where it'd go, with the pointer at `y`: what it'd be before, and the line there. */
+      function aim(y: number) {
         const all = [...document.querySelectorAll<HTMLElement>(`[data-reorder="${CSS.escape(list)}"]`)];
         const rows = all.filter((other) => other !== row);
         const next = rows.find((other) => {
           const box = areaOf(other).getBoundingClientRect();
-          return move.clientY < box.top + box.height / 2;
+          return y < box.top + box.height / 2;
         });
         // Going before the row that's after it now (or to the end, when it's last) is staying put.
         const stays = next === all[all.indexOf(row) + 1];
@@ -89,7 +86,18 @@ export function reorderable(list: string, key: string, onmove: (before: string |
         place(rows, next, stays);
       }
 
-      function onpointerup() {
+      function onpointermove(move: PointerEvent) {
+        if (!dragging && Math.abs(move.clientY - startY) < DRAG_START) return;
+        dragging = true;
+        areaOf(row).classList.add("reordering");
+        document.documentElement.classList.add("rows-dragging");
+        aim(move.clientY);
+      }
+
+      function onpointerup(up?: PointerEvent) {
+        // Where it's let go, which can be where no move was heard: moves come a frame at a time, and a
+        // quick drag on a busy page is let go before the last of them would have.
+        if (up && dragging) aim(up.clientY);
         window.removeEventListener("pointermove", onpointermove);
         window.removeEventListener("pointerup", onpointerup);
         window.removeEventListener("keydown", oncancel, true);

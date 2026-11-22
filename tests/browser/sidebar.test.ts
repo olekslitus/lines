@@ -153,6 +153,27 @@ test("a row dragged back over its own place shows no line, and stays put", async
   expect(await places()).toEqual(before);
 });
 
+test("a row let go past where its last move was heard goes where it's let go", async () => {
+  app = await openApp();
+  const page = app.page;
+  const places = async () => (await rows(app)).slice(0, 4).map((row) => row.split("\n")[0]);
+  const before = await places();
+  expect(before.indexOf("Calendar")).toBeLessThan(before.indexOf("Todo"));
+  // Pressed on Calendar and moved a little (a drag), then let go under Todo with no move heard there,
+  // as a quick drag on a busy page is: moves come a frame at a time, being let go doesn't wait.
+  await page.evaluate(() => {
+    const place = (key: string) => document.querySelector<HTMLElement>(`[data-reorder="places"][data-reorder-key="${key}"]`)!;
+    const calendar = place("calendar").getBoundingClientRect();
+    const todo = place("todo").getBoundingClientRect();
+    const at = (y: number) => ({ clientX: calendar.x + 30, clientY: y, pointerId: 1, pointerType: "mouse", button: 0, isPrimary: true, bubbles: true });
+    place("calendar").dispatchEvent(new PointerEvent("pointerdown", at(calendar.y + 8)));
+    window.dispatchEvent(new PointerEvent("pointermove", at(calendar.y + 14)));
+    window.dispatchEvent(new PointerEvent("pointerup", at(todo.bottom - 2)));
+  });
+  const after = await places();
+  expect(after.indexOf("Calendar")).toBe(after.indexOf("Todo") + 1);
+});
+
 test("a section dragged shows its line under the other whole section, starting where it goes, not gliding in from the top", async () => {
   app = await openApp();
   await app.open("---\ntype: person\n---\n# Ada\n\n#work");

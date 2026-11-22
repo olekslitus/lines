@@ -7,7 +7,7 @@ import { mount, unmount } from "svelte";
 import { speak } from "../a11y";
 import { markupMode } from "../editor/markupMode";
 import { named, SECTIONS, type SlashCommand } from "../editor/slashCommands";
-import { editedNote, isEditing } from "../editor/util";
+import { editedNote, isEditing, parsedFirst } from "../editor/util";
 import { t } from "../i18n/index.svelte";
 import Icon from "../icons/Icon.svelte";
 import { notes } from "../notes/store.svelte";
@@ -260,7 +260,7 @@ export const noteTimes = [
       { key: isApple ? "Ctrl-Meta-t" : "Ctrl-Alt-s", run: writeTimeKey },
     ]),
   ]),
-  Prec.highest(keymap.of([{ key: "Enter", run: continueTimes }])),
+  Prec.highest(keymap.of([{ key: "Enter", run: parsedFirst(continueTimes) }])),
 ];
 
 /** "/time": the time the player is at. */

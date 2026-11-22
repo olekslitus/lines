@@ -77,11 +77,18 @@
     return `# ${title}\n${by.join(" · ")}${body && `\n\n${body}\n`}`;
   }
 
-  /** What a post says; where it says nothing of its own, what its page says of itself, its picture too unless a player of it shows one (`picture`). */
+  /**
+   * What a post says, after its own picture (an image enclosure, Media RSS's, as NASA's Image of the
+   * Day's posts have) where what it says shows none; where it says nothing of its own, what its page
+   * says of itself, its picture too. No picture where a player of it shows one (`picture`), nor an
+   * episode's artwork, which its player shows.
+   */
   function bodyOf(post: Row["post"], html: string | undefined, summary: Summary | undefined, picture: boolean) {
     if (html === undefined) return escapeMarkdown(post.excerpt);
-    if (saysMore(html, post.base, [post.link, post.comments])) return htmlToMarkdown(html, post.base);
-    return [picture && summary?.image && `![](${destination(summary.image)})`, summary?.description && escapeMarkdown(summary.description)].filter(Boolean).join("\n\n");
+    const own = picture && !post.audio && !/<img\b/i.test(html) ? post.image : undefined;
+    const image = (src: string | undefined) => src && `![](${destination(src)})`;
+    if (saysMore(html, post.base, [post.link, post.comments])) return [image(own), htmlToMarkdown(html, post.base)].filter(Boolean).join("\n\n");
+    return [image(own ?? (picture ? summary?.image : undefined)), summary?.description && escapeMarkdown(summary.description)].filter(Boolean).join("\n\n");
   }
 
   /** Whether to ask the page a post links to what it says of itself: it says nothing of its own. */

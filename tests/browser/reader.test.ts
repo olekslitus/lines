@@ -911,6 +911,13 @@ async function madeSubscription(app: App, count: number, url = "https://made.exa
 /** The titles of the posts listed. */
 const listed = (app: App) => app.page.locator(".note-list [data-post] .block.truncate").allInnerTexts();
 
+/**
+ * The notice at the window's bottom saying `text`. Only the app's own: screen readers are told the
+ * same words 50 ms later from a live region outside it (a11y.ts), which the page's getByText would
+ * find too, two where it's to find one.
+ */
+const notice = (app: App, text: string) => app.page.locator("#app").getByText(text);
+
 describe("dismissing posts, to keep a feed at zero", () => {
   test("a row's button, E and ⌫, N, or its menu take a post out of the list, read; the open one's place goes to the next; ⌘Z puts them back", async () => {
     app = await openApp();
@@ -923,7 +930,7 @@ describe("dismissing posts, to keep a feed at zero", () => {
     // The button over a row pointed at, and a notice that says so, with Undo.
     await rows.first().hover();
     await page.locator(".note-list li").first().getByRole("button", { name: "Dismiss", exact: true }).click();
-    await page.getByText("Dismissed “Post 0”").waitFor();
+    await notice(app, "Dismissed “Post 0”").waitFor();
     await page.getByRole("button", { name: "Undo" }).waitFor();
     expect(await listed(app)).toEqual(["Post 1", "Post 2", "Post 3", "Post 4", "Post 5"]);
     await sidebar.getByRole("button", { name: "Made, 5 unread" }).waitFor();
@@ -940,7 +947,7 @@ describe("dismissing posts, to keep a feed at zero", () => {
     await page.getByRole("textbox", { name: "Post: Post 3" }).waitFor();
     await page.keyboard.press("n");
     await page.getByRole("textbox", { name: "Post: Post 4" }).waitFor();
-    await page.getByText("Dismissed “Post 3” as not interesting").waitFor();
+    await notice(app, "Dismissed “Post 3” as not interesting").waitFor();
     expect(await listed(app)).toEqual(["Post 4", "Post 5"]);
 
     // Its menu, on a post that isn't open: the open one stays.
@@ -1048,10 +1055,10 @@ describe("dismissing posts, to keep a feed at zero", () => {
     await sidebar.getByRole("button", { name: "Made, 3 unread" }).click({ button: "right" });
     await page.getByRole("menuitem", { name: "Dismiss All" }).click();
     await page.getByText("All caught up.").waitFor();
-    await page.getByText("Dismissed 3 posts").waitFor();
+    await notice(app, "Dismissed 3 posts").waitFor();
     await sidebar.getByRole("button", { name: "Made", exact: true }).waitFor();
     await page.getByRole("button", { name: "Undo" }).click();
-    await page.getByText("Dismissed 3 posts").waitFor({ state: "detached" });
+    await notice(app, "Dismissed 3 posts").waitFor({ state: "detached" });
     expect(await listed(app)).toEqual(["Post 1", "Post 2", "Post 3"]);
     await sidebar.getByRole("button", { name: "Made, 3 unread" }).waitFor();
 

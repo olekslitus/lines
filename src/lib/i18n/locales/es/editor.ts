@@ -108,6 +108,11 @@ export default {
   "editor.callout.changeIcon": "Cambiar icono…",
   "editor.callout.addIcon": "Añadir icono…",
 
+  "editor.fold.fold": "Plegar «{title}»",
+  "editor.fold.unfold": "Desplegar «{title}»",
+  "editor.fold.folded": "Sección plegada: mostrarla",
+  "editor.fold.didFold": "Plegada «{title}»",
+  "editor.fold.didUnfold": "Desplegada «{title}»",
   "editor.outline": "Esquema",
   "editor.outline.headings": "Encabezados",
   "editor.properties": "Propiedades",

@@ -575,6 +575,8 @@ export default {
   "settings.copyOnSelectNote": "Text you select in a note with the mouse is copied when you let go, as in a terminal: dragged over, or a word double-clicked.",
   "settings.dragBlocks": "Drag to move lines",
   "settings.dragBlocksNote": "A grip beside the line or block you point at, which drags it somewhere else in the note.",
+  "settings.foldSections": "Fold sections",
+  "settings.foldSectionsNote": "A chevron beside each heading folds away what's under it, up to the next heading of its size. Only how the note shows: its text stays as it is. Folds are kept on this device.",
   "settings.typingSounds": "Typing sounds",
   "settings.typingSoundsNote": "The sound of a keyboard as you type, in Lines' windows.",
   "settings.typingSoundsOn": "Play typing sounds",

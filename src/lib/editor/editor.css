@@ -1096,6 +1096,89 @@
   }
 }
 
+/*
+ * Folding a heading's section (folding.ts): a chevron left of the heading, shown as the pointer is
+ * over it, turned to point at the heading's text once it's folded, when it always shows; and "…"
+ * after a folded heading, at the text's size whatever the heading's.
+ */
+.cm-fold-chevrons {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.cm-fold-chevron {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: calc(5px * var(--radius-scale));
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.cm-fold-chevron > svg {
+  transition: transform 160ms ease;
+}
+
+.cm-fold-chevron.is-folded > svg {
+  transform: rotate(-90deg);
+}
+
+.cm-fold-chevron.is-hovered,
+.cm-fold-chevron.is-folded,
+.cm-fold-chevron:hover,
+.cm-fold-chevron:focus-visible {
+  opacity: 1;
+}
+
+.cm-fold-chevron:hover {
+  background: var(--hover);
+  color: var(--text-muted);
+}
+
+/* No hover on touch screens: always there, quieter, and a little taller to tap. */
+@media (hover: none) {
+  .cm-fold-chevron {
+    height: 32px;
+    margin-top: -4px;
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cm-fold-chevron > svg {
+    transition: none;
+  }
+}
+
+.cm-fold-placeholder {
+  display: inline-grid;
+  place-items: center;
+  margin-inline-start: 0.4em;
+  /* The dots sit on the text's baseline: more room under them puts them in the middle. */
+  padding: 0 0.45em 0.3em;
+  border: none;
+  border-radius: calc(6px * var(--radius-scale));
+  background: var(--active);
+  color: var(--text-muted);
+  font: 600 var(--editor-size) / 1 var(--font-text);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.cm-fold-placeholder:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
 /* Drag handles (dragBlocks.ts): a grip left of the hovered line or block, and the line where it'll go. */
 .cm-drag-handle {
   position: absolute;

@@ -1,10 +1,10 @@
-import { syntaxTree } from "@codemirror/language";
-import { Compartment, type EditorState, type Extension, Facet } from "@codemirror/state";
+import { foldedRanges, syntaxTree, unfoldEffect } from "@codemirror/language";
+import { Compartment, type EditorState, type Extension, Facet, type StateEffect } from "@codemirror/state";
 import { EditorView, ViewPlugin, type ViewUpdate } from "@codemirror/view";
 import { mount, unmount } from "svelte";
 import { plainLine } from "../notes/stats";
 import { reducedMotion } from "../platform";
-import type { Side } from "../prefs.svelte";
+import { prefs, type Side } from "../prefs.svelte";
 import { frontMatterField } from "./objects";
 import OutlineRail from "./OutlineRail.svelte";
 
@@ -21,6 +21,10 @@ export interface Heading {
   title: string;
   /** Where in the note it starts. */
   from: number;
+  /** Where it ends, if past its first line (text underlined with `===`). */
+  to?: number;
+  /** The end of what it's in (a quote, a list's item, a LaTeX environment), which its section can't run past. */
+  within?: number;
 }
 
 type ReadHeadings = (state: EditorState) => Heading[];
@@ -38,13 +42,16 @@ const markdownHeadings: ReadHeadings = (state) => {
   const after = front ? doc.line(front.lines).to : -1;
   const headings: Heading[] = [];
   syntaxTree(state).iterate({
-    enter: ({ name, from }) => {
+    enter: (node) => {
+      const { name, from, to } = node;
       if (NO_HEADINGS.has(name)) return false;
       const level = /^(?:ATX|Setext)Heading(\d)$/.exec(name)?.[1];
       if (!level) return;
       // Its first line, without `#`s at either end.
       const title = plainLine(doc.sliceString(from, doc.lineAt(from).to).replace(/^#+|\s#+\s*$/g, "")).trim();
-      if (from > after && title) headings.push({ level: Number(level), title, from });
+      const parent = node.node.parent;
+      const within = parent && parent.name !== "Document" ? parent.to : undefined;
+      if (from > after && title) headings.push({ level: Number(level), title, from, to, within });
       return false;
     },
   });
@@ -66,10 +73,12 @@ export class OutlineState {
 
 /**
  * Space beside the text the outline needs (on the left, clear of the grip that dragging a line
- * shows there too), and how far below the top a heading it goes to stops.
+ * shows there too, and of the chevron that folds a heading's section), and how far below the top a
+ * heading it goes to stops.
  */
 const ROOM = 36;
 const GRIP = 28;
+const CHEVRON = 28;
 const MARGIN = 8;
 /** Where the part being read is, from the top. */
 const READING_LINE = 96;
@@ -116,7 +125,7 @@ class OutlineView {
         const reading = view.lineBlockAtHeight((atEnd ? box.bottom - 1 : box.top + READING_LINE) - view.documentTop);
         return {
           room: {
-            left: text.left + parseFloat(style.paddingLeft) - box.left >= ROOM + GRIP,
+            left: text.left + parseFloat(style.paddingLeft) - box.left >= ROOM + GRIP + (prefs.foldSections ? CHEVRON : 0),
             right: box.left + scroller.clientWidth - (text.right - parseFloat(style.paddingRight)) >= ROOM,
           },
           current: this.outline.headings.filter((heading) => heading.from <= reading.to).length - 1,
@@ -133,10 +142,15 @@ class OutlineView {
     const { view } = this;
     const scroller = view.scrollDOM;
     this.stop();
+    // A heading in a folded section (folding.ts) shows, the fold opening.
+    const effects: StateEffect<unknown>[] = [];
+    foldedRanges(view.state).between(heading.from, heading.from, (from, to) => {
+      if (from < heading.from) effects.push(unfoldEffect.of({ from, to }));
+    });
     if (focus) {
-      view.dispatch({ selection: { anchor: view.state.doc.lineAt(heading.from).to } });
+      view.dispatch({ selection: { anchor: view.state.doc.lineAt(heading.from).to }, effects });
       view.focus();
-    }
+    } else if (effects.length) view.dispatch({ effects });
     // Where the heading's line goes, read again each frame: lines far off are only estimated until they're drawn.
     const target = () => {
       const top = view.lineBlockAt(heading.from).top + view.documentTop - scroller.getBoundingClientRect().top + scroller.scrollTop - MARGIN;

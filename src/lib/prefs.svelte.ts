@@ -307,6 +307,8 @@ export interface Stored {
   listNumbering: ListNumbering;
   /** A numbered list an item is moved into or out of is numbered again in its new order (editor/listMoves.ts); off, items keep their numbers. */
   renumberLists: boolean;
+  /** A heading's section folds away by the chevron beside it, or ⌘⌥[ (editor/folding.ts); off, nothing folds. */
+  foldSections: boolean;
   /** The system checks notes' spelling, and corrects it as you type (code and math never). */
   spellcheck: boolean;
   /** Text selected in a note with the pointer is copied when it's let go, as in a terminal (editor/copyOnSelect.ts). */
@@ -478,6 +480,7 @@ const DEFAULTS: Stored = {
   underlinedHeadings: false,
   listNumbering: "outline",
   renumberLists: true,
+  foldSections: true,
   spellcheck: true,
   copyOnSelect: false,
   typingSounds: false,
@@ -666,6 +669,7 @@ function read(json?: string): Stored {
     underlinedHeadings: flag(raw.underlinedHeadings, DEFAULTS.underlinedHeadings),
     listNumbering: oneOf(raw.listNumbering, LIST_NUMBERINGS, DEFAULTS.listNumbering),
     renumberLists: flag(raw.renumberLists, DEFAULTS.renumberLists),
+    foldSections: flag(raw.foldSections, DEFAULTS.foldSections),
     spellcheck: flag(raw.spellcheck, DEFAULTS.spellcheck),
     copyOnSelect: flag(raw.copyOnSelect, DEFAULTS.copyOnSelect),
     typingSounds: flag(raw.typingSounds, DEFAULTS.typingSounds),
@@ -785,6 +789,7 @@ class Prefs {
   underlinedHeadings = $state(this.#initial.underlinedHeadings);
   listNumbering = $state(this.#initial.listNumbering);
   renumberLists = $state(this.#initial.renumberLists);
+  foldSections = $state(this.#initial.foldSections);
   spellcheck = $state(this.#initial.spellcheck);
   copyOnSelect = $state(this.#initial.copyOnSelect);
   typingSounds = $state(this.#initial.typingSounds);
@@ -1011,6 +1016,7 @@ class Prefs {
       underlinedHeadings: this.underlinedHeadings,
       listNumbering: this.listNumbering,
       renumberLists: this.renumberLists,
+      foldSections: this.foldSections,
       spellcheck: this.spellcheck,
       copyOnSelect: this.copyOnSelect,
       typingSounds: this.typingSounds,

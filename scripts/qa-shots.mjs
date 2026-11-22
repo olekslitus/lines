@@ -629,6 +629,15 @@ const formattingTheme = (note, format) => (page) =>
  * Each scene: a note (and its format), Settings to start with, what to open, what to photograph,
  * and what a person should see in it. `schemes` defaults to light and dark, `language` to English.
  */
+/** A note with a section to fold in its middle. */
+const FOLDED = `${PROSE}\n\n## Later\n\nSomething for the weekend.`;
+
+/** Folds the section the cursor is in, by the keys CodeMirror reads where the page runs (⌘⌥[ on Apple's, Ctrl+Shift+[ elsewhere). */
+async function foldAtCursor(page) {
+  const apple = await page.evaluate(() => /Mac|iPhone|iPad/.test(navigator.platform) || /iPhone|iPad/.test(navigator.userAgent));
+  await page.keyboard.press(apple ? "Meta+Alt+BracketLeft" : "Control+Shift+BracketLeft");
+}
+
 const SCENES = [
   { id: "paper-lines", title: "Paper: ruled lines", look: "Every line of text, wrapped lines and headings too, sits on a rule; the rules end at the text's width; none under code.", prefs: { paperPattern: "lines" }, note: PROSE },
   { id: "paper-graph", title: "Paper: graph paper following the text", look: "A row of cells for each line, columns unbroken down the note, faint enough to read over.", prefs: { paperPattern: "graph" }, note: PROSE },
@@ -649,6 +658,34 @@ const SCENES = [
     act: (page) => page.evaluate(() => window.testing.place()),
     shoot: ".editor-pane",
   })),
+  {
+    id: "fold-sections",
+    title: "A folded section, the pointer on another heading",
+    look: "“What to do” folded: its heading with a quiet “…” chip after it at the text's size, its dots in the chip's middle, then “Later” and its line as usual; a chevron left of it pointing right. Pointing at “A day's notes”: its chevron pointing down, left of the line grip and clear of it, both level with the heading's text. No chevron by “Later”.",
+    note: FOLDED,
+    act: async (page) => {
+      await page.evaluate(() => window.testing.place(window.testing.text().indexOf("Plan the week")));
+      await foldAtCursor(page);
+      await page.locator(".editor-pane .cm-fold-placeholder").waitFor();
+      await page.locator(".editor-pane").getByRole("heading", { name: "A day's notes" }).hover();
+      await page.locator('.editor-pane .cm-fold-chevron[aria-expanded="false"]').waitFor();
+    },
+    shoot: ".editor-pane",
+  },
+  {
+    id: "fold-sections-phone",
+    title: "Phone: a folded section",
+    look: "The chevrons always there, quieter, in the narrow margin left of each heading without touching its text; “What to do”'s pointing right, with “…” after its heading.",
+    note: FOLDED,
+    width: 390,
+    height: 780,
+    act: async (page) => {
+      await page.evaluate(() => window.testing.place(window.testing.text().indexOf("Plan the week")));
+      await foldAtCursor(page);
+      await page.locator(".editor-pane .cm-fold-placeholder").waitFor();
+      await page.locator('.editor-pane .cm-fold-chevron[aria-expanded="false"]').waitFor();
+    },
+  },
   { id: "code-note", title: "A code note", look: "Line numbers beside each line, a fixed-width font, highlighting in the theme's colors.", note: CODE, format: "code-python" },
   { id: "code-note-backdrop", title: "A code note over a backdrop", look: "The page holds the line numbers, each exactly beside its line, with even room on both sides.", prefs: { paperBackdrop: "dawn" }, note: CODE, format: "code-python" },
   ...[

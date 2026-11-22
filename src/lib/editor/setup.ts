@@ -12,6 +12,7 @@ import { codeLanguage } from "./codeLanguages";
 import { cursor } from "./cursor";
 import { dragBlocks } from "./dragBlocks";
 import { focusInPlace } from "./focusInPlace";
+import { folding, foldingCompartment } from "./folding";
 import { fenceInput } from "./fences";
 import { headingLevelInput } from "./headingLevel";
 import { quoteInput } from "./quotes";
@@ -518,6 +519,7 @@ export function createExtensions(onChange: () => void, format?: string): Extensi
     keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap.filter((binding) => binding.key !== "Mod-d"), indentWithTab]),
     readOnlyCompartment.of(readOnly(false)),
     outlineCompartment.of([]),
+    foldingCompartment.of(prefs.foldSections ? folding : []),
     propertiesCompartment.of([]),
     theme,
     EditorView.updateListener.of((update) => {

@@ -128,6 +128,13 @@ export default {
   "editor.callout.changeIcon": "Change icon…",
   "editor.callout.addIcon": "Add icon…",
 
+  // Folding a heading's section (Settings → Editor → Fold sections): the button beside it, what
+  // shows after a folded heading, and what's said when one folds or unfolds.
+  "editor.fold.fold": "Fold “{title}”",
+  "editor.fold.unfold": "Unfold “{title}”",
+  "editor.fold.folded": "Folded section: show it",
+  "editor.fold.didFold": "Folded “{title}”",
+  "editor.fold.didUnfold": "Unfolded “{title}”",
   // The outline beside a note (Settings → Layout): its headings, by name when pointed at.
   "editor.outline": "Outline",
   "editor.outline.headings": "Headings",

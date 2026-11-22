@@ -520,6 +520,8 @@ export default {
   "settings.copyOnSelectNote": "El texto que seleccionas en una nota con el ratón se copia al soltarlo, como en un terminal: arrastrando, o con doble clic en una palabra.",
   "settings.dragBlocks": "Arrastrar para mover líneas",
   "settings.dragBlocksNote": "Un asa junto a la línea o el bloque que señalas, para arrastrarlo a otro sitio de la nota.",
+  "settings.foldSections": "Plegar secciones",
+  "settings.foldSectionsNote": "Un chevrón junto a cada encabezado pliega lo que hay debajo, hasta el siguiente encabezado de su tamaño. Solo cambia cómo se ve la nota: su texto queda igual. Los pliegues se guardan en este dispositivo.",
   "settings.typingSounds": "Sonidos al escribir",
   "settings.typingSoundsNote": "El sonido de un teclado al escribir, en las ventanas de Lines.",
   "settings.typingSoundsOn": "Reproducir sonidos al escribir",

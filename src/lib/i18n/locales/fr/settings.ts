@@ -520,6 +520,8 @@ export default {
   "settings.copyOnSelectNote": "Le texte que vous sélectionnez dans une note à la souris est copié quand vous relâchez, comme dans un terminal : en glissant, ou d’un double-clic sur un mot.",
   "settings.dragBlocks": "Glisser pour déplacer les lignes",
   "settings.dragBlocksNote": "Une poignée à côté de la ligne ou du bloc que vous pointez, pour le faire glisser ailleurs dans la note.",
+  "settings.foldSections": "Replier les sections",
+  "settings.foldSectionsNote": "Un chevron à côté de chaque titre replie ce qu’il y a dessous, jusqu’au titre suivant de sa taille. Seul l’affichage de la note change : son texte reste tel quel. Les sections repliées sont gardées sur cet appareil.",
   "settings.typingSounds": "Sons de frappe",
   "settings.typingSoundsNote": "Le son d’un clavier pendant la saisie, dans les fenêtres de Lines.",
   "settings.typingSoundsOn": "Jouer les sons de frappe",

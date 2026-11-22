@@ -28,7 +28,7 @@ A quiet page that gets out of your way. Type the way you think, and Lines tidies
 - Link notes with `@` or `[[`. Give a note a type, like `person` or `recipe`, and see all of them together.
 - Search finds anything, across every note, as you type.
 - Pictures, files, audio, video, math, drawings and diagrams sit right in the note.
-- Small things help: drag any line to move it, find and replace, arrows that draw themselves (`->` as →), notes side by side, and, on a computer, a note in a small window of its own that can stay on top.
+- Small things help: drag any line to move it, fold a heading's section away, find and replace, arrows that draw themselves (`->` as →), notes side by side, and, on a computer, a note in a small window of its own that can stay on top.
 
 ### Keep what you read, watch and listen to
 
@@ -626,6 +626,7 @@ What's planned next, by area. What's already there but has limits is in [docs/li
 - [x] Resizable sidebar and note list, each on the left or the right
 - [x] Tabs for open notes, with preview tabs (off by default)
 - [x] An outline of a note's headings beside it (off by default)
+- [x] Fold a heading's section, by its chevron or ⌘⌥[, Markdown and LaTeX; folds kept on each device
 - [x] A note's properties at its top, beside its text or after it
 - [x] Choose what a click, ⌘-click and ⇧⌘-click do on links, tags and mentions
 - [x] Several notes at once: select, tag, pin and trash them together

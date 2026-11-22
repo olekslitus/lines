@@ -70,6 +70,7 @@ The plugin is in `src/plugins/latex/`: the editor's reading of LaTeX in `syntax.
 - Enter after a `\begin{…}` (or `\[`) that isn't closed yet adds the `\end{…}` (or `\]`), with the cursor between. A list starts with an `\item`.
 - ⌘B, ⌘I, ⌘U and ⌘E put the selection in `\textbf{…}`, `\emph{…}`, `\underline{…}` and `\texttt{…}`, or take it out.
 - With the outline on (Settings → Layout), `\section`, `\subsection` and `\subsubsection` (starred too) are its headings.
+- `\section`, `\subsection` and `\subsubsection` fold as Markdown headings do ([linedown.md](linedown.md#folding-sections)): their chevron, ⌘⌥[ and ⌘⌥], a section ending at the next heading of its size or bigger, or at the end of the environment it's in.
 - Pasting and dropping work as in Markdown notes, written as LaTeX:
   - Rows copied from a spreadsheet, pgAdmin or a web page become a `tabular`, lined up in the LaTeX, with the first row over a `\hline` and number columns right-aligned. Special characters in cells are escaped (`well_id` → `well\_id`). Undo once for the text as copied.
   - An image becomes `\includegraphics[width=\linewidth]{../attachments/…}`; any other file `\href{../attachments/…}{Name.pdf}`. `/image` and `/file` choose them from the device.

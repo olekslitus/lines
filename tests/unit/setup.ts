@@ -22,15 +22,25 @@ plugin({
   },
 });
 
-/** Browsers' storage, kept in memory for the run. */
-class MemoryStorage {
-  #items = new Map<string, string>();
-  getItem = (key: string) => this.#items.get(key) ?? null;
-  setItem = (key: string, value: string) => void this.#items.set(key, String(value));
-  removeItem = (key: string) => void this.#items.delete(key);
-  clear = () => this.#items.clear();
+/** Browsers' storage, kept in memory for the run; its keys listed as a browser's are (`Object.keys(localStorage)`). */
+function memoryStorage(): Storage {
+  const items = new Map<string, string>();
+  const methods = {
+    getItem: (key: string) => items.get(key) ?? null,
+    setItem: (key: string, value: string) => void items.set(key, String(value)),
+    removeItem: (key: string) => void items.delete(key),
+    clear: () => items.clear(),
+    key: (index: number) => [...items.keys()][index] ?? null,
+    get length() {
+      return items.size;
+    },
+  };
+  return new Proxy(methods, {
+    ownKeys: () => [...items.keys()],
+    getOwnPropertyDescriptor: (_, key) => (typeof key === "string" && items.has(key) ? { value: items.get(key), enumerable: true, configurable: true } : undefined),
+  }) as unknown as Storage;
 }
-globalThis.localStorage ??= new MemoryStorage() as unknown as Storage;
+globalThis.localStorage ??= memoryStorage();
 
 /** The version Vite builds in (vite.config.ts), which the apps' requests say. */
 (globalThis as { __APP_VERSION__?: string }).__APP_VERSION__ = "0.0.0";

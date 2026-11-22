@@ -55,12 +55,22 @@ function objectStore<T extends { id: string }>(name: keyof Database) {
   };
 }
 
+/** How the notes' storage misbehaves: the next `failing` writes fail, as on a full disk, and each waits for `slow` first, if set. */
+export const storage: { failing: number; slow: Promise<void> | null } = { failing: 0, slow: null };
+
 mock.module("../../src/lib/notes/storage", () => ({
   IndexedDBStorage: class {
     #notes = objectStore<Note>("notes");
     all = this.#notes.all;
     get = this.#notes.get;
-    put = this.#notes.put;
+    put = async (...notes: Note[]) => {
+      if (storage.failing > 0) {
+        storage.failing--;
+        throw new Error("The disk is full");
+      }
+      await storage.slow;
+      await this.#notes.put(...notes);
+    };
     delete = this.#notes.delete;
     rewrite = async () => {};
   },

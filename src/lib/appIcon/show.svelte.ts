@@ -63,9 +63,10 @@ async function show(id: string, systemDark: boolean) {
   const key = bundle ? LILAC.id : `${art.id} ${appearance}`;
   if (!isDesktopApp || key === shown) return;
   shown = key;
-  // The Mac's shape, as the bundle's icon has (and Windows' and Linux's .ico and PNGs), at the
-  // Dock's largest or a taskbar's.
-  const size = isMacApp ? 512 : 256;
+  // The Mac's shape, as the bundle's icon has (and Windows' and Linux's .ico and PNGs), as large as
+  // the bundle's largest (512 points at 2×), so the Dock never draws it softer, magnified too; or a
+  // taskbar's largest.
+  const size = isMacApp ? 1024 : 256;
   return invoke("set_app_icon", { alternate: null, picture: bundle ? null : await picture(iconSvg(art, appearance, "mac"), size), size });
 }
 

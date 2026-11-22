@@ -11,6 +11,26 @@
 		4B59208889DD8D9904667FAD /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7A0EEF984076C5BAD706F45 /* UIKit.framework */; };
 		57CB006B72B0C097721AA9E8 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1E7466510E61F6FE09092224 /* main.mm */; };
 		E977C6285EE0F8BBAF367116 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = A667CA5FA826F980B6CF5625 /* AppIcon.icon */; };
+		517069BC44DB8EE78C7926F8 /* AppIcon-oat.icon in Resources */ = {isa = PBXBuildFile; fileRef = 5D3B201B6008344F362DC2B6 /* AppIcon-oat.icon */; };
+		4979F77380262A9A97819602 /* AppIcon-sand.icon in Resources */ = {isa = PBXBuildFile; fileRef = 4B564D17C333056FBCB2BD4F /* AppIcon-sand.icon */; };
+		E003D735ADB877263B20E281 /* AppIcon-warm.icon in Resources */ = {isa = PBXBuildFile; fileRef = 09A903438BFB1E6300E26FD3 /* AppIcon-warm.icon */; };
+		70AD357B81F73DF3EA6FF15F /* AppIcon-cool.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39008A2B857E40E120C8D953 /* AppIcon-cool.icon */; };
+		A782FDDB66DBC76985517412 /* AppIcon-bold.icon in Resources */ = {isa = PBXBuildFile; fileRef = 94B6F6869C79AA035C535527 /* AppIcon-bold.icon */; };
+		288EA44CC3E2EAEBC567292F /* AppIcon-coral.icon in Resources */ = {isa = PBXBuildFile; fileRef = AC35C47DC3A73D3A3AFE3481 /* AppIcon-coral.icon */; };
+		422D3D67C8D9286814A317EB /* AppIcon-knot.icon in Resources */ = {isa = PBXBuildFile; fileRef = 3F8BDE0A41F5A51F92C31D67 /* AppIcon-knot.icon */; };
+		51D0B65398002C1DC0E05869 /* AppIcon-dusk.icon in Resources */ = {isa = PBXBuildFile; fileRef = 29769C9AD8F2B0DC3C3AEB11 /* AppIcon-dusk.icon */; };
+		6A59B0BD2302E358437A6AF7 /* AppIcon-sunrise.icon in Resources */ = {isa = PBXBuildFile; fileRef = A1B4A1C050BD05CA92A4F117 /* AppIcon-sunrise.icon */; };
+		1C978B3F15F60CC5ED460F39 /* AppIcon-sea.icon in Resources */ = {isa = PBXBuildFile; fileRef = 63D91D1867D97531BC405CA7 /* AppIcon-sea.icon */; };
+		38DA041B7285B49D9184B178 /* AppIcon-forest.icon in Resources */ = {isa = PBXBuildFile; fileRef = 9C4A9C5C89652136FC0B9210 /* AppIcon-forest.icon */; };
+		3D16F9F72C8943F3D06CBA33 /* AppIcon-aurora.icon in Resources */ = {isa = PBXBuildFile; fileRef = 4087516E1D396690FE96F44A /* AppIcon-aurora.icon */; };
+		0306823036E44261A658BAAF /* AppIcon-cobalt.icon in Resources */ = {isa = PBXBuildFile; fileRef = 71566BE094C12232B5B29044 /* AppIcon-cobalt.icon */; };
+		53F263EF4196A982A5B9C4FA /* AppIcon-vermilion.icon in Resources */ = {isa = PBXBuildFile; fileRef = 1278B27EEF6EE1045D68B956 /* AppIcon-vermilion.icon */; };
+		E89D5148427AC79E9F72C8D3 /* AppIcon-saffron.icon in Resources */ = {isa = PBXBuildFile; fileRef = D7D1F6380A8F649563837275 /* AppIcon-saffron.icon */; };
+		820A3C57B06B3CE6B5300463 /* AppIcon-mint.icon in Resources */ = {isa = PBXBuildFile; fileRef = 6F5243120350E0BD713018F3 /* AppIcon-mint.icon */; };
+		96F829BCA1EF9EA1DA6BFBF3 /* AppIcon-charcoal.icon in Resources */ = {isa = PBXBuildFile; fileRef = 24E64A1CF340BDDF04FF6DEC /* AppIcon-charcoal.icon */; };
+		582E824B7D760FD26B4549DF /* AppIcon-graphite.icon in Resources */ = {isa = PBXBuildFile; fileRef = 2803C9AF9BEAF1FCBFF2E107 /* AppIcon-graphite.icon */; };
+		18AAC1D4F91FE32BCA74E46F /* AppIcon-glass.icon in Resources */ = {isa = PBXBuildFile; fileRef = A2DC242828C18CC7176EAF6A /* AppIcon-glass.icon */; };
+		45712DA41C85404DE2DE7081 /* AppIcon-ember.icon in Resources */ = {isa = PBXBuildFile; fileRef = 33D2C39F16F1B81540C1CFED /* AppIcon-ember.icon */; };
 		5866674CACC9DD45C33E332F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9099859626B0024FDA6277F2 /* Assets.xcassets */; };
 		630DFE5DC956B482106D4F7A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 379A1ABEFB53E99909FFFE59 /* LaunchScreen.storyboard */; };
 		6403D9FD1B70E5FE22C696EF /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 40962BF7A6F08A4773AA307F /* Security.framework */; };
@@ -43,6 +63,26 @@
 		83FF7E0868427499EE1C502B /* bindings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bindings.h; sourceTree = "<group>"; };
 		8CEFEB47044870740523D203 /* libapp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libapp.a; sourceTree = "<group>"; };
 		A667CA5FA826F980B6CF5625 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		5D3B201B6008344F362DC2B6 /* AppIcon-oat.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-oat.icon"; sourceTree = "<group>"; };
+		4B564D17C333056FBCB2BD4F /* AppIcon-sand.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-sand.icon"; sourceTree = "<group>"; };
+		09A903438BFB1E6300E26FD3 /* AppIcon-warm.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-warm.icon"; sourceTree = "<group>"; };
+		39008A2B857E40E120C8D953 /* AppIcon-cool.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-cool.icon"; sourceTree = "<group>"; };
+		94B6F6869C79AA035C535527 /* AppIcon-bold.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-bold.icon"; sourceTree = "<group>"; };
+		AC35C47DC3A73D3A3AFE3481 /* AppIcon-coral.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-coral.icon"; sourceTree = "<group>"; };
+		3F8BDE0A41F5A51F92C31D67 /* AppIcon-knot.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-knot.icon"; sourceTree = "<group>"; };
+		29769C9AD8F2B0DC3C3AEB11 /* AppIcon-dusk.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-dusk.icon"; sourceTree = "<group>"; };
+		A1B4A1C050BD05CA92A4F117 /* AppIcon-sunrise.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-sunrise.icon"; sourceTree = "<group>"; };
+		63D91D1867D97531BC405CA7 /* AppIcon-sea.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-sea.icon"; sourceTree = "<group>"; };
+		9C4A9C5C89652136FC0B9210 /* AppIcon-forest.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-forest.icon"; sourceTree = "<group>"; };
+		4087516E1D396690FE96F44A /* AppIcon-aurora.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-aurora.icon"; sourceTree = "<group>"; };
+		71566BE094C12232B5B29044 /* AppIcon-cobalt.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-cobalt.icon"; sourceTree = "<group>"; };
+		1278B27EEF6EE1045D68B956 /* AppIcon-vermilion.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-vermilion.icon"; sourceTree = "<group>"; };
+		D7D1F6380A8F649563837275 /* AppIcon-saffron.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-saffron.icon"; sourceTree = "<group>"; };
+		6F5243120350E0BD713018F3 /* AppIcon-mint.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-mint.icon"; sourceTree = "<group>"; };
+		24E64A1CF340BDDF04FF6DEC /* AppIcon-charcoal.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-charcoal.icon"; sourceTree = "<group>"; };
+		2803C9AF9BEAF1FCBFF2E107 /* AppIcon-graphite.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-graphite.icon"; sourceTree = "<group>"; };
+		A2DC242828C18CC7176EAF6A /* AppIcon-glass.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-glass.icon"; sourceTree = "<group>"; };
+		33D2C39F16F1B81540C1CFED /* AppIcon-ember.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = "AppIcon-ember.icon"; sourceTree = "<group>"; };
 		9099859626B0024FDA6277F2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B264D0B5F0A177FAB8AA08D /* folder_sync.rs */ = {isa = PBXFileReference; path = folder_sync.rs; sourceTree = "<group>"; };
 		A550DAB5718FC59B311A0A43 /* updates.rs */ = {isa = PBXFileReference; path = updates.rs; sourceTree = "<group>"; };
@@ -81,6 +121,33 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		68BC00135F5309DBB615A6DE /* AlternateIcons */ = {
+			isa = PBXGroup;
+			children = (
+				5D3B201B6008344F362DC2B6 /* AppIcon-oat.icon */,
+				4B564D17C333056FBCB2BD4F /* AppIcon-sand.icon */,
+				09A903438BFB1E6300E26FD3 /* AppIcon-warm.icon */,
+				39008A2B857E40E120C8D953 /* AppIcon-cool.icon */,
+				94B6F6869C79AA035C535527 /* AppIcon-bold.icon */,
+				AC35C47DC3A73D3A3AFE3481 /* AppIcon-coral.icon */,
+				3F8BDE0A41F5A51F92C31D67 /* AppIcon-knot.icon */,
+				29769C9AD8F2B0DC3C3AEB11 /* AppIcon-dusk.icon */,
+				A1B4A1C050BD05CA92A4F117 /* AppIcon-sunrise.icon */,
+				63D91D1867D97531BC405CA7 /* AppIcon-sea.icon */,
+				9C4A9C5C89652136FC0B9210 /* AppIcon-forest.icon */,
+				4087516E1D396690FE96F44A /* AppIcon-aurora.icon */,
+				71566BE094C12232B5B29044 /* AppIcon-cobalt.icon */,
+				1278B27EEF6EE1045D68B956 /* AppIcon-vermilion.icon */,
+				D7D1F6380A8F649563837275 /* AppIcon-saffron.icon */,
+				6F5243120350E0BD713018F3 /* AppIcon-mint.icon */,
+				24E64A1CF340BDDF04FF6DEC /* AppIcon-charcoal.icon */,
+				2803C9AF9BEAF1FCBFF2E107 /* AppIcon-graphite.icon */,
+				A2DC242828C18CC7176EAF6A /* AppIcon-glass.icon */,
+				33D2C39F16F1B81540C1CFED /* AppIcon-ember.icon */,
+			);
+			path = AlternateIcons;
+			sourceTree = "<group>";
+		};
 		2F6B01BE9A637B9739F2AA97 /* src */ = {
 			isa = PBXGroup;
 			children = (
@@ -134,6 +201,7 @@
 			isa = PBXGroup;
 			children = (
 				A667CA5FA826F980B6CF5625 /* AppIcon.icon */,
+				68BC00135F5309DBB615A6DE /* AlternateIcons */,
 				F017090473AABAC64B2728E7 /* assets */,
 				9099859626B0024FDA6277F2 /* Assets.xcassets */,
 				379A1ABEFB53E99909FFFE59 /* LaunchScreen.storyboard */,
@@ -246,6 +314,26 @@
 			buildActionMask = 2147483647;
 			files = (
 				E977C6285EE0F8BBAF367116 /* AppIcon.icon in Resources */,
+				517069BC44DB8EE78C7926F8 /* AppIcon-oat.icon in Resources */,
+				4979F77380262A9A97819602 /* AppIcon-sand.icon in Resources */,
+				E003D735ADB877263B20E281 /* AppIcon-warm.icon in Resources */,
+				70AD357B81F73DF3EA6FF15F /* AppIcon-cool.icon in Resources */,
+				A782FDDB66DBC76985517412 /* AppIcon-bold.icon in Resources */,
+				288EA44CC3E2EAEBC567292F /* AppIcon-coral.icon in Resources */,
+				422D3D67C8D9286814A317EB /* AppIcon-knot.icon in Resources */,
+				51D0B65398002C1DC0E05869 /* AppIcon-dusk.icon in Resources */,
+				6A59B0BD2302E358437A6AF7 /* AppIcon-sunrise.icon in Resources */,
+				1C978B3F15F60CC5ED460F39 /* AppIcon-sea.icon in Resources */,
+				38DA041B7285B49D9184B178 /* AppIcon-forest.icon in Resources */,
+				3D16F9F72C8943F3D06CBA33 /* AppIcon-aurora.icon in Resources */,
+				0306823036E44261A658BAAF /* AppIcon-cobalt.icon in Resources */,
+				53F263EF4196A982A5B9C4FA /* AppIcon-vermilion.icon in Resources */,
+				E89D5148427AC79E9F72C8D3 /* AppIcon-saffron.icon in Resources */,
+				820A3C57B06B3CE6B5300463 /* AppIcon-mint.icon in Resources */,
+				96F829BCA1EF9EA1DA6BFBF3 /* AppIcon-charcoal.icon in Resources */,
+				582E824B7D760FD26B4549DF /* AppIcon-graphite.icon in Resources */,
+				18AAC1D4F91FE32BCA74E46F /* AppIcon-glass.icon in Resources */,
+				45712DA41C85404DE2DE7081 /* AppIcon-ember.icon in Resources */,
 				5866674CACC9DD45C33E332F /* Assets.xcassets in Resources */,
 				630DFE5DC956B482106D4F7A /* LaunchScreen.storyboard in Resources */,
 				80C6F45C7D1BB543881EC7BC /* assets in Resources */,

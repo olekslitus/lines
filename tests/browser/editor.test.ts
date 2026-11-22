@@ -684,7 +684,9 @@ test("a #tag being typed offers the tags there are, the ones starting with it fi
   // A lone # waits for a letter.
   expect(await app.page.getByRole("option").count()).toBe(0);
   await app.page.keyboard.type("id");
-  await app.page.getByRole("option").first().waitFor();
+  // The menu for "#id": the one for "#i", still showing (disabled) while it's worked out again, has
+  // work/meetings too.
+  await app.page.locator(".cm-tooltip-autocomplete:not(.cm-tooltip-autocomplete-disabled)").getByRole("option").first().waitFor();
   expect(await app.page.getByRole("option").allTextContents()).toEqual(["ideas2", "idle1"]);
   await app.page.keyboard.type("e");
   await app.page.getByRole("option", { name: /idle/ }).waitFor({ state: "detached" });

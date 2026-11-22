@@ -23,6 +23,13 @@ Each of these has only run in Chrome, through the end-to-end tests (two browser 
 - The apps send an attachment to the bucket, and bring one back, as it is, from their native side. On Android it still reaches that side as JSON, a number for each byte, which is all Tauri's messages there can carry: an attachment of tens of megabytes takes a lot of memory to upload and seconds to send.
 - Tried only against a stand-in bucket, from the native side and in WebKit, not yet in the Mac, Windows, Linux, iPhone or Android apps themselves, nor with a real provider.
 
+## Sync keys in the keychain
+
+- The Mac, iPhone, iPad and Windows apps keep the bucket's secret key and the end-to-end encryption key in the system's keychain ([sync.md](sync.md#security-notes)); the Linux and Android apps keep them with the rest of the connection, as the web app does. Linux's would need the Secret Service (a new dependency, and a desktop that runs one), Android's the Keystore through the app's Kotlin side.
+- A development or locally built Mac app is signed differently each time, so macOS may ask for the login password before it reads the keys; the released app doesn't ask after an update.
+- If the keychain no longer has them (the item deleted, a Mac set up again from a backup without its keychain), the bucket asks for its key again in Settings → Sync and encrypted notes for their passphrase. If it can't be read for now, sync is off until it can, and nothing is changed.
+- Tried in the tests (a stand-in keychain, and Credential Manager in the Windows build's tests), not yet in the Mac, iPhone, iPad or Windows apps themselves.
+
 ## The web app's own storage
 
 Where the web app keeps everything is in [storage.md](storage.md).
@@ -631,7 +638,7 @@ What isn't done yet is in [secrets.md](secrets.md#not-yet).
 - [ ] A setting for how long locked notes stay open
 - [ ] Optional password hint for locked notes
 - [ ] Clear opened attachment copies from the cache when Lines locks or quits
-- [ ] Store sync credentials in the OS keychain on native platforms
+- [ ] Store sync credentials in the system's keychain on Linux and Android, as the Mac, iPhone, iPad and Windows apps do
 - [ ] Remove attachments from sync storage once no note uses them
 - [ ] Backlinks, and updating mentions when a note is renamed
 - [ ] Types with a template: the keys a new note of the type starts with

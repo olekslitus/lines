@@ -223,7 +223,7 @@ Browsers only let a web page call your bucket if the bucket allows the page's or
 
 ## Security notes
 
-- Credentials are stored on the device: in the browser's local storage for the web app, and in the app's data folder for native apps. Use a key limited to a single bucket, and revoke it if a device is lost.
+- Credentials are stored on the device. The bucket's secret key and the end-to-end encryption key are in the system's keychain in the Mac, iPhone, iPad and Windows apps (the login keychain, the Keychain, Credential Manager), and the rest of the connection in the app's data folder. The web app keeps them in the browser's local storage, and the Linux and Android apps in their data folder, for now. Use a key limited to a single bucket, and revoke it if a device is lost.
 - Without end-to-end encryption (above), notes are stored in your bucket unencrypted, protected by your provider's access controls.
-- The app lock (Settings → Privacy) encrypts what's on the device too: notes, attachments, and these credentials.
+- The app lock (Settings → Privacy) encrypts what's on the device too: notes, attachments, and these credentials (but for the keys in a keychain, which the system protects).
 - Locking a note replaces its plain copy in the bucket with the encrypted one. A bucket that keeps old versions (S3 versioning, a drive's file history) may still hold the plain one from before.

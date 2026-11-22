@@ -45,4 +45,4 @@ The Secrets plugin draws `{{name}}` in Markdown notes; turned off, `{{github}}` 
 - Suggesting secrets' names after `{{`.
 - A button that makes the secrets note.
 - Showing a secrets note's own values as dots: they show in its properties while it's open.
-- Lines' own secrets (the S3 sync keys, in local storage now) aren't kept this way yet.
+- Lines' own secrets, the sync keys, aren't kept in a secrets note: they're in the system's keychain in the Mac, iPhone, iPad and Windows apps, and in local storage on the web, Linux and Android ([sync.md](sync.md#security-notes)).

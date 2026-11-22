@@ -37,7 +37,7 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] In a LaTeX note, ⌘U wraps the selection in `\underline{…}` and again unwraps it
 - [ ] The shortcuts on several lines format each line, skipping list markers, headings and fence lines
 - [ ] ⌘↵ turns a line into a todo, replaces a bullet or number with a todo, and ticks or unticks a todo; works on every selected line, leaving headings, code, table rows and the properties as they are
-- [ ] Enter in a list, todo or quote continues it; Enter on an empty item ends it
+- [ ] Enter in a list, todo or quote continues it; Enter on an empty item ends it; so too typed fast on a busy device or in a big note (Enter, then Enter again at once, ends the list), and Backspace takes an item's mark away
 - [ ] `>` typed over selected text quotes every line the selection touches (`> `, a blank line between `>`), keeps the text selected, and quotes an already quoted line once more; ⌘Z takes it back; in a code block it types over the selection; Live, Visible and Hidden
 - [ ] Markdown of a line shows when the cursor is on it and hides when it leaves; with the editor unfocused everything is rendered
 - [ ] Settings → Editor → Show Markdown changes an open note at once, its text, cursor and undo history kept: **Source** shows it as written, all one size, marks faint, headings and bold bold, links in the accent, code blocks highlighted, no tables, math, diagrams, cards or images drawn, nor bullets; **Visible** draws everything (headings their size, quotes, code blocks, tables as text in rows, math and diagrams under their source) with every mark in sight; **Live** is as above; a LaTeX note follows each the same, colored by its commands in Source

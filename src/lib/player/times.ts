@@ -1,7 +1,7 @@
 import { isolateHistory } from "@codemirror/commands";
-import { ensureSyntaxTree, syntaxTree } from "@codemirror/language";
 import type { EditorState, Line, Transaction, TransactionSpec } from "@codemirror/state";
 import { continueMarkup } from "../editor/markdownKeys";
+import { parsedTo, treeTo } from "../editor/util";
 import { clock } from "../library/text";
 import { escapeMarkdown } from "../notes/escape";
 import { frontMatter } from "../notes/properties";
@@ -79,7 +79,7 @@ function timeItemOn(state: EditorState, line: Line) {
   const item = TIME_ITEM.exec(line.text);
   if (!item || readStamp(item[2]) === null || (item[3] && fragmentTime(item[3].replace(/^\(<?|>?\)$/g, "")) === null)) return null;
   if (line.number <= (frontMatter(state.doc.sliceString(0, Math.min(state.doc.length, 10_000)))?.lines ?? 0)) return null;
-  const tree = ensureSyntaxTree(state, line.to, 50) ?? syntaxTree(state);
+  const tree = treeTo(state, line.to);
   // In the note's own tree, not a code block's language's: a ```markdown block's list is code.
   const mark = tree.resolve(line.from + item[1].length - 2, 1);
   if (mark.name !== "ListMark" || mark.parent?.name !== "ListItem") return null;
@@ -126,7 +126,7 @@ export function timeEnter(state: EditorState, time: string): { spec: Transaction
   if (!item.after.trim() && item.node.nextSibling?.name !== "ListItem") {
     const bare = state.update({ changes: { from: line.from + item.lead.length, to: line.to } });
     let ended: Transaction | undefined;
-    continueMarkup({ state: bare.state, dispatch: (tr) => (ended = tr) });
+    continueMarkup({ state: parsedTo(bare.state, line.from + item.lead.length), dispatch: (tr) => (ended = tr) });
     if (!ended) return null;
     return { spec: { changes: bare.changes.compose(ended.changes), selection: ended.selection, annotations, userEvent: "delete" }, continued: false };
   }

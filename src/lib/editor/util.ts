@@ -1,4 +1,4 @@
-import { syntaxTree } from "@codemirror/language";
+import { ensureSyntaxTree, syntaxTree, syntaxTreeAvailable } from "@codemirror/language";
 import { searchPanelOpen } from "@codemirror/search";
 import { type EditorSelection, type EditorState, Facet, type Line, type SelectionRange, Prec, type Range, StateEffect, type StateEffectType, StateField, type Text, type Transaction } from "@codemirror/state";
 import { type Command, Decoration, type DecorationSet, EditorView, keymap, ViewPlugin, type ViewUpdate, type WidgetType } from "@codemirror/view";
@@ -7,6 +7,37 @@ import { markupMode } from "./markupMode";
 
 /** The note an editor has open, by its id (Editor.svelte), for what acts on the note as well as its text; null in a preview. */
 export const editedNote = Facet.define<string, string | null>({ combine: (ids) => ids[0] ?? null });
+
+/*
+ * CodeMirror parses a note in slices of time: 20 ms as each change is made, the rest a moment later.
+ * On a busy device a slice can run out before the line just typed, and a key that goes by the syntax
+ * tree then (Enter or Backspace on a list's item) reads that line as plain text: Enter just after
+ * typing an item could start a plain line rather than the next item, or leave an empty one in place
+ * of ending the list. These parse as far as is needed first, however long that takes.
+ */
+
+/** The note's syntax tree, parsed at least as far as `pos`. */
+export const treeTo = (state: EditorState, pos: number) => ensureSyntaxTree(state, pos, Infinity) ?? syntaxTree(state);
+
+/** `state`, or the same with its syntax tree (`syntaxTree`) parsed at least as far as `pos`. */
+export function parsedTo(state: EditorState, pos: number) {
+  if (syntaxTreeAvailable(state, pos)) return state;
+  ensureSyntaxTree(state, pos, Infinity);
+  // A transaction that changes nothing takes the tree parsed into the state it makes.
+  return state.update({}).state;
+}
+
+/** `command`, with the open note parsed as far as the cursor first. */
+export const parsedFirst =
+  (command: Command): Command =>
+  (view) => {
+    const { head } = view.state.selection.main;
+    if (!syntaxTreeAvailable(view.state, head)) {
+      ensureSyntaxTree(view.state, head, Infinity);
+      view.dispatch({});
+    }
+    return command(view);
+  };
 
 /** The syntax node at `pos` and each node it's inside, innermost first. */
 export function* ancestors(state: EditorState, pos: number, side: -1 | 0 | 1 = 0): Generator<SyntaxNode> {

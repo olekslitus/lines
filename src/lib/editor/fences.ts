@@ -1,9 +1,8 @@
-import { ensureSyntaxTree, syntaxTree } from "@codemirror/language";
 import { EditorSelection, type EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import type { SyntaxNode } from "@lezer/common";
 import { toggleFormat } from "./formatting";
-import { ancestors, hasText } from "./util";
+import { ancestors, hasText, treeTo } from "./util";
 
 /*
  * Typing help for code blocks (```) and cards (:::): typing an opening fence adds its closing
@@ -35,7 +34,7 @@ export function inCode(state: EditorState, pos: number) {
 /** The block of `type` that starts on line `lineFrom`, if one does. */
 function blockAt(state: EditorState, type: string, lineFrom: number): SyntaxNode | null {
   const line = state.doc.lineAt(lineFrom);
-  const tree = ensureSyntaxTree(state, Math.min(state.doc.length, line.to + 1), 50) ?? syntaxTree(state);
+  const tree = treeTo(state, Math.min(state.doc.length, line.to + 1));
   for (let node: SyntaxNode | null = tree.resolveInner(line.to, -1); node; node = node.parent) {
     if (node.name === type && state.doc.lineAt(node.from).number === line.number) return node;
   }

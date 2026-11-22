@@ -660,6 +660,36 @@ test("a time linking another sound plays it alone: it's not the note's, which it
   expect(await page.evaluate((id) => window.testing.notes.get(id)?.note.body, mine)).toContain("status: to listen");
 });
 
+test("Enter on a time's item just started ends the list even on a busy device, the item parsed however long that takes", async () => {
+  app = await openApp();
+  const page = app.page;
+  const audio = wav(60_000);
+  await page.route((url) => url.hostname === "audio.example", (route) => answerFile(route, audio, "audio/wav"));
+  await app.open("---\ntype: episode\naudio: https://audio.example/e.wav\n---\n# Episode\n\n- [0:00] First");
+  await page.locator(".cm-content").getByRole("button", { name: "Play Episode" }).click();
+  await playing(app);
+  await page.evaluate(() => window.testing.player.pause());
+  await page.evaluate(() => window.testing.player.seek(50));
+  await page.locator(".cm-content").click();
+  await page.keyboard.press(`${mod()}+End`);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => window.testing.text()?.endsWith("- [0:00] First\n- [0:50] "));
+  // Enter at once, with the clock running fast, as a device too busy to give the parser its time
+  // sees it: the parser's slice runs out before it reaches the line just typed.
+  const text = await page.evaluate(() => {
+    const now = Date.now;
+    let ahead = 0;
+    Date.now = () => now() + (ahead += 100);
+    try {
+      window.testing.editor()!.contentDOM.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    } finally {
+      Date.now = now;
+    }
+    return window.testing.text();
+  });
+  expect(text).toEndWith("- [0:00] First\n");
+});
+
 test("in the episode's note as it plays, Enter after a time's item starts the next with its time; an empty one ends the list; not elsewhere, nor turned off", async () => {
   app = await openApp();
   const page = app.page;

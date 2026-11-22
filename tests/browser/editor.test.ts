@@ -1050,6 +1050,7 @@ describe("fixed", () => {
       document.activeElement!.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
     });
     await other.waitForFunction(() => window.testing.text()!.includes("1650"));
+    expect(await other.evaluate(() => window.testing.text())).toBe("```csv\n1,x\n2,y\n=SUM(A1:A2),1650\n```\n\nAfter the block.");
     await other.close();
 
     // The cells' menu copies them the same way.

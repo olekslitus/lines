@@ -110,7 +110,7 @@ test("a Hacker News post's discussion is under it: ranked, threaded, the poster 
   // Only the story's id is sent, to each API.
   expect([...new Set(asked)].sort()).toEqual([`https://hacker-news.firebaseio.com/v0/item/${ICEWM}.json`, `https://hn.algolia.com/api/v1/items/${ICEWM}`]);
   // Said to screen readers once it's loaded.
-  await expect(thread.getByRole("status").textContent()).resolves.toBe("17 comments");
+  expect(await thread.getByRole("status").textContent()).toBe("17 comments");
 
   // In Hacker News' order (Algolia's is oldest first), each reply under what it answers; the poster's name marked.
   expect(await headers(page).first().textContent()).toContain("yjftsjthsd-h");
@@ -132,7 +132,7 @@ test("a Hacker News post's discussion is under it: ranked, threaded, the poster 
   // A comment folds away with its replies, saying how many.
   const header = headers(page).first();
   await header.click();
-  await expect(header.getAttribute("aria-expanded")).resolves.toBe("false");
+  expect(await header.getAttribute("aria-expanded")).toBe("false");
   expect(await header.textContent()).toContain("5 replies");
   expect(await top.locator(":scope > div > ul").count()).toBe(0);
   await header.click();
@@ -273,7 +273,7 @@ test("a failure says so, with Try Again; nothing from Algolia yet, or no comment
   await openPost(page, "Reverse engineering");
   const coway = region(page, "Comments");
   await coway.getByText("The comments aren’t here yet. They’re on Hacker News.").first().waitFor();
-  await expect(coway.getByRole("status").textContent()).resolves.toBe("The comments aren’t here yet. They’re on Hacker News.");
+  expect(await coway.getByRole("status").textContent()).toBe("The comments aren’t here yet. They’re on Hacker News.");
   expect(await coway.textContent()).not.toMatch(/0 comments|No comments yet|more comments? on/);
 
   await openPost(page, "FM-1 Workbench");

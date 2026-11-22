@@ -39,7 +39,7 @@ test("the look saved as a preset of yours shows as changed once it is, updates, 
   });
   await settings.getByRole("button", { name: "Save as Preset" }).click();
   const name = settings.getByRole("textbox", { name: "Name" });
-  await expect(name.evaluate((field) => field === document.activeElement)).resolves.toBe(true);
+  expect(await name.evaluate((field) => field === document.activeElement)).toBe(true);
   await app.page.keyboard.type("Mossy");
   await presetsGroup(settings).getByRole("radio", { name: /^Mossy/, checked: true }).waitFor();
 

@@ -56,7 +56,7 @@ test("subscribing makes a note for the feed, and lists its posts, unread", async
   await subscribe(app, BLOG);
 
   const page = app.page;
-  await expect(page.locator("#note-list-title").innerText()).resolves.toBe("Svelte blog");
+  expect(await page.locator("#note-list-title").innerText()).toBe("Svelte blog");
   const rows = page.locator(".note-list [data-post]");
   await rows.first().waitFor();
   expect(await rows.count()).toBe(2);
@@ -88,19 +88,19 @@ test("a post opens read-only in the note's place, marked read; Mark as Unread an
   // Drawn as a note: its title, where it's from, and its HTML as Markdown, which can't be edited.
   const post = page.getByRole("textbox", { name: "Post: What’s new in Svelte: October 2026" });
   await post.waitFor();
-  await expect(post.getAttribute("contenteditable")).resolves.toBe("false");
+  expect(await post.getAttribute("contenteditable")).toBe("false");
   await page.waitForFunction(() => document.querySelector(".editor-pane .cm-content")?.textContent?.includes("announcement post"));
   expect(await page.locator(".editor-pane .cm-post-byline").innerText()).toBe("Svelte blog · Dani Sandoval · October 31");
   expect(await rows.first().textContent()).not.toContain("unread");
 
   await page.getByRole("button", { name: "Mark as Unread" }).click();
-  await expect(rows.first().textContent()).resolves.toContain("unread");
+  expect(await rows.first().textContent()).toContain("unread");
 
   // ↓ opens the next, and reads it.
   await rows.first().focus();
   await page.keyboard.press("ArrowDown");
   await page.getByRole("textbox", { name: "Post: SvelteKit 3 is here" }).waitFor();
-  await expect(rows.nth(1).textContent()).resolves.not.toContain("unread");
+  expect(await rows.nth(1).textContent()).not.toContain("unread");
   await page.waitForFunction(() => document.activeElement?.closest("[data-post]") === document.querySelectorAll(".note-list [data-post]")[1]);
 });
 
@@ -170,7 +170,7 @@ test("the Library's + is a menu of Add to Library and Subscribe to a Feed, which
   await page.getByRole("menuitem", { name: "Add to Library" }).waitFor();
   await page.getByRole("menuitem", { name: "Subscribe to a Feed" }).click();
   await page.getByRole("textbox", { name: "Link to a feed, a site or a podcast on Apple Podcasts" }).waitFor();
-  await expect(page.locator("#note-list-title").innerText()).resolves.toBe("Feeds");
+  expect(await page.locator("#note-list-title").innerText()).toBe("Feeds");
 });
 
 test("Feeds in the Library: its row and each feed's, counting what's unread; a feed's menu marks it read, and unsubscribes", async () => {
@@ -181,10 +181,10 @@ test("Feeds in the Library: its row and each feed's, counting what's unread; a f
   const page = app.page;
   const sidebar = page.getByRole("navigation", { name: "Library" });
   await sidebar.getByRole("button", { name: "RSS Feeds, 2 unread" }).click();
-  await expect(page.locator("#note-list-title").innerText()).resolves.toBe("RSS Feeds");
+  expect(await page.locator("#note-list-title").innerText()).toBe("RSS Feeds");
   const blog = sidebar.getByRole("button", { name: "Svelte blog, 2 unread" });
   await blog.click();
-  await expect(page.locator("#note-list-title").innerText()).resolves.toBe("Svelte blog");
+  expect(await page.locator("#note-list-title").innerText()).toBe("Svelte blog");
   // Not listed again under Types.
   expect(await sidebar.getByRole("button", { name: /^Feed\b/ }).count()).toBe(0);
 
@@ -232,7 +232,7 @@ test("feeds by kind: RSS (and RSS 1.0), Atom and podcasts' each a row, its feeds
 
   // A kind's posts, and its menu marks only them read.
   await sidebar.getByRole("button", { name: "Atom Feeds, 2 unread" }).click();
-  await expect(page.locator("#note-list-title").innerText()).resolves.toBe("Atom Feeds");
+  expect(await page.locator("#note-list-title").innerText()).toBe("Atom Feeds");
   expect(await page.locator(".note-list [data-post]").count()).toBe(2);
   await sidebar.getByRole("button", { name: "Atom Feeds, 2 unread" }).click({ button: "right" });
   await page.getByRole("menuitem", { name: "Mark All as Read" }).click();
@@ -242,7 +242,7 @@ test("feeds by kind: RSS (and RSS 1.0), Atom and podcasts' each a row, its feeds
   // Its feeds fold away, and stay folded.
   await sidebar.getByRole("button", { name: "Show the feeds in RSS Feeds" }).click();
   await sidebar.getByRole("button", { name: "Svelte blog, 2 unread" }).waitFor({ state: "detached" });
-  await expect(sidebar.getByRole("button", { name: "Show the feeds in RSS Feeds" }).getAttribute("aria-expanded")).resolves.toBe("false");
+  expect(await sidebar.getByRole("button", { name: "Show the feeds in RSS Feeds" }).getAttribute("aria-expanded")).toBe("false");
 
   // Moved with ⌥↑, it goes with its feeds; hidden, it's back from Show Hidden.
   await sidebar.getByRole("button", { name: "Podcast Feeds, 2 unread" }).focus();
@@ -422,7 +422,7 @@ test("Get Its Picture, in a subscription's menu, gives one without a picture its
   await getPicture.click();
   await page.waitForFunction((id) => window.testing.notes.get(id)?.note.body.includes("](../attachments/"), id);
   // Its icon you can see through, black all over, is marked so: on a tile in a dark theme.
-  await expect(row.locator("img").getAttribute("data-tone")).resolves.toBe("dark");
+  expect(await row.locator("img").getAttribute("data-tone")).toBe("dark");
   await row.click({ button: "right" });
   await page.getByRole("menuitem", { name: "Open Its Note" }).waitFor();
   expect(await getPicture.count()).toBe(0);
@@ -673,7 +673,7 @@ test("a post is only read: its links go to the web alone, its code never runs or
   // Shown as code: no Send, no diagram.
   expect(await page.locator(".editor-pane").getByRole("button", { name: "Send" }).count()).toBe(0);
   expect(await page.locator(".editor-pane svg[id^='mermaid'], .editor-pane .cm-rendered").count()).toBe(0);
-  await expect(content.innerText()).resolves.toContain("GET https://crafted.example/collect?k=1");
+  expect(await content.innerText()).toContain("GET https://crafted.example/collect?k=1");
   expect(sent).toEqual([]);
 });
 
@@ -1034,7 +1034,7 @@ describe("dismissing posts, to keep a feed at zero", () => {
     await page.getByRole("button", { name: "Show Dismissed" }).click();
     await page.getByText("Posts dismissed or filtered out.").waitFor();
     expect(await listed(app)).toEqual(["Post 0", "Post 1", "Post 2", "Post 3"]);
-    await expect(rows.first().innerText()).resolves.toContain("Not interesting");
+    expect(await rows.first().innerText()).toContain("Not interesting");
     await rows.nth(2).hover();
     await page.locator(".note-list li").nth(2).getByRole("button", { name: "Restore" }).click();
     expect(await listed(app)).toEqual(["Post 0", "Post 1", "Post 3"]);
@@ -1240,7 +1240,7 @@ describe("streams, feeds grouped by topic or priority", () => {
     const rows = () => sidebar.locator("[data-reorder-key^='feeds:'], [data-reorder-key^='stream:']").evaluateAll((all) => all.map((row) => row.getAttribute("aria-label") ?? row.textContent?.trim()));
     await sidebar.getByRole("button", { name: "Must read now, 3 unread" }).click();
     expect(await rows()).toEqual(["Must read now, 3 unread", "RSS Feeds, 5 unread"]);
-    await expect(page.locator("#note-list-title").innerText()).resolves.toBe("Must read now");
+    expect(await page.locator("#note-list-title").innerText()).toBe("Must read now");
     expect(await page.locator(".note-list [data-post]").count()).toBe(3);
 
     // Another, from its menu's list of the streams there are.
@@ -1293,9 +1293,9 @@ describe("streams, feeds grouped by topic or priority", () => {
     expect(await bodyOf(app, "Alpha")).toContain("\nstream: Later, Projects\n");
     expect(await bodyOf(app, "Beta")).toContain("\nstream: Projects\n");
     // Its list stays shown, under its new name.
-    await expect(page.locator("#note-list-title").innerText()).resolves.toBe("Projects");
+    expect(await page.locator("#note-list-title").innerText()).toBe("Projects");
     expect(await page.evaluate(() => window.testing.sidebarLayout.sizeOf("stream:projects", "library"))).toBe("small");
-    await expect(sidebar.getByRole("button", { name: "Show the feeds in Projects" }).getAttribute("aria-expanded")).resolves.toBe("false");
+    expect(await sidebar.getByRole("button", { name: "Show the feeds in Projects" }).getAttribute("aria-expanded")).toBe("false");
     // Dated as any edit, so sync weighs it against one made elsewhere meanwhile.
     expect(await page.evaluate(() => window.testing.notes.get("Beta")!.note.updatedAt)).toBeGreaterThan(0);
 
@@ -1347,7 +1347,7 @@ describe("streams, feeds grouped by topic or priority", () => {
     await sidebar.getByRole("button", { name: "Work, 5 unread" }).waitFor();
     expect(await bodyOf(app, "Beta")).toContain("\nstream: Work\n");
     // The click that ended it didn't choose the feed.
-    await expect(page.locator("#note-list-title").innerText()).resolves.not.toBe("Beta");
+    expect(await page.locator("#note-list-title").innerText()).not.toBe("Beta");
   });
 });
 
@@ -1399,7 +1399,7 @@ describe("filters, keeping or hiding posts by their words", () => {
     // Hiding wins, whatever the accents.
     await sidebar.getByRole("button", { name: "Wordy, 2 unread" }).click({ button: "right" });
     await page.getByRole("menuitem", { name: "Filters…" }).click();
-    await expect(dialog.getByRole("textbox", { name: "Only show posts with" }).inputValue()).resolves.toBe("svelte, web components");
+    expect(await dialog.getByRole("textbox", { name: "Only show posts with" }).inputValue()).toBe("svelte, web components");
     await dialog.getByRole("textbox", { name: "Hide posts with" }).fill("cafe");
     await dialog.getByRole("textbox", { name: "Hide posts with" }).press("Enter");
     await dialog.waitFor({ state: "detached" });
@@ -1411,8 +1411,8 @@ describe("filters, keeping or hiding posts by their words", () => {
     await page.getByText("Posts dismissed or filtered out.").waitFor();
     const rows = page.locator(".note-list [data-post]");
     await expectListed(app, ["Sponsored: a Crypto exchange", "Café notes", "In practice"]);
-    await expect(rows.nth(1).innerText()).resolves.toContain("Filtered: “cafe”");
-    await expect(rows.nth(0).innerText()).resolves.toContain("Filtered: none of its feed’s words");
+    expect(await rows.nth(1).innerText()).toContain("Filtered: “cafe”");
+    expect(await rows.nth(0).innerText()).toContain("Filtered: none of its feed’s words");
 
     // Written by hand, at once: the author's name is read too, as whole words ("Rust", not "Trust").
     await page.evaluate(() => {
@@ -1433,7 +1433,7 @@ describe("filters, keeping or hiding posts by their words", () => {
     expect(await page.evaluate(() => window.testing.notes.get("wordy")?.meta.tags)).toEqual([]);
     await sidebar.getByRole("button", { name: "Wordy, 3 unread" }).click({ button: "right" });
     await page.getByRole("menuitem", { name: "Filters…" }).click();
-    await expect(dialog.getByRole("textbox", { name: "Hide posts with" }).inputValue()).resolves.toBe("rust, #runes");
+    expect(await dialog.getByRole("textbox", { name: "Hide posts with" }).inputValue()).toBe("rust, #runes");
     await page.keyboard.press("Escape");
   });
 

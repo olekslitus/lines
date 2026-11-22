@@ -96,7 +96,7 @@ test("an episode plays in the mini player, which pauses, skips and keeps its spe
   await slider.focus();
   await page.keyboard.press("ArrowRight");
   await page.waitForFunction(() => window.testing.player.time === 5);
-  await expect(slider.getAttribute("aria-valuenow")).resolves.toBe("5");
+  expect(await slider.getAttribute("aria-valuenow")).toBe("5");
 
   await mini.getByRole("button", { name: "Stop and close the player" }).click();
   await mini.waitFor({ state: "detached" });
@@ -110,7 +110,7 @@ test("an episode played to its end is played, and starts again from the start", 
   await playRow(app, 0);
   const [first] = await keys(app);
   await page.waitForFunction((key) => window.testing.player.positions.get(key)?.played, first, { timeout: 10_000 });
-  await expect(row.innerText()).resolves.toContain("Played");
+  expect(await row.innerText()).toContain("Played");
 });
 
 test("switching episodes keeps each one's place, even paused before its sound has come; and one chosen meanwhile starts at its own", async () => {

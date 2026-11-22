@@ -75,7 +75,7 @@ test("Drag to move lines, off, shows no grip", async () => {
   await app.open("One\n\nTwo");
   const line = app.page.locator(".editor-pane .cm-line").first();
   await line.hover();
-  await expect(app.page.locator(".cm-drag-handle").first().isVisible()).resolves.toBe(true);
+  expect(await app.page.locator(".cm-drag-handle").first().isVisible()).toBe(true);
   const settings = await app.settings("Editor");
   await toggle(settings, "Drag to move lines", false);
   await app.closeSettings();

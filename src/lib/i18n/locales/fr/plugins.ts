@@ -40,7 +40,7 @@ export default {
   "plugins.styles": "Styles",
   "plugins.styles.description": "Des apparences complètes pour l’app, au-delà des couleurs : Classic, un bureau des années 90 ; Pixel, en un bit et minimal ; Neon ; Puddle, un jour de pluie dans un livre d’images ; Lightbulb, une étincelle d’éclair dessinée comme une bande dessinée ; Adventure, le pixel art d’un jeu d’aventure en 2D ; Aero, le verre brillant des années 2000 ; Brutalist ; Constructivist, les affiches des années 20 ; et Void, un minimalisme poussé. Chacun apporte ses propres couleurs.",
   "plugins.fonts": "Polices",
-  "plugins.fonts.description": "Des polices pour écrire vos notes, en plus de celles du système : IBM Plex Sans, Fira Sans et Agave, une police à chasse fixe. Elles viennent avec Lines, donc les notes sont pareilles sur chaque ordinateur.",
+  "plugins.fonts.description": "Des polices pour écrire vos notes, en plus de celles du système : IBM Plex Sans, Fira Sans et Geist, et deux polices à chasse fixe, Geist Mono et Agave. Elles viennent avec Lines, donc les notes sont pareilles sur chaque ordinateur.",
   "plugins.keyboards": "Claviers",
   "plugins.keyboards.description": "Des claviers à entendre en tapant, faits de son : grave et doux, sec, tactile, à clic, Topre, et une machine à écrire avec sa cloche.",
   "keyboards.creamy": "Linéaire doux",

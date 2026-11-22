@@ -40,7 +40,7 @@ export default {
   "plugins.styles": "Estilos",
   "plugins.styles.description": "Aspectos completos para la app, más allá de los colores: Classic, un escritorio de los 90; Pixel, de un bit y mínimo; Neon; Puddle, un día de lluvia en un libro ilustrado; Lightbulb, una chispa de relámpago dibujada como un cómic; Adventure, el pixel art de un juego de aventuras en 2D; Aero, vidrio brillante de los 2000; Brutalist; Constructivist, carteles de los años 20; y Void, minimalismo extremo. Cada uno trae sus propios colores.",
   "plugins.fonts": "Fuentes",
-  "plugins.fonts.description": "Fuentes para escribir notas, además de las del sistema: IBM Plex Sans, Fira Sans y Agave, una monoespaciada. Vienen con Lines, así que las notas se ven igual en cualquier ordenador.",
+  "plugins.fonts.description": "Fuentes para escribir notas, además de las del sistema: IBM Plex Sans, Fira Sans y Geist, y dos monoespaciadas, Geist Mono y Agave. Vienen con Lines, así que las notas se ven igual en cualquier ordenador.",
   "plugins.keyboards": "Teclados",
   "plugins.keyboards.description": "Teclados que oír al escribir, hechos con sonido: grave y suave, seco, táctil, con clic, Topre y una máquina de escribir con su campana.",
   "keyboards.creamy": "Lineal suave",

@@ -66,7 +66,7 @@ Your notes are files on your device, not rows on someone else's server.
 - Whole new looks in one click: a 90s desktop, one-bit pixels, neon, glossy glass, 1920s posters, and more.
 - Paper to write on: ruled, dotted, squared or graph paper, and a soft backdrop behind the page.
 - An app icon in your colors, from twenty-one: on the home screen on a phone, in the Dock or taskbar on a computer.
-- Your fonts, text size, note width and spacing. Put the sidebar and the list where you like, and add tabs.
+- Your fonts (Geist, Geist Mono, IBM Plex Sans and more come with Lines, or any on your device), text size, note width and spacing. Put the sidebar and the list where you like, and add tabs.
 - A text cursor your way, typing sounds from a real keyboard, and a pixel-art cat (or alien, or slime) that keeps you company at the bottom of the page. The sounds and the cat stay off until you want them.
 - Lines is made of [plugins](docs/plugins.md). Turn off what you don't use, and nothing in your notes changes.
 - In English, Spanish and French. Everything works with the keyboard and with a screen reader ([Accessibility](docs/accessibility.md)).
@@ -337,7 +337,7 @@ src/
     keyboards/               Keyboards to hear as you type, made from sound (synth.ts)
     mascots/                 Companions in the window, as pixel art (art.ts); what they do is lib/mascot/
     themes/                  The twenty-seven themes, each a palette and what its colors are for (Lines, the default, in lines.ts), and the theme files of other apps it reads (formats/)
-    fonts/                   Fonts to write notes in: IBM Plex Sans, Fira Sans and Agave
+    fonts/                   Fonts to write notes in: IBM Plex Sans, Fira Sans, Geist, Geist Mono and Agave
     styles/                  Whole looks beyond the colors, each a preset: Classic, Pixel, Neon, Puddle, Lightbulb, Adventure, Aero, Brutalist, Constructivist and Void, each a CSS file, its fonts, its colors and the settings it brings
     lucide/  sf-symbols/     Icon sets
   lib/

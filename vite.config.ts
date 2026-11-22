@@ -179,5 +179,8 @@ export default defineConfig({
   build: {
     target: "es2022",
     sourcemap: !!process.env.TAURI_ENV_DEBUG,
+    // Fonts stay files, however small: inlined, every face of every font (each subset and weight a
+    // file) would be in the app's first stylesheet, rather than fetched once text is drawn in it.
+    assetsInlineLimit: (file) => (/\.(woff2?|ttf|otf)$/.test(file) ? false : undefined),
   },
 });

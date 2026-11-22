@@ -41,7 +41,7 @@ export default {
   "plugins.styles": "Styles",
   "plugins.styles.description": "Whole looks for the app beyond its colors: Classic, a desktop of the 90s; Pixel, one-bit and minimal; Neon; Puddle, a rainy day in a picture book; Lightbulb, a spark of lightning drawn as a cartoon; Adventure, a 2D adventure game's pixel art; Aero, glossy 2000s glass; Brutalist; Constructivist, 1920s posters; and Void, heavy minimalism. Each comes with colors of its own.",
   "plugins.fonts": "Fonts",
-  "plugins.fonts.description": "Fonts to write notes in, beside your system's: IBM Plex Sans, Fira Sans and Agave, a monospaced one. They come with Lines, so notes look the same on every computer.",
+  "plugins.fonts.description": "Fonts to write notes in, beside your system's: IBM Plex Sans, Fira Sans and Geist, and two monospaced ones, Geist Mono and Agave. They come with Lines, so notes look the same on every computer.",
   "plugins.keyboards": "Keyboards",
   "plugins.keyboards.description": "Keyboards to hear as you type, made from sound: deep and creamy, clacky, tactile, clicky, Topre, and a typewriter with its bell.",
   // Keyboards to hear as you type, and what each sounds like.

@@ -6,7 +6,8 @@ import {
   syntaxTree,
   unfoldEffect,
 } from "@codemirror/language";
-import { Compartment, EditorState, type Extension, Prec, StateEffect } from "@codemirror/state";
+import { invertedEffects } from "@codemirror/commands";
+import { Compartment, EditorState, type Extension, Prec, type StateEffect } from "@codemirror/state";
 import { Decoration, type DecorationSet, EditorView, keymap, ViewPlugin, type ViewUpdate, WidgetType } from "@codemirror/view";
 import { mount, unmount } from "svelte";
 import Icon from "../icons/Icon.svelte";
@@ -183,6 +184,39 @@ const opening = EditorState.transactionExtender.of((tr) => {
     });
   }
   return unfolding.size ? { effects: [...unfolding].map(([from, to]) => unfoldEffect.of({ from, to })) } : null;
+});
+
+/* Moving what's folded. */
+
+/** The folds between `from` and `to`, again `by` further on: for lines moved there (a section moved by its heading). */
+export function foldsMoved(state: EditorState, from: number, to: number, by: number): StateEffect<unknown>[] {
+  const effects: StateEffect<unknown>[] = [];
+  foldedRanges(state).between(from, to, (start, end) => {
+    if (start >= from && end <= to) effects.push(foldEffect.of({ from: start + by, to: end + by }));
+  });
+  return effects;
+}
+
+/**
+ * Folds a move took out with its lines and put back where they went, put back where they were by
+ * ⌘Z, and where they went again by ⇧⌘Z: those of the edit's start that aren't where its changes
+ * would leave them.
+ */
+const foldsThroughHistory = invertedEffects.of((tr) => {
+  if (!tr.docChanged || !["move", "undo", "redo"].some((event) => tr.isUserEvent(event))) return [];
+  const before = foldedRanges(tr.startState);
+  if (!before.size) return [];
+  const after = foldedRanges(tr.state);
+  const effects: StateEffect<unknown>[] = [];
+  before.between(0, tr.startState.doc.length, (from, to) => {
+    const [start, end] = [tr.changes.mapPos(from, 1), tr.changes.mapPos(to, -1)];
+    let kept = false;
+    after.between(start, start, (a, b) => {
+      if (a === start && b === end) kept = true;
+    });
+    if (!kept) effects.push(foldEffect.of({ from, to }));
+  });
+  return effects;
 });
 
 /* Folding and unfolding. */
@@ -436,6 +470,7 @@ export const folding: Extension = [
   foldState.init(keptFolds),
   codeFolding({ placeholderDOM: (_view, onclick) => placeholder(onclick) }),
   opening,
+  foldsThroughHistory,
   remember,
   chevrons,
   Prec.high(foldKeys),

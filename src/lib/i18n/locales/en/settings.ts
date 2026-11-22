@@ -577,6 +577,8 @@ export default {
   "settings.dragBlocksNote": "A grip beside the line or block you point at, which drags it somewhere else in the note.",
   "settings.foldSections": "Fold sections",
   "settings.foldSectionsNote": "A chevron beside each heading folds away what's under it, up to the next heading of its size. Only how the note shows: its text stays as it is. Folds are kept on this device.",
+  "settings.moveSections": "Move a heading with its section",
+  "settings.moveSectionsNote": "Moving a heading, with the keys that move a line up or down or by its grip, moves everything under it too, past the whole section of its size above or below. Off, the heading's line moves alone.",
   "settings.typingSounds": "Typing sounds",
   "settings.typingSoundsNote": "The sound of a keyboard as you type, in Lines' windows.",
   "settings.typingSoundsOn": "Play typing sounds",

@@ -686,6 +686,23 @@ const SCENES = [
       await page.locator('.editor-pane .cm-fold-chevron[aria-expanded="false"]').waitFor();
     },
   },
+  {
+    id: "move-section-drag",
+    title: "A heading's section being dragged by its grip",
+    look: "“Later” and its line dimmed together while dragged, the grip by its heading; the accent drop line above “What to do” (where a section its size starts), in the gap clear of the text; nothing else dimmed.",
+    note: FOLDED,
+    act: async (page) => {
+      const pane = page.locator(".editor-pane");
+      await pane.getByRole("heading", { name: "Later" }).hover();
+      const grip = await pane.locator(".cm-drag-handle").boundingBox();
+      const target = await pane.getByRole("heading", { name: "What to do" }).boundingBox();
+      await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(grip.x + grip.width / 2, target.y + 2, { steps: 10 });
+      await pane.locator(".cm-drop-indicator:not([hidden])").waitFor();
+    },
+    shoot: ".editor-pane",
+  },
   { id: "code-note", title: "A code note", look: "Line numbers beside each line, a fixed-width font, highlighting in the theme's colors.", note: CODE, format: "code-python" },
   { id: "code-note-backdrop", title: "A code note over a backdrop", look: "The page holds the line numbers, each exactly beside its line, with even room on both sides.", prefs: { paperBackdrop: "dawn" }, note: CODE, format: "code-python" },
   ...[

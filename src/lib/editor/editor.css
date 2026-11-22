@@ -1139,6 +1139,11 @@
   opacity: 1;
 }
 
+/* While a block is dragged (dragBlocks.ts), only folded headings' show. */
+:root.cm-dragging .cm-fold-chevron:not(.is-folded) {
+  opacity: 0;
+}
+
 .cm-fold-chevron:hover {
   background: var(--hover);
   color: var(--text-muted);

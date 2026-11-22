@@ -309,6 +309,8 @@ export interface Stored {
   renumberLists: boolean;
   /** A heading's section folds away by the chevron beside it, or ⌘⌥[ (editor/folding.ts); off, nothing folds. */
   foldSections: boolean;
+  /** Moving a heading (⌥↑ and ⌥↓, its grip) moves its section, what's under it too (editor/sectionMoves.ts); off, its line alone. */
+  moveSections: boolean;
   /** The system checks notes' spelling, and corrects it as you type (code and math never). */
   spellcheck: boolean;
   /** Text selected in a note with the pointer is copied when it's let go, as in a terminal (editor/copyOnSelect.ts). */
@@ -481,6 +483,7 @@ const DEFAULTS: Stored = {
   listNumbering: "outline",
   renumberLists: true,
   foldSections: true,
+  moveSections: true,
   spellcheck: true,
   copyOnSelect: false,
   typingSounds: false,
@@ -670,6 +673,7 @@ function read(json?: string): Stored {
     listNumbering: oneOf(raw.listNumbering, LIST_NUMBERINGS, DEFAULTS.listNumbering),
     renumberLists: flag(raw.renumberLists, DEFAULTS.renumberLists),
     foldSections: flag(raw.foldSections, DEFAULTS.foldSections),
+    moveSections: flag(raw.moveSections, DEFAULTS.moveSections),
     spellcheck: flag(raw.spellcheck, DEFAULTS.spellcheck),
     copyOnSelect: flag(raw.copyOnSelect, DEFAULTS.copyOnSelect),
     typingSounds: flag(raw.typingSounds, DEFAULTS.typingSounds),
@@ -790,6 +794,7 @@ class Prefs {
   listNumbering = $state(this.#initial.listNumbering);
   renumberLists = $state(this.#initial.renumberLists);
   foldSections = $state(this.#initial.foldSections);
+  moveSections = $state(this.#initial.moveSections);
   spellcheck = $state(this.#initial.spellcheck);
   copyOnSelect = $state(this.#initial.copyOnSelect);
   typingSounds = $state(this.#initial.typingSounds);
@@ -1017,6 +1022,7 @@ class Prefs {
       listNumbering: this.listNumbering,
       renumberLists: this.renumberLists,
       foldSections: this.foldSections,
+      moveSections: this.moveSections,
       spellcheck: this.spellcheck,
       copyOnSelect: this.copyOnSelect,
       typingSounds: this.typingSounds,

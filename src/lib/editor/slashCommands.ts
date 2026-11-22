@@ -8,7 +8,9 @@ import {
   type CompletionSource,
   completionStatus,
   currentCompletions,
+  insertCompletionText,
   moveCompletionSelection,
+  pickedCompletion,
   setSelectedCompletion,
   startCompletion,
 } from "@codemirror/autocomplete";
@@ -334,12 +336,13 @@ const tabKeymap = Prec.highest(
 );
 
 /**
- * Enter pressed while the menu is still being worked out for what's just been typed (`/time⏎` on a
- * busy device) runs the command it's about to offer first, as it would once it caught up, rather
- * than going to the note as a new line. Only once a name is being typed: a lone "/" or "\" may be
- * just that.
+ * Enter pressed while the menu is still being worked out for what's just been typed (`/time⏎`,
+ * `#meet⏎` or `@Ada⏎` on a busy device) takes what it's about to offer first, as it would once it
+ * caught up, rather than going to the note as a new line. For "/" and "\", only once a name is being
+ * typed: a lone "/" or "\" may be just that. The other menus (`others`: "#", "@") wait for a letter
+ * themselves.
  */
-const enterKeymap = (sources: ((context: CompletionContext) => CompletionResult | null)[]) =>
+const enterKeymap = (byName: ((context: CompletionContext) => CompletionResult | null)[], others: CompletionSource[]) =>
   Prec.highest(
     keymap.of([
       {
@@ -349,13 +352,16 @@ const enterKeymap = (sources: ((context: CompletionContext) => CompletionResult 
           const { head } = view.state.selection.main;
           const line = view.state.doc.lineAt(head);
           const typed = TYPED.exec(line.text.slice(0, head - line.from));
-          if (!typed?.[1] && !typed?.[2]?.slice(1)) return false;
+          const named = !!typed?.[1] || !!typed?.[2]?.slice(1);
           const context = new CompletionContext(view.state, head, false, view);
-          for (const source of sources) {
+          for (const source of named ? byName : others) {
             const result = source(context);
-            const first = result?.options[0];
-            if (typeof first?.apply !== "function") continue;
-            first.apply(view, first, result!.from, head);
+            if (!result || result instanceof Promise) continue;
+            const first = result.options[0];
+            if (!first || (named && typeof first.apply !== "function")) continue;
+            const to = result.to ?? head;
+            if (typeof first.apply === "function") first.apply(view, first, result.from, to);
+            else view.dispatch({ ...insertCompletionText(view.state, first.apply ?? first.label, result.from, to), annotations: pickedCompletion.of(first) });
             return true;
           }
           return false;
@@ -401,7 +407,7 @@ export const slashMenu = (
       tooltipClass: () => "cm-slash-menu",
     }),
     tabKeymap,
-    enterKeymap(byName),
+    enterKeymap(byName, others),
   ];
 };
 

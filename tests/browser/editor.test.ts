@@ -651,6 +651,30 @@ test("a tag at a line's end wraps whole, its # never on one line and its name on
   expect(split).toEqual([]);
 });
 
+test("Enter right after a #tag or an @mention is begun, before the menu has caught up with it, takes what it offers first; after a lone # it's a new line", async () => {
+  await app.open("One #work/meetings");
+  await app.open("# Charles Babbage\n\nAn engineer.");
+  for (const [typed, after] of [
+    [" #meet", "Plan #work/meetings"],
+    [" @Charl", "Plan @[Charles Babbage]"],
+    [" #", "Plan #\n"],
+  ]) {
+    await app.open("Plan");
+    const menuShown = await app.page.evaluate((typed) => {
+      const view = window.testing.editor()!;
+      view.focus();
+      const at = view.state.doc.length;
+      view.dispatch({ changes: { from: at, insert: typed }, selection: { anchor: at + typed.length }, userEvent: "input.type" });
+      // In the same task as the typing, before the menu is worked out for it.
+      const shown = !!document.querySelector(".cm-tooltip-autocomplete");
+      view.contentDOM.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+      return shown;
+    }, typed);
+    expect(menuShown).toBe(false);
+    expect(await app.text()).toBe(after);
+  }
+});
+
 test("a #tag being typed offers the tags there are, the ones starting with it first; Enter writes the whole tag; not for a lone # or in code", async () => {
   await app.open("One #ideas and #work/meetings");
   await app.open("Two #ideas #idle");

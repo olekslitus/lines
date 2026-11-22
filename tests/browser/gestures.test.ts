@@ -184,12 +184,19 @@ test("pulling the feeds down refreshes them, with a spinner while they're fetche
   const BLOG = "https://site.example/feed.xml";
   let asked = 0;
   let answer: () => void = () => {};
+  /** The refresh's request, as it reaches the test: a moment after the page sends it. */
+  let refreshAsked: () => void = () => {};
+  const refreshing = new Promise<void>((resolve) => (refreshAsked = resolve));
   await answerPictures(page);
   await page.route(
     (url) => url.href === BLOG,
     async (route) => {
       // The refresh waits for the test to answer, so its spinner can be seen.
-      if (asked++) await new Promise<void>((resolve) => (answer = resolve));
+      if (asked++) {
+        const answered = new Promise<void>((resolve) => (answer = resolve));
+        refreshAsked();
+        await answered;
+      }
       await route.fulfill({ body: readFileSync(new URL("./feeds/blog.rss", import.meta.url), "utf8"), contentType: "application/rss+xml", headers: { "access-control-allow-origin": "*" } });
     },
   );
@@ -202,6 +209,7 @@ test("pulling the feeds down refreshes them, with a spinner while they're fetche
   await drag(page, { x: 200, y: box.y + 20 }, { x: 200, y: box.y + 320 });
   const indicator = page.locator(".note-list .pull-indicator");
   await page.waitForFunction(() => document.querySelector(".note-list .pull-indicator")?.hasAttribute("data-busy"));
+  await refreshing;
   expect(asked).toBe(2);
   // The list kept down under the spinner until it's done.
   expect(await page.locator(".note-list ul.items").evaluate((list) => list.style.translate)).toMatch(/^0px \d+/);

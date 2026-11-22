@@ -2,7 +2,7 @@ import {
   acceptCompletion,
   autocompletion,
   type Completion,
-  type CompletionContext,
+  CompletionContext,
   type CompletionResult,
   type CompletionSection,
   type CompletionSource,
@@ -333,6 +333,37 @@ const tabKeymap = Prec.highest(
   ]),
 );
 
+/**
+ * Enter pressed while the menu is still being worked out for what's just been typed (`/time⏎` on a
+ * busy device) runs the command it's about to offer first, as it would once it caught up, rather
+ * than going to the note as a new line. Only once a name is being typed: a lone "/" or "\" may be
+ * just that.
+ */
+const enterKeymap = (sources: ((context: CompletionContext) => CompletionResult | null)[]) =>
+  Prec.highest(
+    keymap.of([
+      {
+        key: "Enter",
+        run(view) {
+          if (completionStatus(view.state) !== "pending") return false;
+          const { head } = view.state.selection.main;
+          const line = view.state.doc.lineAt(head);
+          const typed = TYPED.exec(line.text.slice(0, head - line.from));
+          if (!typed?.[1] && !typed?.[2]?.slice(1)) return false;
+          const context = new CompletionContext(view.state, head, false, view);
+          for (const source of sources) {
+            const result = source(context);
+            const first = result?.options[0];
+            if (typeof first?.apply !== "function") continue;
+            first.apply(view, first, result!.from, head);
+            return true;
+          }
+          return false;
+        },
+      },
+    ]),
+  );
+
 /** Math in a Markdown note, where "\" offers math commands: `$…$`, a `$$` block, ```math, or a `$` not closed yet. */
 function markdownMath(state: EditorState, pos: number) {
   for (const node of ancestors(state, pos, -1)) {
@@ -354,9 +385,10 @@ export const slashMenu = (
   others: CompletionSource[] = [],
 ) => {
   const all = [...commands, ...TEXT_COMMANDS, ...MATH_COMMANDS];
+  const byName = [slashSource(commands), backslashSource(backslash)];
   return [
     autocompletion({
-      override: [slashSource(commands), backslashSource(backslash), ...others],
+      override: [...byName, ...others],
       icons: false,
       closeOnBlur: true,
       // Open at once and let a quick "/quo⏎" go straight through.
@@ -369,6 +401,7 @@ export const slashMenu = (
       tooltipClass: () => "cm-slash-menu",
     }),
     tabKeymap,
+    enterKeymap(byName),
   ];
 };
 

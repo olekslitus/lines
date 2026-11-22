@@ -3,7 +3,7 @@ import { compileModule } from "svelte/compiler";
 
 /*
  * What unit tests need to import lines' modules outside a browser: `.svelte.ts` modules (with
- * runes, `$state`) compiled as Vite's Svelte plugin compiles them, `?raw` imports read as text, and
+ * runes, `$state`) compiled as Vite's Svelte plugin compiles them, `?raw` imports read as text, `?url` ones as the file's URL, and
  * stylesheets (fonts a plugin imports) as nothing. Loaded before every unit test (package.json).
  */
 
@@ -18,6 +18,9 @@ plugin({
     });
     build.onResolve({ filter: /\?raw$/ }, ({ path, importer }) => ({ path: Bun.resolveSync(path.slice(0, -4), importer.replace(/[^/]+$/, "")), namespace: "raw" }));
     build.onLoad({ filter: /.*/, namespace: "raw" }, async ({ path }) => ({ contents: `export default ${JSON.stringify(await Bun.file(path).text())};`, loader: "js" }));
+    // A file's URL, as Vite gives it (`?url`): IronCalc's WebAssembly, fetched from disk.
+    build.onResolve({ filter: /\?url$/ }, ({ path, importer }) => ({ path: Bun.resolveSync(path.slice(0, -4), importer.replace(/[^/]+$/, "")), namespace: "url" }));
+    build.onLoad({ filter: /.*/, namespace: "url" }, ({ path }) => ({ contents: `export default ${JSON.stringify(Bun.pathToFileURL(path).href)};`, loader: "js" }));
     build.onLoad({ filter: /\.css$/ }, () => ({ contents: "", loader: "js" }));
   },
 });

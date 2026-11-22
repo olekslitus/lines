@@ -692,6 +692,9 @@ test("a post is only read: its links go to the web alone, its code never runs or
 
   await rows.first().click();
   await page.waitForFunction(() => document.querySelector(".editor-pane .cm-content")?.textContent?.includes("Open the report"));
+  // Drawn as far as its last line, its link to the web: what's drawn comes as the text is parsed,
+  // which on a busy machine can be a moment after the text shows. Only then is nothing else drawn.
+  await content.locator('[data-href="https://site.example/"]').waitFor();
   expect(await content.locator(".cm-lp-mention, .cm-lp-tag, .cm-lp-math, .katex").count()).toBe(0);
   // Its title, a link to it (its guid read as its address), and its one link to the web.
   expect(await content.evaluate((element) => [...element.querySelectorAll<HTMLElement>("[data-href]")].map((link) => link.dataset.href))).toEqual([

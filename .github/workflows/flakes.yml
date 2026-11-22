@@ -59,7 +59,8 @@ jobs:
           for run in $(seq 1 "$RUNS"); do
             if ! bun run test:browser > run.txt 2>&1; then
               failed=1
-              grep -E '^\(fail\)' run.txt | sort -u | sed "s/^(fail) /run $run: /" | tee -a failures.txt
+              # Each test once: Bun lists a failure as it happens and again at the end.
+              grep -E '^\(fail\)' run.txt | sed -E "s/^\(fail\) /run $run: /; s/ \[[0-9.]+ms\]$//" | sort -u | tee -a failures.txt
               cp run.txt "run-$run.txt"
             fi
             # Built once; the runs after use that build.

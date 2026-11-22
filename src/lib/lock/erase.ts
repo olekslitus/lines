@@ -1,5 +1,6 @@
 import { FEEDS_DB } from "../feeds/storage";
 import { isMacApp } from "../platform";
+import { forgetKeys } from "../sync/keys";
 
 /**
  * For a forgotten passphrase: deletes everything the app lock protects on this device (notes,
@@ -17,6 +18,7 @@ export async function eraseThisDevice() {
     });
   }
   for (const key of ["lines.lock", "lines.sync", "lines.sync.leftovers", "lines.sync.shared", "lines.floating", "lines.lockedNotes", "lines.mutedWords", "lines.lists"]) localStorage.removeItem(key);
+  await forgetKeys();
   if (isMacApp) {
     const { invoke } = await import("@tauri-apps/api/core");
     await invoke("touch_id_forget").catch(() => {});

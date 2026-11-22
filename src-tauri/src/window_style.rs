@@ -8,10 +8,9 @@ use tauri::WebviewWindow;
 pub fn set_window_buttons(window: WebviewWindow, visible: bool) -> Result<(), String> {
   #[cfg(target_os = "macos")]
   {
-    // AppKit wants the main thread; the pointer stays valid while the window exists.
-    let ns_window = window.ns_window().map_err(|e| e.to_string())? as usize;
+    let target = window.clone();
     window
-      .run_on_main_thread(move || unsafe { macos::set_buttons(ns_window, visible) })
+      .run_on_main_thread(move || macos::set_buttons(&target, visible))
       .map_err(|e| e.to_string())?;
   }
   #[cfg(not(target_os = "macos"))]
@@ -64,13 +63,19 @@ mod macos {
   /// The tag window-vibrancy gives its blur view, so we can find it again.
   const BLUR_VIEW_TAG: isize = 91376254;
 
-  /// # Safety
-  /// `ns_window` must point to a live NSWindow, and this must run on the main thread.
-  pub unsafe fn set_buttons(ns_window: usize, visible: bool) {
-    let window = unsafe { &*(ns_window as *const NSWindow) };
+  /// The window's NSWindow. AppKit wants it used on the main thread only.
+  fn ns_window_of(window: &WebviewWindow) -> Option<&NSWindow> {
+    let pointer = window.ns_window().ok()?;
+    // SAFETY: Tauri's pointer is to the window's own NSWindow, which lives as long as `window`.
+    Some(unsafe { &*(pointer as *const NSWindow) })
+  }
+
+  /// Must run on the main thread.
+  pub fn set_buttons(window: &WebviewWindow, visible: bool) {
+    let Some(ns_window) = ns_window_of(window) else { return };
     let alpha = if visible { 1.0 } else { 0.0 };
     for kind in [NSWindowButton::CloseButton, NSWindowButton::MiniaturizeButton, NSWindowButton::ZoomButton] {
-      if let Some(button) = window.standardWindowButton(kind) {
+      if let Some(button) = ns_window.standardWindowButton(kind) {
         // Through the animator, so it fades like the system's own controls.
         button.animator().setAlphaValue(alpha);
       }
@@ -79,8 +84,7 @@ mod macos {
 
   /// Must run on the main thread.
   pub fn follow_desktops(window: &WebviewWindow, over_fullscreen: bool) {
-    let Ok(pointer) = window.ns_window() else { return };
-    let ns_window = unsafe { &*(pointer as *const NSWindow) };
+    let Some(ns_window) = ns_window_of(window) else { return };
     let mut behavior = ns_window.collectionBehavior() | NSWindowCollectionBehavior::CanJoinAllSpaces;
     if over_fullscreen {
       behavior |= NSWindowCollectionBehavior::FullScreenAuxiliary;
@@ -92,8 +96,7 @@ mod macos {
 
   /// Must run on the main thread.
   pub fn set_effects(window: &WebviewWindow, translucent: bool, blur: bool, shadow: bool) {
-    let Ok(pointer) = window.ns_window() else { return };
-    let ns_window = unsafe { &*(pointer as *const NSWindow) };
+    let Some(ns_window) = ns_window_of(window) else { return };
     let blur_view = || ns_window.contentView().and_then(|v| v.viewWithTag(BLUR_VIEW_TAG));
 
     if translucent && blur {

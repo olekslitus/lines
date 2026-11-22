@@ -10,6 +10,7 @@ mod drag_out;
 mod export;
 mod folder_sync;
 mod fonts;
+mod keychain;
 mod local_links;
 mod lock;
 mod oauth;
@@ -56,6 +57,10 @@ pub fn run() {
       folder_sync::sync_folder_delete,
       folder_sync::sync_folder_pick,
       fonts::installed_fonts,
+      keychain::keychain_available,
+      keychain::keychain_get,
+      keychain::keychain_set,
+      keychain::keychain_delete,
       local_links::dropped_paths,
       local_links::pick_link_folder,
       local_links::open_local,

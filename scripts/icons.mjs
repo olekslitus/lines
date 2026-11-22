@@ -21,6 +21,7 @@ import { cpSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writ
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import CanvasKitInit from "canvaskit-wasm";
 import { chromium } from "playwright";
 import { favicon, glyph, ICONS, iconSvg, LILAC, MARK } from "../src/lib/appIcon/art.ts";
 
@@ -123,13 +124,34 @@ for (const icon of ICONS) {
   writeFileSync(join(set, "Contents.json"), JSON.stringify({ images, info: { author: "xcode", version: 1 } }, null, 2) + "\n");
 }
 
+const skia = await CanvasKitInit();
+
+/**
+ * `svg` with each stroked path as the shape its stroke covers, filled. Skia strokes the line, with
+ * the round caps and joins art.ts draws, then unites the outline with itself: the knot's crossing
+ * becomes one shape and its loop a hole wound the other way, filled the same under either fill rule.
+ */
+function outlined(svg) {
+  return svg.replace(/<path ([^>]*)\/>/g, (_, attrs) => {
+    const get = (name) => attrs.match(new RegExp(`(?:^| )${name}="([^"]+)"`))?.[1];
+    const line = skia.Path.MakeFromSVGString(get("d"));
+    const stroked = line.makeStroked({ width: Number(get("stroke-width")), cap: skia.StrokeCap.Round, join: skia.StrokeJoin.Round });
+    const united = skia.Path.MakeFromOp(stroked, stroked, skia.PathOp.Union);
+    const shape = united.makeAsWinding();
+    const d = shape.toSVGString().replace(/-?\d+\.\d+/g, (n) => String(+Number(n).toFixed(2)));
+    for (const path of [line, stroked, united, shape]) path.delete();
+    return `<path d="${d}" fill="${get("stroke")}"/>`;
+  });
+}
+
 // iOS 26: Lines' own, as Icon Composer's layers, so the system draws the lines in Liquid Glass and
-// colors them itself when tinted or clear. The lines are a picture rather than an SVG, whose
-// strokes Icon Composer fills in, closing the knot's loop.
+// colors them itself when tinted or clear. The lines are a vector, drawn sharp at every size, and
+// their strokes are outlines, since Icon Composer fills a stroke's path, closing the knot's loop.
+// Without the glass's specular highlight, which blurs lines this thin at home screen sizes.
 const composer = join(apple, "AppIcon.icon");
 rmSync(composer, { recursive: true, force: true });
 mkdirSync(join(composer, "Assets"), { recursive: true });
-writeFileSync(join(composer, "Assets/lines.png"), await png(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">${glyph("#000000")}</svg>`, 1024));
+writeFileSync(join(composer, "Assets/lines.svg"), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">${outlined(glyph("#000000"))}</svg>\n`);
 const srgb = (hex) => `srgb:${[1, 3, 5].map((i) => (parseInt(hex.slice(i, i + 2), 16) / 255).toFixed(5)).join(",")},1.00000`;
 const down = { start: { x: 0.5, y: 0 }, stop: { x: 0.5, y: 1 } };
 const iconJson = {
@@ -141,7 +163,7 @@ const iconJson = {
     {
       layers: [
         {
-          "image-name": "lines.png",
+          "image-name": "lines.svg",
           name: "lines",
           glass: true,
           "fill-specializations": [
@@ -152,6 +174,7 @@ const iconJson = {
         },
       ],
       shadow: { kind: "neutral", opacity: 0.5 },
+      specular: false,
       translucency: { enabled: false, value: 0.5 },
     },
   ],

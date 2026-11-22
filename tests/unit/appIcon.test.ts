@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
+import CanvasKitInit from "canvaskit-wasm";
 import { favicon, ICON_IDS, ICONS, iconArt, iconSvg, iconUrl, LILAC, type Look, MARK } from "../../src/lib/appIcon/art";
 import { contrast, parse } from "../../src/lib/themes/color";
 
@@ -79,5 +81,33 @@ describe("app icon", () => {
   test("an address an <img> can show", () => {
     expect(iconUrl(LILAC, "dark").startsWith("data:image/svg+xml,")).toBe(true);
     expect(decodeURIComponent(iconUrl(LILAC, "dark"))).toContain(LILAC.dark.lines as string);
+  });
+});
+
+describe("iOS and macOS 26's icon (Icon Composer's, from scripts/icons.mjs)", () => {
+  const composer = new URL("../../src-tauri/gen/apple/AppIcon.icon/", import.meta.url);
+  const icon = JSON.parse(readFileSync(new URL("icon.json", composer), "utf8"));
+  const layer = readFileSync(new URL("Assets/lines.svg", composer), "utf8");
+
+  test("draws the lines from a vector, as glass without the specular highlight that blurs them", () => {
+    const [group] = icon.groups;
+    expect(group.layers[0]["image-name"]).toBe("lines.svg");
+    expect(group.layers[0].glass).toBe(true);
+    expect(group.specular).toBe(false);
+  });
+
+  test("has the lines as filled outlines, the knot's loop open under either fill rule", async () => {
+    // Icon Composer fills a stroke's path, which closes the loop: the layer has no strokes.
+    expect(layer).not.toContain("stroke");
+    const skia = await CanvasKitInit();
+    const knot = skia.Path.MakeFromSVGString(layer.match(/<path d="([^"]+)"/)![1])!;
+    for (const fill of [skia.FillType.Winding, skia.FillType.EvenOdd]) {
+      knot.setFillType(fill);
+      // Along the line: its ends, the loop's sides and top, and where it crosses itself.
+      for (const [x, y] of [[214, 420.8], [778, 420.8], [356.11, 288.19], [477.97, 288.19], [417.04, 241.6], [417.04, 393.92]]) expect(knot.contains(x, y)).toBe(true);
+      // Inside the loop, and off the line.
+      for (const [x, y] of [[417, 300], [417, 200], [600, 470]]) expect(knot.contains(x, y)).toBe(false);
+    }
+    knot.delete();
   });
 });

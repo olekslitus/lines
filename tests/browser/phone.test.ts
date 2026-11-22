@@ -124,13 +124,15 @@ test("on a phone, a Key: Value line's copy button at the end of a full line is a
   await app.page.evaluate(() => window.testing.place(0));
   await app.page.locator(".editor-pane .cm-lp-copy").waitFor();
   // The value made longer a character at a time, past where the line wraps.
-  const cut = await app.page.evaluate(() => {
+  const cut = await app.page.evaluate(async () => {
     const view = window.testing.editor()!;
     const edge = view.scrollDOM.getBoundingClientRect().right;
     const found: number[] = [];
     for (let i = 0; i < 60; i++) {
       const line = view.state.doc.line(3);
       view.dispatch({ changes: { from: line.from, to: line.to, insert: `Plate: 3WBZ56 ${"W".repeat(i)}` } });
+      // Drawn again once the line's parsed, which on a busy machine can be a moment after the change.
+      await window.testing.until(() => view.contentDOM.querySelector(".cm-lp-copy"));
       if (view.contentDOM.querySelector(".cm-lp-copy")!.getBoundingClientRect().right > edge) found.push(i);
     }
     return found;

@@ -195,37 +195,22 @@ describe("a ZIP's files", () => {
     await expect(zipEntries(deflated(4096, 4096), 1024).get("big.bin")!.read()).rejects.toThrow("bigger than it says");
   });
 
-  /** `data`, a ZIP `zip` wrote, as one written with ZIP64: its end record full, the count and place in ZIP64's own record. */
-  function asZip64(data: Uint8Array) {
-    const end = data.length - 22;
-    const view = new DataView(data.buffer, data.byteOffset);
-    const [length, start] = [view.getUint32(end + 12, true), view.getUint32(end + 16, true)];
-    const record = new DataView(new ArrayBuffer(56 + 20 + 22));
-    record.setUint32(0, 0x06064b50, true);
-    record.setBigUint64(4, 44n, true);
-    record.setBigUint64(24, BigInt(count), true);
-    record.setBigUint64(32, BigInt(count), true);
-    record.setBigUint64(40, BigInt(length), true);
-    record.setBigUint64(48, BigInt(start), true);
-    record.setUint32(56, 0x07064b50, true);
-    record.setBigUint64(64, BigInt(end), true);
-    record.setUint32(72, 1, true);
-    record.setUint32(76, 0x06054b50, true);
-    record.setUint16(84, 0xffff, true);
-    record.setUint16(86, 0xffff, true);
-    record.setUint32(88, 0xffffffff, true);
-    record.setUint32(92, 0xffffffff, true);
-    return new Uint8Array(Buffer.concat([data.subarray(0, end), new Uint8Array(record.buffer)]));
+  /** `data`, a ZIP with ZIP64's end records that `zip` wrote, as an app that leaves them out writes it: its count what's left over in 16 bits. */
+  function withoutZip64(data: Uint8Array) {
+    const end = data.slice(data.length - 22);
+    new DataView(end.buffer).setUint16(8, count % 65_536, true);
+    new DataView(end.buffer).setUint16(10, count % 65_536, true);
+    return new Uint8Array(Buffer.concat([data.subarray(0, data.length - 22 - 56 - 20), end]));
   }
   const count = 70_000;
 
   test("more than 65,535 of them, from ZIP64's record, or from an app that writes past what 16 bits hold without it: all listed, or it's damaged", () => {
     const modified = new Date(2026, 10, 13);
-    const many = zip(Array.from({ length: count }, (_, i) => ({ name: `n${i}.md`, data: `${i}`, modified })));
-    expect(new DataView(many.buffer).getUint16(many.length - 12, true)).toBe(count % 65_536);
-    expect(zipEntries(many).size).toBe(count);
-    const zip64 = asZip64(many);
+    const zip64 = zip(Array.from({ length: count }, (_, i) => ({ name: `n${i}.md`, data: `${i}`, modified })));
+    expect(new DataView(zip64.buffer).getUint16(zip64.length - 12, true)).toBe(0xffff);
     expect([zipEntries(zip64).size, zipEntries(zip64).get(`n${count - 1}.md`)!.size]).toEqual([count, 5]);
+    const many = withoutZip64(zip64);
+    expect(zipEntries(many).size).toBe(count);
     // Saying it has a file more than it lists, it's damaged, not read as far as it goes.
     new DataView(many.buffer).setUint16(many.length - 12, (count % 65_536) + 1, true);
     expect(() => zipEntries(many)).toThrow("damaged");

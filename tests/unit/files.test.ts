@@ -1,4 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { deflateRawSync } from "node:zlib";
 import { diffLines } from "../../src/plugins/changes/diff";
 import { isPageBreak, LATEX_PAGE_BREAK, PAGE_BREAK } from "../../src/lib/notes/pageBreak";
@@ -66,6 +69,69 @@ describe("zip", () => {
   test("says when a file isn't a ZIP", async () => {
     expect(unzip(bytes("hello, not a zip"))).rejects.toThrow();
   });
+
+  /**
+   * What Info-ZIP's unzip and zipinfo, as most systems have, say of the ZIP `write` puts at the path
+   * it's given: whether it's whole, every file's CRC checked; how many files its end records say it
+   * has (`first` named, to list no more); and what its files add up to.
+   */
+  function standardUnzip(write: (path: string) => void, first: string) {
+    const folder = mkdtempSync(join(tmpdir(), "lines-zip-"));
+    const path = join(folder, "export.zip");
+    try {
+      write(path);
+      const tested = Bun.spawnSync(["unzip", "-tq", path]);
+      const told = `${Bun.spawnSync(["zipinfo", "-v", path, first]).stdout}`;
+      return {
+        whole: tested.exitCode === 0,
+        said: `${tested.stdout}${tested.stderr}`,
+        count: Number(/central directory contains (\d+) entr/.exec(told)?.[1]),
+        total: `${Bun.spawnSync(["zipinfo", "-t", path]).stdout}`.trim(),
+      };
+    } finally {
+      rmSync(folder, { recursive: true, force: true });
+    }
+  }
+  const modified = new Date(2026, 10, 21);
+  const unzipped = Bun.which("unzip") && Bun.which("zipinfo");
+
+  test.skipIf(!unzipped)("past 65,535 files, with ZIP64's count, as a standard unzip reads", async () => {
+    const count = 70_000;
+    const many = zip(Array.from({ length: count }, (_, i) => ({ name: `notes/${i}.md`, data: `# ${i}`, modified })));
+    const opened = standardUnzip((path) => writeFileSync(path, many), "notes/0.md");
+    expect([opened.whole, opened.count], opened.said).toEqual([true, count]);
+    const files = await unzip(many);
+    expect([files.size, text(files.get(`notes/${count - 1}.md`))]).toEqual([count, `# ${count - 1}`]);
+    // 65,535 itself is ZIP64's sign in the end record, so it's ZIP64's too.
+    const most = zip(Array.from({ length: 65_535 }, (_, i) => ({ name: `${i}`, data: "", modified })));
+    expect(standardUnzip((path) => writeFileSync(path, most), "0").count).toBe(65_535);
+  });
+
+  // A file past 4 GB, and one after it, starting past where 32 bits can say. It takes 8 GB of memory,
+  // 4 GB of disk and a minute, so it's run when asked (LINES_BIG_ZIP=1); and by Node, as Bun's arrays
+  // stop short of 4 GB.
+  test.if(process.env.LINES_BIG_ZIP === "1" && !!unzipped && !!Bun.which("node"))(
+    "past 4 GB, with ZIP64's sizes and places, as a standard unzip reads",
+    () => {
+      const writer = new URL("../../src/lib/zip.ts", import.meta.url).pathname;
+      const script = `
+        import { closeSync, openSync, writeSync } from "node:fs";
+        import { zip } from ${JSON.stringify(writer)};
+        const big = new Uint8Array(0xffffffff + 16);
+        big[big.length - 1] = 7;
+        const modified = new Date(${modified.getTime()});
+        const data = zip([{ name: "big.bin", data: big, modified }, { name: "after.md", data: "# After", modified }]);
+        const file = openSync(process.argv[1], "w");
+        for (let at = 0; at < data.length; ) at += writeSync(file, data, at, Math.min(2 ** 30, data.length - at));
+        closeSync(file);`;
+      const opened = standardUnzip((path) => {
+        const node = Bun.spawnSync(["node", "--input-type=module", "-e", script, path]);
+        if (node.exitCode !== 0) throw new Error(`${node.stderr}`);
+      }, "after.md");
+      expect([opened.whole, opened.count, opened.total], opened.said).toEqual([true, 2, expect.stringMatching(/^2 files, 4294967318 bytes uncompressed/)]);
+    },
+    600_000,
+  );
 });
 
 describe("Mechvibes sound packs", () => {

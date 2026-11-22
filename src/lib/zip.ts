@@ -1,6 +1,7 @@
 /**
  * A minimal ZIP writer: files are stored uncompressed, which keeps this tiny and is fine for
- * text (and images, which are compressed already). Names are UTF-8, and each file keeps its own modification time.
+ * text (and images, which are compressed already). Names are UTF-8, and each file keeps its own
+ * modification time. Past 65,535 files or 4 GB, ZIP64 holds the numbers ZIP's own fields can't.
  */
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
@@ -22,6 +23,23 @@ function dosTime(date: Date) {
   return { time, day };
 }
 
+/** What 32 bits, or 16, hold at most: in a ZIP, a sign that ZIP64 keeps the real number elsewhere. */
+const FULL32 = 0xffffffff;
+const FULL16 = 0xffff;
+
+/** The version of ZIP a file needs to be read: 4.5 with ZIP64's numbers, 2.0 without. */
+const versionFor = (zip64: boolean) => (zip64 ? 45 : 20);
+
+/** ZIP64's extra field (0x0001): the numbers 32 bits can't hold, in the order ZIP gives them; nothing without any. */
+function zip64Field(numbers: number[]) {
+  if (!numbers.length) return new Uint8Array();
+  const field = new DataView(new ArrayBuffer(4 + 8 * numbers.length));
+  field.setUint16(0, 1, true);
+  field.setUint16(2, 8 * numbers.length, true);
+  numbers.forEach((number, i) => field.setBigUint64(4 + 8 * i, BigInt(number), true));
+  return new Uint8Array(field.buffer);
+}
+
 export interface ZipEntry {
   name: string;
   /** Text (saved as UTF-8) or a file's bytes. */
@@ -40,47 +58,71 @@ export function zip(entries: ZipEntry[]): Uint8Array<ArrayBuffer> {
     const data = typeof entry.data === "string" ? encoder.encode(entry.data) : entry.data;
     const crc = crc32(data);
     const { time, day } = dosTime(entry.modified);
+    // A size or place 32 bits can't hold is in ZIP64's field; a local header gives both sizes there.
+    const big = data.length >= FULL32;
+    const far = offset >= FULL32;
+    const size = big ? FULL32 : data.length;
+    const localExtra = zip64Field(big ? [data.length, data.length] : []);
+    const centralExtra = zip64Field([...(big ? [data.length, data.length] : []), ...(far ? [offset] : [])]);
 
     const header = new DataView(new ArrayBuffer(30));
     header.setUint32(0, 0x04034b50, true); // local file header
-    header.setUint16(4, 20, true); // version needed
+    header.setUint16(4, versionFor(big), true); // version needed
     header.setUint16(6, 0x0800, true); // UTF-8 names
     header.setUint16(8, 0, true); // stored
     header.setUint16(10, time, true);
     header.setUint16(12, day, true);
     header.setUint32(14, crc, true);
-    header.setUint32(18, data.length, true);
-    header.setUint32(22, data.length, true);
+    header.setUint32(18, size, true);
+    header.setUint32(22, size, true);
     header.setUint16(26, name.length, true);
-    local.push(new Uint8Array(header.buffer), name, data);
+    header.setUint16(28, localExtra.length, true);
+    local.push(new Uint8Array(header.buffer), name, localExtra, data);
 
     const record = new DataView(new ArrayBuffer(46));
     record.setUint32(0, 0x02014b50, true); // central directory header
-    record.setUint16(4, 20, true); // version made by
-    record.setUint16(6, 20, true); // version needed
+    record.setUint16(4, versionFor(big || far), true); // version made by
+    record.setUint16(6, versionFor(big || far), true); // version needed
     record.setUint16(8, 0x0800, true);
     record.setUint16(10, 0, true);
     record.setUint16(12, time, true);
     record.setUint16(14, day, true);
     record.setUint32(16, crc, true);
-    record.setUint32(20, data.length, true);
-    record.setUint32(24, data.length, true);
+    record.setUint32(20, size, true);
+    record.setUint32(24, size, true);
     record.setUint16(28, name.length, true);
-    record.setUint32(42, offset, true);
-    central.push(new Uint8Array(record.buffer), name);
+    record.setUint16(30, centralExtra.length, true);
+    record.setUint32(42, far ? FULL32 : offset, true);
+    central.push(new Uint8Array(record.buffer), name, centralExtra);
 
-    offset += 30 + name.length + data.length;
+    offset += 30 + name.length + localExtra.length + data.length;
   }
 
   const centralSize = central.reduce((sum, part) => sum + part.length, 0);
+  // Past what the end record's numbers hold, ZIP64's own end record has them, found by a locator just before it.
+  const zip64 = entries.length >= FULL16 || centralSize >= FULL32 || offset >= FULL32;
+  const zip64End = new DataView(new ArrayBuffer(zip64 ? 56 + 20 : 0));
+  if (zip64) {
+    zip64End.setUint32(0, 0x06064b50, true); // ZIP64 end of central directory
+    zip64End.setBigUint64(4, 44n, true); // its size, after this
+    zip64End.setUint16(12, versionFor(true), true); // version made by
+    zip64End.setUint16(14, versionFor(true), true); // version needed
+    zip64End.setBigUint64(24, BigInt(entries.length), true);
+    zip64End.setBigUint64(32, BigInt(entries.length), true);
+    zip64End.setBigUint64(40, BigInt(centralSize), true);
+    zip64End.setBigUint64(48, BigInt(offset), true);
+    zip64End.setUint32(56, 0x07064b50, true); // ZIP64 end of central directory locator
+    zip64End.setBigUint64(64, BigInt(offset + centralSize), true);
+    zip64End.setUint32(72, 1, true); // disks
+  }
   const end = new DataView(new ArrayBuffer(22));
   end.setUint32(0, 0x06054b50, true); // end of central directory
-  end.setUint16(8, entries.length, true);
-  end.setUint16(10, entries.length, true);
-  end.setUint32(12, centralSize, true);
-  end.setUint32(16, offset, true);
+  end.setUint16(8, Math.min(entries.length, FULL16), true);
+  end.setUint16(10, Math.min(entries.length, FULL16), true);
+  end.setUint32(12, Math.min(centralSize, FULL32), true);
+  end.setUint32(16, Math.min(offset, FULL32), true);
 
-  const parts = [...local, ...central, new Uint8Array(end.buffer)];
+  const parts = [...local, ...central, new Uint8Array(zip64End.buffer), new Uint8Array(end.buffer)];
   const out = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
   let at = 0;
   for (const part of parts) {
@@ -123,10 +165,6 @@ async function inflate(stored: Uint8Array<ArrayBuffer>, size: number): Promise<U
   }
   return new Uint8Array(await new Blob(chunks).arrayBuffer());
 }
-
-/** What 32 bits, or 16, hold at most: in a ZIP, a sign that ZIP64 keeps the real number elsewhere. */
-const FULL32 = 0xffffffff;
-const FULL16 = 0xffff;
 
 /**
  * Where a ZIP's central directory (its list of files) starts, and how many files it says it has:

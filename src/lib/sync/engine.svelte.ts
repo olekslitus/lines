@@ -1,6 +1,7 @@
 import { speak } from "../a11y";
 import { fromBase64, lockKey, randomBytes, toBase64, unlockKey } from "../crypto";
 import { t } from "../i18n/index.svelte";
+import { keychain } from "../keychain";
 import { readSecret, writeSecret } from "../lock/vault";
 import { attachmentNames, getAttachment, putAttachment, usedAttachments } from "../notes/attachments";
 import { RATINGS_FILE, readRatings, writeRatings } from "../library/ratings";
@@ -18,6 +19,7 @@ import { plugins } from "../plugins/registry.svelte";
 import { deserialize, hash, serialize } from "./format";
 import { BrowserFolderRemote, isBrowserFolder } from "./browserFolder";
 import { FolderRemote } from "./folder";
+import { forgetKeys, stashKeys, withKeys, type SavedConfig } from "./keys";
 import { isFolder, normalizeConfig, sameLocation, type SyncConfig } from "./providers";
 import { SyncError, type Remote, type RemoteObject } from "./remote";
 import { S3Remote } from "./s3";
@@ -90,11 +92,23 @@ export type SyncStatus = "off" | "idle" | "syncing" | "error" | "offline";
  */
 export type EncryptionIssue = "locked" | "rekeyed" | "turned-off";
 
-/** Kept with the app lock's other secrets, since it holds the storage keys (see lock/vault.ts). */
-async function loadConfig(): Promise<SyncConfig | null> {
-  const config = await readSecret<SyncConfig>(CONFIG_KEY);
-  const fields = config?.kind === "folder" ? ["path"] : ["endpoint", "bucket", "prefix", "region", "accessKeyId", "secretAccessKey"];
-  return config && fields.every((field) => typeof (config as unknown as Record<string, unknown>)[field] === "string") ? config : null;
+/**
+ * Kept with the app lock's other secrets, since it holds the storage keys (see lock/vault.ts); the
+ * keys themselves in the system's keychain, where there is one (keys.ts).
+ */
+async function loadConfig(): Promise<{ config: SyncConfig; inKeychain: boolean } | null> {
+  const saved = await readSecret<SavedConfig>(CONFIG_KEY);
+  if (!saved) return null;
+  let config: SyncConfig;
+  try {
+    config = await withKeys(saved);
+  } catch (error) {
+    console.error("lines: couldn't read the sync keys from the keychain", error);
+    return null;
+  }
+  const fields = config.kind === "folder" ? ["path"] : ["endpoint", "bucket", "prefix", "region", "accessKeyId", "secretAccessKey"];
+  const valid = fields.every((field) => typeof (config as unknown as Record<string, unknown>)[field] === "string");
+  return valid ? { config, inKeychain: "inKeychain" in saved } : null;
 }
 
 const MIN_PASSPHRASE = 8;
@@ -307,8 +321,11 @@ class SyncEngine {
   /** Reads the saved connection. Once lines is unlocked, if the app lock is on. */
   async load() {
     this.#saved = localStorage.getItem(CONFIG_KEY);
-    this.config = await loadConfig();
+    const loaded = await loadConfig();
+    this.config = loaded?.config ?? null;
     this.status = this.config ? "idle" : "off";
+    // Keys saved with the rest, before Lines kept them in the keychain, go there now.
+    if (loaded && !loaded.inKeychain && (await keychain.available())) await this.#save(loaded.config);
   }
 
   /** Saves the connection again, encrypted or not as the app lock now says. */
@@ -317,7 +334,8 @@ class SyncEngine {
   }
 
   async #save(config: SyncConfig | null) {
-    await writeSecret(CONFIG_KEY, config);
+    await writeSecret(CONFIG_KEY, config && (await stashKeys(config)));
+    if (!config) await forgetKeys();
     this.#saved = localStorage.getItem(CONFIG_KEY);
   }
 

@@ -482,6 +482,7 @@ As in GFM. Some details:
 
 - `- [ ]` and `- [x]` (or `[X]`) are todos. A note with any open todo shows in the Todo view.
 - Nested items are indented under their parent's text. Bullets cycle through a dot, a ring and a square as they nest deeper.
+- `1. ` (or `1) `) typed at the start of a bullet item's text makes it a numbered item, and `- ` (or `* `, `+ `) at the start of a numbered item's text makes it a bullet, rather than a list inside the item (`- 1. Milk`); its sub-items move with it. ⌘Z just after leaves it as typed. The number counts on from a numbered list just above (`1. Eggs` then `- Milk` makes `2. Milk`), and the numbered items after it count on from it. Starting a list of its own it's the number typed, but right under a line of text it's 1: Markdown reads a list starting at any other number there as more of that text. For the same reason a numbered item made a bullet leaves the numbered items after it starting again from 1. In a todo's text, after its checkbox, what's typed stays text, as Markdown reads it there.
 
 ## Symbols
 

@@ -1,7 +1,9 @@
+import { isolateHistory } from "@codemirror/commands";
 import { type ChangeSpec, type EditorState, Prec, type Text } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import type { SyntaxNode } from "@lezer/common";
 import { inCode } from "./fences";
+import { frontMatterField } from "./objects";
 import { ancestors } from "./util";
 
 /*
@@ -10,8 +12,9 @@ import { ancestors } from "./util";
  * spaces under "- ", three under "1. "); the editor draws each level the same, wider step.
  * Numbered items are numbered again, in the list they leave and the one they join.
  * Backspace right after an item's marker moves a nested item out a level, and turns a top-level
- * one into plain text. Enter there puts an empty item above it. List items pasted on an empty one
- * take its place, at its level (listPaste).
+ * one into plain text. Enter there puts an empty item above it. A number typed there makes a bullet
+ * item numbered, and a bullet a numbered one a bullet (listMarkerInput). List items pasted on an
+ * empty one take its place, at its level (listPaste).
  */
 
 /** The list item whose marker is on the cursor's line. */
@@ -69,20 +72,33 @@ function numberAfter(doc: Text, item: SyntaxNode) {
   return last ? itemNumber(doc, last) + 1 : 1;
 }
 
+/** The node before (or after) `node`, a list item's or a list's: in a quote, each line's `>` sits between them. */
+function beside(node: SyntaxNode, after: boolean) {
+  let next = after ? node.nextSibling : node.prevSibling;
+  while (next?.name === "QuoteMark") next = after ? next.nextSibling : next.prevSibling;
+  return next;
+}
+
 /** Quote markers a line starts with; indentation goes after them. */
 const QUOTES = /^(?:[ \t]*>[ ]?)*/;
 
-/** Shifts every line of `item` (and its sub-items) by `delta` columns, numbering items again as `renumbered` says. */
-function shift(view: EditorView, item: SyntaxNode, delta: number, renumbered: ChangeSpec[] = []) {
-  const { doc } = view.state;
+/** The changes that shift lines `first` to `last` by `delta` columns, after a quote's `>`. */
+function shifted(doc: Text, first: number, last: number, delta: number) {
   const changes = [];
-  for (let n = doc.lineAt(item.from).number; n <= doc.lineAt(item.to).number; n++) {
+  for (let n = first; n <= last; n++) {
     const line = doc.line(n);
     if (!line.text.trim()) continue;
     const from = line.from + QUOTES.exec(line.text)![0].length;
     if (delta > 0) changes.push({ from, insert: " ".repeat(delta) });
     else changes.push({ from, to: from + Math.min(-delta, /^ */.exec(doc.sliceString(from, line.to))![0].length) });
   }
+  return changes;
+}
+
+/** Shifts every line of `item` (and its sub-items) by `delta` columns, numbering items again as `renumbered` says. */
+function shift(view: EditorView, item: SyntaxNode, delta: number, renumbered: ChangeSpec[] = []) {
+  const { doc } = view.state;
+  const changes = shifted(doc, doc.lineAt(item.from).number, doc.lineAt(item.to).number, delta);
   view.dispatch({ changes: [...changes, ...renumbered], scrollIntoView: true, userEvent: delta > 0 ? "input.indent" : "delete.dedent" });
 }
 
@@ -90,9 +106,7 @@ function indentItem(view: EditorView) {
   const { state } = view;
   const item = state.readOnly ? null : itemAt(state);
   if (!item) return false;
-  // In a quote, each line's ">" sits between the items.
-  let above = item.prevSibling;
-  while (above?.name === "QuoteMark") above = above.prevSibling;
+  const above = beside(item, false);
   // The first item of a list has nothing to go under; keep Tab from typing spaces anyway.
   if (above?.name !== "ListItem") return true;
   // Line it up with the text of the item above, which is what makes it that item's child.
@@ -159,8 +173,7 @@ function itemAbove(view: EditorView) {
   const start = mark.to + AFTER_MARK.exec(doc.sliceString(mark.to, line.to))![0].length;
   if (main.head !== start || !doc.sliceString(start, line.to).trim()) return false;
   const list = item.parent!;
-  let before = list.prevSibling;
-  while (before?.name === "QuoteMark") before = before.prevSibling;
+  const before = beside(list, false);
   const underParagraph =
     list.firstChild?.from === item.from && list.parent?.name !== "ListItem" && before?.name === "Paragraph" && doc.lineAt(before.to).number === line.number - 1;
   const blank = underParagraph ? `${QUOTES.exec(line.text)![0].trimEnd()}\n` : "";
@@ -177,6 +190,94 @@ export const listKeymap = Prec.high(
     { key: "Enter", run: itemAbove },
   ]),
 );
+
+/** A number's marker typed at the start of a bullet item's text, up to the cursor; a bullet typed at a numbered one's. */
+const NUMBER_TYPED = /^[-*+][ \t]+(\d{1,9})([.)])$/;
+const BULLET_TYPED = /^\d{1,9}[.)][ \t]+([-*+])$/;
+
+/** A list's first (or last) item. */
+function endItem(list: SyntaxNode, last: boolean) {
+  let item = last ? list.lastChild : list.firstChild;
+  while (item && item.name !== "ListItem") item = last ? item.prevSibling : item.nextSibling;
+  return item;
+}
+
+/** An ordered list item's `.` or `)`. */
+function delimiterOf(doc: Text, item: SyntaxNode) {
+  const mark = item.getChild("ListMark")!;
+  return doc.sliceString(mark.to - 1, mark.to);
+}
+
+/**
+ * Whether a numbered list starting with `item` has to start at 1: right under a line of text, and
+ * not within another numbered list, Markdown reads any other number as more of that text.
+ */
+function startsAtOne(state: EditorState, item: SyntaxNode) {
+  for (let node = item.parent?.parent; node; node = node.parent) if (node.name === "OrderedList") return false;
+  const line = state.doc.lineAt(item.from);
+  if (line.number === 1) return false;
+  const above = state.doc.line(line.number - 1);
+  return [...ancestors(state, above.to, -1)].some((node) => node.name === "Paragraph" || node.name === "Task");
+}
+
+/**
+ * A list item's marker typed over: `1. ` (or `1) `) typed at the start of a bullet item's text makes
+ * it a numbered item, and `- ` (`* `, `+ `) at a numbered item's makes it a bullet, rather than a
+ * list inside it (`- 1. Milk`), as `## ` typed on a heading changes its level. Its sub-items move
+ * with its text. A number counts on from a numbered list just above, in its style (`3)`), and the
+ * numbered items after it count on from it; else it's the number typed, or 1 where only 1 makes a
+ * list. A numbered item made a bullet leaves the ones after it a list of their own, from 1, which
+ * Markdown, unlike other numbers, reads as a list right under the bullet's text. A todo's text
+ * keeps what's typed, which Markdown reads as text there. ⌘Z just after leaves it as typed.
+ */
+export const listMarkerInput = EditorView.inputHandler.of((view, from, to, text) => {
+  const { state } = view;
+  const { main } = state.selection;
+  if (text !== " " || from !== to || !main.empty || main.head !== from || state.selection.ranges.length > 1 || state.readOnly) return false;
+  const item = itemAt(state);
+  if (!item) return false;
+  const { doc } = state;
+  const line = doc.lineAt(from);
+  const front = state.field(frontMatterField, false);
+  if (front && line.number <= front.lines) return false;
+  const mark = item.getChild("ListMark")!;
+  const typed = doc.sliceString(mark.from, from);
+  const list = item.parent!;
+  let marker: string;
+  const renumbered = [];
+  if (list.name === "BulletList") {
+    const number = NUMBER_TYPED.exec(typed);
+    if (!number) return false;
+    const above = beside(item, false) ? null : beside(list, false);
+    const run = above?.name === "OrderedList" ? endItem(above, true)! : null;
+    const n = run ? itemNumber(doc, run) + 1 : startsAtOne(state, item) ? 1 : parseInt(number[1], 10);
+    const delimiter = run ? delimiterOf(doc, run) : number[2];
+    marker = `${n}${delimiter}`;
+    const below = beside(item, true) ? null : beside(list, true);
+    const next = below?.name === "OrderedList" ? endItem(below, false)! : null;
+    if (next && delimiterOf(doc, next) === delimiter) renumbered.push(...renumber(doc, next, n + 1));
+  } else {
+    const bullet = BULLET_TYPED.exec(typed);
+    if (!bullet) return false;
+    marker = bullet[1];
+    renumbered.push(...renumber(doc, beside(item, true), 1));
+  }
+  // Its sub-items and the rest of its text line up with its text where it now starts.
+  const textFrom = from - /\S+$/.exec(typed)![0].length;
+  const delta = mark.from + marker.length + 1 - textFrom;
+  const last = doc.lineAt(item.to).number;
+  const moved = delta ? shifted(doc, line.number + 1, last, delta) : [];
+  const space = state.changes({ from, insert: " " });
+  view.dispatch({ changes: space, selection: { anchor: from + 1 }, userEvent: "input.type" });
+  view.dispatch({
+    changes: state.changes([{ from: mark.from, to: from, insert: marker }, ...moved, ...renumbered]).map(space),
+    selection: { anchor: mark.from + marker.length + 1 },
+    annotations: isolateHistory.of("full"),
+    userEvent: "input.format",
+    scrollIntoView: true,
+  });
+  return true;
+});
 
 /** The start of a line that's a list item: its indentation, then its marker (a checkbox too) and the space after. */
 const ITEM_START = /^([ \t]*)((?:[-*+]|\d+[.)])(?:[ \t]+\[[ xX]\])?[ \t]+)/;

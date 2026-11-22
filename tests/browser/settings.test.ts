@@ -1,4 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
+import type { Page } from "playwright";
 import { type App, mod, noErrors, openApp } from "./app";
 
 let app: App;
@@ -148,5 +149,85 @@ test("two windows changing different settings at the same moment each keep the o
   await page.waitForTimeout(100);
   expect(await page.evaluate(() => [window.testing.prefs.font, window.testing.prefs.textSize])).toEqual(["serif", 20]);
   expect(JSON.parse(await page.evaluate(() => localStorage.getItem("lines.prefs")!))).toMatchObject({ font: "serif", textSize: 20 });
+  await other.close();
+});
+
+/** Another window of the app, beside `app`'s, ready. */
+async function otherWindow(app: App) {
+  const other = await app.page.context().newPage();
+  await other.goto(app.page.url());
+  await other.waitForFunction(() => window.testing?.notes.ready);
+  return other;
+}
+
+test("a setting changed in one window goes to the others alone and once, isn't sent back, and one another window can't have is its default", async () => {
+  app = await openApp({ prefs: { textSize: 15 } });
+  const { page } = app;
+  const other = await otherWindow(app);
+  // What the windows say to each other about settings, heard in this one.
+  await page.evaluate(() => {
+    const heard: unknown[] = [];
+    const channel = new BroadcastChannel("lines:window");
+    channel.onmessage = ({ data }) => data.type === "prefs" && heard.push(data.changed);
+    Object.assign(window, { heard, channel });
+  });
+  const heard = () => page.evaluate(() => (window as unknown as { heard: unknown[] }).heard);
+  await other.evaluate(() => (window.testing.prefs.textSize = 20));
+  await page.waitForFunction(() => window.testing.prefs.textSize === 20);
+  await other.evaluate(() => (window.testing.prefs.font = "serif"));
+  await page.waitForFunction(() => window.testing.prefs.font === "serif");
+  expect(await heard()).toEqual([{ textSize: 20 }, { font: "serif" }]);
+  expect(JSON.parse(await page.evaluate(() => localStorage.getItem("lines.prefs")!))).toMatchObject({ font: "serif", textSize: 20 });
+
+  // From a window of another version, a size this one can't have, and an appearance it doesn't know.
+  await page.evaluate(() => (window as unknown as { channel: BroadcastChannel }).channel.postMessage({ type: "prefs", changed: { textSize: "huge", appearance: "sepia" } }));
+  await page.waitForFunction(() => window.testing.prefs.textSize !== 20);
+  expect(await page.evaluate(() => [window.testing.prefs.textSize, window.testing.prefs.appearance])).toEqual([17, "system"]);
+  await other.close();
+});
+
+test("a plugin turned off in one window is off in the others at once", async () => {
+  app = await openApp();
+  const { page } = app;
+  const other = await otherWindow(app);
+  const on = (page: Page) => page.evaluate(() => window.testing.plugins.isOn(window.testing.plugins.get("spreadsheet")!));
+  expect(await on(other)).toBe(true);
+  const settings = await app.settings("All Plugins");
+  await settings.getByRole("switch", { name: "Spreadsheets" }).click();
+  await other.waitForFunction(() => !window.testing.plugins.isOn(window.testing.plugins.get("spreadsheet")!));
+  expect(await on(page)).toBe(false);
+  await other.close();
+});
+
+test("the language chosen in one window: each starts again in it, with what was being typed kept", async () => {
+  app = await openApp();
+  const { page } = app;
+  const id = await app.open("# Plan");
+  const other = await otherWindow(app);
+  await page.evaluate(() => window.testing.place());
+  await page.keyboard.type("\n\nTyped just now");
+  const settings = await app.settings("General");
+  await settings.getByRole("combobox", { name: "Language" }).click();
+  await Promise.all([page.waitForEvent("load"), other.waitForEvent("load"), page.getByRole("option", { name: "Français" }).click()]);
+  for (const each of [page, other]) {
+    await each.waitForFunction(() => window.testing?.notes.ready);
+    expect(await each.evaluate(() => document.documentElement.lang)).toBe("fr");
+  }
+  expect(await page.evaluate((id) => window.testing.notes.get(id)?.note.body, id)).toBe("# Plan\n\nTyped just now");
+  await other.close();
+});
+
+test("a theme and a preset of your own made in one window are there to choose in the others at once", async () => {
+  app = await openApp();
+  const { page } = app;
+  const other = await otherWindow(app);
+  const [theme, preset] = await page.evaluate(() => {
+    const { customThemes, plugins, presets } = window.testing;
+    const theme = customThemes.copy(plugins.theme("lines").definition, (each) => plugins.palette(each), "Moss");
+    return [theme, presets.add("Mossy", presets.builtIn[0].settings)];
+  });
+  await other.waitForFunction(([theme, preset]) => window.testing.customThemes.get(theme)?.name === "Moss" && window.testing.presets.get(preset)?.name === "Mossy", [theme, preset]);
+  await other.evaluate((theme) => (window.testing.prefs.theme = theme), theme);
+  await page.waitForFunction((theme) => window.testing.prefs.theme === theme, theme);
   await other.close();
 });

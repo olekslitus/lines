@@ -762,6 +762,7 @@ HTTP 200
 jsonpath "$.name" isString
 ```
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Hurl entries (hurl block): a capture used by the next entry, and asserts, then Score (Settings → Little Touches)
 

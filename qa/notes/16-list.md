@@ -346,6 +346,7 @@ Each element in a list item. Check: it draws as it does on its own, sits inside 
 - List item
 
   **Wi-Fi password:** correct-horse-battery
+  Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Score (Settings → Little Touches) in a list item
 

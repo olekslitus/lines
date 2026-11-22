@@ -314,6 +314,7 @@ And another.
 
 The token is {{qa-token}}, and {{no-such-secret}} isn't one.
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Secret ({{name}}, kept in a locked secrets note), then Score (Settings → Little Touches)
 

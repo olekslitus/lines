@@ -17,10 +17,23 @@ import { copyText } from "../platform";
  */
 const KEY_VALUE = /^(?:\*\*|__)?[\p{L}\p{N}][^:*_`\n]{0,39}?(?:\*\*|__)?:(?:\*\*|__)?[ \t]+(\S.*?)\s*$/du;
 
+/** A word of prose, with what can be around it in a sentence: not a number, code or link. */
+const WORD = /^[("“‘*_]*\p{L}[\p{L}\p{M}'’-]*[)"”’*_,;:.!?…]*$/u;
+
+/**
+ * Whether a value reads as the rest of a sentence (`Three slow days: walk everywhere, eat late.`)
+ * rather than something to copy: more than six words, or four and it ends as a sentence does.
+ * Numbers and codes aren't words, so a phone number or an IBAN is still a value.
+ */
+function prose(value: string) {
+  const words = value.split(/\s+/).filter((token) => WORD.test(token)).length;
+  return words > 6 || (words >= 4 && /[.!?…]["”’)]?$/u.test(value));
+}
+
 /** Where the value is in `text`, if it's a "Key: Value" line. */
 export function keyValue(text: string): { from: number; to: number } | null {
   const match = KEY_VALUE.exec(text);
-  if (!match?.indices?.[1]) return null;
+  if (!match?.indices?.[1] || prose(match[1])) return null;
   const [from, to] = match.indices[1];
   return { from, to };
 }

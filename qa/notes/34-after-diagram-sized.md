@@ -410,6 +410,7 @@ flowchart LR
   A[Small] --> B[Diagram]
 ```
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Diagram (240 px wide), then Score (Settings → Little Touches)
 

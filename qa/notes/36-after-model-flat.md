@@ -410,6 +410,7 @@ square(20);
 translate([30, 10]) circle(8);
 ```
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Flat model (openscad block), then Score (Settings → Little Touches)
 

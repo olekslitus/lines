@@ -474,6 +474,7 @@ Food, 450.50
 Total, =SUM(B2:B3)
 ```
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Spreadsheet (csv block), then Score (Settings → Little Touches)
 

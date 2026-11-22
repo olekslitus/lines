@@ -538,6 +538,7 @@ After it, on a new page.
 
 And another.
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Page breaks (as Lines writes them, and as Obsidian and Typora do; a new page in the PDF at each, a gap between pages over a backdrop), then Score (Settings → Little Touches)
 

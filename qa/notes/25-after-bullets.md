@@ -442,6 +442,7 @@ And another.
     - Third level
 - Last item
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Bullet list, then Score (Settings → Little Touches)
 

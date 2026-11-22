@@ -410,6 +410,7 @@ const greeting: string = "hello";
 console.log(greeting);
 ```
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Code block (TypeScript), then Score (Settings → Little Touches)
 

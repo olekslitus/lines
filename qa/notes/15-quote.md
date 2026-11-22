@@ -282,6 +282,7 @@ Each element in a quote. Check: it draws as it does on its own, sits inside the 
 #### 32. Key: Value line in a quote
 
 > **Wi-Fi password:** correct-horse-battery
+> Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Score (Settings → Little Touches) in a quote
 

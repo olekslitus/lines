@@ -410,6 +410,7 @@ Half: 3.5/5
 Score: 7 / 10
 Not a score: 12/20
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Score (Settings → Little Touches), then Score (Settings → Little Touches)
 

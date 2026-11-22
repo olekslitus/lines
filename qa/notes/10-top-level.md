@@ -282,6 +282,7 @@ And another.
 #### 32. Key: Value line at the top level
 
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Score (Settings → Little Touches) at the top level
 

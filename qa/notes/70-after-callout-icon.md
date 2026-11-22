@@ -378,6 +378,7 @@ And another.
 Text in a warning callout with the flag icon.
 :::
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Callout (warning, chosen icon), then Score (Settings → Little Touches)
 

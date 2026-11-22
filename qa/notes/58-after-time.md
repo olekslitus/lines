@@ -314,6 +314,7 @@ And another.
 
 At [12:34](https://traffic.megaphone.fm/FSI3647670844.mp3#t=754) they said it; [3:16] stays text here
 **Wi-Fi password:** correct-horse-battery
+Not a value: a sentence with a colon in it reads on, as prose does.
 
 #### 33. Time in an episode, then Score (Settings → Little Touches)
 

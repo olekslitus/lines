@@ -1211,6 +1211,27 @@ test("a score on a Key: Value line or in the properties is drawn as marks, as Li
   expect(await page.locator(".editor-pane .cm-lp-copy").count()).toBe(0);
 });
 
+test("a sentence with a colon in it is prose, not a Key: Value line with a copy button", async () => {
+  await app.open(
+    [
+      "# Trip",
+      "",
+      "Plate: 3WBZ56",
+      "IBAN: DE89 3704 0044 0532 0130 00",
+      "Address: 221B Baker Street, London",
+      "Update: moved to Tuesday.",
+      "Three slow days: walk everywhere, eat late and sleep in.",
+      "The plan: take the early train and see the old town before lunch",
+      "",
+      "End",
+    ].join("\n"),
+  );
+  await app.page.evaluate(() => window.testing.place());
+  await app.page.locator(".editor-pane .cm-lp-copy").first().waitFor();
+  expect(await app.page.locator(".editor-pane .cm-lp-kv-value").allTextContents()).toEqual(["3WBZ56", "DE89 3704 0044 0532 0130 00", "221B Baker Street, London", "moved to Tuesday."]);
+  expect(await app.page.locator(".editor-pane .cm-lp-copy").count()).toBe(4);
+});
+
 test("times and words between colons are text, not emoji shortcodes: a duration's 4:47:43, :smile:", async () => {
   app = await openApp();
   await app.open("---\nduration: 4:47:43\n---\n# Talk\n\nAt 1:02:03 and :smile: here");

@@ -1476,7 +1476,7 @@
   bind:offsetWidth={rootWidth}
   class={[
     "group relative flex flex-col font-text text-[0.94em] leading-none tabular-nums select-none [--grid-line:color-mix(in_srgb,var(--ink)_12%,transparent)] [--head:linear-gradient(var(--code-bg),var(--code-bg)),var(--bg)] [--head-on:linear-gradient(var(--active),var(--active)),var(--bg)]",
-    // A block is as wide as its columns.
+    // A block is as wide as its columns, up to its width, if it gives one.
     !sheet.fills && "w-fit max-w-full",
     filling && "cursor-crosshair",
     // A formula in another window or tab is waiting for cells to be pointed at.
@@ -1485,6 +1485,7 @@
     resizing && "cursor-nwse-resize",
   ]}
   style:height={sheet.fills ? `${height}px` : undefined}
+  style:max-width={sheet.width ? `min(${sheet.width}px, 100%)` : undefined}
 >
   <!-- The current cell, and what's written in it: a formula, not what it works out to. A block in a note does without, quieter in the text around it: its formulas show as they're written in, and on hovering. -->
   {#if sheet.fills}

@@ -31,6 +31,8 @@ export interface Sheet {
   /** A block's name, which others find it by; renamed, or named, from the grid. */
   readonly name?: string | null;
   rename?(name: string | null): void;
+  /** The most a block is shown wide, in pixels (```csv |400): past it, its columns scroll sideways. */
+  readonly width?: number | null;
   /** A block's name for a formula elsewhere in its note: if it has none, the one it's given (Sheet1, Sheet2…) by `keepName`. */
   nameHere?(): string | null;
   /** Gives a block the name `nameHere` gave out, once the pointing's done, so the grid doesn't move under the pointer. */

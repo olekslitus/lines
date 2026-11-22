@@ -975,6 +975,8 @@ export interface EditableBlock {
   readonly from: number;
   /** Its name, written after its language (```csv name=costs), by which other blocks and notes can find it. */
   readonly name: string | null;
+  /** The most it's shown wide, in pixels, written after a bar (```csv |400), if it gives one. */
+  readonly width: number | null;
   readonly readOnly: boolean;
   /** Writes its code, as one step to undo. */
   write(source: string): void;
@@ -988,7 +990,7 @@ export interface EditableBlock {
 
 /** What a renderer's editor gives back for a block it's put into. */
 export interface BlockEditor {
-  /** Its code or name, the note around it, or whether the note is read-only, changed. */
+  /** Its code, name or width, the note around it, or whether the note is read-only, changed. */
   update(): void;
   /** Takes the keyboard, from the line above it (↓) or below (↑). */
   focus(from: "above" | "below"): void;

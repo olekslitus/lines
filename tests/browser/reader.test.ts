@@ -404,7 +404,8 @@ test("a feed with no picture of its own is made with its site's icon as its note
 });
 
 test("Get Its Picture, in a subscription's menu, gives one without a picture its site's icon; a note locked meanwhile is left as it was", async () => {
-  app = await openApp();
+  // On disk, so WebKit keeps the picture (an attachment).
+  app = await openApp({ onDisk: true });
   const page = app.page;
   const FEED = "https://plain.example/feed.xml";
   const cors = { "access-control-allow-origin": "*" };
@@ -445,13 +446,13 @@ test("Get Its Picture, in a subscription's menu, gives one without a picture its
   await page.waitForTimeout(500);
   expect(await body()).toBe(before);
 
-  // WebKit's test browser can't keep a picture (an attachment): what follows is Chromium's.
-  if (engine() !== "chromium") return;
   await page.evaluate((id) => window.testing.notes.removeLock(id), id);
   await row.click({ button: "right" });
   await getPicture.click();
   await page.waitForFunction((id) => window.testing.notes.get(id)?.note.body.includes("](../attachments/"), id);
-  // Its icon you can see through, black all over, is marked so: on a tile in a dark theme.
+  // Its icon you can see through, black all over, is marked so: on a tile in a dark theme, once its
+  // tone's been seen (as it loads).
+  await row.locator("img[data-tone]").waitFor();
   expect(await row.locator("img").getAttribute("data-tone")).toBe("dark");
   await row.click({ button: "right" });
   await page.getByRole("menuitem", { name: "Open Its Note" }).waitFor();
@@ -460,7 +461,8 @@ test("Get Its Picture, in a subscription's menu, gives one without a picture its
 });
 
 test("Get Missing Pictures, in RSS Feeds' menu, gives each of its feeds without a picture its site's icon and says how many; not a podcast's", async () => {
-  app = await openApp();
+  // On disk, so WebKit keeps the pictures (attachments).
+  app = await openApp({ onDisk: true });
   const page = app.page;
   const cors = { "access-control-allow-origin": "*" };
   const asked: string[] = [];
@@ -492,11 +494,8 @@ test("Get Missing Pictures, in RSS Feeds' menu, gives each of its feeds without 
   const sidebar = page.getByRole("navigation", { name: "Library" });
   await sidebar.getByRole("button", { name: /^RSS Feeds/ }).click({ button: "right" });
   await page.getByRole("menuitem", { name: "Get Missing Pictures" }).click();
-  // In WebKit's test browser, which can't keep a picture, none is found.
-  const found = engine() === "chromium" ? "Found a picture for 1 feed" : "No pictures found";
-  await page.waitForFunction((text) => document.querySelector("body > [aria-live=polite].sr-only")?.textContent === text, found);
+  await page.waitForFunction(() => document.querySelector("body > [aria-live=polite].sr-only")?.textContent === "Found a picture for 1 feed");
   expect(asked).toEqual([]);
-  if (engine() !== "chromium") return;
   await sidebar.getByRole("button", { name: /^Plain Notes/ }).locator("img").waitFor();
   expect(await page.evaluate((urls) => window.testing.feeds.withoutPictures(urls), Object.keys(feeds))).toEqual(["https://quiet.example/feed.xml"]);
 });

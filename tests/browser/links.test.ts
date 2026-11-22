@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { type App, engine, mod, noErrors, openApp } from "./app";
+import { type App, clickMod, noErrors, openApp } from "./app";
 
 let app: App;
 beforeEach(async () => {
@@ -29,13 +29,11 @@ describe("links to folders and files on this computer", () => {
   });
 
   test("on the web, following one copies its path, as a page can't open it", async () => {
-    if (engine() !== "chromium") return;
     await app.open("[Projects](file:///Users/me/My%20Projects/)\n\nEnd");
     await app.page.evaluate(() => window.testing.place());
-    await app.page.keyboard.down(mod());
-    await app.page.locator(".editor-pane .cm-lp-link").first().click();
-    await app.page.keyboard.up(mod());
-    await app.page.waitForFunction(async () => (await navigator.clipboard.readText()) === "/Users/me/My Projects", null, { timeout: 2000 });
+    // Followed as a link is: with ⌘ or Ctrl, as the browser says it is.
+    await app.page.locator(".editor-pane .cm-lp-link").first().click({ modifiers: [await clickMod(app.page)] });
+    await app.page.evaluate(() => window.testing.until(async () => (await navigator.clipboard.readText()) === "/Users/me/My Projects"));
   });
 
   test("/folder is offered only where there's a folder picker (the Mac app)", async () => {

@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { type App, engine, mod, noErrors, openApp } from "./app";
+import { type App, mod, noErrors, openApp } from "./app";
 import { answerFile, png, wav } from "./files";
 
 /*
@@ -240,9 +240,8 @@ test("an episode note plays from the button after its audio, and is listened to 
 });
 
 test("playing an episode pauses a sound playing in a note, and the other way round", async () => {
-  app = await openApp();
-  // WebKit run by Playwright can't keep a file in IndexedDB, so a note's sound can't be attached there.
-  if (engine() !== "chromium") return;
+  // On disk, so WebKit keeps the note's sound (an attachment).
+  app = await openApp({ onDisk: true });
   const page = app.page;
   const audio = wav(20_000);
   await page.route((url) => url.hostname === "audio.example", (route) => answerFile(route, audio, "audio/wav"));

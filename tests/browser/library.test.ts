@@ -73,7 +73,7 @@ test("a link pasted into a new note is filled in at once, filed, and one ⌘Z pu
   if (engine() === "chromium") {
     expect(below).toMatch(/^# .*\n\n!\[.*\|400\]\(\.\.\/attachments\/([0-9a-f]{32}\.jpg)\)\n$/);
     const name = /attachments\/([0-9a-f]{32}\.jpg)/.exec(text)![1];
-    await page.waitForFunction(async (name) => (await window.testing.attachmentNames()).includes(name), name);
+    await page.evaluate((name) => window.testing.until(async () => (await window.testing.attachmentNames()).includes(name)), name);
   } else {
     expect(below).toMatch(/^# .*\n(?:\n!\[.*\|400\]\(\.\.\/attachments\/[0-9a-f]{32}\.jpg\)\n)?$/);
     await page.waitForFunction((title) => window.testing.text()?.endsWith(`# ${title}\n`), TITLE);

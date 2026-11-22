@@ -45,10 +45,14 @@ const editor = () => {
   return dom ? EditorView.findFromDOM(dom) : null;
 };
 
-/** Resolves once `ready()` is true, checked each frame; rejects after `timeout` ms. */
+/**
+ * Resolves once `ready()` is true, checked each frame; rejects after `timeout` ms. It can be async,
+ * for what's only read so (the clipboard, attachments), which Playwright's waitForFunction can't
+ * wait on: it takes the promise for the answer.
+ */
 async function until(ready: () => unknown, timeout = 10_000) {
   const start = performance.now();
-  while (!ready()) {
+  while (!(await ready())) {
     if (performance.now() - start > timeout) throw new Error("timed out");
     await new Promise((resolve) => requestAnimationFrame(resolve));
   }

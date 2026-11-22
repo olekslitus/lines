@@ -1,6 +1,6 @@
-import { afterEach, beforeAll, describe, expect, test } from "bun:test";
+import { afterEach, beforeAll, describe, expect, setSystemTime, test } from "bun:test";
 import type { MarkField, Marks } from "../../src/lib/feeds/marks";
-import { beforeDelete, beforeWrite, type Device, devices, drive, editElsewhere, FOLDER, fileOf, inAnotherTab, languages, listings, notes, placeholders, reads, refused, serialize, sync, used, written } from "./sync";
+import { beforeDelete, beforeRead, beforeWrite, type Device, devices, drive, driveFiles, editElsewhere, FOLDER, fileOf, inAnotherTab, languages, listings, notes, placeholders, reads, refused, serialize, sync, used, written } from "./sync";
 // After ./sync, which sets up the page they run in and the notes' storage in memory: imported first,
 // a module would read a page that isn't there, or bind the real storage (IndexedDB) before it's replaced.
 const { latexContent, markTitle } = await import("../../src/plugins/latex/text");
@@ -248,7 +248,46 @@ describe("sync, of a note changed on two devices", () => {
     notes.update(id, "# Trip\n\nRome\nVenice");
     await there.sync();
     await here.open();
+    // A minute later, so the newer edit is newer, not one made in the same millisecond.
+    setSystemTime(Date.now() + 60_000);
     notes.update(id, "# Trip\n\nRome\nFlorence");
+    await here.sync();
+    setSystemTime();
+    expect(listed().map((note) => note.body)).toEqual(["# Trip (conflicted copy)\n\nRome\nVenice", "# Trip\n\nRome\nFlorence"]);
+  });
+
+  test("the newer edit is kept whichever device syncs last", async () => {
+    const [here, there] = await devices(2);
+    const id = notes.add("# Trip\n\nRome");
+    await here.sync();
+    await there.sync();
+    await here.open();
+    notes.update(id, "# Trip\n\nRome\nFlorence");
+    await notes.flush();
+    await there.open();
+    setSystemTime(Date.now() + 60_000);
+    notes.update(id, "# Trip\n\nRome\nVenice");
+    await there.sync();
+    setSystemTime();
+    await here.sync();
+    expect(listed().map((note) => note.body)).toEqual(["# Trip (conflicted copy)\n\nRome\nFlorence", "# Trip\n\nRome\nVenice"]);
+  });
+
+  test("an edit made here while sync reads another device's isn't written over: the newer is kept, the other as a conflicted copy", async () => {
+    const [here, there] = await devices(2);
+    const id = notes.add("# Trip\n\nRome");
+    await here.sync();
+    await there.sync();
+    notes.update(id, "# Trip\n\nRome\nVenice");
+    await there.sync();
+    await here.open();
+    // Typed after sync listed the folder, as it reads the note.
+    setSystemTime(Date.now() + 60_000);
+    beforeRead.set(fileOf(id), () => notes.update(id, "# Trip\n\nRome\nFlorence"));
+    await here.sync();
+    setSystemTime();
+    expect(beforeRead.size).toBe(0);
+    expect(notes.get(id)!.note.body).toBe("# Trip\n\nRome\nFlorence");
     await here.sync();
     expect(listed().map((note) => note.body)).toEqual(["# Trip (conflicted copy)\n\nRome\nVenice", "# Trip\n\nRome\nFlorence"]);
   });
@@ -615,6 +654,253 @@ describe("sync, of a folder of small files beside the notes: what was done with 
     await device.sync();
     expect(folderReads()).toEqual([]);
     ready = false;
+  });
+});
+
+describe("sync, of a note deleted on one device", () => {
+  test("deletes it on the others, and takes it out of the folder", async () => {
+    const [here, there] = await devices(2);
+    const id = notes.add("# Old list");
+    notes.add("# Kept");
+    await here.sync();
+    await there.sync();
+    await notes.deleteForever(id);
+    await there.sync();
+    expect(drive.has(fileOf(id))).toBe(false);
+    await here.sync();
+    expect(bodies()).toEqual(["# Kept"]);
+  });
+
+  test("edited on another device meanwhile, keeps it there with the edit, and brings it back to the folder", async () => {
+    const [here, there] = await devices(2);
+    const id = notes.add("# Plan\n\none");
+    notes.add("# Kept");
+    await here.sync();
+    await there.sync();
+    await notes.deleteForever(id);
+    await there.sync();
+    await here.open();
+    notes.update(id, "# Plan\n\none\ntwo");
+    await here.sync();
+    expect(bodies()).toEqual(["# Kept", "# Plan\n\none\ntwo"]);
+    expect(drive.get(fileOf(id))?.text).toEndWith("# Plan\n\none\ntwo");
+    await there.sync();
+    expect(bodies()).toEqual(["# Kept", "# Plan\n\none\ntwo"]);
+  });
+
+  test("edited on another device before it heard, brings the edit back here rather than deleting it there", async () => {
+    const [here, there] = await devices(2);
+    const id = notes.add("# Plan\n\none");
+    await here.sync();
+    await there.sync();
+    notes.update(id, "# Plan\n\none\ntwo");
+    await there.sync();
+    await here.open();
+    await notes.deleteForever(id);
+    await here.sync();
+    expect(drive.get(fileOf(id))?.text).toEndWith("# Plan\n\none\ntwo");
+    expect(bodies()).toEqual(["# Plan\n\none\ntwo"]);
+  });
+});
+
+describe("sync, of a locked note", () => {
+  async function lockedNote() {
+    const { key } = await noteKeys.create("correct horse");
+    noteKeys.save({ key, touchId: false });
+    const devicesHere = await devices(2);
+    const id = notes.add("# Bank\n\nPIN 1234");
+    await notes.lock(id);
+    await devicesHere[0].sync();
+    return { id, devices: devicesHere };
+  }
+
+  test("edited as a pass starts, goes up once it's encrypted again, never empty", async () => {
+    const {
+      id,
+      devices: [here, there],
+    } = await lockedNote();
+    beforeRead.set(`${FOLDER.path}/encryption.json`, () => notes.update(id, "# Bank\n\nPIN 1234\nPUK 5678"));
+    await here.sync();
+    expect(beforeRead.size).toBe(0);
+    expect(drive.get(fileOf(id))!.text).not.toEndWith("\n---\n");
+    await here.sync();
+    await there.sync();
+    expect(listed()).toEqual([{ body: "# Bank\n\nPIN 1234\nPUK 5678", pinned: false, trashed: false, icon: undefined, color: undefined, locked: true }]);
+    noteKeys.clear();
+  });
+
+  test("a drive's own copy of one, with the password not given here, is kept locked, titled as a conflicted copy", async () => {
+    const {
+      id,
+      devices: [here],
+    } = await lockedNote();
+    const before = drive.get(fileOf(id))!;
+    notes.update(id, "# Bank\n\nPIN 1234\nPUK 5678");
+    await here.sync();
+    drive.set(`${FOLDER.path}/notes/${id} 2.md`, before);
+    noteKeys.clear();
+    await here.open();
+    await here.sync();
+    const copy = notes.entries.find(({ note }) => note.id !== id)!.note;
+    expect(copy.locked && [copy.locked.title, copy.locked.open, before.text.endsWith(copy.locked.sealed)]).toEqual(["Bank (conflicted copy)", undefined, true]);
+  });
+});
+
+describe("sync, connecting", () => {
+  test("to another folder deletes nothing here: the notes go up there, beside what it has", async () => {
+    const [here] = await devices(1);
+    const id = notes.add("# Mine");
+    await here.sync();
+    const other = { ...FOLDER, path: "/drive/other" };
+    drive.set(`${other.path}/notes/theirs.md`, { text: serialize({ id: "theirs", body: "# Theirs", createdAt: 1, updatedAt: 1, pinned: false, trashed: false }), etag: "theirs" });
+    await sync.configure(other);
+    await sync.syncNow();
+    expect(sync.status).toBe("idle");
+    expect(bodies()).toEqual(["# Mine", "# Theirs"]);
+    expect(drive.get(`${other.path}/notes/${id}.md`)?.text).toEndWith("# Mine");
+  });
+
+  test("a note with nothing written in it yet isn't synced until something is", async () => {
+    const [here] = await devices(1);
+    const id = notes.add("");
+    await here.sync();
+    expect(drive.has(fileOf(id))).toBe(false);
+    notes.update(id, "# Now");
+    await here.sync();
+    expect(drive.get(fileOf(id))?.text).toEndWith("# Now");
+  });
+});
+
+describe("sync, of the images and files notes show", () => {
+  const bytes = new Uint8Array([137, 80, 78, 71, 1, 2, 3, 4]);
+  const kept = async (name: string) => {
+    const { getAttachment } = await import("../../src/lib/notes/attachments");
+    const file = await getAttachment(name);
+    return file && new Uint8Array(await file.arrayBuffer());
+  };
+
+  test("go to the folder, come in on other devices, and with encryption on are kept there only encrypted", async () => {
+    const { saveAttachment } = await import("../../src/lib/notes/attachments");
+    const [here, there, third] = await devices(3);
+    const name = await saveAttachment(new File([bytes], "photo.png", { type: "image/png" }));
+    notes.add(`# Photo\n\n![](../attachments/${name})`);
+    await here.sync();
+    expect(driveFiles.get(`${FOLDER.path}/attachments/${name}`)).toEqual(bytes);
+    await there.sync();
+    expect(await kept(name)).toEqual(bytes);
+
+    await here.open();
+    await sync.encrypt("correct horse battery");
+    await sync.syncNow();
+    const stored = [...driveFiles.keys()];
+    expect(stored).toHaveLength(1);
+    expect(stored[0]).toMatch(/\/attachments\/[0-9a-f]{32}\.enc$/);
+    expect(driveFiles.get(stored[0])).not.toEqual(bytes);
+    await third.sync();
+    expect(await kept(name)).toEqual(bytes);
+  });
+});
+
+describe("sync, with end-to-end encryption", () => {
+  const PASSPHRASE = "correct horse battery";
+  const KEY_FILE = `${FOLDER.path}/encryption.json`;
+  /** Whatever in the folder says `text`, in a note or beside them. */
+  const saying = (text: string) => [...drive].filter(([, file]) => file.text.includes(text)).map(([path]) => path);
+  /** Connects the device that's open as one that's never had the passphrase. */
+  async function connectAnew() {
+    await sync.configure(null);
+    await sync.configure(FOLDER);
+    await sync.syncNow();
+  }
+  /** What `work` failed with, or null. */
+  const failure = (work: Promise<unknown>) => work.then(
+    () => null,
+    (error: Error) => error.message,
+  );
+
+  test("keeps no note's text in the folder; a device without the passphrase stops, writing nothing, until it's given", async () => {
+    const [here, there] = await devices(2);
+    const id = notes.add("# Bank\n\nPIN 1234");
+    await here.sync();
+    await sync.encrypt(PASSPHRASE);
+    await sync.syncNow();
+    expect([...drive.keys()].filter((path) => path.includes("/notes/"))).toEqual([`${FOLDER.path}/notes/${id}.enc`]);
+    expect(saying("PIN")).toEqual([]);
+
+    await there.open();
+    notes.add("# Diary\n\nDear diary");
+    await connectAnew();
+    expect([sync.status, sync.encryptionIssue]).toEqual(["error", "locked"]);
+    expect(saying("Dear diary")).toEqual([]);
+    expect(bodies()).toEqual(["# Diary\n\nDear diary"]);
+
+    expect(await failure(sync.unlockLibrary("not the passphrase"))).toBeString();
+    expect(saying("Dear diary")).toEqual([]);
+    await sync.unlockLibrary(PASSPHRASE);
+    await sync.syncNow();
+    expect(sync.status).toBe("idle");
+    expect(bodies()).toEqual(["# Bank\n\nPIN 1234", "# Diary\n\nDear diary"]);
+    expect([...drive.keys()].filter((path) => path.includes("/notes/"))).toHaveLength(2);
+    expect(saying("Dear diary")).toEqual([]);
+  });
+
+  test("set up again elsewhere with a new passphrase, or turned off there, a device stops and says which, writing nothing", async () => {
+    const [here] = await devices(1);
+    notes.add("# Plan");
+    await here.sync();
+    await sync.encrypt(PASSPHRASE);
+    await sync.syncNow();
+    const original = drive.get(KEY_FILE)!;
+    const rekeyed = { text: JSON.stringify({ ...JSON.parse(original.text), id: crypto.randomUUID() }), etag: "rekeyed" };
+    drive.set(KEY_FILE, rekeyed);
+    notes.add("# New here");
+    written.length = 0;
+    await sync.syncNow();
+    expect([sync.status, sync.encryptionIssue]).toEqual(["error", "rekeyed"]);
+    expect(written).toEqual([]);
+    // Nor is the other device's key file written over with this one's key.
+    expect(await failure(sync.changePassphrase("another passphrase"))).toBeString();
+    expect(drive.get(KEY_FILE)).toEqual(rekeyed);
+
+    // Turned off there: the key file gone, and the encrypted notes with it.
+    drive.delete(KEY_FILE);
+    for (const path of drive.keys()) if (path.endsWith(".enc")) drive.delete(path);
+    written.length = 0;
+    await sync.syncNow();
+    expect([sync.status, sync.encryptionIssue]).toEqual(["error", "turned-off"]);
+    expect(written).toEqual([]);
+  });
+
+  test("with a new passphrase, a device setting up needs it, not the old one", async () => {
+    const [here, there] = await devices(2);
+    notes.add("# Plan");
+    await here.sync();
+    await sync.encrypt(PASSPHRASE);
+    await sync.syncNow();
+    await sync.changePassphrase("staple battery horse");
+    await there.open();
+    await connectAnew();
+    expect(sync.encryptionIssue).toBe("locked");
+    expect(await failure(sync.unlockLibrary(PASSPHRASE))).toBeString();
+    await sync.unlockLibrary("staple battery horse");
+    await sync.syncNow();
+    expect(bodies()).toEqual(["# Plan"]);
+  });
+
+  test("turned off, the notes go back to plain files, the encrypted ones and the key file go, and sync goes on", async () => {
+    const [here] = await devices(1);
+    const id = notes.add("# Plan\n\none");
+    await here.sync();
+    await sync.encrypt(PASSPHRASE);
+    await sync.syncNow();
+    await sync.decrypt();
+    await sync.syncNow();
+    expect(sync.status).toBe("idle");
+    expect([...drive.keys()].filter((path) => path.endsWith(".enc") || path === KEY_FILE)).toEqual([]);
+    expect(drive.get(fileOf(id))?.text).toEndWith("# Plan\n\none");
+    notes.update(id, "# Plan\n\none\ntwo");
+    await here.sync();
+    expect(drive.get(fileOf(id))?.text).toEndWith("# Plan\n\none\ntwo");
   });
 });
 

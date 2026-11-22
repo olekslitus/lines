@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import type { BucketConfig } from "../../src/lib/sync/providers";
 
-/** The system's keychain, as the apps that have one keep secrets in it: in memory, and able to be missing or refuse. */
+/** The system's keychain, as the apps that have one keep secrets in it: in memory, and able to be missing, refuse, or keep only part of what it's given. */
 const keychain = {
   items: new Map<string, string>(),
   there: true,
   refusing: false,
+  truncating: false,
 };
 mock.module("../../src/lib/keychain", () => ({
   keychain: {
@@ -16,7 +17,7 @@ mock.module("../../src/lib/keychain", () => ({
     },
     set: async (name: string, value: string) => {
       if (keychain.refusing) throw new Error("The user name or passphrase you entered is not correct.");
-      keychain.items.set(name, value);
+      keychain.items.set(name, keychain.truncating ? value.slice(0, 16) : value);
     },
     delete: async (name: string) => void keychain.items.delete(name),
   },
@@ -41,7 +42,7 @@ const bucket: BucketConfig = {
 const stored = () => localStorage.getItem(CONFIG_KEY) ?? "";
 
 beforeEach(() => {
-  Object.assign(keychain, { there: true, refusing: false });
+  Object.assign(keychain, { there: true, refusing: false, truncating: false });
   keychain.items.clear();
   localStorage.setItem(CONFIG_KEY, JSON.stringify(bucket));
 });
@@ -67,6 +68,12 @@ describe("the sync connection's keys", () => {
 
   test("where the keychain won't take them, they stay where they were", async () => {
     keychain.refusing = true;
+    await sync.load();
+    expect([sync.config, JSON.parse(stored())]).toEqual([bucket, bucket]);
+  });
+
+  test("nor where it takes them but gives back something else", async () => {
+    keychain.truncating = true;
     await sync.load();
     expect([sync.config, JSON.parse(stored())]).toEqual([bucket, bucket]);
   });

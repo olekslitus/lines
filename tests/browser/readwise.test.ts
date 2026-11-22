@@ -154,7 +154,7 @@ test("a token Readwise doesn't take is said so, and nothing else is asked", asyn
     return route.fulfill({ headers: CORS, status: 401, json: { detail: "Invalid token." } });
   });
   const group = await find("wrong");
-  await expect(group.getByRole("alert").textContent()).resolves.toBe("Readwise didn’t accept this token. Copy it again from Readwise.");
+  expect(await group.getByRole("alert").textContent()).toBe("Readwise didn’t accept this token. Copy it again from Readwise.");
   expect(asked).toEqual(["/api/v2/auth/"]);
   // Back in the field, to correct it.
   expect(await focused(page)).toBe("password");

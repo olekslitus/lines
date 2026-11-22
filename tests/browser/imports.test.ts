@@ -240,6 +240,23 @@ test("Notion's export, a ZIP of ZIPs: its pages, a database as a table of its ro
   await group.getByText("Everything in Export-0a1b is in Lines already.").waitFor();
 });
 
+test("Import Files…: a file's time where the system gives one, and now where it gives one before 1970, as Android's picker does", async () => {
+  app = await openApp();
+  const settings = await app.settings("Export and Import");
+  const before = Date.now();
+  await settings.locator("input[type=file][multiple]").first().evaluate((input: HTMLInputElement) => {
+    const chosen = new DataTransfer();
+    chosen.items.add(new File(["# Dated"], "Dated.md", { lastModified: Date.UTC(2024, 10, 14) }));
+    chosen.items.add(new File(["# Undated"], "Undated.md", { lastModified: -11_644_473_600_000 }));
+    input.files = chosen.files;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await settings.getByText("Imported 2 notes").waitFor();
+  const times = await app.page.evaluate(() => Object.fromEntries(window.testing.notes.entries.map(({ note }) => [note.body, note.createdAt])));
+  expect(times["# Dated"]).toBe(Date.UTC(2024, 10, 14));
+  expect(times["# Undated"]).toBeGreaterThanOrEqual(before);
+});
+
 describe("Evernote", () => {
   const enex = readFileSync(new URL("../unit/fixtures/evernote/Work.enex", import.meta.url), "utf8");
 

@@ -942,7 +942,6 @@ test("Tab and ⇧Tab number a numbered item again, and the items around it; Back
 });
 
 test("Copy what you select copies a selection made with the pointer, not with keys", async () => {
-  if (engine() !== "chromium") return;
   await app.page.evaluate(() => (window.testing.prefs.copyOnSelect = true));
   await app.open("Copy these words please");
   await app.page.evaluate(() => navigator.clipboard.writeText("before"));
@@ -951,7 +950,7 @@ test("Copy what you select copies a selection made with the pointer, not with ke
   await app.page.keyboard.press("Shift+Home");
   expect(await app.page.evaluate(() => navigator.clipboard.readText())).toBe("before");
   await line.dblclick({ position: { x: 10, y: 8 } });
-  await app.page.waitForTimeout(100);
+  await app.page.evaluate(() => window.testing.until(async () => (await navigator.clipboard.readText()) !== "before"));
   expect(await app.page.evaluate(() => navigator.clipboard.readText())).toBe("Copy");
 });
 
@@ -966,12 +965,11 @@ describe("a code block in a list item or a quote", () => {
   const NOTES = ["- Item\n\n  ```\n  one\n    two\n  ```", "> ```\n> one\n>   two\n> ```"];
 
   test("Copy copies every line of its code, without the item's indent or the >", async () => {
-    if (engine() !== "chromium") return;
     for (const note of NOTES) {
       await app.open(note);
       await app.page.evaluate(() => navigator.clipboard.writeText("before"));
       await app.page.locator(".editor-pane .cm-lp-code-copy").dispatchEvent("click");
-      await app.page.waitForFunction(async () => (await navigator.clipboard.readText()) !== "before");
+      await app.page.evaluate(() => window.testing.until(async () => (await navigator.clipboard.readText()) !== "before"));
       expect(await app.page.evaluate(() => navigator.clipboard.readText())).toBe("one\n  two");
     }
   });
@@ -1072,7 +1070,6 @@ describe("fixed", () => {
   });
 
   test("Copy what you select doesn't copy a selection made with keys, at a click after it", async () => {
-    if (engine() !== "chromium") return;
     await app.page.evaluate(() => (window.testing.prefs.copyOnSelect = true));
     await app.open("Some words here\n\nAnd more");
     await app.page.evaluate(() => navigator.clipboard.writeText("before"));
@@ -1169,11 +1166,10 @@ describe("fixed", () => {
     await other.close();
 
     // The cells' menu copies them the same way.
-    if (engine() !== "chromium") return;
     await app.page.evaluate(() => navigator.clipboard.writeText("before"));
     await app.page.locator(".cm-sheet [role=gridcell]").nth(0).click({ button: "right" });
     await app.page.getByRole("menuitem", { name: "Copy" }).click();
-    await app.page.waitForFunction(async () => (await navigator.clipboard.readText()) !== "before");
+    await app.page.evaluate(() => window.testing.until(async () => (await navigator.clipboard.readText()) !== "before"));
     const html = await app.page.evaluate(async () => {
       const [item] = await navigator.clipboard.read();
       return item.types.includes("text/html") ? (await item.getType("text/html")).text() : "";

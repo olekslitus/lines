@@ -140,7 +140,7 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] Inside `SUM(` a hint shows `SUM(number1, [number2], …)` with the current argument in bold and what it's for; after a comma the next argument is bold
 - [ ] After `=`, `(`, a comma or an operator: clicking a cell writes its reference, dragging writes a range, and clicking another replaces it; ↑ ↓ ← → point from the cell being written in, ⇧ and an arrow stretches to a range; typing `+` and pointing again adds a second reference; each reference is outlined on the grid in its own color (the one being pointed at dashed) and colored in the bar above
 - [ ] Writing text that isn't a formula, the arrow keys still keep it and move to the next cell
-- [ ] Right-click (or ⇧F10) opens the cells' menu: Cut, Copy, Insert Row Above/Below, Delete Row, Insert Column Left/Right, Delete Column (counts when several are selected), Clear; inserting a row inside a sum's range widens the sum; Esc gives focus back to the grid
+- [ ] Right-click (or ⇧F10) opens the cells' menu: Cut, Copy, Insert Row Above/Below, Delete Row, Insert Column Left/Right, Delete Column (counts when several are selected), Clear; inserting a row inside a sum's range widens the sum, and deleting its first or last row narrows it (not `#REF!`); Esc gives focus back to the grid
 - [ ] `#tag` on the title line shows as a tag and puts the note under it in the sidebar; the list shows the title and the first cells as the excerpt
 - [ ] A trashed spreadsheet can't be changed (no typing, pasting or menu changes), but can be scrolled and copied
 - [ ] Spreadsheets plugin off: the note shows its text (title, blank line, CSV) and can be changed; on again, the grid

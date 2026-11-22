@@ -463,6 +463,15 @@ export function shift(cells: Cells, axis: "row" | "column", at: number, count: n
       }),
     );
     const n = Math.abs(count);
+    if (count < 0) {
+      // A range losing its first or last rows or columns, but not all of them, keeps the rest.
+      cells.forEach((row, r) =>
+        row.forEach((input, c) => {
+          const kept = isFormula(input) ? shrunk(input, axis, at + 1, at + n) : input;
+          if (kept !== input) setInput(model, 0, r, c, kept);
+        }),
+      );
+    }
     if (axis === "row") {
       if (count > 0) model.insertRows(0, at + 1, n);
       else model.deleteRows(0, at + 1, n);
@@ -543,6 +552,33 @@ function moveCorner(corner: Corner, rows: number, columns: number): Corner | nul
 const columnText = (corner: Corner) => (corner.absolute_column ? "$" : "") + columnNameFromNumber(corner.column);
 const rowText = (corner: Corner) => (corner.absolute_row ? "$" : "") + corner.row;
 const cornerText = (corner: Corner) => columnText(corner) + rowText(corner);
+
+/**
+ * A formula with its own sheet's ranges that rows or columns `first` to `last` (from 1) are about
+ * to be taken from at an edge made smaller to leave them out, as Excel and Numbers do: IronCalc
+ * would make that edge #REF!. A range taken out whole is left to it, as #REF!.
+ */
+function shrunk(formula: string, axis: "row" | "column", first: number, last: number): string {
+  const chars = Array.from(formula);
+  const cut = (n: number) => n >= first && n <= last;
+  let out = "";
+  let at = 0;
+  for (const { token, start, end } of getTokens(formula)) {
+    if (typeof token !== "object" || !("Range" in token) || token.Range.sheet) continue;
+    const { left, right } = token.Range;
+    // Whole columns (A:B) lose no rows, and whole rows (1:3) no columns.
+    const whole = { row: left.row === 1 && right.row === MAX_ROW, column: left.column === 1 && right.column === MAX_COLUMN };
+    if (whole[axis]) continue;
+    const [low, high] = [Math.min(left[axis], right[axis]), Math.max(left[axis], right[axis])];
+    if (cut(low) === cut(high)) continue;
+    const edge = (corner: Corner): Corner => ({ ...corner, [axis]: corner[axis] === low ? (cut(low) ? last + 1 : low) : cut(high) ? first - 1 : high });
+    const [from, to] = [edge(left), edge(right)];
+    const text = whole.row ? `${columnText(from)}:${columnText(to)}` : whole.column ? `${rowText(from)}:${rowText(to)}` : `${cornerText(from)}:${cornerText(to)}`;
+    out += chars.slice(at, start).join("") + text;
+    at = end;
+  }
+  return out + chars.slice(at).join("");
+}
 
 /** A reference or range token's text copied elsewhere, keeping its sheet as written; null if it isn't one. */
 function movedToken({ token }: MarkedToken, written: string, rows: number, columns: number): string | null {

@@ -1173,6 +1173,25 @@ describe("fixed", () => {
     expect(await grid.getAttribute("aria-rowcount")).toBe(rows);
   });
 
+  test("deleting the first or last row of what a spreadsheet's total sums leaves the rest summed, not #REF!", async () => {
+    const block = (rows: string) => `\`\`\`csv\nItem,Cost\n${rows}\n\`\`\`\n\nAfter the block.`;
+    const cells = app.page.locator(".cm-sheet [role=gridcell]");
+    const deleteRow = async (cell: number) => {
+      await cells.nth(cell).click({ button: "right" });
+      await app.page.getByRole("menuitem", { name: "Delete Row" }).click();
+    };
+    await app.open(block("Rent,1200\nFood,450\nGas,80\nTotal,=SUM(B2:B4)"));
+    await cells.nth(9).filter({ hasText: "1730" }).waitFor();
+    // Rent, the first summed.
+    await deleteRow(2);
+    expect(await app.text()).toBe(block("Food,450\nGas,80\nTotal,=SUM(B2:B3)"));
+    await cells.nth(7).filter({ hasText: "530" }).waitFor();
+    // Gas, the last.
+    await deleteRow(4);
+    expect(await app.text()).toBe(block("Food,450\nTotal,=SUM(B2:B2)"));
+    await cells.nth(5).filter({ hasText: "450" }).waitFor();
+  });
+
   test("a table with a ``` cell, converted to a spreadsheet, keeps it in the block", async () => {
     await app.open("| Fence |\n| --- |\n| ``` |\n\nAfter the table.");
     await app.page.locator(".editor-pane .cm-lp-table-wrap").hover();

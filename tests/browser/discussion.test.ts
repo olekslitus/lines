@@ -312,11 +312,12 @@ async function deepThread(width: number, height: number) {
   const page = app.page;
   await headers(page).first().waitFor();
   await page.evaluate(async () => {
-    // Every comment laid out, to be measured: those out of view aren't (content-visibility). Linux's
-    // WebKit could measure some before they'd moved into place, so with the fonts in, after two frames.
+    // Every comment laid out, to be measured: those out of view aren't (content-visibility).
     for (const comment of document.querySelectorAll<HTMLElement>("[data-comment]")) comment.style.contentVisibility = "visible";
     await document.fonts.ready;
-    await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+    // On a phone the post slides in over the list: WebKit gives each rect where the slide is as it's
+    // asked, so comments measured mid-slide are a pixel or two apart.
+    await Promise.all([...document.querySelectorAll("[data-pane], .editor-pane")].flatMap((pane) => pane.getAnimations().map((animation) => animation.finished)));
   });
   return page.evaluate(() => {
     return [...document.querySelectorAll<HTMLElement>("[data-comment]")]
@@ -338,8 +339,7 @@ function expectDrawnIn(shapes: Awaited<ReturnType<typeof deepThread>>, inline: n
       if (depth) expect(shape.left).toBeGreaterThan(shapes[depth - 1].left);
     } else {
       expect(shape.says).toBe(`↳ reply to person${depth}`);
-      // In line with it, to the pixel (a cold layout in Linux's WebKit can round a half pixel either way).
-      expect(Math.abs(shape.left - shapes[inline - 1].left)).toBeLessThanOrEqual(1);
+      expect(shape.left).toBe(shapes[inline - 1].left);
     }
   }
 }

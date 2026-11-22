@@ -153,6 +153,8 @@ test("ten thousand notes: the import says how it's going, with Settings closed a
     // Again, all of them this time.
     const again = Date.now();
     await chooseVault(vault);
+    // Read again first, as long as that takes.
+    await group.getByText("10,000 notes and 100 folders in Many.").waitFor({ timeout: 60_000 });
     await group.getByRole("button", { name: "Import 10,000 Notes" }).click();
     await group.getByText("Imported 10,000 notes.").waitFor({ timeout: 120_000 });
     console.log(`Imported 10,000 notes in ${Date.now() - again} ms`);

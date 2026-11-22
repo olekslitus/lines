@@ -176,7 +176,8 @@ test("Mark as Played on the episode playing puts the player away, and it stays p
   await page.locator(".note-list [data-post]").first().click({ button: "right" });
   await page.getByRole("menuitem", { name: "Mark as Played" }).click();
   await page.getByRole("region", { name: "Podcast player" }).waitFor({ state: "detached" });
-  await page.waitForTimeout(300);
+  // Kept played, and its place let go of.
+  await page.waitForFunction((key) => window.testing.player.positions.get(key)?.played, first);
   expect(await placeOf(app, first)).toMatchObject({ at: 0, played: true });
 });
 

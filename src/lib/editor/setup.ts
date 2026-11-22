@@ -13,6 +13,7 @@ import { cursor } from "./cursor";
 import { dragBlocks } from "./dragBlocks";
 import { focusInPlace } from "./focusInPlace";
 import { folding, foldingCompartment } from "./folding";
+import { sectionMoveKeymap } from "./sectionMoves";
 import { fenceInput } from "./fences";
 import { headingLevelInput } from "./headingLevel";
 import { quoteInput } from "./quotes";
@@ -520,6 +521,7 @@ export function createExtensions(onChange: () => void, format?: string): Extensi
     readOnlyCompartment.of(readOnly(false)),
     outlineCompartment.of([]),
     foldingCompartment.of(prefs.foldSections ? folding : []),
+    sectionMoveKeymap,
     propertiesCompartment.of([]),
     theme,
     EditorView.updateListener.of((update) => {

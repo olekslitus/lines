@@ -28,7 +28,7 @@ A quiet page that gets out of your way. Type the way you think, and Lines tidies
 - Link notes with `@` or `[[`. Give a note a type, like `person` or `recipe`, and see all of them together.
 - Search finds anything, across every note, as you type.
 - Pictures, files, audio, video, math, drawings and diagrams sit right in the note.
-- Small things help: drag any line to move it, fold a heading's section away, find and replace, arrows that draw themselves (`->` as →), notes side by side, and, on a computer, a note in a small window of its own that can stay on top.
+- Small things help: drag any line to move it (a heading takes its section along), fold a heading's section away, find and replace, arrows that draw themselves (`->` as →), notes side by side, and, on a computer, a note in a small window of its own that can stay on top.
 
 ### Keep what you read, watch and listen to
 

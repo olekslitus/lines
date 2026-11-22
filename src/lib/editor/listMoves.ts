@@ -12,7 +12,8 @@ import { frontMatterField } from "./objects";
  * past the line there. A numbered list an item is moved into or out of, by those keys, a grip,
  * dragging text, cutting, pasting or deleting it, is numbered again in its new order
  * (Settings → Editor → Renumber lists when items move): from the number it started at, keeping its
- * `.` or `)`. A list numbered the same throughout (`1.`, `1.`, `1.`) stays so.
+ * `.` or `)`. A list numbered the same throughout (`1.`, `1.`, `1.`) stays so. A heading moves its
+ * section the same way, with the same swap (sectionMoves.ts).
  */
 
 const propertyLines = (state: EditorState) => state.field(frontMatterField, false)?.lines ?? 0;
@@ -37,6 +38,33 @@ function sibling(item: SyntaxNode, after: boolean) {
   return next?.name === "ListItem" ? next : null;
 }
 
+/**
+ * Swaps lines `top`–`bottom` with lines `from`–`to` just above them (`up`) or below them, the blank
+ * lines between them staying between them: the changes, and how far lines `top`–`bottom` move.
+ */
+export function swapLines(doc: Text, [top, bottom]: [number, number], [from, to]: [number, number], up: boolean): { changes: ChangeSpec[]; by: number } {
+  const text = (a: number, b: number) => doc.sliceString(doc.line(a).from, doc.line(b).to);
+  const [above, below] = up ? [from, top] : [top, from];
+  const [aboveEnd, belowEnd] = up ? [to, bottom] : [bottom, to];
+  const gap = aboveEnd + 1 < below ? `${text(aboveEnd + 1, below - 1)}\n` : "";
+  if (up) {
+    return {
+      changes: [
+        { from: doc.line(above).from, insert: `${text(below, belowEnd)}\n${gap}` },
+        { from: doc.line(aboveEnd).to, to: doc.line(belowEnd).to },
+      ],
+      by: doc.line(above).from - doc.line(below).from,
+    };
+  }
+  return {
+    changes: [
+      { from: doc.line(above).from, to: doc.line(below).from },
+      { from: doc.line(belowEnd).to, insert: `\n${gap}${text(above, aboveEnd)}` },
+    ],
+    by: doc.line(belowEnd).to - doc.line(below).from + 1 + gap.length,
+  };
+}
+
 /** Moves the items the selection starts on up (or down) past the item there, or the line, with what's under them. */
 function moveItems(view: EditorView, up: boolean) {
   const { state } = view;
@@ -58,26 +86,7 @@ function moveItems(view: EditorView, up: boolean) {
   const [from, to] = other ? linesOf(doc, other) : up ? [top - 1, top - 1] : [bottom + 1, bottom + 1];
   if (from <= properties || to > doc.lines) return true;
 
-  const text = (a: number, b: number) => doc.sliceString(doc.line(a).from, doc.line(b).to);
-  // The blank lines between them stay between them.
-  const [above, below] = up ? [from, top] : [top, from];
-  const [aboveEnd, belowEnd] = up ? [to, bottom] : [bottom, to];
-  const gap = aboveEnd + 1 < below ? `${text(aboveEnd + 1, below - 1)}\n` : "";
-  let changes: ChangeSpec[];
-  let by: number;
-  if (up) {
-    changes = [
-      { from: doc.line(above).from, insert: `${text(below, belowEnd)}\n${gap}` },
-      { from: doc.line(aboveEnd).to, to: doc.line(belowEnd).to },
-    ];
-    by = doc.line(above).from - doc.line(below).from;
-  } else {
-    changes = [
-      { from: doc.line(above).from, to: doc.line(below).from },
-      { from: doc.line(belowEnd).to, insert: `\n${gap}${text(above, aboveEnd)}` },
-    ];
-    by = doc.line(belowEnd).to - doc.line(below).from + 1 + gap.length;
-  }
+  const { changes, by } = swapLines(doc, [top, bottom], [from, to], up);
   view.dispatch({
     changes,
     selection: EditorSelection.single(main.anchor + by, main.head + by),

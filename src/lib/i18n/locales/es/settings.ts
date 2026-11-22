@@ -522,6 +522,8 @@ export default {
   "settings.dragBlocksNote": "Un asa junto a la línea o el bloque que señalas, para arrastrarlo a otro sitio de la nota.",
   "settings.foldSections": "Plegar secciones",
   "settings.foldSectionsNote": "Un chevrón junto a cada encabezado pliega lo que hay debajo, hasta el siguiente encabezado de su tamaño. Solo cambia cómo se ve la nota: su texto queda igual. Los pliegues se guardan en este dispositivo.",
+  "settings.moveSections": "Mover un encabezado con su sección",
+  "settings.moveSectionsNote": "Mover un encabezado, con las teclas que mueven líneas o con su asa, mueve también todo lo que hay debajo, más allá de la sección entera de su tamaño de arriba o de abajo. Desactivado, se mueve solo la línea del encabezado.",
   "settings.typingSounds": "Sonidos al escribir",
   "settings.typingSoundsNote": "El sonido de un teclado al escribir, en las ventanas de Lines.",
   "settings.typingSoundsOn": "Reproducir sonidos al escribir",

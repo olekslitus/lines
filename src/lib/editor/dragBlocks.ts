@@ -6,24 +6,30 @@ import { mount, unmount } from "svelte";
 import Icon from "../icons/Icon.svelte";
 import { t } from "../i18n/index.svelte";
 import { reducedMotion } from "../platform";
+import { prefs } from "../prefs.svelte";
 import { CALLOUT_GUTTER, CARD_PAD, calloutOf, cardInset } from "./cards";
+import { foldsMoved } from "./folding";
 import { frontMatterField } from "./objects";
+import { sectionOn, sections } from "./sections";
 import { ancestors } from "./util";
 
 /*
  * Drag handles: hovering a line or block shows a grip to its left, and dragging the grip moves
- * it. A plain line moves on its own; a list item moves with its sub-items; a heading, code block,
- * table, quote or card (by its ::: line) moves whole. Things can't be dropped inside a code block,
- * table or quote. A note's properties stay at its top: they have no grip, and nothing goes above
- * or among them.
+ * it. A plain line moves on its own; a list item moves with its sub-items; a heading with its
+ * section (Settings → Editor → Move a heading with its section; off, alone), to where a section of
+ * its size or a bigger one starts or the note's end; a code block, table, quote or card (by its :::
+ * line) moves whole. Things can't be dropped inside a code block, table or quote. A note's
+ * properties stay at its top: they have no grip, and nothing goes above or among them.
  */
 
 interface Block {
   /** Line numbers of its first and last lines. */
   first: number;
   last: number;
-  kind: "line" | "item" | "block" | "card";
+  kind: "line" | "item" | "block" | "card" | "section";
   node: SyntaxNode | null;
+  /** A section's heading level. */
+  level?: number;
 }
 
 /** Blocks whose lines only make sense together, which nothing can be dropped into. */
@@ -66,6 +72,11 @@ function blockAt(state: EditorState, n: number): Block | null {
   // A quote moves whole, lists in it included; a list item takes what's in it along.
   if (quote) return lines(quote, "block");
   if (item) return lines(item, "item");
+  // A heading takes its section along: one at the note's top level, not in a card.
+  const section = block && /Heading/.test(block.name) && prefs.moveSections ? sectionOn(state, block.from) : null;
+  if (block && section && section.from === block.from && section.heading.within === undefined) {
+    return { first: lines(block, "section").first, last: state.doc.lineAt(section.to).number, kind: "section", node: block, level: section.level };
+  }
   if (block) return lines(block, "block");
   if (paragraph) return { first: n, last: n, kind: "line", node: null };
   // Not in a paragraph or another block, so one of a card's ::: lines.
@@ -85,13 +96,24 @@ function spanning(state: EditorState, k: number) {
   return nodes;
 }
 
-/** Whether the boundary above line `b` is in the note, below its properties, and not inside a code block, table or quote. */
-const droppable = (state: EditorState, b: number) =>
-  b > propertyLines(state) && b <= state.doc.lines + 1 && !spanning(state, b).some((n) => ATOMIC.has(n.name));
+/** Whether line `b` starts a section a section of `level` can go before: one of its size or bigger, at the note's top level. */
+const sectionStarts = (state: EditorState, b: number, level: number) =>
+  sections(state).some((section) => section.level <= level && section.heading.within === undefined && state.doc.lineAt(section.from).number === b);
 
-/** The nearest boundary to `k` that's below the properties and not inside a code block, table or quote. */
-function snap(state: EditorState, k: number) {
-  const ok = (b: number) => droppable(state, b);
+/**
+ * Whether `block` can go to the boundary above line `b`: in the note, below its properties, and not
+ * inside a code block, table or quote; a section only before one of its size or a bigger one, or at
+ * the end.
+ */
+const droppable = (state: EditorState, b: number, block: Block) =>
+  b > propertyLines(state) &&
+  b <= state.doc.lines + 1 &&
+  !spanning(state, b).some((n) => ATOMIC.has(n.name)) &&
+  (block.kind !== "section" || b === state.doc.lines + 1 || sectionStarts(state, b, block.level!));
+
+/** The nearest boundary to `k` that `block` can go to. */
+function snap(state: EditorState, k: number, block: Block) {
+  const ok = (b: number) => droppable(state, b, block);
   for (let d = 0; d <= state.doc.lines; d++) {
     if (ok(k - d)) return k - d;
     if (ok(k + d)) return k + d;
@@ -142,13 +164,16 @@ export function moveBlock(state: EditorState, block: Block, k: number): Transact
   if (block.last === doc.lines) {
     from = Math.max(0, first.from - 1);
     to = last.to;
+    // A section at the end leaves no blank lines after the one before it.
+    if (block.kind === "section") for (let n = block.first - 1; n >= 1 && blank(n); n--) from = Math.max(0, doc.line(n).from - 1);
   } else if ((block.first === 1 || blank(block.first - 1)) && blank(block.last + 1) && block.last + 1 < doc.lines) {
     to = doc.line(block.last + 1).to + 1;
   }
 
   // Tables and cards need blank lines around them: text right after a table would be a row of it.
   // So does a line of text after a list, which would be part of its last item.
-  const separate = block.kind === "card" || block.node?.name === "Table";
+  // Sections keep a blank line from what's around them, as they had.
+  const separate = block.kind === "card" || block.kind === "section" || block.node?.name === "Table";
   const after = block.kind === "line" ? ["Table", "Card", "BulletList", "OrderedList"] : ["Table", "Card"];
   const padAbove = k > 1 && !blank(k - 1) && (separate || blockEdge(state, doc.line(k - 1).to, after, true));
   const padBelow =
@@ -162,8 +187,11 @@ export function moveBlock(state: EditorState, block: Block, k: number): Transact
     at = doc.length;
     insert = "\n" + (padAbove ? "\n" : "") + text;
   }
-  const changes = [{ from, to }, { from: at, insert }].sort((a, b) => a.from - b.from);
-  return { changes, userEvent: "move.drop", scrollIntoView: false };
+  const changes = state.changes([{ from, to }, { from: at, insert }]);
+  // A section moves folded as it was.
+  const start = changes.mapPos(at, -1) + /^\n*/.exec(insert)![0].length;
+  const effects = block.kind === "section" ? foldsMoved(state, first.from, last.to, start - first.from) : [];
+  return { changes, effects, userEvent: "move.drop", scrollIntoView: false };
 }
 
 /* Dimming what's being dragged. */
@@ -543,14 +571,14 @@ const handles = ViewPlugin.fromClass(
       let k: number;
       if (y > view.lineBlockAt(doc.length).bottom) k = doc.lines + 1;
       else k = y < line.top + line.height / 2 ? doc.lineAt(line.from).number : doc.lineAt(line.to).number + 1;
-      k = snap(state, Math.max(1, Math.min(k, doc.lines + 1)));
+      k = snap(state, Math.max(1, Math.min(k, doc.lines + 1)), drag.block);
       // The boundaries in one gap that leave the note the same are one place to drop, and one that
       // leaves it as it is (the blank lines around a card are put back either way) is none: the
       // line fades out there, and letting go does nothing.
       const gap = gapAround(view, k);
       const places: { k: number; outcome: string }[] = [];
       for (let b = gap.above + 1; b <= gap.below; b++) {
-        const outcome = droppable(state, b) ? this.outcome(b) : null;
+        const outcome = droppable(state, b, drag.block) ? this.outcome(b) : null;
         if (outcome !== null && !places.some((place) => place.outcome === outcome)) places.push({ k: b, outcome });
       }
       const outcome = this.outcome(k);

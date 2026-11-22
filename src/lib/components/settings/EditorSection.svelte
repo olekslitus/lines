@@ -70,6 +70,9 @@
   <FieldRow label={t("settings.foldSections")} note={t("settings.foldSectionsNote")}>
     <Switch label={t("settings.foldSections")} checked={prefs.foldSections} onchange={(on) => (prefs.foldSections = on)} />
   </FieldRow>
+  <FieldRow label={t("settings.moveSections")} note={t("settings.moveSectionsNote")}>
+    <Switch label={t("settings.moveSections")} checked={prefs.moveSections} onchange={(on) => (prefs.moveSections = on)} />
+  </FieldRow>
   <FieldRow label={t("settings.listNumbering")} note={t("settings.listNumberingNote")}>
     <Segmented label={t("settings.listNumbering")} options={numberings} value={prefs.listNumbering} onselect={(numbering) => (prefs.listNumbering = numbering)} />
   </FieldRow>

@@ -30,6 +30,15 @@ Each of these has only run in Chrome, through the end-to-end tests (two browser 
 - If the keychain no longer has them (the item deleted, a Mac set up again from a backup without its keychain), the bucket asks for its key again in Settings → Sync and encrypted notes for their passphrase. If it can't be read for now, sync is off until it can, and nothing is changed.
 - Tried in the tests (a stand-in keychain, and Credential Manager in the Windows build's tests), not yet in the Mac, iPhone, iPad or Windows apps themselves.
 
+## Locked notes' keys in a bucket
+
+How a bad copy of the key is kept out is in [sync.md](sync.md#locked-notes).
+
+- A copy made before Lines checked them, or by an older version (a password changed there), has no check. With locked notes open, such a copy isn't taken; it is once its password is typed on this device.
+- A device that has never opened a key (no password of its own for it) takes the first copy the password opens: it has nothing of its own to compare it with.
+- A copy that's refused is only noted in the app's log, not shown.
+- Someone who can write to the bucket can still delete notes, or damage a locked note so it no longer opens (it stays shut, and the others still open). End-to-end encryption keeps them from writing notes Lines would read.
+
 ## The web app's own storage
 
 Where the web app keeps everything is in [storage.md](storage.md).

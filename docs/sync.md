@@ -139,13 +139,14 @@ created: 2026-10-28T14:43:00.000Z
 updated: 2026-10-28T15:02:11.000Z
 pinned: false
 trashed: false
-locked: {"title":"Bank","files":[],"key":{"id":"…","changed":…,"kdf":"PBKDF2-SHA256","iterations":600000,"salt":"…","key":"…"}}
+locked: {"title":"Bank","files":[],"key":{"id":"…","changed":…,"kdf":"PBKDF2-SHA256","iterations":600000,"salt":"…","key":"…","check":"…"}}
 ---
 AWeRtq…
 ```
 
 - The Markdown is encrypted with AES-256-GCM under a random key that notes locked with the same password share. Each note carries that key, locked with the password (PBKDF2-SHA-256, 600,000 iterations), so it opens on any device where you type the password. A device that has no password of its own yet takes this one once it's typed.
 - Changing the password locks the same key again, in every note that has it; they sync, and the new password opens them everywhere. "Forgot password" sets a new one for notes you lock from then on; notes already locked still need the old one.
+- Each copy of the key carries a check made with the key itself (`check`: HMAC-SHA-256, under a key derived from it), so a device that has the key can tell a copy made by one of your devices from one someone put in its place. Anyone who can write to the bucket or folder could put a copy there that says it's newer: Lines never takes one on trust. A device keeps its own copy until a newer one holds the same key (the key vouches for it, or the password opens it and it holds the key the device's own copy is for); every copy is tried when you type the password, so a bad one can't hide a good one; and a copy that doesn't hold the key it names is refused and forgotten.
 - Readable: the title, dates, pin and icon, and the names of the images and files it shows. Those images and files themselves aren't encrypted by the lock (end-to-end encryption does encrypt them). A note imported from another app says which, and what it was imported with (a vault's name), but of the note's id there (its path, which would say what folders it was in) only a hash, which importing again knows it by, and not its name there; unlocked again, it stays so.
 
 ## Setting up a bucket

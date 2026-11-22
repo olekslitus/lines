@@ -777,7 +777,8 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] A locked note shows its title and a password field; a wrong password shakes; the right one opens every note locked with it, in every window
 - [ ] A note locked with an older password says so
 - [ ] Lock Now locks them everywhere; they lock again after 5 minutes idle; typing in an open locked note and choosing Lock Now at once keeps what was typed
-- [ ] Remove Lock; Change password (works on other devices once synced); Forgot password
+- [ ] Remove Lock; Change password (works on other devices once synced, at once on one where locked notes are open); Forgot password
+- [ ] A copy of the key changed by hand in the bucket or folder (a locked note's `locked` line: its key's `salt` or `key` edited, `changed` made larger) doesn't stop the password opening the locked notes, nor take the device's password's place: after the next sync, Lock Now and the same password still open them all
 - [ ] Locked notes stay out of tags, Todo, search (except titles) and export
 
 ## 18. Export and share

@@ -57,6 +57,12 @@ export interface WrappedKey extends LockedKey {
   id: string;
   /** When the password was last set, so the newest wrapping of a key wins across devices. */
   changed: number;
+  /**
+   * The key's own check of this copy (HMAC-SHA-256, with a key made from it), so a device that has
+   * the key can tell a copy made by one that had it from one put in its place (noteKeys.svelte.ts).
+   * Copies made before Lines checked them have none.
+   */
+  check?: string;
 }
 
 /**

@@ -1,10 +1,11 @@
-import { fromBase64, unlockKey, WrongPassphrase } from "../crypto";
+import { fromBase64 } from "../crypto";
 import { native } from "../lock/lock.svelte";
 import { checkPassphrase } from "../sync/engine.svelte";
 import { t } from "../i18n/index.svelte";
 import { announce } from "../windows/channel";
 import { noteKeys } from "./noteKeys.svelte";
 import { notes } from "./store.svelte";
+import type { WrappedKey } from "./types";
 
 /*
  * Locked notes, like in Apple Notes: one password (or Touch ID, on the Mac) opens them all, and
@@ -77,7 +78,7 @@ class LockedNotes {
     if (!settings?.touchId) return false;
     const raw = new Uint8Array(await native<ArrayBuffer>("touch_id_unlock", { which: "notes" }));
     if (!raw.byteLength) return false;
-    await noteKeys.add(raw, settings.key.id);
+    await noteKeys.add(raw, settings.key);
     await this.#opened();
     return true;
   }
@@ -92,11 +93,11 @@ class LockedNotes {
   }
 
   /** Keys another window opened locked notes with. */
-  async adopt(keys: { id: string; raw: string }[]) {
+  async adopt(keys: { raw: string; copy: WrappedKey }[]) {
     let added = false;
-    for (const { id, raw } of keys) {
-      if (noteKeys.isOpen(id)) continue;
-      await noteKeys.add(fromBase64(raw), id);
+    for (const { raw, copy } of keys) {
+      if (noteKeys.isOpen(copy.id)) continue;
+      await noteKeys.add(fromBase64(raw), copy);
       added = true;
     }
     if (added) await this.#opened(false);
@@ -108,12 +109,7 @@ class LockedNotes {
     const settings = noteKeys.settings;
     if (!settings) return;
     const { id } = settings.key;
-    try {
-      const raw = await unlockKey(noteKeys.newest(id)!, current);
-      if (!noteKeys.isOpen(id)) await noteKeys.add(raw, id);
-    } catch (error) {
-      throw error instanceof WrongPassphrase ? new WrongPassword() : error;
-    }
+    if (!(await noteKeys.openWith(id, current))) throw new WrongPassword();
     const key = await noteKeys.rewrap(id, next);
     noteKeys.save({ ...settings, key });
     await notes.rekey(key);

@@ -45,7 +45,7 @@ export type WindowMessage =
   /** Someone is using a floating note, so the main window shouldn't lock for being idle. */
   | { type: "activity" }
   /** Locked notes were opened, with these keys (see notes/locked.svelte.ts). */
-  | { type: "notes-unlocked"; keys: { id: string; raw: string }[] }
+  | { type: "notes-unlocked"; keys: { raw: string; copy: import("../notes/types").WrappedKey }[] }
   /** Locked notes were locked again. */
   | { type: "notes-locked" }
   /** A window that just opened asks whether locked notes are open. */

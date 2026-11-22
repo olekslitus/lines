@@ -108,6 +108,11 @@ export default {
   "editor.callout.changeIcon": "Changer d’icône…",
   "editor.callout.addIcon": "Ajouter une icône…",
 
+  "editor.fold.fold": "Replier « {title} »",
+  "editor.fold.unfold": "Déplier « {title} »",
+  "editor.fold.folded": "Section repliée : l’afficher",
+  "editor.fold.didFold": "« {title} » repliée",
+  "editor.fold.didUnfold": "« {title} » dépliée",
   "editor.outline": "Plan",
   "editor.outline.headings": "Titres",
   "editor.properties": "Propriétés",

@@ -48,6 +48,18 @@ The editor's parser is in `src/lib/editor/syntax.ts` (tags, highlights, underlin
 
 A note has no separate title field: its title is its **first line with text on it**, with the Markdown taken off (`# Trip to Rome` → "Trip to Rome"). Card and callout fences (lines starting with `:::`) are skipped, and so are the note's [properties](#properties); a note with nothing after its properties takes its `title` or `name` property. The note list shows the following lines, without Markdown, as the excerpt.
 
+## Folding sections
+
+A heading's section is the heading and everything under it, up to the next heading of its size or a bigger one (or the end of the note): `## Packing` holds its `### Clothes` and `### Papers`, and ends at the next `##` or `#`. A heading in a quote, a card or a list's item has a section that ends with what it's in. Folding one hides what's under it, the heading showing with "…" after it; the note's text doesn't change, and copying, printing, the PDF, export and sync have all of it.
+
+- The chevron left of a heading (shown as the pointer is over the heading, always while it's folded and on a touch screen) folds and unfolds it. Clicking the "…" unfolds it too.
+- ⌘⌥[ (Ctrl+Shift+[ on Windows and Linux) folds the innermost section the cursor is in, and again the one around it; ⌘⌥] (Ctrl+Shift+]) unfolds the one the cursor's on. ⌃⌥[ (Ctrl+Alt+[) folds every section, at every level, so opening one shows the ones inside it folded; ⌃⌥] (Ctrl+Alt+]) unfolds them all. Settings → Shortcuts lists them.
+- A section inside a folded one stays folded or not, as it was, when the one around it opens.
+- A fold opens when the cursor goes into it: find going to a match in it, the outline going to a heading in it, ← from the line after it into its end, a click on its "…". The arrows otherwise step over it, as in a code editor, and ⇧ with them selects it whole. A line break typed or deleted at its edge (Enter at the end of its heading, Backspace at the start of the line after it) opens it too, so nothing is typed into what can't be seen.
+- Folds are kept for each note on this device, and come back when it's opened again, after quitting too. They aren't synced: another device has its own. One whose heading or last line changed elsewhere in the meantime opens.
+- Settings → Editor → Fold sections, off, hides the chevrons, opens every fold and turns the keys off.
+- LaTeX notes fold their `\section`, `\subsection` and `\subsubsection`s the same, a section ending with the environment it's in (`\end{document}` stays in sight).
+
 ## Dividers and underlined headings
 
 `---` on a line of its own is a divider, under a line of text too: a heading is written with `#`. CommonMark also has headings written by underlining text, with `===` (an H1) or `---` (an H2) on the line under it, which make `---` typed under text turn that text into a heading. Lines leaves them out unless **Settings → Editor → Underlined headings** is on, so `---` under text is a divider in Lines, and `===` text. Another app that reads them may show such a note's text above `---` as a heading; a blank line between them keeps it a divider everywhere.

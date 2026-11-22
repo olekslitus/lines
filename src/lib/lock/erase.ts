@@ -17,7 +17,7 @@ export async function eraseThisDevice() {
       request.onblocked = () => resolve();
     });
   }
-  for (const key of ["lines.lock", "lines.sync", "lines.sync.leftovers", "lines.sync.shared", "lines.floating", "lines.lockedNotes", "lines.mutedWords", "lines.lists"]) localStorage.removeItem(key);
+  for (const key of ["lines.lock", "lines.sync", "lines.sync.leftovers", "lines.sync.shared", "lines.floating", "lines.lockedNotes", "lines.mutedWords", "lines.lists", "lines.folds"]) localStorage.removeItem(key);
   await forgetKeys();
   if (isMacApp) {
     const { invoke } = await import("@tauri-apps/api/core");

@@ -958,12 +958,20 @@ function backslashCommands(state: EditorState, pos: number) {
   return inOpenMath(paragraphBefore(state, pos)) ? MATH_COMMANDS : TEXT_COMMANDS;
 }
 
-/** Its \section, \subsection and \subsubsection headings, for the outline beside the note. */
-const outline = outlineHeadings.of((state) =>
-  state.field(parsed).spans.flatMap((span) =>
-    span.type === "heading" ? [{ level: span.level, title: latexText(state.sliceDoc(span.open, span.close)).trim(), from: span.from }] : [],
-  ),
-);
+/**
+ * Its \section, \subsection and \subsubsection headings, for the outline beside the note and for
+ * folding them: each in the environment it's in (the document's), which its section ends with.
+ */
+const outline = outlineHeadings.of((state) => {
+  const { spans } = state.field(parsed);
+  const envs = spans.flatMap((span) => (span.type === "env" ? [span] : []));
+  return spans.flatMap((span) => {
+    if (span.type !== "heading") return [];
+    // The innermost one around it: the one ending first, of those it's in.
+    const within = envs.reduce<number | undefined>((end, env) => (env.beginTo <= span.from && env.endFrom >= span.to && (end === undefined || env.endFrom < end) ? env.endFrom : end), undefined);
+    return [{ level: span.level, title: latexText(state.sliceDoc(span.open, span.close)).trim(), from: span.from, to: span.to, within }];
+  });
+});
 
 /** Its "/" commands, with "/paper" after Link for each source of papers. */
 const slashCommands = (papers: readonly PaperSource[]) =>

@@ -92,6 +92,11 @@ export const SHORTCUTS: ShortcutGroup[] = [
       { action: "shortcuts.sendAllRequests", keys: ["Mod-Shift-Enter"], note: "shortcuts.inRequest" },
       { action: "shortcuts.nest", keys: ["Tab", "Shift-Tab"], note: "shortcuts.inListItem" },
       { action: "shortcuts.moveLines", keys: ["Alt-ArrowUp", "Alt-ArrowDown"] },
+      // CodeMirror's folding keys (editor/folding.ts), for sections under headings.
+      { action: "shortcuts.foldSection", keys: [{ mac: "Mod-Alt-[", other: "Ctrl-Shift-[" }] },
+      { action: "shortcuts.unfoldSection", keys: [{ mac: "Mod-Alt-]", other: "Ctrl-Shift-]" }] },
+      { action: "shortcuts.foldAll", keys: ["Ctrl-Alt-["] },
+      { action: "shortcuts.unfoldAll", keys: ["Ctrl-Alt-]"] },
       { action: "shortcuts.undo", keys: ["Mod-z"] },
       // CodeMirror's history keys: ⌘⇧Z on a Mac, Ctrl+Y elsewhere (and Ctrl+Shift+Z on Linux).
       { action: "shortcuts.redo", keys: [{ mac: "Mod-Shift-z", other: "Mod-y" }] },
@@ -276,6 +281,8 @@ export function speakKeys(keys: Keys, on: System): string {
     scroll: "shortcuts.key.scroll",
     "/": "shortcuts.key.slash",
     "\\": "shortcuts.key.backslash",
+    "[": "shortcuts.key.openBracket",
+    "]": "shortcuts.key.closeBracket",
     "@": "shortcuts.key.at",
     "+": "shortcuts.key.plus",
     "-": "shortcuts.key.minus",

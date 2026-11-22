@@ -27,6 +27,7 @@
     steadyScroller,
   } from "./setup";
   import { copyOnSelect } from "./copyOnSelect";
+  import { folding, foldingCompartment } from "./folding";
   import { symbolsChanged } from "./symbols";
   import { changesBetween, editedNote } from "./util";
   import { paneEditor } from "./writeIn";
@@ -218,11 +219,12 @@
 
   /**
    * Whether the note can be edited, the outline beside it and where its properties are (Settings →
-   * Layout), and its spelling and copying what's selected (Settings → Editor).
+   * Layout), and its spelling, copying what's selected and folding its sections (Settings → Editor).
    */
   const setUp = () => [
     readOnlyCompartment.reconfigure(readOnly(viewOnly)),
     outlineCompartment.reconfigure(prefs.outline ? outline : []),
+    foldingCompartment.reconfigure(prefs.foldSections ? folding : []),
     propertiesCompartment.reconfigure(propertiesApart(prefs.propertiesPlace, prefs.outline ? prefs.outlineSide : null)),
     spellingCompartment.reconfigure(spelling(prefs.spellcheck)),
     copyOnSelectCompartment.reconfigure(copyOnSelect(prefs.copyOnSelect)),

@@ -25,6 +25,8 @@ It's a comment at the line's end, `<!-- mark orange: to check -->`, which other 
 
 Start a line with `#`, `##` or `###`. The first line of a note is its title in the list.
 
+Point at a heading for the chevron beside it, which folds away everything under it until the next heading its size, leaving "…" after it. ⌘⌥[ (Ctrl+Shift+[) folds the section the cursor's in, ⌘⌥] opens it again.
+
 ## Quotes
 
 > Quotes are for things worth remembering.

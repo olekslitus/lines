@@ -70,8 +70,9 @@ export const lift = (page: Page) => page.evaluate(() => (window as unknown as { 
 /**
  * A finger put down on `selector`'s first element, held `ms` (moved `moveBy` px down partway, as a scroll starts), then
  * lifted: pointer events, as a long press is read (longPress.ts). What the page saw: how long after
- * the finger went down a menu opened (null if none did), and how far the element had sunk just
- * before it would open.
+ * the finger went down a menu opened (null if none did), how far the element had sunk just before
+ * it would open, and when a timer for the long press's 0.4 s, set as the finger went down, ran
+ * (later than that on a busy machine, as the long press's own is).
  */
 export function hold(page: Page, selector: string, { ms = 600, moveBy = 0, pointerType = "touch" }: { ms?: number; moveBy?: number; pointerType?: string } = {}) {
   return page.evaluate(
@@ -80,19 +81,27 @@ export function hold(page: Page, selector: string, { ms = 600, moveBy = 0, point
       const box = target.getBoundingClientRect();
       const at = (dy: number) => ({ clientX: box.x + box.width / 2, clientY: box.y + box.height / 2 + dy, pointerId: 7, pointerType, isPrimary: true, bubbles: true, cancelable: true });
       const start = performance.now();
-      let opened: number | null = null;
+      const seen = { opened: null as number | null, due: null as number | null };
       let sunk = 1;
+      // When the menu's put in the page: as it happens, not at the next frame, which a busy page can
+      // be slow to draw.
+      const menus = new MutationObserver(() => {
+        if (seen.opened === null && document.querySelector('[role="menu"]')) seen.opened = performance.now() - start;
+      });
+      menus.observe(document.body, { childList: true, subtree: true });
       target.dispatchEvent(new PointerEvent("pointerdown", at(0)));
-      while (performance.now() - start < ms) {
+      setTimeout(() => (seen.due = performance.now() - start), 400);
+      // Held `ms`, and at least until that timer's run, and a moment after it.
+      while (performance.now() - start < ms || seen.due === null || performance.now() - start < seen.due + 50) {
         await new Promise((resolve) => requestAnimationFrame(resolve));
         const elapsed = performance.now() - start;
         if (moveBy && elapsed > 100) target.dispatchEvent(new PointerEvent("pointermove", at(moveBy)));
         if (elapsed < 360) sunk = Number(getComputedStyle(target).scale) || 1;
-        if (opened === null && document.querySelector('[role="menu"]')) opened = elapsed;
       }
+      menus.disconnect();
       target.dispatchEvent(new PointerEvent("pointerup", at(moveBy)));
       target.click();
-      return { opened, sunk, scale: getComputedStyle(target).scale };
+      return { opened: seen.opened, sunk, due: seen.due, scale: getComputedStyle(target).scale };
     },
     [selector, ms, moveBy, pointerType] as const,
   );

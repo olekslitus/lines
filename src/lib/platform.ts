@@ -195,3 +195,13 @@ export async function copyText(text: string) {
     area.remove();
   }
 }
+
+/** Copies text, and HTML for the apps that take it; only the text where the webview can't. */
+export async function copyHtml(text: string, html: string) {
+  try {
+    const blob = (data: string, type: string) => new Blob([data], { type });
+    await navigator.clipboard.write([new ClipboardItem({ "text/plain": blob(text, "text/plain"), "text/html": blob(html, "text/html") })]);
+  } catch {
+    await copyText(text);
+  }
+}

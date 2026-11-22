@@ -500,7 +500,8 @@ What's planned next, by area. What's already there but has limits is in [docs/li
 **Security**
 - [ ] Encrypt images and files in locked notes
 - [ ] Face ID for the app lock and locked notes on iPhone
-- [ ] Store sync credentials (the S3 secret key) in the OS keychain on native platforms instead of local storage
+- [x] Store sync credentials (the S3 secret key, and the end-to-end encryption key) in the system's keychain on the Mac, iPhone, iPad and Windows instead of local storage
+- [ ] The same on Linux (the Secret Service) and Android (the Keystore)
 - [ ] Conditional S3 writes (`If-Match`), so an upload fails instead of overwriting a note another device changed in between
 - [ ] Narrow the app's native permissions: limit network access to the configured endpoint and file access to the chosen sync folder
 

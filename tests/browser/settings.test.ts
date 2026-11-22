@@ -127,3 +127,26 @@ test("spreadsheet notes are off at first, blocks in notes on; a spreadsheet note
   await page.waitForTimeout(200);
   expect(await on("spreadsheet-notes")).toBe(false);
 });
+
+test("two windows changing different settings at the same moment each keep the other's, and both are kept", async () => {
+  app = await openApp();
+  const { page } = app;
+  const other = await page.context().newPage();
+  await other.goto(page.url());
+  await other.waitForFunction(() => window.testing?.notes.ready);
+  // The other window busy for a moment, then changing the text's size before it hears of the font chosen here meanwhile.
+  await other.evaluate(() => {
+    setTimeout(() => {
+      const until = performance.now() + 600;
+      while (performance.now() < until);
+      window.testing.prefs.textSize = 20;
+    });
+  });
+  await page.waitForTimeout(100);
+  await page.evaluate(() => (window.testing.prefs.font = "serif"));
+  for (const each of [page, other]) await each.waitForFunction(() => window.testing.prefs.font === "serif" && window.testing.prefs.textSize === 20);
+  await page.waitForTimeout(100);
+  expect(await page.evaluate(() => [window.testing.prefs.font, window.testing.prefs.textSize])).toEqual(["serif", 20]);
+  expect(JSON.parse(await page.evaluate(() => localStorage.getItem("lines.prefs")!))).toMatchObject({ font: "serif", textSize: 20 });
+  await other.close();
+});

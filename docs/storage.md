@@ -34,7 +34,7 @@ With the app lock on, the notes and attachments in `lines` and everything in `li
 | `lines.tabs` | The open tabs, when tabs are on |
 | `lines.tagIcons`, `lines.typeIcons` | Icons given to tags and types |
 | `lines.mutedWords` | The words and phrases hidden in every feed (Settings → Library → Feed filters), and when they were set; they sync as `feeds/muted.json`. Not encrypted by the app lock |
-| `lines.sync` | Where notes sync to: the folder (its name and an id for its handle) or the bucket and its keys. Encrypted while the app lock is on |
+| `lines.sync` | Where notes sync to: the folder (its name and an id for its handle) or the bucket, and their keys (the bucket's secret key, the end-to-end encryption key). In the Mac, iPhone, iPad and Windows apps the keys are in the system's keychain instead (below). Encrypted while the app lock is on |
 | `lines.sync.shared` | The tag and a hash of each file of feeds' marks as last exchanged with the sync folder or bucket, so only those changed are read or written (by the one tab that syncs them) |
 | `lines.lists` | Accounts on AniList and MyAnimeList (who, and their tokens), and for each anime on the list what was last exchanged with the site, both sides, and with which note; and what was taken off the list there, which isn't put back. This device's own: never synced. Encrypted while the app lock is on |
 | `lines.sync.leftovers` | Set only while encrypted copies are being removed after turning end-to-end encryption off |
@@ -79,7 +79,7 @@ The apps keep the same databases and keys, in their web view's storage, in a fol
 | Windows | `%LOCALAPPDATA%\com.olekslitus.lines\` (WebView2's, in `EBWebView`) |
 | Linux | `~/.local/share/com.olekslitus.lines/` (WebKitGTK's) |
 
-Besides those, an update being downloaded and copies of attachments opened in other apps are in Lines' cache folder (`~/Library/Caches/com.olekslitus.lines/` on a Mac, the folder above on Windows, `~/.cache/com.olekslitus.lines/` on Linux), and with Touch ID on, its keys are in the Mac's login keychain as "lines app lock".
+Besides those, an update being downloaded and copies of attachments opened in other apps are in Lines' cache folder (`~/Library/Caches/com.olekslitus.lines/` on a Mac, the folder above on Windows, `~/.cache/com.olekslitus.lines/` on Linux), and with Touch ID on, its keys are in the Mac's login keychain as "lines app lock". The sync connection's keys are in the system's keychain as "Lines" (`sync`) on the Mac, iPhone and iPad, and in Windows' Credential Manager as `Lines/sync`; Linux and Android keep them in `lines.sync` for now.
 
 ## What the host sees
 

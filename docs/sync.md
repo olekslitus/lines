@@ -101,7 +101,7 @@ What's been done with feeds' posts is a folder of small files beside them, `<buc
 - A drive's own conflicted copy of one of these files (`a1b2c3 2.json`) is merged in and removed, as a note's is.
 - **What it shows:** a post's fingerprint hides nothing. A post's id is usually its public link or guid, so with encryption off, anyone who can read the folder can tell which posts of which feeds were read and dismissed, and when. End-to-end encryption hides it all, the files' names too.
 
-Only one sync pass runs at a time, even with Lines open in several browser tabs, so a conflict makes one copy, not one per tab.
+Only one sync pass runs at a time, even with Lines open in several browser tabs, so a conflict makes one copy, not one per tab. Before a pass writes a note, here or there, it looks at the note as it's stored on the device, so a tab that hasn't yet heard of another tab's edit or deletion takes it up rather than write over it with its older copy.
 
 A note is only written over the version Lines saw there a moment before, so an edit another device saves while this one syncs isn't overwritten: the next pass brings it in and compares, as above. In a bucket that's a conditional write (`If-Match`, or `If-None-Match` for a new note); a service that ignores those, or doesn't do them (it refuses a write over the very version it holds), is written to as before. In a cloud drive's folder, Lines looks at the file again just before writing it.
 

@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, test } from "bun:test";
 import type { MarkField, Marks } from "../../src/lib/feeds/marks";
-import { beforeWrite, type Device, devices, drive, editElsewhere, FOLDER, fileOf, languages, listings, notes, placeholders, reads, serialize, sync, written } from "./sync";
+import { beforeWrite, type Device, devices, drive, editElsewhere, FOLDER, fileOf, inAnotherTab, languages, listings, notes, placeholders, reads, serialize, sync, written } from "./sync";
 // After ./sync, which sets up the page they run in and the notes' storage in memory: imported first,
 // a module would read a page that isn't there, or bind the real storage (IndexedDB) before it's replaced.
 const { latexContent, markTitle } = await import("../../src/plugins/latex/text");
@@ -79,6 +79,62 @@ describe("sync", () => {
 
 /** The notes on the device that's open, by their text. */
 const bodies = () => notes.entries.map((entry) => entry.note.body).sort();
+
+describe("sync, with lines in several tabs, of what another tab did that this one hasn't heard of yet", () => {
+  /** What the folder has of the note, its text. */
+  const synced = (id: string) => drive.get(fileOf(id))?.text;
+
+  test("an edit synced there isn't written over with this tab's older copy, which takes it up", async () => {
+    const [here] = await devices(1);
+    const id = notes.add("# Plan\n\nfirst");
+    await here.sync();
+    await inAnotherTab(async () => {
+      notes.update(id, "# Plan\n\nsecond");
+      await here.sync();
+    });
+    written.length = 0;
+    await here.sync();
+    expect([synced(id), written.includes(fileOf(id)), notes.get(id)!.note.body]).toEqual([expect.stringContaining("second"), false, "# Plan\n\nsecond"]);
+  });
+
+  test("a note deleted there isn't uploaded again", async () => {
+    const [here] = await devices(1);
+    const id = notes.add("# Done with");
+    await here.sync();
+    await inAnotherTab(async () => {
+      await notes.deleteForever(id);
+      await here.sync();
+    });
+    await here.sync();
+    await here.sync();
+    expect([synced(id), notes.get(id)]).toEqual([undefined, undefined]);
+  });
+
+  test("a note brought in there from another device isn't taken as deleted here", async () => {
+    const [here, there] = await devices(2);
+    await there.open();
+    const id = notes.add("# From the phone");
+    await there.sync();
+    await here.open();
+    await inAnotherTab(() => sync.syncNow());
+    await here.sync();
+    expect([synced(id), notes.get(id)?.note.body]).toEqual([expect.stringContaining("From the phone"), "# From the phone"]);
+  });
+
+  test("an edit stored there, as another device edits the note too, isn't written over with the other's: both are kept", async () => {
+    const [here, there] = await devices(2);
+    const id = notes.add("# List\n\nmilk");
+    await here.sync();
+    await there.sync();
+    notes.update(id, "# List\n\nmilk\nbread");
+    await there.sync();
+    await here.open();
+    await inAnotherTab(async () => notes.update(id, "# List\n\nmilk\neggs"));
+    await here.sync();
+    await here.sync();
+    expect(bodies()).toEqual(["# List\n\nmilk\neggs", "# List (conflicted copy)\n\nmilk\nbread"]);
+  });
+});
 
 describe("sync, as another device writes the same note", () => {
   test("an edit another device saves while this one syncs isn't written over, but kept with a conflicted copy", async () => {

@@ -296,6 +296,15 @@
   cursor: pointer;
 }
 
+/*
+ * Drawn with its icon, the tag keeps it with its name at a line's end, and a nested tag's `/`
+ * doesn't split it. Not while the cursor's on it (its `#` shown): there WebKit would type a space
+ * after it as a no-break space.
+ */
+.cm-lp-tag:has(.cm-lp-tag-icon) {
+  white-space: nowrap;
+}
+
 /* In a heading, as big as the heading's text, its `#` icon as big as its name (below). */
 .cm-lp-h .cm-lp-tag {
   font-size: 1em;

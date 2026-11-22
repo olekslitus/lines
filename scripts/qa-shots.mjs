@@ -2020,6 +2020,14 @@ const SCENES = [
     width: 390,
     height: 780,
   },
+  {
+    id: "phone-tags-wrap",
+    title: "Phone: tags where lines wrap",
+    look: "Each tag whole, its # icon with its name: a tag that doesn't fit at a line's end starts the next, never split across the two.",
+    note: "# Trip\n\nBook the train and the hotel early #travel\n\nPack light, three days only, and the #travel bag\n\nAsk Ana about the budget at the next #work/meetings\n\nA long walk by the river, then lunch #travel/food",
+    width: 390,
+    height: 780,
+  },
   { id: "phone-backdrop", title: "Phone: a backdrop", look: "Room around the page, nothing scrolls sideways.", prefs: { paperBackdrop: "dawn" }, note: PROSE, width: 390, height: 780 },
   {
     id: "phone-settings-shortcuts",

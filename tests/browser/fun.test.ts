@@ -8,6 +8,20 @@ afterEach(async () => {
   await app.close();
 });
 
+/**
+ * The cursor's width with the cursor put at `pos`, once it's drawn there: CodeMirror draws it in a
+ * frame of its own after the selection moves, which on a busy machine can be late.
+ */
+async function widthAt(app: App, pos: number) {
+  await app.page.evaluate((pos) => window.testing.place(pos), pos);
+  await app.page.waitForFunction((pos) => {
+    const cursor = document.querySelector(".editor-pane .cm-cursor-primary")?.getBoundingClientRect();
+    const at = window.testing.editor()!.coordsAtPos(pos);
+    return !!cursor && !!at && Math.abs(cursor.left - at.left) < 1 && cursor.top < at.bottom && cursor.bottom > at.top;
+  }, pos);
+  return app.page.locator(".editor-pane .cm-cursor-primary").evaluate((cursor) => cursor.getBoundingClientRect().width);
+}
+
 describe("cursor", () => {
   test("a block cursor is as wide as the character it's on", async () => {
     app = await openApp();
@@ -16,9 +30,7 @@ describe("cursor", () => {
     await choose(settings, "Shape", "Block");
     await app.closeSettings();
     expect(await app.root("caret-shape")).toBe("block");
-    await app.page.evaluate(() => window.testing.place(5));
-    const width = await app.page.locator(".editor-pane .cm-cursor-primary").evaluate((cursor) => cursor.getBoundingClientRect().width);
-    expect(width).toBeGreaterThan(6);
+    expect(await widthAt(app, 5)).toBeGreaterThan(6);
   });
 
   // Not in WebKit yet, which draws it before it has laid the line out (docs/limitations.md).
@@ -79,17 +91,11 @@ describe("cursor", () => {
   test("an underline cursor on an empty line, or after a space at a line's end, is as wide as a letter", async () => {
     app = await openApp({ prefs: { caretShape: "underline" } });
     await app.open("Words \n\nnnn");
-    /** The cursor's width at `pos`, once it's drawn there. */
-    const widthAt = async (pos: number) => {
-      await app.page.evaluate((pos) => window.testing.place(pos), pos);
-      await app.page.waitForTimeout(100);
-      return app.page.locator(".editor-pane .cm-cursor-primary").evaluate((cursor) => cursor.getBoundingClientRect().width);
-    };
-    const letter = await widthAt(8);
+    const letter = await widthAt(app, 8);
     expect(letter).toBeGreaterThan(6);
     // Measured from the type, which WebKit lays out half a pixel apart.
-    expect(Math.abs((await widthAt(6)) - letter)).toBeLessThan(1);
-    expect(Math.abs((await widthAt(7)) - letter)).toBeLessThan(1);
+    expect(Math.abs((await widthAt(app, 6)) - letter)).toBeLessThan(1);
+    expect(Math.abs((await widthAt(app, 7)) - letter)).toBeLessThan(1);
   });
 
   test("Width Even keeps an underline a letter wide, over an i or a space too; shown only for Block and Underline", async () => {
@@ -101,12 +107,7 @@ describe("cursor", () => {
     await choose(settings, "Width", "Even");
     await app.closeSettings();
     expect(await app.root("caret-width")).toBe("even");
-    const widthAt = async (pos: number) => {
-      await app.page.evaluate((pos) => window.testing.place(pos), pos);
-      await app.page.waitForTimeout(100);
-      return app.page.locator(".editor-pane .cm-cursor-primary").evaluate((cursor) => cursor.getBoundingClientRect().width);
-    };
-    const [n, i, space] = [await widthAt(0), await widthAt(1), await widthAt(3)];
+    const [n, i, space] = [await widthAt(app, 0), await widthAt(app, 1), await widthAt(app, 3)];
     expect(n).toBeGreaterThan(6);
     expect(Math.abs(i - n)).toBeLessThan(1);
     expect(Math.abs(space - n)).toBeLessThan(1);

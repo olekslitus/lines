@@ -1043,9 +1043,9 @@ describe("fixed", () => {
   });
 
   test("a mark on the title line isn't part of the note's title", async () => {
-    await app.open("# Plan <!-- mark green: due -->\n\nText");
-    await app.page.waitForTimeout(300);
-    expect(await app.page.locator(".note-list [data-id]").first().innerText()).toStartWith("Plan\n");
+    const id = await app.open("# Plan <!-- mark green: due -->\n\nText");
+    // Its row, once it's listed with the title it's given.
+    await app.page.waitForFunction((id) => document.querySelector<HTMLElement>(`.note-list [data-id="${id}"]`)?.innerText.startsWith("Plan\n"), id);
   });
 
   test("the line before a page break looks as any line does", async () => {
@@ -1287,7 +1287,13 @@ describe("clicking a tag in a note", () => {
   async function clickTag(app: App, modifiers: ("Meta" | "Control")[] = []) {
     await app.open("# Plan\n\nSee #idea here");
     await app.page.locator(".editor-pane .cm-lp-tag").click({ modifiers });
-    await app.page.waitForTimeout(100);
+    // Once the click's been taken: the tag's notes shown, or the cursor put in the tag.
+    await app.page.waitForFunction(() => {
+      if (window.testing.notes.filter.kind === "tag") return true;
+      const tag = window.testing.text()!.indexOf("#idea");
+      const head = window.testing.editor()!.state.selection.main.head;
+      return head >= tag && head <= tag + "#idea".length;
+    });
     return app.page.evaluate(() => window.testing.notes.filter.kind === "tag");
   }
   const old = { web: { click: "edit", modClick: "open", modShiftClick: "copy" }, tag: { click: "edit", modClick: "open", modShiftClick: "open" } };

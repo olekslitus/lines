@@ -163,20 +163,21 @@ test("a video's post shows its picture and what it says, and plays in place, You
   expect(src.searchParams.has("autoplay")).toBe(false);
   expect(await element.getAttribute("referrerpolicy")).toBe("strict-origin-when-cross-origin");
   expect(await element.getAttribute("allow")).toContain("fullscreen");
-  const told = async () => {
+  /** What the player was told, once it's been told `last`, and then a moment for anything after it. */
+  const told = async (last: string) => {
     const frame = (await (await element.elementHandle())!.contentFrame())!;
-    await frame.waitForFunction(() => (window as unknown as { told?: string[] }).told?.includes("addEventListener onStateChange"));
+    await frame.waitForFunction((last) => (window as unknown as { told?: string[] }).told?.includes(last), last);
     await page.waitForTimeout(300);
     return frame.evaluate(() => (window as unknown as { told: string[] }).told);
   };
   // Spoken to until it answers, then asked to say how it plays, and played: by the Play pressed.
-  expect(await told()).toEqual(["listening", "addEventListener onStateChange", "playVideo"]);
+  expect(await told("playVideo")).toEqual(["listening", "addEventListener onStateChange", "playVideo"]);
 
   // Drawn again (another post, then this one), it's its player, waiting: not played again by itself.
   await page.locator(".note-list").getByRole("button", { name: /^Anemones at low tide/ }).click();
   await post.click();
   await element.waitFor();
-  expect(await told()).toEqual(["listening", "addEventListener onStateChange"]);
+  expect(await told("addEventListener onStateChange")).toEqual(["listening", "addEventListener onStateChange"]);
 });
 
 test("a channel whose feed is missing is read from its page, its videos' dates a guess until the feed's back, which puts them right; a page changed past reading guesses nothing", async () => {

@@ -1,6 +1,7 @@
 import { afterEach, expect, test } from "bun:test";
 import type { Locator } from "playwright";
 import { type App, noErrors, openApp } from "./app";
+import { drag } from "./touch";
 
 /*
  * lines on an iPhone, as Safari there has it (Playwright's iPhone 15: its size, touch and user
@@ -138,4 +139,66 @@ test("on a phone, a Key: Value line's copy button at the end of a full line is a
     return found;
   });
   expect(cut).toEqual([]);
+});
+
+/** The cursor as the editor has it: the system's caret's color, and whether lines' own is drawn. */
+const cursorShown = (page: App["page"]) =>
+  page.evaluate(() => {
+    const view = window.testing.editor()!;
+    const probe = document.body.appendChild(document.createElement("span"));
+    probe.style.color = "var(--caret-color)";
+    const cursorColor = getComputedStyle(probe).color;
+    probe.remove();
+    const caret = getComputedStyle(view.contentDOM).caretColor;
+    return { system: caret === cursorColor ? "the cursor's color" : caret, lines: getComputedStyle(view.dom.querySelector(".cm-cursorLayer")!).display !== "none" };
+  });
+
+/** A finger put down on the note's first line and lifted, once the note's slid in and the line is what's under it. */
+async function tapText(page: App["page"]) {
+  const under = await page.waitForFunction(() => {
+    const line = document.querySelector(".editor-pane .cm-line")!;
+    const box = line.getBoundingClientRect();
+    const at = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+    return line.contains(document.elementFromPoint(at.x, at.y)) && at;
+  });
+  const at = (await under.jsonValue()) as { x: number; y: number };
+  await drag(page, at, at, { steps: 1, duration: 16 });
+}
+
+test("on an iPhone the cursor is the system's from a touch until typing, and while text is selected, so iOS shows the selection's handles and highlight", async () => {
+  app = await openApp({ phone: true });
+  const { page } = app;
+  await app.open("Lines is a calm place for your thoughts.");
+  await page.evaluate(() => window.testing.place(0));
+  // Typed into without a touch: lines' own cursor, the system's hidden.
+  expect(await cursorShown(page)).toEqual({ system: "rgba(0, 0, 0, 0)", lines: true });
+
+  // iOS draws the handles, the highlight and the loupe in the caret's color: in the cursor's from the touch on, before anything's selected.
+  await tapText(page);
+  await page.waitForFunction(() => window.testing.editor()!.dom.classList.contains("cm-systemCursor"));
+  expect(await cursorShown(page)).toEqual({ system: "the cursor's color", lines: false });
+  await page.evaluate(() => window.testing.editor()!.dispatch({ selection: { anchor: 11, head: 15 } }));
+  expect(await cursorShown(page)).toEqual({ system: "the cursor's color", lines: false });
+
+  // Typing over it, lines' cursor is back.
+  await page.keyboard.type("quiet");
+  await page.waitForFunction(() => window.testing.text()!.startsWith("Lines is a quiet place"));
+  expect(await cursorShown(page)).toEqual({ system: "rgba(0, 0, 0, 0)", lines: true });
+
+  // Text selected with an iPad's keys has the system's highlight too.
+  await page.keyboard.press("Shift+ArrowLeft");
+  await page.waitForFunction(() => !window.testing.editor()!.state.selection.main.empty);
+  expect((await cursorShown(page)).system).toBe("the cursor's color");
+
+  // On Android and on a computer the cursor is always lines' own, touched or not.
+  for (const options of [{ device: "Pixel 7" }, {}]) {
+    noErrors(app);
+    await app.close();
+    app = await openApp(options);
+    await app.open("Lines is a calm place for your thoughts.");
+    await app.page.evaluate(() => window.testing.place(0));
+    if (options.device) await tapText(app.page);
+    await app.page.evaluate(() => window.testing.editor()!.dispatch({ selection: { anchor: 11, head: 15 } }));
+    expect((await cursorShown(app.page)).system).toBe("rgba(0, 0, 0, 0)");
+  }
 });

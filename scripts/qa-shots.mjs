@@ -2161,6 +2161,8 @@ for (const scene of scenes) {
     await page.waitForFunction(() => window.testing?.notes.ready);
     if (scene.note !== undefined) await page.evaluate(([body, format]) => window.testing.open(body, format), [scene.note, scene.format]);
     await scene.act?.(page);
+    // Code blocks in their colors: a language loads the first time a note uses it.
+    await page.evaluate(() => window.testing.highlighted());
     if (scene.settings) {
       await page.getByRole("button", { name: "Settings", exact: true }).click();
       await page.getByRole("dialog").getByRole("navigation").getByText(scene.settings, { exact: true }).first().click();

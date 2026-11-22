@@ -986,6 +986,29 @@ test("a code note has line numbers, a fixed-width font and its language's highli
   await app.page.waitForFunction(() => document.querySelectorAll(".editor-pane .cm-line span[class]").length > 2, null, { timeout: 5000 });
 });
 
+test("code blocks are drawn in their languages' colors once loaded, light and dark, in lines' theme and a palette's", async () => {
+  const note = '```js\nconst greeting = "Hello";\n```\n\n```python\ndef hello():\n    return \'hi\'\n```\n\n```css\nbody { color: red; }\n```';
+  // A keyword and a string or name in each, which no theme draws in the text's color.
+  const tokens = ["const", '"Hello"', "def", "'hi'", "body", "color"];
+  for (const scheme of ["light", "dark"] as const) {
+    for (const theme of ["lines", "nord"]) {
+      await app.close();
+      app = await openApp({ scheme, prefs: { theme } });
+      await app.open(note);
+      await app.page.evaluate(() => window.testing.highlighted());
+      const colors = await app.page.evaluate((tokens) => {
+        const spans = [...document.querySelectorAll(".editor-pane .cm-lp-codeblock span")];
+        const text = getComputedStyle(document.querySelector(".editor-pane .cm-content")!).color;
+        return tokens.map((token) => {
+          const span = spans.find((each) => each.textContent === token);
+          return span && getComputedStyle(span).color !== text;
+        });
+      }, tokens);
+      expect([scheme, theme, colors]).toEqual([scheme, theme, tokens.map(() => true)]);
+    }
+  }
+});
+
 describe("a code block in a list item or a quote", () => {
   const NOTES = ["- Item\n\n  ```\n  one\n    two\n  ```", "> ```\n> one\n>   two\n> ```"];
 

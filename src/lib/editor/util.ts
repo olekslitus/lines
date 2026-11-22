@@ -61,6 +61,16 @@ export function selectedLines(state: EditorState): Line[] {
 export const hasText = (doc: Text, n: number) => n >= 1 && n <= doc.lines && !!doc.line(n).text.trim();
 
 /**
+ * Where a "/" command typed at `from` is taken out from when what it makes goes elsewhere: after
+ * a line's text, with the spaces before it, so the text isn't left with one at its end.
+ */
+export function commandStart(doc: Text, from: number) {
+  const line = doc.lineAt(from);
+  const before = line.text.slice(0, from - line.from).trimEnd();
+  return before.trim() ? line.from + before.length : from;
+}
+
+/**
  * Says `focus.of(true)` when an editor that has focus already is given a note (one opened from a
  * mention, say), which no focus event will tell; a field that keeps track of focus starts without it.
  */

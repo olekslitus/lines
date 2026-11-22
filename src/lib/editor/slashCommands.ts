@@ -28,7 +28,7 @@ import { ratingSource } from "./ratings";
 import { insertTable } from "./tables";
 import { tagSource } from "./tagCompletion";
 import { backslashSource, inOpenMath, MATH_COMMANDS, paragraphBefore, TEXT_COMMANDS } from "./texCommands";
-import { ancestors } from "./util";
+import { ancestors, commandStart } from "./util";
 import { PAGE_BREAK } from "../notes/pageBreak";
 
 export interface SlashCommand {
@@ -93,8 +93,9 @@ export function insert(snippet: string | (() => string), ownLine = false) {
     let changes;
     if (ownLine && rest) {
       // Keep the line's text, and put the block after it with a blank line between.
-      changes = [{ from, to }, { from: line.to, insert: "\n\n" + text }];
-      start = line.to - (to - from) + 2;
+      const cut = commandStart(view.state.doc, from);
+      changes = [{ from: cut, to }, { from: line.to, insert: "\n\n" + text }];
+      start = line.to - (to - cut) + 2;
     } else if (ownLine) {
       // A divider right under text would turn that text into a heading.
       const above = line.number > 1 ? view.state.doc.line(line.number - 1).text.trim() : "";

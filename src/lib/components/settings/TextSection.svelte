@@ -34,6 +34,8 @@
 
   const SAMPLE = t("settings.previewNote");
   const fonts = $derived(noteFonts());
+  /** Rows of four, or of three where that fills every row and four wouldn't. */
+  const fontColumns = $derived(fonts.length % 4 && fonts.length % 3 === 0 ? 3 : 4);
   /** The installed font chosen isn't on this device (a preset's, or settings from another computer). */
   const missing = $derived(!!prefs.installedFont && !canDraw(prefs.installedFont));
 
@@ -128,7 +130,7 @@
       value={prefs.installedFont ? null : prefs.font}
       onselect={chooseFont}
       stacked
-      columns={4}
+      columns={fontColumns}
     >
       {#snippet content(option)}
         <span class="text-[20px] leading-[1.3] font-normal" aria-hidden="true" style:font-family={fonts.find((font) => font.id === option.id)!.family}>Aa</span>

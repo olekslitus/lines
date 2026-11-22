@@ -92,13 +92,18 @@ test("Heading color: the accent colors every heading", async () => {
   expect(await lightness(app.page, heading)).toBeCloseTo(await lightness(app.page, accent), 2);
 });
 
-test("Fonts: IBM Plex Sans, Fira Sans and Agave come with lines, write notes in them, and go back to the system's with their plugin off", async () => {
+test("Fonts: IBM Plex Sans, Fira Sans, Geist, Geist Mono and Agave come with lines, write notes in them, and go back to the system's with their plugin off", async () => {
   app = await openApp();
   await app.open("# Title\n\nText");
   const settings = await app.settings("Typography");
   const fonts = settings.getByRole("radiogroup", { name: "Recommended" });
-  for (const [name, id] of [["IBM Plex Sans", "ibm-plex-sans"], ["Fira Sans", "fira-sans"], ["Agave", "agave"]]) {
-    await fonts.getByRole("radio", { name }).click();
+  const columns = () => fonts.evaluate((group) => getComputedStyle(group).gridTemplateColumns.split(" ").length);
+  // Nine, in three rows of three.
+  expect(await fonts.getByRole("radio").count()).toBe(9);
+  expect(await columns()).toBe(3);
+  const bundled = [["IBM Plex Sans", "ibm-plex-sans"], ["Fira Sans", "fira-sans"], ["Geist", "geist"], ["Geist Mono", "geist-mono"], ["Agave", "agave"]];
+  for (const [name, id] of bundled) {
+    await fonts.getByRole("radio", { name, exact: true }).click();
     expect(await app.root("font")).toBe(id);
     // Chrome quotes a name with spaces in it, WebKit doesn't.
     expect((await app.style(".editor-pane .cm-content", "font-family")).replaceAll('"', "")).toStartWith(`${name},`);
@@ -106,11 +111,17 @@ test("Fonts: IBM Plex Sans, Fira Sans and Agave come with lines, write notes in 
     const loaded = await app.page.evaluate(async (name) => (await Promise.all([`16px "${name}"`, `bold 16px "${name}"`].map((font) => document.fonts.load(font, "Aa")))).map((faces) => faces.length), name);
     expect(loaded.every((count) => count > 0)).toBe(true);
   }
+  // Geist and Geist Mono bring their own italic, rather than their regular slanted.
+  for (const name of ["Geist", "Geist Mono"]) {
+    const italic = await app.page.evaluate(async (name) => (await document.fonts.load(`italic 16px "${name}"`, "Aa")).map((face) => [face.family.replaceAll('"', ""), face.style, face.status]), name);
+    expect(italic).toContainEqual([name, "italic", "loaded"]);
+  }
 
   const plugins = await app.settings("All Plugins");
   await toggle(plugins, "Fonts", false);
   await app.settings("Typography");
   expect(await fonts.getByRole("radio").count()).toBe(4);
+  expect(await columns()).toBe(4);
   expect(await app.style(".editor-pane .cm-content", "font-family")).toStartWith("-apple-system");
 });
 
@@ -154,7 +165,7 @@ describe("fonts installed on this device", () => {
     app = await openApp();
     const settings = await app.settings("Typography");
     const family = settings.getByRole("region", { name: "Font family" });
-    expect(await family.getByRole("radiogroup", { name: "Recommended" }).getByRole("radio").count()).toBe(7);
+    expect(await family.getByRole("radiogroup", { name: "Recommended" }).getByRole("radio").count()).toBe(9);
     expect(await family.getByRole("combobox", { name: "Installed font" }).isVisible()).toBe(true);
     expect(await settings.getByRole("region", { name: "Font size" }).getByRole("slider", { name: "Text size" }).isVisible()).toBe(true);
     expect(await family.getByRole("slider").count()).toBe(0);
@@ -337,6 +348,21 @@ describe("formatting's fonts", () => {
     await pick(await app.settings("Typography"), "Bold", "Same as text");
     expect(await family(".cm-lp-strong")).toBe(await family(".cm-content"));
     expect(Object.keys(await app.page.evaluate(() => window.testing.prefs.formattingFonts))).toEqual(["headings", "code"]);
+  });
+
+  test("Geist Mono for code: inline code and code blocks are drawn in it, its files load, and notes' text stays in its own font", async () => {
+    app = await openApp();
+    await app.open("Some `code`.\n\n```\nblock\n```");
+    const text = await family(".cm-content");
+    const settings = await app.settings("Typography");
+    await pick(settings, "Inline code", "Geist Mono");
+    await pick(settings, "Code blocks", "Geist Mono");
+    expect(await family(".cm-lp-code .cm-lp-monospace")).toStartWith("Geist Mono,");
+    expect(await family(".cm-lp-codeblock .cm-lp-monospace")).toStartWith("Geist Mono,");
+    expect(await family(".cm-content")).toBe(text);
+    expect(await app.page.evaluate(() => window.testing.prefs.formattingFonts)).toEqual({ code: { font: "geist-mono" }, "code-block": { font: "geist-mono" } });
+    await app.page.evaluate(() => document.fonts.ready);
+    expect(await app.page.evaluate(() => document.fonts.check('16px "Geist Mono"', "block"))).toBe(true);
   });
 
   test("an installed font for code blocks, from the device's list; one this computer hasn't, or of a plugin that's off, is as none chosen, and Settings says so under its field; what can't be a font is none", async () => {

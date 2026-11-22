@@ -753,6 +753,21 @@ const SCENES = [
     schemes: ["light"],
   },
   {
+    id: "font-geist",
+    title: "A note in Geist, its code in Geist Mono",
+    look: "The text, headings, bold and italics in Geist (its own italic, not slanted regular), inline code and the code block in Geist Mono, its letters each as wide; lines evenly spaced, the code's background fitting it, nothing clipped.",
+    prefs: { font: "geist", formattingFonts: { code: { font: "geist-mono" }, "code-block": { font: "geist-mono" } } },
+    act: openFormatting(`${PROSE}\n\n\`\`\`js\nconst greeting = "Hello";\n\`\`\``),
+  },
+  {
+    id: "settings-typography-geist",
+    title: "Settings → Typography, Geist chosen",
+    look: "Font family's Recommended in three even rows of three, System to Agave, each “Aa” in its font (Geist Mono's and Agave's monospaced), Geist marked; the preview in Geist.",
+    prefs: { font: "geist" },
+    settings: "Typography",
+    shoot: "dialog",
+  },
+  {
     id: "formatting-fonts-settings",
     title: "Settings → Typography → Fonts for formatting",
     look: "A row for each, Headings to Code blocks, its name beside its field, the fields lined up with Installed font's and the sliders; those chosen show their font's name (Serif, Rounded…), the rest Same as text, or Code font for code.",

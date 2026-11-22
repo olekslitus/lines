@@ -208,18 +208,35 @@ test("locking lines keeps where the episode playing got to, and it's in the play
   const page = app.page;
   await subscribeToPodcast(app, { length: 60_000 });
   await page.evaluate(() => window.testing.lock.enable("a passphrase only tests know"));
+  // The episode's sound, to say it's played on: WebKit can stall playing a test's WAV once it's been
+  // sought (#382), so the test doesn't wait for its clock.
+  await page.evaluate(() => {
+    const play = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function (this: HTMLMediaElement) {
+      (window as unknown as { episodeAudio: HTMLMediaElement }).episodeAudio = this;
+      return play.call(this);
+    };
+  });
   await playRow(app, 0);
   await playing(app);
+  const [first] = await keys(app);
   await page.evaluate(() => window.testing.player.seek(20));
-  // Played on past where it was last kept.
-  await page.waitForFunction(() => window.testing.player.time >= 22);
+  await page.waitForFunction((key) => window.testing.player.positions.get(key)?.at === 20, first);
+  // Played on to 0:23, past where it was last kept, as its sound says when it moves on.
+  await page.evaluate(() => {
+    const audio = (window as unknown as { episodeAudio: HTMLMediaElement }).episodeAudio;
+    Object.defineProperty(audio, "currentTime", { configurable: true, get: () => 23, set: () => {} });
+    audio.dispatchEvent(new Event("timeupdate"));
+  });
+  expect(await page.evaluate(() => window.testing.player.time)).toBe(23);
+  expect((await placeOf(app, first))?.at).toBe(20);
   await Promise.all([page.waitForEvent("load"), page.evaluate(() => void window.testing.lock.lockNow())]);
   const field = page.getByRole("textbox", { name: "Passphrase" });
   await field.fill("a passphrase only tests know");
   await field.press("Enter");
   const mini = page.getByRole("region", { name: "Podcast player" });
   await mini.waitFor();
-  expect(await page.evaluate(() => window.testing.player.time)).toBeGreaterThanOrEqual(22);
+  expect(await page.evaluate(() => window.testing.player.time)).toBeGreaterThanOrEqual(23);
 });
 
 test("an episode note plays from the button after its audio, and is listened to once played to its end", async () => {

@@ -224,12 +224,12 @@ async function drop(view: EditorView, block: Block, k: number) {
   view.dispatch(tr);
   if (still) return;
 
-  // Where the block went: the text inserted, after any blank lines put before it.
+  // Where the block went: the lines inserted (not a list's numbers changed), after any blank lines put before it.
   const { doc } = tr.state;
   let first = 0;
   const added: [number, number][] = [];
   tr.changes.iterChanges((_fromA, _toA, fromB, toB, inserted) => {
-    if (!inserted.length) return;
+    if (inserted.lines < 2) return;
     added.push([fromB, toB]);
     first = doc.lineAt(fromB + /^\n*/.exec(inserted.toString())![0].length).number;
   });

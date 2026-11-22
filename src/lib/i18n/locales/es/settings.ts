@@ -512,6 +512,8 @@ export default {
   "settings.listNumberingOutline": "1. a. i.",
   "settings.listNumberingClassic": "I. A. 1.",
   "settings.listNumberingNumbers": "1. 1. 1.",
+  "settings.renumberLists": "Renumerar las listas al mover elementos",
+  "settings.renumberListsNote": "Mover un elemento de una lista numerada (arrastrándolo, con el teclado o cortando y pegando) vuelve a numerar la lista en su nuevo orden. Desactivado, los elementos conservan sus números.",
   "settings.spellcheck": "Revisar la ortografía",
   "settings.spellcheckNote": "Subraya las palabras mal escritas en las notas y deja que el sistema las corrija al escribir. El código y las fórmulas nunca se revisan.",
   "settings.copyOnSelect": "Copiar lo que seleccionas",

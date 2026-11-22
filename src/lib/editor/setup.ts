@@ -19,6 +19,7 @@ import { find } from "./find.svelte";
 import { attachmentBlocks } from "./attachments";
 import { formatToolbar, toggleFormat } from "./formatting";
 import { listKeymap, listMarkerInput, listPaste } from "./lists";
+import { listMoveKeymap, renumberMoved } from "./listMoves";
 import { markdownKeymap } from "./markdownKeys";
 import { livePreview, openAtCursor } from "./livePreview";
 import { mathBlocks } from "./math";
@@ -299,6 +300,8 @@ const linedownEditing = (additions: MarkdownAddition[], papers: PaperSource[], m
   cards,
   drag ? dragBlocks : [],
   listKeymap,
+  listMoveKeymap,
+  renumberMoved,
   listPaste,
   Prec.high(markdownKeymap),
   // Before live preview, so its marks (a code span, a link) wrap the symbols inside them.

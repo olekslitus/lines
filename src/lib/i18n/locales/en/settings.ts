@@ -567,6 +567,8 @@ export default {
   "settings.listNumberingOutline": "1. a. i.",
   "settings.listNumberingClassic": "I. A. 1.",
   "settings.listNumberingNumbers": "1. 1. 1.",
+  "settings.renumberLists": "Renumber lists when items move",
+  "settings.renumberListsNote": "Moving an item in a numbered list (dragging it, with the keyboard, or by cutting and pasting) numbers the list again in its new order. Off, items keep the numbers they have.",
   "settings.spellcheck": "Check spelling",
   "settings.spellcheckNote": "Underlines misspelled words in notes, and lets the system correct them as you type. Code and math are never checked.",
   "settings.copyOnSelect": "Copy what you select",

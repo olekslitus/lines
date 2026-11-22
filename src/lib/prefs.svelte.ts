@@ -305,6 +305,8 @@ export interface Stored {
   underlinedHeadings: boolean;
   /** How numbered lists inside numbered lists are numbered where they're drawn (editor/listNumbers.ts); the Markdown keeps `1.`. */
   listNumbering: ListNumbering;
+  /** A numbered list an item is moved into or out of is numbered again in its new order (editor/listMoves.ts); off, items keep their numbers. */
+  renumberLists: boolean;
   /** The system checks notes' spelling, and corrects it as you type (code and math never). */
   spellcheck: boolean;
   /** Text selected in a note with the pointer is copied when it's let go, as in a terminal (editor/copyOnSelect.ts). */
@@ -475,6 +477,7 @@ const DEFAULTS: Stored = {
   dragBlocks: true,
   underlinedHeadings: false,
   listNumbering: "outline",
+  renumberLists: true,
   spellcheck: true,
   copyOnSelect: false,
   typingSounds: false,
@@ -662,6 +665,7 @@ function read(json?: string): Stored {
     dragBlocks: flag(raw.dragBlocks, DEFAULTS.dragBlocks),
     underlinedHeadings: flag(raw.underlinedHeadings, DEFAULTS.underlinedHeadings),
     listNumbering: oneOf(raw.listNumbering, LIST_NUMBERINGS, DEFAULTS.listNumbering),
+    renumberLists: flag(raw.renumberLists, DEFAULTS.renumberLists),
     spellcheck: flag(raw.spellcheck, DEFAULTS.spellcheck),
     copyOnSelect: flag(raw.copyOnSelect, DEFAULTS.copyOnSelect),
     typingSounds: flag(raw.typingSounds, DEFAULTS.typingSounds),
@@ -780,6 +784,7 @@ class Prefs {
   dragBlocks = $state(this.#initial.dragBlocks);
   underlinedHeadings = $state(this.#initial.underlinedHeadings);
   listNumbering = $state(this.#initial.listNumbering);
+  renumberLists = $state(this.#initial.renumberLists);
   spellcheck = $state(this.#initial.spellcheck);
   copyOnSelect = $state(this.#initial.copyOnSelect);
   typingSounds = $state(this.#initial.typingSounds);
@@ -1005,6 +1010,7 @@ class Prefs {
       dragBlocks: this.dragBlocks,
       underlinedHeadings: this.underlinedHeadings,
       listNumbering: this.listNumbering,
+      renumberLists: this.renumberLists,
       spellcheck: this.spellcheck,
       copyOnSelect: this.copyOnSelect,
       typingSounds: this.typingSounds,

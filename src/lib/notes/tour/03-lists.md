@@ -24,6 +24,6 @@
 
 ## Moving things
 
-Hover a line for a grip on its left, and drag it to move the line, a list item with everything under it, a heading, table, code block or card. ⌥↑ and ⌥↓ (Alt) move lines from the keyboard. Settings → Editor turns the grips off.
+Hover a line for a grip on its left, and drag it to move the line, a list item with everything under it, a heading, table, code block or card. ⌥↑ and ⌥↓ (Alt) move lines from the keyboard, and list items with what's under them. A numbered item moved is numbered for where it lands, its list counting on in the new order. Settings → Editor turns the grips and the renumbering off.
 
 #tour

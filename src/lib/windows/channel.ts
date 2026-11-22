@@ -3,8 +3,9 @@ import { isTauri } from "../platform";
 /**
  * Messages between the app's windows: the main window, Settings and any floating notes. They share one
  * on-device database, so a note's message only says which changed, and each window reloads it from
- * there. Settings, plugins and the language, kept in local storage, which WebKit brings up to date
- * in other windows only a moment later, come in the message, so they apply at once.
+ * there. Settings, plugins, tags' and types' looks and the language, kept in local storage, which
+ * WebKit brings up to date in other windows only a moment later, come in the message, so they apply
+ * at once.
  */
 export type WindowMessage =
   /** A note was saved or deleted. `local` means by the person (so it should sync), not by sync itself. */
@@ -15,14 +16,16 @@ export type WindowMessage =
   | { type: "show"; id: string }
   /** Play this episode in the main window's player (a floating note's Play), from `at` seconds if given. */
   | { type: "play"; episode: import("../player/player.svelte").Episode; at?: number }
-  /** Preferences changed (theme, text, window look): all of them, as saved. */
-  | { type: "prefs"; prefs: string }
+  /** Preferences changed (theme, text, window look): only those, as saved, so the others stay as each window has them. */
+  | { type: "prefs"; changed: Record<string, unknown> }
   /** The app's language was chosen (i18n/index.svelte.ts). */
   | { type: "language"; choice: string }
   /** Your own themes and palettes changed (themes/custom.svelte.ts): all of them, as saved. */
   | { type: "themes"; themes: string; palettes: string }
   /** Colors changed by right-clicking, not saved yet, or picking them turned on or off (themes/drafts.svelte.ts). */
   | { type: "theme-drafts"; drafts: string }
+  /** Tags' and types' icons and colors changed (notes/looks.svelte.ts): all of them, as saved. */
+  | { type: "looks"; looks: string }
   /** What the Library's kinds are rated on changed (library/ratings.svelte.ts): all of it, as saved. */
   | { type: "ratings"; ratings: string }
   /** Your own presets changed (themes/presets.svelte.ts): all of them, as saved. */

@@ -1,11 +1,12 @@
 <script module lang="ts">
+  import type { CopiedCells } from "./clipboard";
   import type { Sheet } from "./state.svelte";
 
   /**
-   * The cells last copied from a sheet, so pasting them into one keeps their formulas, moved as
-   * copying moves them; and the sheet they were cut from, where pasting them moves them.
+   * The cells last copied from a sheet in this window, and the sheet they were cut from, where
+   * pasting them moves them. In another window or tab, their formulas come from the clipboard.
    */
-  let copied: { text: string; inputs: string[][]; row: number; column: number; cut: Sheet | null } | null = null;
+  let copied: (CopiedCells & { text: string; cut: Sheet | null }) | null = null;
 </script>
 
 <script lang="ts">
@@ -16,7 +17,7 @@
   import { pressed as feelPressed } from "../../lib/haptics";
   import { htmlTable, parseTabbed } from "../../lib/editor/tables";
   import { locale, type MessageKey, t } from "../../lib/i18n/index.svelte";
-  import { copyText, isApple } from "../../lib/platform";
+  import { copyHtml, isApple } from "../../lib/platform";
   import { floating } from "../../lib/components/ui/styles";
   import type { CellArea, CellValue, Cells, FormulaEngine, FormulaSheet } from "../../lib/plugins/types";
   import { prefs, type SheetStat } from "../../lib/prefs.svelte";
@@ -27,6 +28,7 @@
   import { loadedFormulas, loadFormulas, sheetName } from "../../lib/sheets/formulas";
   import { type MenuItem, ui } from "../../lib/ui.svelte";
   import Icon from "../../lib/icons/Icon.svelte";
+  import { cellsHtml, readCellsHtml } from "./clipboard";
   import { FormulaHelp, type Suggestion } from "./help.svelte";
   import { type Point, pointing as pointers, type Writer } from "./pointing.svelte";
   import { blockNameText, sheetLook, showCell, spokenCell } from "./sheet";
@@ -1064,7 +1066,7 @@
     );
   }
 
-  /** The selection as tab-separated values, as other spreadsheet apps paste them, and as written; `cut`, to be moved by pasting here. */
+  /** The selection as tab-separated values and a table, as other spreadsheet apps paste them, with what's written in it; `cut`, to be moved by pasting here. */
   function copySelection(cut = false) {
     const inputs: Cells = [];
     const values: Cells = [];
@@ -1078,19 +1080,27 @@
     }
     const text = writeCsv(values, "\t");
     copied = { text, inputs, row: range.top, column: range.left, cut: cut ? sheet : null };
-    return text;
+    return { text, html: cellsHtml(values, copied) };
+  }
+
+  /** Copies the selection, on a copy or cut, or else from the cells' menu. */
+  function copyTo(data: DataTransfer | null, cut = false) {
+    const { text, html } = copySelection(cut);
+    if (!data) return void copyHtml(text, html);
+    data.setData("text/plain", text);
+    data.setData("text/html", html);
   }
 
   function oncopy(event: ClipboardEvent) {
     if (editing) return;
     event.preventDefault();
-    event.clipboardData?.setData("text/plain", copySelection());
+    copyTo(event.clipboardData);
   }
 
   function oncut(event: ClipboardEvent) {
     if (editing) return;
     event.preventDefault();
-    event.clipboardData?.setData("text/plain", copySelection(true));
+    copyTo(event.clipboardData, true);
     clear();
   }
 
@@ -1100,8 +1110,20 @@
     if (sheet.readOnly) return;
     const plain = event.clipboardData.getData("text/plain").replace(/\r\n?/g, "\n");
     const html = event.clipboardData.getData("text/html");
-    if (copied && plain === copied.text) {
-      if (!(copied.cut === sheet && pasteCut(copied))) paste(copied.inputs, copied);
+    // Copied in this window, or else in another, with their formulas in the clipboard's HTML.
+    const here = copied && plain === copied.text ? copied : null;
+    const from = here ?? readCellsHtml(html);
+    if (from) {
+      if (here?.cut === sheet && pasteCut(here)) return;
+      // Formulas move once the engine has loaded, which a sheet without any may not have yet.
+      if (engine || !from.inputs.some((row) => row.some(isFormula))) paste(from.inputs, from);
+      else
+        void loadFormulas()
+          .catch(() => null)
+          .then((loaded) => {
+            engine = loaded;
+            paste(from.inputs, from);
+          });
     } else paste((html.includes("<table") ? htmlTable(html) : null) ?? parseTabbed(plain), null);
   }
 
@@ -1154,12 +1176,12 @@
         label: t("sheet.cut"),
         icon: "scissors",
         run: () => {
-          void copyText(copySelection(true));
+          copyTo(null, true);
           clear();
         },
       });
     }
-    items.push({ label: t("sheet.copy"), icon: "copy", run: () => void copyText(copySelection()) });
+    items.push({ label: t("sheet.copy"), icon: "copy", run: () => copyTo(null) });
     if (!sheet.readOnly) {
       // Going on from what's written at the start of the selection, for the keyboard as dragging its corner.
       const down = autofillFrom("row");

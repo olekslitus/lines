@@ -254,7 +254,6 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 - Dates show in the chosen style only when written as `2026-11-05` (as typing and pasting keep them); a CSV file's `11/5/2026` shows as written. Times aren't read.
 - Function suggestions and their descriptions are in English in every language, as the functions' names are. They're IronCalc's, from its own spreadsheet app.
 - While pointing, ⌘ and an arrow doesn't jump to the edge of what's written.
-- Copied cells paste with their formulas only in the window they were copied in; in another (a floating note, another browser tab) they paste as what they show.
 - Formulas are in English with commas, and numbers and dates are read as in US English, whatever the app's language: `1.200,50` is text, not a number.
 - Find in a note (⌘F) doesn't search a spreadsheet's cells. The note list's search does. In a Markdown note, it finds text in a ` ```csv ` block but can't show it in the grid; the cells' Edit as CSV shows the block's text.
 - A ` ```csv ` block is comma-separated only; a ` ```tsv ` block is code. Empty rows at the end of a one-column block aren't kept.

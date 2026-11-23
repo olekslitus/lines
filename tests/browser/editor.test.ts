@@ -635,13 +635,15 @@ test("a tag at a line's end wraps whole, its # never on one line and its name on
   await app.page.evaluate(() => window.testing.place(0));
   await app.page.locator(".editor-pane .cm-lp-tag-icon").waitFor();
   // Moved along the line a letter at a time, past where it wraps.
-  const split = await app.page.evaluate(() => {
+  const split = await app.page.evaluate(async () => {
     const view = window.testing.editor()!;
     const found: string[] = [];
     for (let i = 0; i < 200; i++) {
       for (const tag of ["#travel", "#work/meetings"]) {
         const line = view.state.doc.line(3);
         view.dispatch({ changes: { from: line.from, to: line.to, insert: `${"a".repeat(i)} ${tag}` } });
+        // Drawn once the line's parsed, which on a busy machine can be a moment after the change.
+        await window.testing.until(() => view.contentDOM.querySelector(".cm-lp-tag"));
         const chip = view.contentDOM.querySelector(".cm-lp-tag")!;
         if (new Set([...chip.getClientRects()].map((rect) => Math.round(rect.top))).size > 1) found.push(`${i} ${tag}`);
       }

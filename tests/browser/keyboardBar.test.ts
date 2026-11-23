@@ -29,8 +29,11 @@ const iosKeyboard = (page: Page, height: number) =>
     const viewport = window.visualViewport!;
     const full = innerHeight;
     Object.defineProperty(viewport, "height", { configurable: true, get: () => full - height });
-    Object.assign(window, { pageScrolled: 0 });
-    window.scrollBy = ((x: number, y: number) => Object.assign(window, { pageScrolled: (window as unknown as { pageScrolled: number }).pageScrolled + Math.abs(y) })) as typeof window.scrollBy;
+    const page = window as unknown as { pageScrolled: number };
+    page.pageScrolled = 0;
+    window.scrollBy = (...args: [number, number] | [ScrollToOptions?]) => {
+      page.pageScrolled += Math.abs((typeof args[0] === "number" ? args[1] : args[0]?.top) ?? 0);
+    };
     viewport.dispatchEvent(new Event("resize"));
   }, height);
 

@@ -128,6 +128,8 @@ It's drawn as a dashed line across the note, named; over a backdrop (Settings �
 
 A backslash before a punctuation mark keeps it from being Markdown, as CommonMark has it: `\#idea` is text, not a tag, and so are `\*not italic\*`, `\@[Not a mention]` and `\# Not a heading`. The editor shows the backslash only with the cursor on it, as other Markdown apps show the text; the note list, a note's title and its properties read the text without it (`author: \@nytimes` is `@nytimes`). The Library writes what a source found this way, so a title or description makes no tag, mention or heading ([library.md](library.md#a-note-thats-just-a-link)).
 
+Text pasted from a web page, Slack, Google Docs, Notes or Mail keeps its formatting as Markdown: its links, lists (nested ones too), headings, bold, italics, strikethrough, quotes, code and pictures, read from the HTML those apps copy along with the text. Its words are escaped the same way (`#10458` in a link from Slack is `\#10458`, a word, not a tag), and an emoji Slack copies as a picture is the emoji. Lines of plain text starting with `•` (or `◦`, `▪`) paste as a list. A list pasted after text on its line starts on a line of its own, and on an empty item takes its place. What a code editor copies, code pasted into a code block, and a link alone paste as they are. ⌘Z right after a paste leaves it as plain text; Settings → Editor → Keep formatting when pasting, off, pastes everything plain. Links relative to the page they were on are only their text, as the page's address doesn't come with them. In LaTeX notes only a table is changed when pasted; other text goes in as it is.
+
 ## Cards
 
 A card groups any Markdown, drawn as a rounded panel:

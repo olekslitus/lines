@@ -51,6 +51,8 @@ export interface MarkdownOf {
  * a block's (null for one it leaves as HTML has it), or an element's within a line.
  */
 export interface OwnElements {
+  /** Puts the HTML right before it's read: a page's own ways of writing what plain HTML has elements for (Slack's lists, Google Docs' bold). */
+  prepare?(body: HTMLElement): void;
   block?(element: Element, markdown: MarkdownOf): string[] | null;
   inline?(element: Element, markdown: MarkdownOf): string | null;
   /** Whether a list's item is a task, and done (Evernote's checklists); null for one that isn't. */
@@ -59,7 +61,9 @@ export interface OwnElements {
 
 /** HTML as Markdown, its relative links and pictures read from `base`, and elements of its own as `own` says. */
 export function htmlToMarkdown(html: string, base?: string, own?: OwnElements): string {
-  return new Writer(base, own).blocks(parseHtml(html)).join("\n\n").trim();
+  const body = parseHtml(html);
+  own?.prepare?.(body);
+  return new Writer(base, own).blocks(body).join("\n\n").trim();
 }
 
 /** A text node's words, escaped as a line of text is (notes/escape.ts), with a space kept at either end that had one: it parts them from what's beside them. */

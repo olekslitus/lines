@@ -253,6 +253,7 @@ The home page and the docs at https://olekslitus.com/lines/ (`site/`):
 - A synced LaTeX note's file still ends in `.md`, with `format: latex` in its front matter. Export writes `.tex` files.
 - Switching a note's format doesn't convert its text.
 - Formulas in a `tabular` aren't worked out, as they are in Markdown tables.
+- Text pasted with formatting (links, lists, emphasis from a web page or Slack) goes in as plain text: only Markdown notes turn it into markup. Tables pasted are a `tabular`.
 - `1. ` or `- ` typed at the start of an `\item`'s text doesn't change the list's kind, as it does a Markdown list item's: in LaTeX that's the whole list's, its `itemize` or `enumerate`.
 - Only `\section`, `\subsection` and `\subsubsection` fold: `\chapter`, `\part` and `\paragraph` aren't headings to Lines, so they don't fold or end a section.
 

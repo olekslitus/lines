@@ -295,11 +295,27 @@ const ITEM_START = /^([ \t]*)((?:[-*+]|\d+[.)])(?:[ \t]+\[[ xX]\])?[ \t]+)/;
 const indentOf = (line: string) => /^[ \t]*/.exec(line)![0].length;
 
 /**
- * List items pasted on an empty item, as copied from another list: they take its place, rather
- * than going inside it (`- - Copied`, a list in an item), and however deep they were nested where
- * they came from, the first starts at its level and the rest keep their places under it. Pasted on
- * an empty line, they start at its indentation the same way.
+ * Where list items pasted at `pos` go, if it's an empty item or an empty line (and not code): in
+ * its place from its line's start, rather than inside it (`- - Copied`, a list in an item), and
+ * however deep they were nested where they came from, the first at its level and the rest keeping
+ * their places under it. Null for text that doesn't start with an item, or anywhere else.
  */
+export function placeItems(state: EditorState, pos: number, text: string): { from: number; insert: string } | null {
+  const lines = text.replace(/\r\n?/g, "\n").replace(/\n+$/, "").split("\n");
+  const first = ITEM_START.exec(lines[0]);
+  if (!first) return null;
+  const line = state.doc.lineAt(pos);
+  const before = line.text.slice(0, pos - line.from);
+  const item = ITEM_START.exec(before);
+  // Right after an empty item's marker, or on a line with nothing on it.
+  const empty = !line.text.slice(pos - line.from).trim() && (item?.[0] === before || !before.trim());
+  if (!empty || inCode(state, pos)) return null;
+  const indent = item ? item[1] : before;
+  const base = first[1].length;
+  return { from: line.from, insert: lines.map((each) => (each.trim() ? indent + " ".repeat(Math.max(0, indentOf(each) - base)) + each.trimStart() : "")).join("\n") };
+}
+
+/** List items pasted on an empty item or line, as copied from another list, go where `placeItems` puts them. */
 export const listPaste = EditorView.domEventHandlers({
   paste(event, view) {
     const data = event.clipboardData;
@@ -307,21 +323,11 @@ export const listPaste = EditorView.domEventHandlers({
     const { state } = view;
     const { main } = state.selection;
     if (!data || !text || data.files.length || state.readOnly || !main.empty) return false;
-    const lines = text.replace(/\r\n?/g, "\n").replace(/\n+$/, "").split("\n");
-    const first = ITEM_START.exec(lines[0]);
-    if (!first) return false;
-    const line = state.doc.lineAt(main.head);
-    const before = line.text.slice(0, main.head - line.from);
-    const item = ITEM_START.exec(before);
-    // Right after an empty item's marker, or on a line with nothing on it.
-    const empty = !line.text.slice(main.head - line.from).trim() && (item?.[0] === before || !before.trim());
-    if (!empty || inCode(state, main.head)) return false;
-    const indent = item ? item[1] : before;
-    const base = first[1].length;
-    const insert = lines.map((each) => (each.trim() ? indent + " ".repeat(Math.max(0, indentOf(each) - base)) + each.trimStart() : "")).join("\n");
+    const placed = placeItems(state, main.head, text);
+    if (!placed) return false;
     view.dispatch({
-      changes: { from: line.from, to: main.head, insert },
-      selection: { anchor: line.from + insert.length },
+      changes: { from: placed.from, to: main.head, insert: placed.insert },
+      selection: { anchor: placed.from + placed.insert.length },
       scrollIntoView: true,
       userEvent: "input.paste",
     });

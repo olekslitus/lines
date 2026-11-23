@@ -27,6 +27,7 @@ import { livePreview, openAtCursor } from "./livePreview";
 import { mathBlocks } from "./math";
 import { markdownPaperLink, paperCommands } from "./papers";
 import { renderedBlocks } from "./rendered";
+import { richPaste } from "./richPaste";
 import { slashCommands } from "./slashCommands";
 import { symbols } from "./symbols";
 import { tables } from "./tables";
@@ -306,6 +307,7 @@ const linedownEditing = (additions: MarkdownAddition[], papers: PaperSource[], m
   listKeymap,
   listMoveKeymap,
   renumberMoved,
+  richPaste,
   listPaste,
   Prec.high(markdownKeymap),
   // Before live preview, so its marks (a code span, a link) wrap the symbols inside them.

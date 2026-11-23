@@ -120,6 +120,7 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 - [ ] Pasting rows from a spreadsheet makes a table, numbers right-aligned; one ⌘Z gives the pasted text instead
 - [ ] Pasting a table from a web page or Google Docs makes a table
 - [ ] Pasting text that isn't a table pastes it as text; pasting in code pastes plain text
+- [ ] Copying a Slack message with a list of links (Copy, or selecting its text) and pasting it into a note gives a Markdown list of links, nested items nested, italics and bold kept, its emoji as emoji; the same from a web page, Google Docs (bold not everywhere, its headings at their level), Notes and Mail. ⌘Z once leaves the paste as plain text. Plain text with `•` lines pastes as a list. Code copied from VS Code pastes as it is. Settings → Editor → Keep formatting when pasting, off: every paste plain
 - [ ] Tables in quotes and list items stay Markdown
 - [ ] Formulas (QA note "Table with formulas"): a cell like `=SUM(B2:B3)` shows its result once IronCalc has loaded (faint formula for a moment the first time), the header being row 1; `=B2/0` shows `#DIV/0!` in red; hovering a result shows its formula; the cell's copy button copies the result; with the cursor in the table the formulas show; `\=` stays a plain `=`; the PDF shows results
 - [ ] Pasting rows whose last one has a formula (a total) still right-aligns the number column

@@ -514,6 +514,8 @@ export default {
   "settings.listNumberingNumbers": "1. 1. 1.",
   "settings.renumberLists": "Renumerar las listas al mover elementos",
   "settings.renumberListsNote": "Mover un elemento de una lista numerada (arrastrándolo, con el teclado o cortando y pegando) vuelve a numerar la lista en su nuevo orden. Desactivado, los elementos conservan sus números.",
+  "settings.pasteFormatting": "Mantener el formato al pegar",
+  "settings.pasteFormattingNote": "Los enlaces, listas, encabezados y énfasis copiados de una página web, Slack o un documento se pegan como Markdown. Deshacer justo después de pegar lo deja como texto sin formato. Desactivado, todo se pega como texto sin formato.",
   "settings.spellcheck": "Revisar la ortografía",
   "settings.spellcheckNote": "Subraya las palabras mal escritas en las notas y deja que el sistema las corrija al escribir. El código y las fórmulas nunca se revisan.",
   "settings.copyOnSelect": "Copiar lo que seleccionas",

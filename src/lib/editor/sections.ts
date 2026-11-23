@@ -1,13 +1,15 @@
 import { forceParsing, syntaxTree, syntaxTreeAvailable } from "@codemirror/language";
 import type { EditorState, Text } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
+import { TAG_NAME } from "../notes/tags";
 import { type Heading, outlineHeadings } from "./outline.svelte";
 
 /*
  * A note's sections: each heading and what's under it, up to the next heading of its level or a
  * larger one, or the end of what it's in (a quote, a LaTeX environment) or of the note. Headings
  * are where the note's language says (`outlineHeadings`), so code and the properties have none.
- * Folding (folding.ts) hides a section's lines under its heading.
+ * Lines of nothing but tags at the note's end tag the note, not its last section, so they're in
+ * none. Folding (folding.ts) hides a section's lines under its heading.
  */
 
 export interface Section {
@@ -34,6 +36,20 @@ function lastText(doc: Text, head: number, next: number) {
   return Math.max(head, Math.min(line.to, next));
 }
 
+/** A line of nothing but tags. */
+const TAGS_ONLY = new RegExp(`^[ \\t]*#${TAG_NAME}(?:[ \\t]+#${TAG_NAME})*[ \\t]*$`, "u");
+
+/** Where the note's closing tags start: its last lines with nothing but tags on them (or blank between them); its end if there are none. */
+function closingTags(doc: Text) {
+  let start = doc.length;
+  for (let n = doc.lines; n >= 1; n--) {
+    const line = doc.line(n);
+    if (TAGS_ONLY.test(line.text)) start = line.from;
+    else if (line.text.trim()) break;
+  }
+  return start;
+}
+
 const read = new WeakMap<EditorState, Section[]>();
 
 /** The note's sections, in order of their headings, as far as it's parsed. */
@@ -54,8 +70,9 @@ export function sections(state: EditorState): Section[] {
     stack.push(section);
     found.push(section);
   }
+  const end = found.length ? closingTags(doc) : doc.length;
   for (const section of found) {
-    if (section.next < 0) section.next = Math.min(section.heading.within ?? doc.length, doc.length);
+    if (section.next < 0) section.next = section.heading.within === undefined ? Math.max(section.head, end) : Math.min(section.heading.within, doc.length);
     section.to = lastText(doc, section.head, section.next);
   }
   read.set(state, found);

@@ -143,10 +143,15 @@ test("on a phone, a Key: Value line's copy button at the end of a full line is a
   expect(cut).toEqual([]);
 });
 
-/** The cursor as the editor has it: the system's caret's color, and whether lines' own is drawn. */
+/**
+ * The cursor as the editor has it: the system's caret's color, and whether lines' own is drawn.
+ * Read once the editor's drawn what it was last told: lines' cursor is drawn in its next measure,
+ * a frame after the selection changes, and in WebKit its layer is hidden while it has nothing in it.
+ */
 const cursorShown = (page: App["page"]) =>
-  page.evaluate(() => {
+  page.evaluate(async () => {
     const view = window.testing.editor()!;
+    await new Promise((drawn) => view.requestMeasure({ read: () => null, write: drawn }));
     const probe = document.body.appendChild(document.createElement("span"));
     probe.style.color = "var(--caret-color)";
     const cursorColor = getComputedStyle(probe).color;

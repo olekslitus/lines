@@ -12,9 +12,8 @@ import { ancestors, parsedFirst } from "./util";
  * spaces under "- ", three under "1. "); the editor draws each level the same, wider step.
  * Numbered items are numbered again, in the list they leave and the one they join.
  * Backspace right after an item's marker moves a nested item out a level, and turns a top-level
- * one into plain text. Enter there puts an empty item above it. In a list spaced out with blank lines
- * between its items (Markdown's loose list), these keep its spacing, as Markdown's own Enter does
- * (markdownKeys.ts), and Backspace takes back the blank line that Enter put with an empty item.
+ * one into plain text. Enter there puts an empty item above it. A new item goes right next to the
+ * item it's made from, as Enter's does (markdownKeys.ts), however the list is spaced.
  * A number typed there makes a bullet item numbered, and a bullet a numbered one a bullet (listMarkerInput). List items pasted on an
  * empty one take its place, at its level (listPaste). Moving items, and numbering them again where
  * they go, is listMoves.ts's.
@@ -161,31 +160,10 @@ function deleteMarker(view: EditorView) {
   if (item.parent?.parent?.name === "ListItem") return outdentItem(view);
   const { doc } = state;
   const changes: ChangeSpec[] = [{ from: line.from + QUOTES.exec(line.text)![0].length, to: main.head }];
-  // An empty item in a spaced-out list takes the blank line above it, which Enter put there with it:
-  // an empty line under the item above is left, as in a list without them, rather than a gap.
-  const above = line.number > 1 ? doc.line(line.number - 1) : null;
-  if (above && BLANK.test(above.text) && !doc.sliceString(main.head, line.to).trim() && item.to <= line.to && beside(item, false)?.name === "ListItem") {
-    changes.push({ from: above.from, to: line.from });
-  }
   // The numbered items after it count on from the one before it.
   if (item.parent!.name === "OrderedList") changes.push(...renumber(doc, beside(item, true), itemNumber(doc, item)));
   view.dispatch({ changes, scrollIntoView: true, userEvent: "delete.backward" });
   return true;
-}
-
-/** A line with nothing on it but a quote's `>`s. */
-const BLANK = /^[\s>]*$/;
-
-/**
- * Whether a list is spaced out, a blank line between its items, as its first two say: what Markdown's
- * Enter goes by to keep it so (CodeMirror's `nonTightList`).
- */
-function spacedOut(doc: Text, list: SyntaxNode) {
-  const first = endItem(list, false);
-  const second = first && beside(first, true);
-  if (!first || second?.name !== "ListItem") return false;
-  const end = doc.lineAt(first.to);
-  return end.number + (BLANK.test(end.text) ? 0 : 1) < doc.lineAt(second.from).number;
 }
 
 /**
@@ -209,9 +187,7 @@ function itemAbove(view: EditorView) {
     list.firstChild?.from === item.from && list.parent?.name !== "ListItem" && before?.name === "Paragraph" && doc.lineAt(before.to).number === line.number - 1;
   const quote = QUOTES.exec(line.text)![0].trimEnd();
   const blank = underParagraph ? `${quote}\n` : "";
-  // In a spaced-out list, a blank line between it and the item, as between the others.
-  const apart = spacedOut(doc, list) ? `${quote}\n` : "";
-  const changes = [{ from: line.from, to: line.from, insert: `${blank}${line.text.slice(0, start - line.from).replace(/\[[xX]\]/, "[ ]")}\n${apart}` }];
+  const changes = [{ from: line.from, to: line.from, insert: `${blank}${line.text.slice(0, start - line.from).replace(/\[[xX]\]/, "[ ]")}\n` }];
   if (list.name === "OrderedList") changes.push(...renumber(doc, item, itemNumber(doc, item) + 1));
   view.dispatch({ changes, scrollIntoView: true, userEvent: "input" });
   return true;

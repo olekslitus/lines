@@ -758,29 +758,37 @@ async function pressIn(note: string, keys: string[]) {
 }
 
 describe("a list spaced out with blank lines between its items", () => {
-  test("Enter after an item keeps the spacing; Backspace on the empty item takes its blank line back with it, then the line, as in a list without them; Live and Hidden", async () => {
+  test("Enter after an item makes the next one right under it, the blank lines between the others staying; Backspace takes it back; Live and Hidden", async () => {
     const cases = [
-      // Its blank line, then the empty line, then back where Enter was.
-      ["- one‸\n\n- two", ["- one\n\n- ‸\n\n- two", "- one\n‸\n\n- two", "- one‸\n\n- two"]],
+      // The new item, then the empty line, then back where Enter was.
+      ["- one‸\n\n- two", ["- one\n- ‸\n\n- two", "- one\n‸\n\n- two", "- one‸\n\n- two"]],
+      // A note of habits in groups: Enter at the end of a group's last item adds to the group.
+      [
+        "- get outside\n\n- track workouts\n- add skincare‸\n\n- no social media",
+        [
+          "- get outside\n\n- track workouts\n- add skincare\n- ‸\n\n- no social media",
+          "- get outside\n\n- track workouts\n- add skincare\n‸\n\n- no social media",
+          "- get outside\n\n- track workouts\n- add skincare‸\n\n- no social media",
+        ],
+      ],
       // A video's link and its title on the next line, then a tag, as a note of exercises has them.
       [
         "## 1 month\n- 10 pushups\n\n- 20 squats‸\n\n- https://example.com/v\n  [Calisthenics](https://example.com/v)\n\n#gym",
         [
-          "## 1 month\n- 10 pushups\n\n- 20 squats\n\n- ‸\n\n- https://example.com/v\n  [Calisthenics](https://example.com/v)\n\n#gym",
+          "## 1 month\n- 10 pushups\n\n- 20 squats\n- ‸\n\n- https://example.com/v\n  [Calisthenics](https://example.com/v)\n\n#gym",
           "## 1 month\n- 10 pushups\n\n- 20 squats\n‸\n\n- https://example.com/v\n  [Calisthenics](https://example.com/v)\n\n#gym",
           "## 1 month\n- 10 pushups\n\n- 20 squats‸\n\n- https://example.com/v\n  [Calisthenics](https://example.com/v)\n\n#gym",
         ],
       ],
       // The last item.
-      ["- one\n\n- two‸", ["- one\n\n- two\n\n- ‸", "- one\n\n- two\n‸", "- one\n\n- two‸"]],
+      ["- one\n\n- two‸", ["- one\n\n- two\n- ‸", "- one\n\n- two\n‸", "- one\n\n- two‸"]],
       // Numbered, the items after it count up, and back down.
-      ["1. one‸\n\n2. two\n\n3. three", ["1. one\n\n2. ‸\n\n3. two\n\n4. three", "1. one\n‸\n\n2. two\n\n3. three", "1. one‸\n\n2. two\n\n3. three"]],
-      ["- [x] one‸\n\n- [ ] two", ["- [x] one\n\n- [ ] ‸\n\n- [ ] two", "- [x] one\n‸\n\n- [ ] two", "- [x] one‸\n\n- [ ] two"]],
+      ["1. one‸\n\n2. two\n\n3. three", ["1. one\n2. ‸\n\n3. two\n\n4. three", "1. one\n‸\n\n2. two\n\n3. three", "1. one‸\n\n2. two\n\n3. three"]],
+      ["- [x] one‸\n\n- [ ] two", ["- [x] one\n- [ ] ‸\n\n- [ ] two", "- [x] one\n‸\n\n- [ ] two", "- [x] one‸\n\n- [ ] two"]],
       // In a quote, its > stays (Backspace again takes it, as on any line of a quote).
-      ["> - one‸\n>\n> - two", ["> - one\n>\n> - ‸\n>\n> - two", "> - one\n> ‸\n>\n> - two"]],
+      ["> - one‸\n>\n> - two", ["> - one\n> - ‸\n>\n> - two", "> - one\n> ‸\n>\n> - two"]],
       // Nested, its own list spaced out; Backspace moves it out a level first, as it always has.
-      // (CodeMirror's Enter puts a space on the blank line in an item.)
-      ["- one\n\n  - a\n\n  - b‸\n\n- two", ["- one\n\n  - a\n\n  - b\n \n  - ‸\n\n- two", "- one\n\n  - a\n\n  - b\n \n- ‸\n\n- two", "- one\n\n  - a\n\n  - b\n‸\n\n- two"]],
+      ["- one\n\n  - a\n\n  - b‸\n\n- two", ["- one\n\n  - a\n\n  - b\n  - ‸\n\n- two", "- one\n\n  - a\n\n  - b\n- ‸\n\n- two", "- one\n\n  - a\n\n  - b\n‸\n\n- two"]],
       ["- one\n\n  - a‸\n\n- two", ["- one\n\n  - a\n  - ‸\n\n- two", "- one\n\n  - a\n- ‸\n\n- two", "- one\n\n  - a\n‸\n\n- two"]],
       // Without blank lines, as before.
       ["- one‸\n- two", ["- one\n- ‸\n- two", "- one\n‸\n- two", "- one‸\n- two"]],
@@ -801,13 +809,13 @@ describe("a list spaced out with blank lines between its items", () => {
     expect(await pressIn("1. one\n\n2. ‸\n\n3. two", ["Enter"])).toEqual(["1. one\n\n‸\n\n2. two"]);
   });
 
-  test("Enter at the start of an item's text puts an empty item above it, spaced as the others", async () => {
+  test("Enter at the start of an item's text puts an empty item right above it", async () => {
     const cases = [
-      ["- one\n\n- ‸two", "- one\n\n- \n\n- ‸two"],
-      ["- ‸one\n\n- two", "- \n\n- ‸one\n\n- two"],
-      ["1. one\n\n2. ‸two", "1. one\n\n2. \n\n3. ‸two"],
-      ["> - one\n>\n> - ‸two", "> - one\n>\n> - \n>\n> - ‸two"],
-      ["- one\n\n- [x] ‸two", "- one\n\n- [ ] \n\n- [x] ‸two"],
+      ["- one\n\n- ‸two", "- one\n\n- \n- ‸two"],
+      ["- ‸one\n\n- two", "- \n- ‸one\n\n- two"],
+      ["1. one\n\n2. ‸two", "1. one\n\n2. \n3. ‸two"],
+      ["> - one\n>\n> - ‸two", "> - one\n>\n> - \n> - ‸two"],
+      ["- one\n\n- [x] ‸two", "- one\n\n- [ ] \n- [x] ‸two"],
     ];
     for (const [note, after] of cases) expect(await pressIn(note, ["Enter"])).toEqual([after]);
   });
@@ -824,7 +832,7 @@ describe("a list spaced out with blank lines between its items", () => {
       Date.now = () => now() + (ahead += 100);
       try {
         const end = view.state.doc.length;
-        view.dispatch({ changes: { from: end, insert: "\n\n- " }, selection: { anchor: end + 4 }, userEvent: "input" });
+        view.dispatch({ changes: { from: end, insert: "\n- " }, selection: { anchor: end + 3 }, userEvent: "input" });
         view.contentDOM.dispatchEvent(new KeyboardEvent("keydown", { key: "Backspace", bubbles: true, cancelable: true }));
       } finally {
         Date.now = now;

@@ -2362,7 +2362,8 @@
 }
 
 /* The toolbar over selected text (formatting.ts). */
-.cm-tooltip.cm-format-bar {
+.cm-tooltip.cm-format-bar,
+.cm-tooltip.cm-link-bar {
   display: flex;
   gap: 2px;
   padding: 4px;
@@ -2380,7 +2381,8 @@
   }
 }
 
-.cm-format-bar button {
+.cm-format-bar button,
+.cm-link-bar button {
   display: grid;
   place-items: center;
   width: 30px;
@@ -2394,7 +2396,8 @@
   transition: background-color 100ms ease, color 100ms ease;
 }
 
-.cm-format-bar button:hover {
+.cm-format-bar button:hover,
+.cm-link-bar button:hover {
   background: var(--hover);
   color: var(--text);
 }
@@ -2404,8 +2407,26 @@
   color: var(--accent);
 }
 
+/* The bar under a link with Markdown hidden (linkEditing.ts): its address first, cut short, which edits it. */
+.cm-link-bar button.cm-link-address {
+  display: flex;
+  gap: 6px;
+  width: auto;
+  max-width: min(320px, 60vw);
+  padding-inline: 8px 10px;
+  color: var(--accent);
+  font: var(--text-sm) / 1.3 var(--font-ui);
+}
+
+.cm-link-address span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (pointer: coarse) {
-  .cm-format-bar button {
+  .cm-format-bar button,
+  .cm-link-bar button {
     width: 38px;
     height: 38px;
   }

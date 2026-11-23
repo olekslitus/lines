@@ -101,6 +101,7 @@ export default {
   "shortcuts.code": "Code",
   "shortcuts.strike": "Strikethrough",
   "shortcuts.highlight": "Highlight",
+  "shortcuts.link": "Add a link, or edit the one the cursor is in",
   "shortcuts.markdownOnly": "Markdown notes",
   "shortcuts.nextCell": "Next or previous cell",
   "shortcuts.newRow": "New row (on an empty last row, leave the table)",

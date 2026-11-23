@@ -222,6 +222,18 @@ export default {
   "editor.link.open": "Open Link",
   "editor.link.openInBrowser": "Open in Browser",
   "editor.link.copy": "Copy Link",
+  // A link's text and address, to change (⌘K), and the bar under a link the cursor's in while Markdown is hidden.
+  "editor.link.label": "Link",
+  "editor.link.edit": "Edit Link",
+  "editor.link.editWithShortcut": "Edit Link ({shortcut})",
+  "editor.link.editImage": "Edit Picture",
+  "editor.link.add": "Add Link",
+  "editor.link.addAction": "Add",
+  "editor.link.save": "Save",
+  "editor.link.remove": "Remove Link",
+  "editor.link.text": "Text",
+  "editor.link.description": "Description",
+  "editor.link.address": "Address",
   // The button on a code block that tidies its code.
   "editor.formatCode": "Format code",
   "editor.codeFormatted": "Code formatted",

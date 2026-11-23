@@ -301,7 +301,7 @@ export function tableMarkdown(cells: string[][]) {
 /** Code, and tables that are already being edited, where a paste stays as it is. */
 const KEEP_PASTE = new Set(["FencedCode", "CodeBlock", "InlineCode", "Table", "HTMLBlock"]);
 
-const inMarkdownCode = (state: EditorState, pos: number) => {
+export const inMarkdownCode = (state: EditorState, pos: number) => {
   for (const node of ancestors(state, pos, -1)) if (KEEP_PASTE.has(node.name)) return true;
   return false;
 };

@@ -514,6 +514,8 @@ export default {
   "settings.listNumberingNumbers": "1. 1. 1.",
   "settings.renumberLists": "Renuméroter les listes quand on déplace un élément",
   "settings.renumberListsNote": "Déplacer un élément d’une liste numérotée (en le faisant glisser, au clavier, ou en le coupant et collant) renumérote la liste dans son nouvel ordre. Désactivé, les éléments gardent leurs numéros.",
+  "settings.pasteFormatting": "Garder la mise en forme en collant",
+  "settings.pasteFormattingNote": "Les liens, listes, titres et mises en valeur copiés d’une page web, de Slack ou d’un document sont collés en Markdown. Annuler juste après un collage le laisse en texte brut. Désactivé, tout est collé en texte brut.",
   "settings.spellcheck": "Vérifier l’orthographe",
   "settings.spellcheckNote": "Souligne les mots mal orthographiés dans les notes et laisse le système les corriger pendant la saisie. Le code et les maths ne sont jamais vérifiés.",
   "settings.copyOnSelect": "Copier ce que vous sélectionnez",

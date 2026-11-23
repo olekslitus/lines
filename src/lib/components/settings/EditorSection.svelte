@@ -79,6 +79,9 @@
   <FieldRow label={t("settings.renumberLists")} note={t("settings.renumberListsNote")}>
     <Switch label={t("settings.renumberLists")} checked={prefs.renumberLists} onchange={(on) => (prefs.renumberLists = on)} />
   </FieldRow>
+  <FieldRow label={t("settings.pasteFormatting")} note={t("settings.pasteFormattingNote")}>
+    <Switch label={t("settings.pasteFormatting")} checked={prefs.pasteFormatting} onchange={(on) => (prefs.pasteFormatting = on)} />
+  </FieldRow>
   <FieldRow label={t("settings.spellcheck")} note={t("settings.spellcheckNote")}>
     <Switch label={t("settings.spellcheck")} checked={prefs.spellcheck} onchange={(on) => (prefs.spellcheck = on)} />
   </FieldRow>

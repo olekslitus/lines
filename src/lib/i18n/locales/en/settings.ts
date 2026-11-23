@@ -569,6 +569,8 @@ export default {
   "settings.listNumberingNumbers": "1. 1. 1.",
   "settings.renumberLists": "Renumber lists when items move",
   "settings.renumberListsNote": "Moving an item in a numbered list (dragging it, with the keyboard, or by cutting and pasting) numbers the list again in its new order. Off, items keep the numbers they have.",
+  "settings.pasteFormatting": "Keep formatting when pasting",
+  "settings.pasteFormattingNote": "Links, lists, headings and emphasis copied from a web page, Slack or a document are pasted as Markdown. Undo right after a paste leaves it as plain text. Off, everything is pasted as plain text.",
   "settings.spellcheck": "Check spelling",
   "settings.spellcheckNote": "Underlines misspelled words in notes, and lets the system correct them as you type. Code and math are never checked.",
   "settings.copyOnSelect": "Copy what you select",

@@ -307,6 +307,8 @@ export interface Stored {
   listNumbering: ListNumbering;
   /** A numbered list an item is moved into or out of is numbered again in its new order (editor/listMoves.ts); off, items keep their numbers. */
   renumberLists: boolean;
+  /** What's pasted keeps its links, lists and emphasis, as Markdown (editor/richPaste.ts); off, pastes are plain text. */
+  pasteFormatting: boolean;
   /** A heading's section folds away by the chevron beside it, or ⌘⌥[ (editor/folding.ts); off, nothing folds. */
   foldSections: boolean;
   /** Moving a heading (⌥↑ and ⌥↓, its grip) moves its section, what's under it too (editor/sectionMoves.ts); off, its line alone. */
@@ -484,6 +486,7 @@ const DEFAULTS: Stored = {
   underlinedHeadings: false,
   listNumbering: "outline",
   renumberLists: true,
+  pasteFormatting: true,
   foldSections: true,
   moveSections: true,
   spellcheck: true,
@@ -675,6 +678,7 @@ function read(json?: string): Stored {
     underlinedHeadings: flag(raw.underlinedHeadings, DEFAULTS.underlinedHeadings),
     listNumbering: oneOf(raw.listNumbering, LIST_NUMBERINGS, DEFAULTS.listNumbering),
     renumberLists: flag(raw.renumberLists, DEFAULTS.renumberLists),
+    pasteFormatting: flag(raw.pasteFormatting, DEFAULTS.pasteFormatting),
     foldSections: flag(raw.foldSections, DEFAULTS.foldSections),
     moveSections: flag(raw.moveSections, DEFAULTS.moveSections),
     spellcheck: flag(raw.spellcheck, DEFAULTS.spellcheck),
@@ -797,6 +801,7 @@ class Prefs {
   underlinedHeadings = $state(this.#initial.underlinedHeadings);
   listNumbering = $state(this.#initial.listNumbering);
   renumberLists = $state(this.#initial.renumberLists);
+  pasteFormatting = $state(this.#initial.pasteFormatting);
   foldSections = $state(this.#initial.foldSections);
   moveSections = $state(this.#initial.moveSections);
   spellcheck = $state(this.#initial.spellcheck);
@@ -1026,6 +1031,7 @@ class Prefs {
       underlinedHeadings: this.underlinedHeadings,
       listNumbering: this.listNumbering,
       renumberLists: this.renumberLists,
+      pasteFormatting: this.pasteFormatting,
       foldSections: this.foldSections,
       moveSections: this.moveSections,
       spellcheck: this.spellcheck,

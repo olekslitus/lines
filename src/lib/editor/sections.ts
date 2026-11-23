@@ -1,8 +1,9 @@
-import { forceParsing, syntaxTree, syntaxTreeAvailable } from "@codemirror/language";
+import { syntaxTree } from "@codemirror/language";
 import type { EditorState, Text } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import { TAG_NAME } from "../notes/tags";
 import { type Heading, outlineHeadings } from "./outline.svelte";
+import { treeTo } from "./util";
 
 /*
  * A note's sections: each heading and what's under it, up to the next heading of its level or a
@@ -85,7 +86,11 @@ export const sectionOn = (state: EditorState, pos: number) => {
   return sections(state).find((section) => section.from <= line.to && section.head >= line.from) ?? null;
 };
 
-/** The note read to its end, so a section ends where its next heading is rather than where reading stopped. */
+/**
+ * The note read to its end, so a section ends where its next heading is rather than where reading
+ * stopped: however long that takes (on a busy device a time limit runs out early), and into the
+ * view's state, whose tree can be behind what's been read.
+ */
 export function readAll(view: EditorView) {
-  if (!syntaxTreeAvailable(view.state, view.state.doc.length) && syntaxTree(view.state).length) forceParsing(view, view.state.doc.length, 300);
+  if (syntaxTree(view.state).length && treeTo(view.state, view.state.doc.length) !== syntaxTree(view.state)) view.dispatch({});
 }

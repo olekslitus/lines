@@ -41,6 +41,27 @@ test("⌥↓ on a heading moves its section, the one inside it too, past the nex
   expect(await app.text()).toBe(NOTE);
 });
 
+test("on a device too busy to read the note as it changes, ⌥↓ and ⌥↑ at once still move a heading's section, not its line", async () => {
+  await app.open(NOTE);
+  await placeAt("## A", 4);
+  // Both at once, with the clock running fast, as a device too busy to give the parser its time sees
+  // them: its slice runs out before it reaches the heading just moved.
+  const texts = await app.page.evaluate(() => {
+    const now = Date.now;
+    let ahead = 0;
+    Date.now = () => now() + (ahead += 100);
+    try {
+      return ["ArrowDown", "ArrowUp"].map((key) => {
+        window.testing.editor()!.contentDOM.dispatchEvent(new KeyboardEvent("keydown", { key, altKey: true, bubbles: true, cancelable: true }));
+        return window.testing.text();
+      });
+    } finally {
+      Date.now = now;
+    }
+  });
+  expect(texts).toEqual([SWAPPED, NOTE]);
+});
+
 test("the first section of its size doesn't move up, nor the last down; nor the only one under its heading", async () => {
   await app.open(NOTE);
   await placeAt("## A");

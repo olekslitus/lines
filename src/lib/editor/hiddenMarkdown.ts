@@ -1,7 +1,9 @@
 import { syntaxTree } from "@codemirror/language";
 import { EditorSelection, EditorState, type Extension, findClusterBreak, type Line, Prec, RangeSet } from "@codemirror/state";
 import { type Command, EditorView, keymap } from "@codemirror/view";
+import type { SyntaxNode } from "@lezer/common";
 import { INLINE_STYLES, livePreview } from "./livePreview";
+import { hidesMarks, linkBarWhileHidden, linkMarks, linkOf } from "./linkEditing";
 import { frontMatterField } from "./objects";
 
 /*
@@ -40,6 +42,13 @@ function runsOn(state: EditorState, line: Line): Run[] {
     from: line.from,
     to: line.to,
     enter(ref) {
+      const link = (ref.name === "Link" || ref.name === "Autolink") && hidesMarks(state, ref.node) && linkOf(state, ref.node);
+      if (link) {
+        // Its `[` and `](address)`, as opening and closing marks: the cursor stops outside the link.
+        for (const [i, part] of linkMarks(link).entries()) {
+          if (part.from < part.to && part.from >= line.from && part.to <= line.to) marks.push({ ...part, closing: i === 1 });
+        }
+      }
       if (OPAQUE.has(ref.name)) return false;
       const parent = ref.node.parent;
       if (!parent || ref.from < line.from || ref.to > line.to) return;
@@ -67,10 +76,11 @@ function runsOn(state: EditorState, line: Line): Run[] {
   }
   if (lead > line.from) runs.push({ from: line.from, to: lead, at: lead, lead: true, heading });
   // Marks next to each other make one run, which the cursor stops in after those that close
-  // styled text, before those that open it: outside both.
+  // styled text, before those that open it: outside both. Not the line's own marks' run, which the
+  // cursor never goes back into: `- **bold**` is two, both stopping before the `**`.
   for (const mark of marks.sort((a, b) => a.from - b.from)) {
     const last = runs.at(-1);
-    if (last && mark.from <= last.to) {
+    if (last && !last.lead && mark.from <= last.to) {
       if (mark.closing && last.at === last.to) last.at = mark.to;
       last.to = Math.max(last.to, mark.to);
     } else {
@@ -80,7 +90,11 @@ function runsOn(state: EditorState, line: Line): Run[] {
   return runs;
 }
 
-const runAt = (state: EditorState, pos: number) => runsOn(state, state.doc.lineAt(pos)).find((run) => run.from <= pos && pos <= run.to);
+/** The run `pos` is in: where two meet, the first, or going `forward`, the second. */
+function runAt(state: EditorState, pos: number, forward = false) {
+  const runs = runsOn(state, state.doc.lineAt(pos)).filter((run) => run.from <= pos && pos <= run.to);
+  return forward ? runs.at(-1) : runs[0];
+}
 
 /** The next character's edge from `pos` on its line, or the next line's start or the last's end. */
 function beyond(state: EditorState, pos: number, forward: boolean) {
@@ -130,6 +144,17 @@ const settleCursors = EditorState.transactionFilter.of((tr) => {
   return moved ? [tr, { selection: EditorSelection.create(ranges, state.selection.mainIndex), sequential: true }] : tr;
 });
 
+/** Where the text `node` styles or links is, between its marks: if it's styled text or a link. */
+function styledText(state: EditorState, node: SyntaxNode): [from: number, to: number] | null {
+  const style = INLINE_STYLES[node.name];
+  if (style) {
+    const marks = node.getChildren(style[1]);
+    return marks.length > 1 ? [marks[0].to, marks[marks.length - 1].from] : null;
+  }
+  const link = node.name === "Link" ? linkOf(state, node) : null;
+  return link && [link.textFrom, link.textTo];
+}
+
 /** Backspace or Delete beside marks takes the character past them, and the marks too if it's all they styled. */
 const deleteBeside =
   (forward: boolean): Command =>
@@ -138,7 +163,7 @@ const deleteBeside =
     const range = state.selection.main;
     if (state.readOnly || state.selection.ranges.length > 1 || !range.empty) return false;
     const pos = range.head;
-    const run = runAt(state, pos);
+    const run = runAt(state, pos, forward);
     if (!run) return false;
     if (run.lead && !forward) {
       // At the start of a heading's text, Backspace makes it text: its `#` go. A list's and a quote's
@@ -153,12 +178,12 @@ const deleteBeside =
     if (forward ? edge >= line.to : edge <= line.from) return false;
     const other = beyond(state, edge, forward);
     let [from, to] = forward ? [edge, other] : [other, edge];
+    // Styled text, or a link, of only that character goes with it, and what styles or links that, so on out.
     for (let node = syntaxTree(state).resolveInner(from, 1); node.parent; node = node.parent) {
-      const style = INLINE_STYLES[node.name];
-      if (!style) continue;
-      const marks = node.getChildren(style[1]);
-      if (marks.length > 1 && marks[0].to === from && marks[marks.length - 1].from === to) [from, to] = [node.from, node.to];
-      break;
+      const text = styledText(state, node);
+      if (!text) continue;
+      if (text[0] !== from || text[1] !== to) break;
+      [from, to] = [node.from, node.to];
     }
     const changes = state.changes({ from, to });
     view.dispatch({ changes, selection: { anchor: changes.mapPos(pos) }, userEvent: forward ? "delete.forward" : "delete.backward", scrollIntoView: true });
@@ -190,6 +215,7 @@ const lineAboveHeading: Command = (view) => {
 /** Hidden Markdown's cursor and keys, over what live preview draws. */
 export const hiddenMarkdown: Extension = [
   settleCursors,
+  linkBarWhileHidden,
   // What's drawn in place of Markdown (a mention, a list's bullet) the cursor goes over in one step.
   EditorView.atomicRanges.of((view) => view.plugin(livePreview)?.atoms ?? RangeSet.empty),
   Prec.highest(

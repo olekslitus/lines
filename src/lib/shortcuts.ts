@@ -121,6 +121,7 @@ export const SHORTCUTS: ShortcutGroup[] = [
       { action: "shortcuts.code", keys: ["Mod-e"] },
       { action: "shortcuts.strike", keys: ["Mod-Shift-x"], note: "shortcuts.markdownOnly" },
       { action: "shortcuts.highlight", keys: ["Mod-Shift-h"], note: "shortcuts.markdownOnly" },
+      { action: "shortcuts.link", keys: ["Mod-k"], note: "shortcuts.markdownOnly" },
     ],
   },
   {

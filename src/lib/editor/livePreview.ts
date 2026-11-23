@@ -36,6 +36,7 @@ import { InlineMathWidget } from "./math";
 import { listNumber } from "./listNumbers";
 import { fenceCode } from "./rendered";
 import { followClick, openHref } from "./links";
+import { linkMarks, linkOf } from "./linkEditing";
 import { drawMention, frontMatterField, heldProperties, objectsChanged, openMention, openTag, shownNote, valueText } from "./objects";
 import { normalizeTag } from "../notes/parse";
 import { cheer, viewSelectionInUse } from "./util";
@@ -283,7 +284,8 @@ function build(view: EditorView): DecorationSet {
     const line = doc.lineAt(pos);
     return touches(line.from, line.to);
   };
-  // Hidden, what only styles text (`**`, a heading's `#`, a list's marker) doesn't show under the cursor either.
+  // Hidden, what only styles text (`**`, a heading's `#`, a list's marker) doesn't show under the cursor either, nor a
+  // link's brackets and address, nor a picture's Markdown: ⌘K edits those (linkEditing.ts).
   const styleShows = mode === "hidden" ? () => false : touches;
   const styleLineShows = mode === "hidden" ? () => false : lineActive;
 
@@ -417,25 +419,31 @@ function build(view: EditorView): DecorationSet {
         }
 
         case "Link": {
-          const url = node.getChild("URL");
-          const marks = node.getChildren("LinkMark");
-          if (!url || marks.length < 2) return;
+          const link = linkOf(state, node.node);
+          if (!link) return;
           // Drawn as a block (attachments.ts), it shows its Markdown as written, an image in it too.
           if (drawnAsBlock(state, node.node)) return false;
-          const textFrom = marks[0].to;
-          const textTo = marks[1].from;
-          const href = doc.sliceString(url.from, url.to);
-          const short = !touches(node.from, node.to) && shortLink(href);
+          const { textFrom, textTo, href } = link;
+          const drawn = !styleShows(node.from, node.to);
+          const short = drawn && shortLink(href);
           if (short) {
             // A link whose text is its URL reads short; one with text of its own gets the mark.
             if (doc.sliceString(textFrom, textTo) === href) return shortChip(node.from, node.to, href, short);
             decos.push(Decoration.widget({ widget: new ShortLinkWidget(href, short.mark, ""), side: -1 }).range(textFrom));
           }
           // A folder or file on this computer: its icon in front.
-          const local = !touches(node.from, node.to) && localIcon(href);
+          const local = drawn && localIcon(href);
           if (local) decos.push(local.range(textFrom));
+          if (mode === "hidden") {
+            // Only its text, or with none its address, the cursor in it or not (linkEditing.ts edits the rest).
+            const [open, close] = linkMarks(link);
+            mark(open.to, close.from, "cm-lp-link", linkAttributes(href));
+            hide(open.from, open.to);
+            hide(close.from, close.to);
+            return;
+          }
           mark(textFrom, textTo, "cm-lp-link", linkAttributes(href));
-          if (!touches(node.from, node.to)) {
+          if (drawn) {
             hide(node.from, textFrom);
             hide(textTo, node.to);
           }
@@ -446,12 +454,13 @@ function build(view: EditorView): DecorationSet {
           const url = node.getChild("URL");
           if (!url) return false;
           const href = doc.sliceString(url.from, url.to);
-          const short = !touches(node.from, node.to) && shortLink(href);
+          const drawn = !styleShows(node.from, node.to);
+          const short = drawn && shortLink(href);
           if (short) return shortChip(node.from, node.to, href, short);
-          const local = !touches(node.from, node.to) && localIcon(href);
+          const local = drawn && localIcon(href);
           if (local) decos.push(local.range(url.from));
           mark(url.from, url.to, "cm-lp-link", linkAttributes(href));
-          if (!touches(node.from, node.to)) hideChildren(node, "LinkMark");
+          if (drawn) hideChildren(node, "LinkMark");
           return false;
         }
 
@@ -469,7 +478,7 @@ function build(view: EditorView): DecorationSet {
         case "Image": {
           const url = node.getChild("URL");
           const marks = node.getChildren("LinkMark");
-          if (!url || marks.length < 2 || touches(node.from, node.to) || drawnAsBlock(state, node.node)) return false;
+          if (!url || marks.length < 2 || styleShows(node.from, node.to) || drawnAsBlock(state, node.node)) return false;
           if (doc.lineAt(node.from).number !== doc.lineAt(node.to).number) return false;
           const widget = new ImageWidget(
             doc.sliceString(url.from, url.to),

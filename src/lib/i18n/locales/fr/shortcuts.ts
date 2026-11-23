@@ -103,6 +103,7 @@ export default {
   "shortcuts.code": "Code",
   "shortcuts.strike": "Barré",
   "shortcuts.highlight": "Surligné",
+  "shortcuts.link": "Ajouter un lien, ou modifier celui où se trouve le curseur",
   "shortcuts.markdownOnly": "Notes Markdown",
   "shortcuts.nextCell": "Cellule suivante ou précédente",
   "shortcuts.newRow": "Nouvelle ligne (sur une dernière ligne vide, quitter le tableau)",

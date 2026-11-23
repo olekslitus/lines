@@ -817,6 +817,26 @@ const SCENES = [
     schemes: ["light"],
   })),
   {
+    id: "markdown-hidden-link",
+    title: "Show Markdown: Hidden, the cursor in a link",
+    look: "The first item's link shows only its text, no `[`, `]` or address, the cursor in it; under it a bar like the formatting bar: its address cut short in the accent, then Open, Copy and Remove, lined up and quiet.",
+    prefs: { markdownMode: "hidden" },
+    note: '# Gym\n\n- [SML-3 Rogue 108" Monster Lite Squat Stand](https://www.roguefitness.com/sml-3-rogue-108-monster-lite-squat-stand)\n- [Bumper plates](https://www.roguefitness.com/bumper-plates) and a bar\n\nThe end.',
+    act: (page) => page.evaluate(() => window.testing.place(window.testing.text().indexOf("Monster"))),
+  },
+  {
+    id: "markdown-hidden-link-box",
+    title: "Edit Link (⌘K), Markdown hidden",
+    look: "Under the link's start, a box titled Edit Link: Text and Address labelled above their fields, the address selected with the focus ring; Open, Copy and Remove quiet on the left, Save in the accent on the right; the same room around everything.",
+    prefs: { markdownMode: "hidden" },
+    note: '# Gym\n\n- [SML-3 Rogue 108" Monster Lite Squat Stand](https://www.roguefitness.com/sml-3-rogue-108-monster-lite-squat-stand)\n- [Bumper plates](https://www.roguefitness.com/bumper-plates) and a bar\n\nThe end.',
+    act: async (page) => {
+      await page.evaluate(() => window.testing.place(window.testing.text().indexOf("Monster")));
+      await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
+      await page.getByRole("dialog", { name: "Edit Link" }).waitFor();
+    },
+  },
+  {
     id: "formatting-colors",
     title: "Formatting's colors, in a theme of your own",
     look: "Each heading level in its own color, bold, italics, strikethrough, underline, highlighted text, inline code, the link, the mention, the quote and the bullets and number each in theirs; italics inside bold in italics' color; bold in the quote in bold's; the strikethrough's line and the link's underline quiet; everything readable on the note, the highlighted text on the highlighter too.",

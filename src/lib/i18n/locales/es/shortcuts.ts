@@ -103,6 +103,7 @@ export default {
   "shortcuts.code": "Código",
   "shortcuts.strike": "Tachado",
   "shortcuts.highlight": "Resaltado",
+  "shortcuts.link": "Añadir un enlace, o editar aquel en el que está el cursor",
   "shortcuts.markdownOnly": "Notas Markdown",
   "shortcuts.nextCell": "Celda siguiente o anterior",
   "shortcuts.newRow": "Fila nueva (en una última fila vacía, salir de la tabla)",

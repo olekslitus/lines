@@ -42,6 +42,7 @@ import { DEFAULT_LANGUAGE, plugins } from "../plugins/registry.svelte";
 import type { MarkdownAddition, NoteLanguage, PaperSource } from "../plugins/types";
 import { lineMarkers, openedText } from "./markers";
 import { hiddenMarkdown } from "./hiddenMarkdown";
+import { linkKeymap } from "./linkEditing";
 import { dropTagSlash } from "./tagSlash";
 import { markdownPageBreaks } from "./pageBreaks";
 import { markupMode } from "./markupMode";
@@ -321,6 +322,7 @@ const linedownEditing = (additions: MarkdownAddition[], papers: PaperSource[], m
   formattingKeymap,
   markdownOutline,
   linkMenu,
+  linkKeymap,
   additions.flatMap((addition) => addition.editor ?? []),
 ];
 

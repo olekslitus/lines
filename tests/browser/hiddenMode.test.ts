@@ -62,7 +62,7 @@ async function steps(from: number, key: string) {
  * of its line, at `inside` in it, and with all of it selected: each as `expected`, the note's text
  * as written.
  */
-async function hiddenEverywhere(markdown: string, inside: number, expected: string) {
+async function hiddenEverywhere(markdown: string, inside: number, expected: string | { none: string[] }) {
   const body = `Intro\n\n${markdown}\n\nEnd`;
   await app.open(body);
   const start = body.indexOf(markdown);
@@ -74,7 +74,10 @@ async function hiddenEverywhere(markdown: string, inside: number, expected: stri
   ];
   for (const [where, anchor, to] of states) {
     await select(anchor, to);
-    expect(`${where}: ${await seen()}`).toBe(`${where}: Intro\n\n${expected}\n\nEnd`);
+    const now = await seen();
+    if (typeof expected === "string") expect(`${where}: ${now}`).toBe(`${where}: Intro\n\n${expected}\n\nEnd`);
+    // Where what's drawn has text of its own (math), none of the marks.
+    else for (const mark of expected.none) expect(now.includes(mark) ? `${where}, ${mark}: ${now}` : "").toBe("");
   }
   expect(await app.text()).toBe(body);
 }
@@ -230,5 +233,113 @@ describe("the link bar and box", () => {
     expect(await bar().count()).toBe(0);
     await select(0);
     expect(await seen()).toBe("See Rogue here");
+  });
+});
+
+describe("everything else Lines draws", () => {
+  const line = () =>
+    app.page.evaluate(() => {
+      const { state } = window.testing.editor()!;
+      return state.doc.lineAt(state.selection.main.head).number;
+    });
+
+  test("a code block shows its language as a label and no fences; ```math, a math block and math in text no `$` or fences", async () => {
+    await hiddenEverywhere("```ts\nconst a = 1;\n```", 3, { none: ["`"] });
+    await hiddenEverywhere("```math\nx^2\n```", 9, { none: ["`"] });
+    await hiddenEverywhere("$$\nx^2\n$$", 4, { none: ["$"] });
+    await hiddenEverywhere("So $x^2$ is", 5, { none: ["$"] });
+    // Math's source with the cursor in it, and the language, are what's written there.
+    await select(7 + 5);
+    expect(await seen()).toBe("Intro\n\nSo x^2 is\n\nEnd");
+    await app.open("```ts\nconst a = 1;\n```");
+    await select(5);
+    expect((await seen()).split("\n")[0]).toBe("ts");
+  });
+
+  test("a card's and a callout's `:::`, a page break's comment, a line mark's, a `\\` line break's and an escape's backslash never show", async () => {
+    await hiddenEverywhere(":::i\nInside\n:::", 2, { none: [":"] });
+    await hiddenEverywhere("::: card\n:::!\nNested\n:::\n:::", 15, { none: [":", "card"] });
+    await hiddenEverywhere("<!-- pagebreak -->", 3, { none: ["<", "pagebreak"] });
+    await hiddenEverywhere("Marked line <!-- mark green: ready -->", 3, "Marked line");
+    await hiddenEverywhere("One\\\nTwo", 2, "One\nTwo");
+    await hiddenEverywhere("Not \\*em\\* here", 6, "Not *em* here");
+  });
+
+  test("a mention stays its note's chip, the cursor on it or in it; a picture on a line of its own stays drawn", async () => {
+    await app.open("# Ada Lovelace\n\nShe wrote the first program.");
+    await hiddenEverywhere("Ask @[Ada Lovelace] now", 7, "Ask Ada Lovelace now");
+    await hiddenEverywhere("Ask [[Ada Lovelace|Ada]] now", 7, "Ask Ada now");
+    await hiddenEverywhere("![A picture](https://example.com/a.png)", 4, "This image couldn’t be shown");
+    // One Backspace takes a mention.
+    await app.open("Ask @[Ada Lovelace]");
+    await select(19);
+    await app.page.keyboard.press("Backspace");
+    expect(await app.text()).toBe("Ask ");
+  });
+
+  test("↓ and ↑ go past a code block's closing fence and a card's fences, never onto them", async () => {
+    await app.open("Intro\n\n```ts\ncode\n```\n\nEnd");
+    await select(13);
+    await app.page.keyboard.press("ArrowDown");
+    expect(await line()).toBe(6);
+    await app.page.keyboard.press("ArrowUp");
+    expect(await line()).toBe(4);
+
+    await app.open("Intro\n:::i\nInside\n:::\nEnd");
+    await select(5);
+    const lines: number[] = [];
+    for (const key of ["ArrowDown", "ArrowDown", "ArrowUp"]) {
+      await app.page.keyboard.press(key);
+      lines.push(await line());
+    }
+    expect(lines).toEqual([3, 5, 3]);
+  });
+
+  test("Backspace beside a fence never joins a line to it: an empty line goes, a line with text stays", async () => {
+    await app.open("```ts\ncode\n```\n\nEnd");
+    await select(15);
+    await app.page.keyboard.press("Backspace");
+    expect(await app.text()).toBe("```ts\ncode\n```\nEnd");
+    expect(await head()).toBe(10);
+    await select(15);
+    await app.page.keyboard.press("Backspace");
+    expect(await app.text()).toBe("```ts\ncode\n```\nEnd");
+  });
+
+  test("math's `$` are stepped over: → from before it goes past its first character, its source shown", async () => {
+    await app.open("So $x^2$ is");
+    await select(3);
+    await app.page.keyboard.press("ArrowRight");
+    expect(await head()).toBe(5);
+    expect(await seen()).toBe("So x^2 is");
+  });
+
+  test("typing at a marked line's end goes before its mark; Return starts the next line after it; → goes on to the next line", async () => {
+    const marked = "Marked line <!-- mark green: ready -->";
+    await app.open(`${marked}\nNext`);
+    await select(marked.length);
+    await app.page.keyboard.type("!");
+    expect(await app.text()).toBe("Marked line! <!-- mark green: ready -->\nNext");
+    await app.page.keyboard.press("Enter");
+    expect(await app.text()).toBe("Marked line! <!-- mark green: ready -->\n\nNext");
+    expect(await line()).toBe(2);
+    await select(12);
+    await app.page.keyboard.press("ArrowRight");
+    expect(await line()).toBe(2);
+    // Delete there brings the next line up before the mark.
+    await app.page.keyboard.press("Backspace");
+    await select(12);
+    await app.page.keyboard.press("Delete");
+    expect(await app.text()).toBe("Marked line!Next <!-- mark green: ready -->");
+  });
+
+  test("↓ onto a page break chooses it whole, drawn; Backspace takes it", async () => {
+    await app.open("Before\n<!-- pagebreak -->\nAfter");
+    await select(3);
+    await app.page.keyboard.press("ArrowDown");
+    expect(await app.page.evaluate(() => window.testing.editor()!.state.selection.main.toJSON())).toEqual({ anchor: 7, head: 25 });
+    expect(await seen()).not.toContain("<!--");
+    await app.page.keyboard.press("Backspace");
+    expect(await app.text()).toBe("Before\n\nAfter");
   });
 });

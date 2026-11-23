@@ -90,9 +90,9 @@ const markdownBreaks = drawnBlocks(
     if (node.name !== "CommentBlock" && node.name !== "HTMLBlock") return null;
     const line = state.doc.lineAt(node.from);
     if (!isPageBreak(line.text)) return null;
-    return pageBreakAt(line.from, line.to, isEditing(state, line.from, line.to));
+    return pageBreakAt(line.from, line.to, isEditing(state, line.from, line.to, false));
   },
   { inside: ["Document"] },
 );
 
-export const markdownPageBreaks: Extension = [markdownBreaks, arrowsInto(markdownBreaks), pagedNote];
+export const markdownPageBreaks: Extension = [markdownBreaks, arrowsInto(markdownBreaks, true), pagedNote];

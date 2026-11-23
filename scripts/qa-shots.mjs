@@ -825,6 +825,14 @@ const SCENES = [
     act: (page) => page.evaluate(() => window.testing.place(window.testing.text().indexOf("Monster"))),
   },
   {
+    id: "markdown-hidden-blocks",
+    title: "Show Markdown: Hidden, the cursor in a code block",
+    look: "No ``` or `:::` anywhere, the code block's language a faint label at its top, its code with the cursor in it as written; the callout drawn with its icon, no `:::` lines; the math in text drawn; the marked line's bar in the margin, its comment hidden; the gaps around the blocks as with the cursor elsewhere.",
+    prefs: { markdownMode: "hidden" },
+    note: '# Hidden\n\nThe area is $\\pi r^2$, ==roughly== three times r². <!-- mark green: checked -->\n\n```ts\nconst area = (r: number) => Math.PI * r ** 2;\n```\n\n:::i\nA callout, its fences never seen.\n:::\n\nThe end.',
+    act: (page) => page.evaluate(() => window.testing.place(window.testing.text().indexOf("Math.PI"))),
+  },
+  {
     id: "markdown-hidden-link-box",
     title: "Edit Link (⌘K), Markdown hidden",
     look: "Under the link's start, a box titled Edit Link: Text and Address labelled above their fields, the address selected with the focus ring; Open, Copy and Remove quiet on the left, Save in the accent on the right; the same room around everything.",

@@ -316,9 +316,11 @@ How they work is in [spreadsheets.md](spreadsheets.md).
 
 ## Showing Markdown
 
-- Hidden Markdown (Settings → Editor → Show Markdown) hides what only styles text (`**`, `#`, `>`, list markers) and links' and pictures' Markdown (⌘K edits a link); math, mentions' sources, code fences, cards' `:::` and a note's properties still show their Markdown while the cursor is in them, as in Live, since there's no other way to change them yet (no math editor over the text).
+- Hidden Markdown (Settings → Editor → Show Markdown) still shows what's edited as it's written, as there's no other way to change it yet: a table's Markdown, pipes and its `---` row, while the cursor is in it (its cells can't be edited in the drawn table yet); a diagram's or a math block's code, and math's source (without its `$`), while the cursor is in them; a score as written (`4/5`) on the line being edited. A heading's closing `#`s show, as a `#` just typed at a heading's end starts a tag, and so does a heading's underline (`===`, with Underlined headings on), which is what makes it one.
+- Hidden, a callout's kind, a card's attributes and a wiki link's own text (`[[Note|text]]`) are changed in Live or Visible, where their Markdown shows; a mention of a note that isn't there shows as written, faint, so it can be told from one that is.
+- What Lines doesn't draw shows as written in every way of showing Markdown, Hidden too: footnotes (`[^1]`), reference links (`[text][ref]`, `[ref]: …`), `~sub~` and `^sup^`, HTML but `<u>`, page breaks and line marks (`<kbd>`, `<div>`, comments), and GitHub's `> [!note]` callouts.
 - Hidden, typing at either end of styled text writes outside it: to add to a bold word, type inside it, or ⌘B again. Return at the start of a heading's text puts a line above it; Backspace at a list item's text takes its marker, as Markdown's own Backspace does.
-- LaTeX notes follow Source, Visible and Live; with Hidden they show their commands as in Live.
+- LaTeX notes follow Source, Visible and Live; with Hidden they show their commands as in Live, but for line marks (`% mark`), hidden there too, and ⌘K, which is for Markdown notes only.
 - Not tried yet with input methods that compose text (Japanese, Chinese, Korean) in Hidden, nor in the Mac app or on phones.
 
 ## Page breaks

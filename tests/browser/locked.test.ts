@@ -8,7 +8,10 @@ afterEach(async () => {
   await app.close();
 });
 
-/** Everything Lines keeps in the page's storage, as text: each database's records, their bytes and files read as text too, and localStorage. */
+/**
+ * Everything Lines keeps in the page's storage, as text: each database's records, their bytes and files read as text too, and localStorage.
+ * It's full of times in milliseconds, ids and base64, so a secret looked for in it is a whole line (`PIN 2468`), not digits alone, which those hold by chance.
+ */
 const storedText = (page: Page) =>
   page.evaluate(async () => {
     const decode = async (value: unknown): Promise<unknown> => {
@@ -106,11 +109,11 @@ describe("a locked note", () => {
     const id = await app.open("# Bank\n\nPIN 2468");
     await lockNote(page, "correct horse");
     await page.waitForFunction((id) => !!window.testing.notes.get(id)?.note.locked?.sealed, id);
-    expect(await storedText(page)).not.toContain("2468");
+    expect(await storedText(page)).not.toContain("PIN 2468");
 
     await lockNow(page);
     expect(await stored(page, id)).toEqual({ body: "", sealed: true, open: false });
-    expect(await page.locator(".editor-pane").innerText()).not.toContain("2468");
+    expect(await page.locator(".editor-pane").innerText()).not.toContain("PIN 2468");
     const password = page.getByLabel("Password for locked notes");
     await password.fill("wrong horse");
     await password.press("Enter");
@@ -132,7 +135,7 @@ describe("a locked note", () => {
     await page.waitForFunction((id) => window.testing.notes.get(id)?.note.body.includes("PUK 1357"), id);
     expect(await stored(page, id)).toEqual({ body: "# Bank\n\nPIN 2468\nPUK 1357", sealed: true, open: true });
     const text = await storedText(page);
-    expect([text.includes("2468"), text.includes("1357")]).toEqual([false, false]);
+    expect([text.includes("PIN 2468"), text.includes("PUK 1357")]).toEqual([false, false]);
 
     await page.reload();
     await page.waitForFunction(() => window.testing?.notes.ready);

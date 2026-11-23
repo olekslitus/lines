@@ -34,7 +34,7 @@ function withoutBlankLine(state: EditorState, tr: Transaction): Transaction {
   return state.update({ changes, selection: EditorSelection.create(ranges, tr.selection!.mainIndex), scrollIntoView: true, userEvent: "input" });
 }
 
-/** Markdown's Enter and Backspace, which go by the syntax tree: parsed as far as the cursor first. */
+/** Markdown's Enter and Backspace, which go by the syntax tree: parsed as far as the cursor, and through the list it's in, first. */
 export const markdownKeymap = keymap.of([
   { key: "Enter", run: parsedFirst(continueMarkup) },
   { key: "Backspace", run: parsedFirst(deleteMarkupBackward) },

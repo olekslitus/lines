@@ -126,6 +126,11 @@ export default {
   "editor.format.highlight": "Surligner",
   "editor.format.withShortcut": "{format} ({shortcut})",
 
+  "editor.keyboardBar": "Mise en forme",
+  "editor.keyboardBar.indent": "Augmenter le retrait",
+  "editor.keyboardBar.outdent": "Diminuer le retrait",
+  "editor.keyboardBar.hide": "Masquer le clavier",
+
   "editor.checkbox": "Tâche",
   "editor.image": "Image",
   "editor.imageFailed": "Impossible d’afficher cette image",

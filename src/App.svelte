@@ -31,6 +31,7 @@
   import IconButton from "./lib/components/ui/IconButton.svelte";
   import Notice from "./lib/components/ui/Notice.svelte";
   import Editor from "./lib/editor/Editor.svelte";
+  import KeyboardBar from "./lib/editor/KeyboardBar.svelte";
   import { flushSync, untrack } from "svelte";
   import { speak } from "./lib/a11y";
   import { t } from "./lib/i18n/index.svelte";
@@ -1012,6 +1013,10 @@
   </main>
 </div>
 <DragLabel />
+<!-- On phones and tablets, formatting on top of the keyboard as a note's written in. -->
+{#if isMobile}
+  <KeyboardBar />
+{/if}
 
 {#if infoAnchor && selected && !closed}
   <NoteInfo entry={selected} anchor={infoAnchor} onclose={closeInfo} />

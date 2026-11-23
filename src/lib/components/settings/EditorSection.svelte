@@ -85,6 +85,9 @@
   <FieldRow label={t("settings.copyOnSelect")} note={t("settings.copyOnSelectNote")}>
     <Switch label={t("settings.copyOnSelect")} checked={prefs.copyOnSelect} onchange={(on) => (prefs.copyOnSelect = on)} />
   </FieldRow>
+  <FieldRow label={t("settings.keyboardBar")} note={t("settings.keyboardBarNote")}>
+    <Switch label={t("settings.keyboardBar")} checked={prefs.keyboardBar} onchange={(on) => (prefs.keyboardBar = on)} />
+  </FieldRow>
 </FieldGroup>
 
 <FieldGroup title={t("settings.links")} note={t("settings.linksNote", { openKey: formatKeys("Alt-Enter", system) })}>

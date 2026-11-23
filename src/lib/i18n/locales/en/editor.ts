@@ -152,6 +152,12 @@ export default {
   // A toolbar button's tooltip: "Bold (⌘B)".
   "editor.format.withShortcut": "{format} ({shortcut})",
 
+  // The bar on top of a phone's keyboard as a note's written in: its name for screen readers, and its buttons beside the toolbar's.
+  "editor.keyboardBar": "Formatting",
+  "editor.keyboardBar.indent": "Indent",
+  "editor.keyboardBar.outdent": "Outdent",
+  "editor.keyboardBar.hide": "Hide keyboard",
+
   // A todo's checkbox, named for screen readers when the todo has no text.
   "editor.checkbox": "Todo",
   "editor.image": "Image",

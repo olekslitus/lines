@@ -28,7 +28,7 @@ A quiet page that gets out of your way. Type the way you think, and Lines tidies
 - Link notes with `@` or `[[`. Give a note a type, like `person` or `recipe`, and see all of them together.
 - Search finds anything, across every note, as you type.
 - Pictures, files, audio, video, math, drawings and diagrams sit right in the note.
-- Small things help: drag any line to move it (a heading takes its section along), fold a heading's section away, find and replace, arrows that draw themselves (`->` as →), notes side by side, and, on a computer, a note in a small window of its own that can stay on top.
+- Small things help: drag any line to move it (a heading takes its section along), fold a heading's section away, find and replace, arrows that draw themselves (`->` as →), notes side by side, on a phone a bar of formatting and lists on top of the keyboard, and, on a computer, a note in a small window of its own that can stay on top.
 
 ### Keep what you read, watch and listen to
 
@@ -387,6 +387,7 @@ src/
       markers.ts             Marks in the margin: a note's own (written by its language) and plugins', in lanes; ⌘⇧M
       formatCode.ts          Tidies code blocks (JSON, SQL, Prettier languages)
       formatting.ts          Bold, italic, underline, code… toggles and the toolbar over selected text
+      KeyboardBar.svelte     On phones, formatting, lists and indenting in a bar on top of the keyboard
       links.ts               Following links, tags and mentions as Settings → Editor → Links says for each click
       linkMenu.ts            A web link's menu (Open, Copy, and what plugins add: Add to Library)
       outline.svelte.ts      The outline beside a note: its languages' headings, the part being read, gliding to one

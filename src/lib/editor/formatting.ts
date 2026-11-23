@@ -18,8 +18,9 @@ import { selectedBlock } from "./attachments";
 import { ancestors, focusAtStart } from "./util";
 
 /*
- * Inline formatting: bold, italic, underline, strikethrough, code and highlight. The shortcuts and the
- * toolbar that appears over selected text both toggle it, using the parse tree to tell whether
+ * Inline formatting: bold, italic, underline, strikethrough, code and highlight. The shortcuts, the
+ * toolbar that appears over selected text and the bar above a phone's keyboard (KeyboardBar.svelte)
+ * all toggle it, using the parse tree to tell whether
  * the selection is already formatted (so italic on bold text adds italic instead of eating one
  * of the bold's asterisks).
  */
@@ -140,6 +141,8 @@ export function toggleFormat(id: FormatId): StateCommand {
 const pointer = StateEffect.define<boolean>();
 const focus = StateEffect.define<boolean>();
 const dismiss = StateEffect.define<null>();
+/** Whether formatting is in the bar above the keyboard instead (KeyboardBar.svelte), told again as that changes. */
+export const dockFormatBar = StateEffect.define<boolean>();
 
 interface ToolbarState {
   /** A mouse button is down, e.g. while dragging out a selection; the toolbar waits for it. */
@@ -147,29 +150,36 @@ interface ToolbarState {
   focused: boolean;
   /** Escape hid it; it comes back with the next selection. */
   dismissed: boolean;
+  /** The bar above the keyboard has its buttons, so it doesn't show. */
+  docked: boolean;
 }
 
 const toolbarState = StateField.define<ToolbarState>({
-  create: () => ({ pointerDown: false, focused: false, dismissed: false }),
+  create: () => ({ pointerDown: false, focused: false, dismissed: false, docked: false }),
   update(value, tr) {
-    let { pointerDown, focused, dismissed } = value;
+    let { pointerDown, focused, dismissed, docked } = value;
     if (tr.selection) dismissed = false;
     for (const effect of tr.effects) {
       if (effect.is(pointer)) pointerDown = effect.value;
       if (effect.is(focus)) focused = effect.value;
       if (effect.is(dismiss)) dismissed = true;
+      if (effect.is(dockFormatBar)) docked = effect.value;
     }
-    return pointerDown === value.pointerDown && focused === value.focused && dismissed === value.dismissed ? value : { pointerDown, focused, dismissed };
+    const same = pointerDown === value.pointerDown && focused === value.focused && dismissed === value.dismissed && docked === value.docked;
+    return same ? value : { pointerDown, focused, dismissed, docked };
   },
   provide: (field) =>
     showTooltip.compute([field, "selection"], (state) => {
-      const { pointerDown, focused, dismissed } = state.field(field);
+      const { pointerDown, focused, dismissed, docked } = state.field(field);
       const range = state.selection.main;
-      if (pointerDown || !focused || dismissed || range.empty || state.readOnly) return null;
+      if (pointerDown || !focused || dismissed || docked || range.empty || state.readOnly) return null;
       if (!segments(state, range).length || inCodeBlock(state, range.head) || selectedBlock(state)) return null;
       return toolbarTooltip(range);
     }),
 });
+
+/** Whether a note's text can be formatted: a Markdown note's, the one language with this toolbar. */
+export const formatsHere = (state: EditorState) => state.field(toolbarState, false) !== undefined;
 
 function inCodeBlock(state: EditorState, pos: number) {
   for (const node of ancestors(state, pos, -1)) {

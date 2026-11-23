@@ -1,6 +1,6 @@
 import { syntaxTree } from "@codemirror/language";
-import { type ChangeSpec, type EditorState, type Extension, RangeSetBuilder, StateEffect, StateField, type Text } from "@codemirror/state";
-import { Decoration, type DecorationSet, EditorView, keymap, layer, type LayerMarker, ViewPlugin, type ViewUpdate } from "@codemirror/view";
+import { Annotation, type ChangeSpec, EditorSelection, EditorState, type Extension, Prec, RangeSetBuilder, StateEffect, StateField, type Text } from "@codemirror/state";
+import { type Command, Decoration, type DecorationSet, EditorView, keymap, layer, type LayerMarker, ViewPlugin, type ViewUpdate } from "@codemirror/view";
 import { PALETTE, paletteVar } from "../palette";
 import { plugins } from "../plugins/registry.svelte";
 import type { LineMarker, MarkerColor, NoteLanguage } from "../plugins/types";
@@ -202,7 +202,7 @@ export function lineMarkers(language: NoteLanguage): Extension {
   const writtenOn = (state: EditorState) => new Map(ownMarks(state).map((mark) => [mark.line, mark.at]));
 
   const hidden = Decoration.replace({});
-  /** The note's own marks, hidden but where the cursor is (or anywhere, while the note isn't being edited). */
+  /** The note's own marks, hidden but where the cursor is (or anywhere, while the note isn't being edited; or with Markdown hidden). */
   const hiding = ViewPlugin.fromClass(
     class {
       decorations: DecorationSet;
@@ -218,7 +218,8 @@ export function lineMarkers(language: NoteLanguage): Extension {
         if (mode === "source" || mode === "visible") return Decoration.none;
         const written = writtenOn(view.state);
         const { doc } = view.state;
-        const selection = viewSelectionInUse(view) ? view.state.selection.ranges : [];
+        // Hidden, not even there.
+        const selection = viewSelectionInUse(view) && mode !== "hidden" ? view.state.selection.ranges : [];
         const builder = new RangeSetBuilder<Decoration>();
         for (const { from, to } of view.visibleRanges) {
           for (let pos = from; pos <= to; ) {
@@ -296,5 +297,67 @@ export function lineMarkers(language: NoteLanguage): Extension {
     return true;
   }
 
-  return [marks, hiding, bars, keymap.of([{ key: "Mod-Shift-m", run: markLines }])];
+  /** Where on its line the mark is written, if the cursor at `pos` is on a marked line. */
+  const markOn = (state: EditorState, pos: number) => {
+    const line = state.doc.lineAt(pos);
+    const at = writtenOn(state).get(line.from);
+    return at === undefined ? null : { line, at };
+  };
+
+  /**
+   * With Markdown hidden, where the mark never shows, the cursor stops before it, so what's typed at
+   * the line's end goes before it and the mark stays at the end. → there goes on to the next line.
+   */
+  const beforeMark = EditorState.transactionFilter.of((tr) => {
+    if ((!tr.selection && !tr.docChanged) || tr.state.facet(markupMode) !== "hidden" || tr.annotation(pastMark) || tr.isUserEvent("input.type.compose")) return tr;
+    const { state } = tr;
+    const step = !tr.docChanged && tr.isUserEvent("select") && !tr.isUserEvent("select.pointer");
+    let moved = false;
+    const ranges = state.selection.ranges.map((range, i) => {
+      const found = range.empty && markOn(state, range.head);
+      if (!found || range.head <= found.at) return range;
+      moved = true;
+      const from = tr.startState.selection.ranges[i];
+      const onward = step && from?.empty && from.head === found.at && found.line.to < state.doc.length;
+      return EditorSelection.cursor(onward ? found.line.to + 1 : found.at);
+    });
+    return moved ? [tr, { selection: EditorSelection.create(ranges, state.selection.mainIndex), sequential: true }] : tr;
+  });
+
+  /** Return before a hidden mark starts the next line after it, the mark staying on this one. */
+  const enterPastMark: Command = (view) => {
+    const { state } = view;
+    const range = state.selection.main;
+    const found = state.facet(markupMode) === "hidden" && range.empty && state.selection.ranges.length === 1 && markOn(state, range.head);
+    if (!found || range.head !== found.at) return false;
+    view.dispatch({ selection: { anchor: found.line.to }, annotations: pastMark.of(true) });
+    // Return's own command goes on from there.
+    return false;
+  };
+
+  /** Delete before a hidden mark brings the next line's text up before it, rather than after it. */
+  const deleteBeforeMark: Command = (view) => {
+    const { state } = view;
+    const range = state.selection.main;
+    const found = state.facet(markupMode) === "hidden" && !state.readOnly && range.empty && state.selection.ranges.length === 1 && markOn(state, range.head);
+    if (!found || range.head !== found.at) return false;
+    if (found.line.number === state.doc.lines) return true;
+    const next = state.doc.line(found.line.number + 1);
+    view.dispatch({ changes: [{ from: found.at, insert: next.text }, { from: found.line.to, to: next.to }], selection: { anchor: found.at }, userEvent: "delete.forward" });
+    return true;
+  };
+
+  return [
+    marks,
+    hiding,
+    bars,
+    beforeMark,
+    // Hidden, the cursor goes over a mark in one step.
+    EditorView.atomicRanges.of((view) => (view.state.facet(markupMode) === "hidden" ? (view.plugin(hiding)?.decorations ?? Decoration.none) : Decoration.none)),
+    Prec.highest(keymap.of([{ key: "Enter", run: enterPastMark }, { key: "Delete", run: deleteBeforeMark }])),
+    keymap.of([{ key: "Mod-Shift-m", run: markLines }]),
+  ];
 }
+
+/** A cursor put past a hidden mark on purpose, to stay there. */
+const pastMark = Annotation.define<boolean>();

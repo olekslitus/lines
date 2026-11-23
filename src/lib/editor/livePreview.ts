@@ -344,7 +344,7 @@ function build(view: EditorView): DecorationSet {
   };
 
   const codeLines = new Set<number>();
-  /** Draws a block's lines as code. Its fences (`fence`, marked `markName`) show only while the cursor is on their line. */
+  /** Draws a block's lines as code. Its fences (`fence`, marked `markName`) show only while the cursor is on their line; Hidden, never. */
   const codeBlock = (node: SyntaxNode, fence: RegExp, markName: string) => {
     // Right after another code block or a card (no line between): a gap, so the two don't run together.
     const afterBlock = endsBlock(state, doc.lineAt(node.from).number - 1);
@@ -359,7 +359,7 @@ function build(view: EditorView): DecorationSet {
       return cls;
     });
     // A code block's language stays, as a label.
-    for (const mark of node.getChildren(markName)) if (!lineActive(mark.from)) hide(mark.from, mark.to);
+    for (const mark of node.getChildren(markName)) if (!styleLineShows(mark.from)) hide(mark.from, mark.to);
   };
   /**
    * Lines inside cards: how far in, whether it's a `:::` fence, and on a callout's opening fence,
@@ -494,6 +494,11 @@ function build(view: EditorView): DecorationSet {
           return false;
         }
 
+        case "HardBreak":
+          // A line break written as a `\` at the line's end: Hidden, it's only the break.
+          if (mode === "hidden" && doc.sliceString(node.from, node.from + 1) === "\\") hide(node.from, node.from + 1);
+          return false;
+
         case "Tag": {
           const hash = node.getChild("TagMark");
           const tag = hash ? normalizeTag(doc.sliceString(hash.to, node.to)) : null;
@@ -508,8 +513,11 @@ function build(view: EditorView): DecorationSet {
         }
 
         case "Mention": {
-          // Its source shows with the cursor in it, Hidden too: a chip can't be edited, only taken away.
-          if (touches(node.from, node.to)) {
+          // Its source shows with the cursor in it. Hidden, it stays a chip, one step for the arrows and
+          // one Backspace, but for `@name` while it's typed (the cursor at its end), not yet a mention.
+          const typed = () => selection.some((range) => range.empty && range.head === node.to) && /^@[^[]/.test(doc.sliceString(node.from, node.from + 2));
+          const source = mode === "hidden" ? typed() : touches(node.from, node.to);
+          if (source) {
             mark(node.from, node.to, "cm-lp-mention-source");
             return false;
           }
@@ -593,8 +601,15 @@ function build(view: EditorView): DecorationSet {
           const marks = node.getChildren("MathMark");
           if (marks.length < 2) return false;
           const single = doc.lineAt(node.from).number === doc.lineAt(node.to).number;
-          if (touches(node.from, node.to) || !single) {
-            mark(node.from, node.to, "cm-lp-math-source", { spellcheck: "false" });
+          // Hidden, a selection taking all of it in leaves it drawn, and its source shows without its `$`.
+          const covered = mode === "hidden" && selection.some((range) => range.from <= node.from && range.to >= node.to && !range.empty);
+          if ((touches(node.from, node.to) && !covered) || !single) {
+            if (mode !== "hidden") mark(node.from, node.to, "cm-lp-math-source", { spellcheck: "false" });
+            else {
+              mark(marks[0].to, marks[1].from, "cm-lp-math-source", { spellcheck: "false" });
+              hide(marks[0].from, marks[0].to);
+              hide(marks[1].from, marks[1].to);
+            }
             return false;
           }
           const widget = new InlineMathWidget(doc.sliceString(marks[0].to, marks[1].from), marks[0].to - marks[0].from === 2);
@@ -661,10 +676,12 @@ function build(view: EditorView): DecorationSet {
   for (const [n, { inset, fence, top, callout, spoken }] of cardLines) {
     const line = doc.line(n);
     let cls = "cm-lp-card";
-    if (fence) cls += touches(line.from, line.to) ? " cm-lp-card-fence is-active" : " cm-lp-card-fence";
+    // Hidden, never seen: the cursor goes past it (hiddenMarkdown.ts).
+    const shown = fence && styleLineShows(line.from);
+    if (fence) cls += shown ? " cm-lp-card-fence is-active" : " cm-lp-card-fence";
     // The fence (from its colons, after a quote's `>`), unseen until the cursor's on it, is said in words.
     const colons = line.text.indexOf(":");
-    if (fence && spoken && colons >= 0 && !touches(line.from, line.to)) {
+    if (fence && spoken && colons >= 0 && !shown) {
       decos.push(Decoration.replace({ widget: new SpokenWidget(spoken) }).range(line.from + colons, line.to));
     }
     else if (top) cls += " cm-lp-card-top";

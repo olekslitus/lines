@@ -550,7 +550,8 @@ function drawBlock(state: EditorState, node: SyntaxNodeRef) {
   const block = drawnAsBlock(state, node.node);
   if (!block) return null;
   const line = state.doc.lineAt(node.from);
-  const editing = isEditing(state, line.from, line.to);
+  // Hidden, a picture or file stays drawn with the cursor on it: ⌘K edits it (linkEditing.ts).
+  const editing = isEditing(state, line.from, line.to, false);
   const selected = editing && state.selection.ranges.some((r) => r.from <= node.from && r.to >= node.to && !r.empty);
   return drawnBlock(new BlockWidget(block, cardInset(state, node.node), editing, selected), line.from, line.to, editing);
 }

@@ -183,11 +183,14 @@ export const covers = (range: SelectionRange, from: number, to: number) => !rang
 /**
  * Whether `from`–`to` shows its Markdown: where the cursor, or either end of a selection, is while
  * it's being worked on (`selectionInUse`), or everywhere while Markdown is all in sight (markupMode.ts).
- * With Markdown hidden, a selection taking in all of it selects what's drawn, which stays drawn.
+ * With Markdown hidden, a selection taking in all of it selects what's drawn, which stays drawn; and
+ * what's drawn with nothing to write in it (`source` false: a picture, a page break) stays drawn
+ * with the cursor on it too.
  */
-export function isEditing(state: EditorState, from: number, to: number) {
+export function isEditing(state: EditorState, from: number, to: number, source = true) {
   const mode = state.facet(markupMode);
   if (mode === "visible") return true;
+  if (mode === "hidden" && !source) return false;
   if (!selectionInUse(state) || !touches(state.selection, from, to)) return false;
   return mode !== "hidden" || !state.selection.ranges.some((range) => covers(range, from, to));
 }
@@ -342,7 +345,7 @@ export function drawnBlocks(
  * ↓ on the line above a block drawn in place of its Markdown, or ↑ on the line below it, goes onto
  * its first line or its last, which shows its Markdown, rather than past it as if it weren't there.
  */
-function arrowInto(blocks: StateField<DecorationSet>, forward: boolean): Command {
+function arrowInto(blocks: StateField<DecorationSet>, forward: boolean, whole: boolean): Command {
   return (view) => {
     const { state } = view;
     const { doc } = state;
@@ -358,17 +361,25 @@ function arrowInto(blocks: StateField<DecorationSet>, forward: boolean): Command
       if (from < to && deco.spec.block && doc.lineAt(forward ? from : to).number === n) drawn = true;
     });
     if (!drawn) return false;
-    view.dispatch({ selection: { anchor: Math.min(next.from + range.head - line.from, next.to) }, scrollIntoView: true, userEvent: "select" });
+    // One with nothing to write in it, with Markdown hidden, is chosen whole, as its grip chooses it.
+    const selection =
+      whole && state.facet(markupMode) === "hidden"
+        ? { anchor: forward ? next.from : next.to, head: forward ? next.to : next.from }
+        : { anchor: Math.min(next.from + range.head - line.from, next.to) };
+    view.dispatch({ selection, scrollIntoView: true, userEvent: "select" });
     return true;
   };
 }
 
-/** ↑ and ↓ stop on the blocks drawn in place of their text in `blocks` (a field of decorations) rather than skipping them. */
-export const arrowsInto = (blocks: StateField<DecorationSet>) =>
+/**
+ * ↑ and ↓ stop on the blocks drawn in place of their text in `blocks` (a field of decorations) rather
+ * than skipping them; with Markdown hidden, on the whole block, for one that's `whole` (a page break).
+ */
+export const arrowsInto = (blocks: StateField<DecorationSet>, whole = false) =>
   Prec.high(
     keymap.of([
-      { key: "ArrowDown", run: arrowInto(blocks, true) },
-      { key: "ArrowUp", run: arrowInto(blocks, false) },
+      { key: "ArrowDown", run: arrowInto(blocks, true, whole) },
+      { key: "ArrowUp", run: arrowInto(blocks, false, whole) },
     ]),
   );
 

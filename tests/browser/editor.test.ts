@@ -738,6 +738,102 @@ test("Enter on an empty item ends the list, when it's the second item too", asyn
   }
 });
 
+/** The open note's text with ‸ where the cursor is. */
+async function withCursor() {
+  const text = (await app.text())!;
+  const head = await app.page.evaluate(() => window.testing.editor()!.state.selection.main.head);
+  return text.slice(0, head) + "‸" + text.slice(head);
+}
+
+/** Opens `note` (‸ the cursor) and presses each key, returning the text with the cursor after each. */
+async function pressIn(note: string, keys: string[]) {
+  await app.open(note.replace("‸", ""));
+  await app.page.evaluate((pos) => window.testing.place(pos), note.indexOf("‸"));
+  const after = [];
+  for (const key of keys) {
+    await app.page.keyboard.press(key);
+    after.push(await withCursor());
+  }
+  return after;
+}
+
+describe("a list spaced out with blank lines between its items", () => {
+  test("Enter after an item keeps the spacing; Backspace on the empty item takes its blank line back with it, then the line, as in a list without them; Live and Hidden", async () => {
+    const cases = [
+      // Its blank line, then the empty line, then back where Enter was.
+      ["- one‸\n\n- two", ["- one\n\n- ‸\n\n- two", "- one\n‸\n\n- two", "- one‸\n\n- two"]],
+      // A video's link and its title on the next line, then a tag, as a note of exercises has them.
+      [
+        "## 1 month\n- 10 pushups\n\n- 20 squats‸\n\n- https://example.com/v\n  [Calisthenics](https://example.com/v)\n\n#gym",
+        [
+          "## 1 month\n- 10 pushups\n\n- 20 squats\n\n- ‸\n\n- https://example.com/v\n  [Calisthenics](https://example.com/v)\n\n#gym",
+          "## 1 month\n- 10 pushups\n\n- 20 squats\n‸\n\n- https://example.com/v\n  [Calisthenics](https://example.com/v)\n\n#gym",
+          "## 1 month\n- 10 pushups\n\n- 20 squats‸\n\n- https://example.com/v\n  [Calisthenics](https://example.com/v)\n\n#gym",
+        ],
+      ],
+      // The last item.
+      ["- one\n\n- two‸", ["- one\n\n- two\n\n- ‸", "- one\n\n- two\n‸", "- one\n\n- two‸"]],
+      // Numbered, the items after it count up, and back down.
+      ["1. one‸\n\n2. two\n\n3. three", ["1. one\n\n2. ‸\n\n3. two\n\n4. three", "1. one\n‸\n\n2. two\n\n3. three", "1. one‸\n\n2. two\n\n3. three"]],
+      ["- [x] one‸\n\n- [ ] two", ["- [x] one\n\n- [ ] ‸\n\n- [ ] two", "- [x] one\n‸\n\n- [ ] two", "- [x] one‸\n\n- [ ] two"]],
+      // In a quote, its > stays (Backspace again takes it, as on any line of a quote).
+      ["> - one‸\n>\n> - two", ["> - one\n>\n> - ‸\n>\n> - two", "> - one\n> ‸\n>\n> - two"]],
+      // Nested, its own list spaced out; Backspace moves it out a level first, as it always has.
+      // (CodeMirror's Enter puts a space on the blank line in an item.)
+      ["- one\n\n  - a\n\n  - b‸\n\n- two", ["- one\n\n  - a\n\n  - b\n \n  - ‸\n\n- two", "- one\n\n  - a\n\n  - b\n \n- ‸\n\n- two", "- one\n\n  - a\n\n  - b\n‸\n\n- two"]],
+      ["- one\n\n  - a‸\n\n- two", ["- one\n\n  - a\n  - ‸\n\n- two", "- one\n\n  - a\n- ‸\n\n- two", "- one\n\n  - a\n‸\n\n- two"]],
+      // Without blank lines, as before.
+      ["- one‸\n- two", ["- one\n- ‸\n- two", "- one\n‸\n- two", "- one‸\n- two"]],
+      ["1. one‸\n2. two", ["1. one\n2. ‸\n3. two", "1. one\n‸\n2. two", "1. one‸\n2. two"]],
+    ] as const;
+    for (const mode of ["live", "hidden"] as const) {
+      await app.page.evaluate((mode) => (window.testing.prefs.markdownMode = mode), mode);
+      for (const [note, after] of cases) {
+        const keys = ["Enter", ...after.slice(1).map(() => "Backspace")];
+        expect(await pressIn(note, keys), `${mode}: ${note}`).toEqual([...after]);
+      }
+    }
+  });
+
+  test("Enter on an empty item ends the list where it is, the blank lines around it keeping a paragraph typed there apart", async () => {
+    expect(await pressIn("- one\n\n- ‸\n\n- two", ["Enter"])).toEqual(["- one\n\n‸\n\n- two"]);
+    expect(await pressIn("- one\n\n- ‸", ["Enter"])).toEqual(["- one\n\n‸"]);
+    expect(await pressIn("1. one\n\n2. ‸\n\n3. two", ["Enter"])).toEqual(["1. one\n\n‸\n\n2. two"]);
+  });
+
+  test("Enter at the start of an item's text puts an empty item above it, spaced as the others", async () => {
+    const cases = [
+      ["- one\n\n- ‸two", "- one\n\n- \n\n- ‸two"],
+      ["- ‸one\n\n- two", "- \n\n- ‸one\n\n- two"],
+      ["1. one\n\n2. ‸two", "1. one\n\n2. \n\n3. ‸two"],
+      ["> - one\n>\n> - ‸two", "> - one\n>\n> - \n>\n> - ‸two"],
+      ["- one\n\n- [x] ‸two", "- one\n\n- [ ] \n\n- [x] ‸two"],
+    ];
+    for (const [note, after] of cases) expect(await pressIn(note, ["Enter"])).toEqual([after]);
+  });
+
+  test("Backspace on an item just made reads it as one, even on a busy device", async () => {
+    await app.open("- one\n\n- two");
+    await app.page.evaluate(() => window.testing.place(window.testing.editor()!.state.doc.length));
+    // The item made, then Backspace at once, with the clock running fast, as a device too busy to
+    // give the parser its time sees it: its slice runs out before the line just made.
+    await app.page.evaluate(() => {
+      const view = window.testing.editor()!;
+      const now = Date.now;
+      let ahead = 0;
+      Date.now = () => now() + (ahead += 100);
+      try {
+        const end = view.state.doc.length;
+        view.dispatch({ changes: { from: end, insert: "\n\n- " }, selection: { anchor: end + 4 }, userEvent: "input" });
+        view.contentDOM.dispatchEvent(new KeyboardEvent("keydown", { key: "Backspace", bubbles: true, cancelable: true }));
+      } finally {
+        Date.now = now;
+      }
+    });
+    expect(await withCursor()).toBe("- one\n\n- two\n‸");
+  });
+});
+
 test("a note that couldn't be saved is saved once it can be, and until then a message says so", async () => {
   const id = await app.open("# Diary\n\nfirst line");
   const message = await app.page.evaluate(async () => {

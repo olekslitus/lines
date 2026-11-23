@@ -19,23 +19,61 @@ export const editedNote = Facet.define<string, string | null>({ combine: (ids) =
 /** The note's syntax tree, parsed at least as far as `pos`. */
 export const treeTo = (state: EditorState, pos: number) => ensureSyntaxTree(state, pos, Infinity) ?? syntaxTree(state);
 
+/** The outermost list `pos` is in or at the edge of, in `tree`. */
+function listAt(tree: Tree, pos: number) {
+  let list: SyntaxNode | null = null;
+  for (const side of [-1, 1] as const) {
+    for (let node: SyntaxNode | null = tree.resolveInner(pos, side); node; node = node.parent) {
+      if ((node.name === "BulletList" || node.name === "OrderedList") && (!list || node.to > list.to)) list = node;
+    }
+  }
+  return list;
+}
+
+/**
+ * The note's syntax tree, parsed as far as `pos` and through the end of the list there. A long list
+ * goes on past what's parsed (below the screen; on a busy device, past the line just typed), and
+ * its items there would be missing: numbered again after an edit, they'd keep their old numbers.
+ */
+export function treeThrough(state: EditorState, pos: number) {
+  const { doc } = state;
+  let tree = treeTo(state, pos);
+  for (let list = listAt(tree, pos); list; ) {
+    // Read on past the first line after it that isn't blank, and at least as far again as it went:
+    // if it's still where it ended, that line isn't one of its.
+    let next = doc.lineAt(list.to).number + 1;
+    while (next <= doc.lines && !doc.line(next).text.trim()) next++;
+    const upto = next > doc.lines ? doc.length : Math.max(doc.line(next).to, Math.min(doc.length, 2 * list.to - list.from));
+    tree = treeTo(state, upto);
+    const read = listAt(tree, pos);
+    if (!read || read.to === list.to) break;
+    list = read;
+  }
+  return tree;
+}
+
 /*
  * Whether the parse has got that far isn't enough to know the state's tree has: the parse goes on
  * after a state is made (something else asking for the tree), and the state's tree is the one it
  * had then until the next transaction. So a tree parsed far enough is compared with the state's.
  */
 
-/** `state`, or the same with its syntax tree (`syntaxTree`) parsed at least as far as `pos`. */
+/** `state`, or the same with its syntax tree (`syntaxTree`) parsed as far as `pos` and through the list there. */
 export function parsedTo(state: EditorState, pos: number) {
   // A transaction that changes nothing takes the tree parsed into the state it makes.
-  return treeTo(state, pos) === syntaxTree(state) ? state : state.update({}).state;
+  return treeThrough(state, pos) === syntaxTree(state) ? state : state.update({}).state;
 }
 
-/** `command`, with the open note parsed as far as the cursor first. */
+/** Gives the view's state its syntax tree parsed as far as `pos` and through the list there. */
+export function parseThrough(view: EditorView, pos: number) {
+  if (treeThrough(view.state, pos) !== syntaxTree(view.state)) view.dispatch({});
+}
+
+/** `command`, with the open note parsed as far as the cursor, and through the list it's in, first. */
 export const parsedFirst =
   (command: Command): Command =>
   (view) => {
-    if (treeTo(view.state, view.state.selection.main.head) !== syntaxTree(view.state)) view.dispatch({});
+    parseThrough(view, view.state.selection.main.head);
     return command(view);
   };
 

@@ -1071,6 +1071,36 @@ test("Tab and ⇧Tab number a numbered item again, and the items around it; Back
   }
 });
 
+test("a numbered list longer than what's been read of the note is numbered again to its end: Enter, Tab, ⇧Tab, a marker typed, an item pasted or deleted", async () => {
+  // Past what the editor reads ahead of the screen (100,000 characters), however long the test waits.
+  const items = Array.from({ length: 2500 }, (_, i) => `item ${i + 1}: some words to make it longer`);
+  const numbered = (texts: string[], from = 1) => texts.map((text, i) => `${from + i}. ${text}`);
+  const paste = (text: string) =>
+    app.page.evaluate((text) => {
+      const data = new DataTransfer();
+      data.setData("text/plain", text);
+      window.testing.editor()!.contentDOM.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
+    }, text);
+  const cases: [string[], number, () => Promise<unknown>, string[]][] = [
+    [numbered(items), items[0].length + 3, () => app.page.keyboard.press("Enter").then(() => app.page.keyboard.type("new")), [`1. ${items[0]}`, ...numbered(["new", ...items.slice(1)], 2)]],
+    [numbered(items), items[0].length * 2 + 7, () => app.page.keyboard.press("Tab"), [`1. ${items[0]}`, `   1. ${items[1]}`, ...numbered(items.slice(2), 2)]],
+    [[`1. ${items[0]}`, "   1. sub", ...numbered(items.slice(1), 2)], items[0].length + 13, () => app.page.keyboard.press("Shift+Tab"), numbered([items[0], "sub", ...items.slice(1)])],
+    [numbered(items), 3, () => app.page.keyboard.type("- "), [`- ${items[0]}`, ...numbered(items.slice(1))]],
+    [numbered(items), 0, () => paste("1. new\n"), numbered(["new", ...items])],
+    [numbered(items), 0, () => app.page.evaluate(() => window.testing.editor()!.dispatch({ selection: { anchor: 0, head: window.testing.editor()!.state.doc.line(2).from } })).then(() => app.page.keyboard.press("Backspace")), numbered(items.slice(1))],
+  ];
+  for (const [note, at, edit, after] of cases) {
+    await app.open(note.join("\n"));
+    await app.page.evaluate((pos) => window.testing.place(pos), at);
+    await edit();
+    const text = (await app.text())!.split("\n");
+    // Where the numbers first go wrong, if they do, rather than the whole list.
+    const wrong = after.findIndex((line, i) => line !== text[i]);
+    expect(wrong === -1 ? null : [wrong, text[wrong], after[wrong]]).toBeNull();
+    expect(text.length).toBe(after.length);
+  }
+});
+
 describe("a list marker typed at the start of an item's text", () => {
   /** The note and where the cursor is in it (‸). */
   const withCursor = async () => {

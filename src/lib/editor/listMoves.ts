@@ -1,10 +1,11 @@
-import { ensureSyntaxTree, syntaxTree } from "@codemirror/language";
+import { syntaxTree } from "@codemirror/language";
 import { type ChangeSpec, EditorSelection, EditorState, Prec, type Text, type Transaction } from "@codemirror/state";
 import { type EditorView, keymap } from "@codemirror/view";
 import type { SyntaxNode, Tree } from "@lezer/common";
 import { prefs } from "../prefs.svelte";
 import { beside, itemNumber, itemOn, numbered, QUOTES, shifted } from "./lists";
 import { frontMatterField } from "./objects";
+import { treeThrough, treeTo } from "./util";
 
 /*
  * Moving list items. ⌥↑ and ⌥↓ on an item (or on items selected together) move it past the item
@@ -124,9 +125,6 @@ function itemMarkedAt(tree: Tree, pos: number) {
   return null;
 }
 
-/** How long a move waits for the note to be read as far as it reaches, in ms. */
-const PARSE_TIME = 100;
-
 /**
  * The changes that number the numbered lists `tr` moved items into or out of again in their new
  * order. An item that was there before keeps its place in the list it was in: the list starts at
@@ -138,15 +136,13 @@ function renumbering(tr: Transaction): ChangeSpec[] {
   const { state, startState, changes } = tr;
   const { doc } = state;
   const arrivals: [number, number][] = [];
-  let reach = 0;
-  let reachBefore = 0;
-  changes.iterChanges((_fromA, toA, fromB, toB) => {
+  let tree = syntaxTree(state);
+  changes.iterChanges((_fromA, _toA, fromB, toB) => {
     if (toB > fromB) arrivals.push([fromB, toB]);
-    reach = Math.max(reach, toB);
-    reachBefore = Math.max(reachBefore, toA);
+    // Read whole, the lists the change is in or next to: each parse goes on from the last.
+    tree = treeThrough(state, Math.max(0, fromB - 1));
+    tree = treeThrough(state, Math.min(doc.length, toB + 1));
   });
-  const tree = ensureSyntaxTree(state, Math.min(doc.length, reach + 1), PARSE_TIME) ?? syntaxTree(state);
-  const treeBefore = ensureSyntaxTree(startState, Math.min(startState.doc.length, reachBefore + 1), PARSE_TIME) ?? syntaxTree(startState);
 
   // The numbered lists around each change.
   const lists = new Map<number, SyntaxNode>();
@@ -163,6 +159,9 @@ function renumbering(tr: Transaction): ChangeSpec[] {
 
   const properties = propertyLines(state);
   const back = changes.invertedDesc;
+  // The note before, read as far as the lists were.
+  const reach = Math.max(0, ...[...lists.values()].map((list) => back.mapPos(list.to)));
+  const treeBefore = treeTo(startState, Math.min(startState.doc.length, reach + 1));
   const arrived = (pos: number) => arrivals.some(([from, to]) => pos >= from && pos < to);
   const renumbered: ChangeSpec[] = [];
   // How far each line's moved along, under a number that's grown or shrunk.

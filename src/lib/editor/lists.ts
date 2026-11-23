@@ -4,7 +4,7 @@ import { EditorView, keymap } from "@codemirror/view";
 import type { SyntaxNode } from "@lezer/common";
 import { inCode } from "./fences";
 import { frontMatterField } from "./objects";
-import { ancestors, parsedFirst } from "./util";
+import { ancestors, parsedFirst, parseThrough } from "./util";
 
 /*
  * Tab and Shift-Tab on a list item nest it under the item above, or move it back out a level,
@@ -195,7 +195,7 @@ function itemAbove(view: EditorView) {
 
 export const listKeymap = Prec.high(
   keymap.of([
-    { key: "Tab", run: indentItem, shift: outdentItem },
+    { key: "Tab", run: parsedFirst(indentItem), shift: parsedFirst(outdentItem) },
     { key: "Backspace", run: parsedFirst(deleteMarker) },
     { key: "Enter", run: parsedFirst(itemAbove) },
   ]),
@@ -241,9 +241,10 @@ function startsAtOne(state: EditorState, item: SyntaxNode) {
  * keeps what's typed, which Markdown reads as text there. ⌘Z just after leaves it as typed.
  */
 export const listMarkerInput = EditorView.inputHandler.of((view, from, to, text) => {
+  const { main } = view.state.selection;
+  if (text !== " " || from !== to || !main.empty || main.head !== from || view.state.selection.ranges.length > 1 || view.state.readOnly) return false;
+  parseThrough(view, from);
   const { state } = view;
-  const { main } = state.selection;
-  if (text !== " " || from !== to || !main.empty || main.head !== from || state.selection.ranges.length > 1 || state.readOnly) return false;
   const item = itemAt(state);
   if (!item) return false;
   const { doc } = state;

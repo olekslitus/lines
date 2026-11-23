@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from "bun:test";
 import type { Locator } from "playwright";
-import { type App, noErrors, openApp } from "./app";
+import { type App, noErrors, openApp, settled } from "./app";
 import { drag } from "./touch";
 
 /*
@@ -124,6 +124,8 @@ test("on a phone, a Key: Value line's copy button at the end of a full line is a
   await app.open("# Car\n\nPlate: 3WBZ56");
   await app.page.evaluate(() => window.testing.place(0));
   await app.page.locator(".editor-pane .cm-lp-copy").waitFor();
+  // The screen's edge, once the note's slid in.
+  await settled(app.page);
   // The value made longer a character at a time, past where the line wraps.
   const cut = await app.page.evaluate(async () => {
     const view = window.testing.editor()!;

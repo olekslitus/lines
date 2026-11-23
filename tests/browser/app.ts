@@ -63,6 +63,13 @@ export const mod = () => (process.platform === "darwin" ? "Meta" : "Control");
  */
 export const clickMod = (page: App["page"]) => page.evaluate(() => (/Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? "Meta" : "Control"));
 
+/**
+ * Done sliding: nothing a finger set is left on the panes, nor anything still moving them. Measure
+ * where things are on a phone only then: during a slide, WebKit can give two measurements from
+ * different moments of it, on a busy machine even an earlier place after a later one.
+ */
+export const settled = (page: Page) => page.waitForFunction(() => [...document.querySelectorAll<HTMLElement>("[data-pane], .editor-pane")].every((pane) => !pane.style.translate && !pane.getAnimations().length));
+
 /** What a browser says in the console on its own, not about lines: WebKit on Linux doesn't know a viewport key the page sets. */
 const NOISE = [/^Viewport argument key ".+" not recognized and ignored\.$/];
 

@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { type App, mod, noErrors, openApp, toggle } from "./app";
+import { type App, mod, noErrors, openApp, settled, toggle } from "./app";
 import { answerPictures } from "./files";
 import { drag, lift } from "./touch";
 
@@ -27,8 +27,6 @@ const inert = (pane: string) => app.page.locator(`[data-pane=${pane}]`).evaluate
 const left = (pane: string) => app.page.locator(pane === "editor" ? ".editor-pane" : `[data-pane=${pane}]`).evaluate((element) => element.getBoundingClientRect().left);
 /** A pane in its place at the screen's left edge, within the pixel a slide's last frame may leave it (WebKit's are fractions). */
 const home = async (pane: string) => expect(Math.abs(await left(pane))).toBeLessThanOrEqual(1);
-/** Done sliding: nothing the finger set is left on the panes, nor anything still moving them. */
-const settled = () => app.page.waitForFunction(() => [...document.querySelectorAll<HTMLElement>("[data-pane], .editor-pane")].every((pane) => !pane.style.translate && !pane.getAnimations().length));
 
 /**
  * A note opened on a phone, once it's slid in: at rest, not just near its place (the slide's spring
@@ -39,7 +37,7 @@ const settled = () => app.page.waitForFunction(() => [...document.querySelectorA
 async function openNote() {
   await app.open("# A note\n\nSome text to read.");
   await app.page.waitForFunction(() => Math.abs(document.querySelector(".editor-pane")!.getBoundingClientRect().x) < 1);
-  await settled();
+  await settled(app.page);
   await app.page.waitForFunction(() => {
     const text = document.querySelector(".editor-pane .cm-scroller")!.getBoundingClientRect();
     return document.querySelector(".editor-pane")!.contains(document.elementFromPoint(text.x + text.width / 2, text.y + 40));
@@ -59,7 +57,7 @@ test("a swipe from the left edge takes a note back to the list, following the fi
   expect(Number(await page.locator("[data-list-dim]").evaluate((dim) => getComputedStyle(dim).opacity))).toBeGreaterThan(0);
   await lift(page);
   await page.waitForFunction(() => !window.testing.notes.selected);
-  await settled();
+  await settled(app.page);
   expect(await inert("list")).toBe(false);
   await home("list");
 });
@@ -69,14 +67,14 @@ test("let go before halfway and slowly, the note springs back; a flick takes it 
   await openNote();
   const { page } = app;
   await drag(page, { x: 4, y: 300 }, { x: 120, y: 300 }, { duration: 600 });
-  await settled();
+  await settled(app.page);
   expect(await page.evaluate(() => !!window.testing.notes.selected)).toBe(true);
   expect(await inert("list")).toBe(true);
   await home("editor");
 
   await drag(page, { x: 4, y: 300 }, { x: 110, y: 300 }, { duration: 60, steps: 4 });
   await page.waitForFunction(() => !window.testing.notes.selected);
-  await settled();
+  await settled(app.page);
 });
 
 test("only from the edge, sideways, and its way: a swipe further in, a scroll, or a swipe left doesn't go back", async () => {
@@ -86,7 +84,7 @@ test("only from the edge, sideways, and its way: a swipe further in, a scroll, o
   await drag(page, { x: 80, y: 300 }, { x: 300, y: 300 });
   await drag(page, { x: 4, y: 200 }, { x: 30, y: 400 });
   await drag(page, { x: 20, y: 300 }, { x: 4, y: 300 });
-  await settled();
+  await settled(app.page);
   expect(await page.evaluate(() => !!window.testing.notes.selected)).toBe(true);
   await home("editor");
 });
@@ -101,7 +99,7 @@ test("on the list, a swipe from the edge opens the sidebar as it follows, and a 
   expect(await left("sidebar")).toBeLessThan(0);
   await lift(page);
   await page.waitForFunction(() => !(document.querySelector("[data-pane=sidebar]") as HTMLElement).inert);
-  await settled();
+  await settled(app.page);
   await home("sidebar");
 
   await drag(page, { x: 250, y: 300 }, { x: 20, y: 300 });
@@ -122,7 +120,7 @@ test("turned off in Settings, swipes and pulls do nothing", async () => {
   expect(await page.evaluate(() => window.testing.prefs.gestures)).toBe(false);
   await drag(page, { x: 4, y: 300 }, { x: 300, y: 300 });
   await drag(page, { x: 200, y: 220 }, { x: 200, y: 500 });
-  await settled();
+  await settled(app.page);
   expect(await inert("sidebar")).toBe(true);
   // Nor is anything drawn as iPhone bounces the list past its top.
   await page.locator(".note-list ul.items").evaluate((list) => {
@@ -186,7 +184,7 @@ test("pulling a note down past its top finds in it", async () => {
   const box = (await page.locator(".editor-pane .cm-scroller").boundingBox())!;
   await drag(page, { x: 200, y: box.y + 40 }, { x: 200, y: box.y + 340 });
   await page.waitForFunction(() => document.activeElement?.closest(".cm-panel"));
-  await settled();
+  await settled(app.page);
 });
 
 test("pulling the feeds down refreshes them, with a spinner while they're fetched", async () => {
@@ -234,7 +232,7 @@ test("a laptop's touch screen pulls, but its edges are the system's: no swipes",
   app = await openApp({ width: 390, height: 800 });
   const { page } = app;
   await drag(page, { x: 4, y: 300 }, { x: 300, y: 300 });
-  await settled();
+  await settled(app.page);
   expect(await inert("sidebar")).toBe(true);
   const box = (await page.locator(".note-list ul.items").boundingBox())!;
   await drag(page, { x: 200, y: box.y + 20 }, { x: 200, y: box.y + 320 });
@@ -283,7 +281,7 @@ test("let go, a swipe carries on at the finger's speed and comes to rest as a sp
   // The list's already in reach, to scroll or tap, while the note slides off.
   expect(listInert).toBe(false);
   await page.waitForFunction(() => !window.testing.notes.selected);
-  await settled();
+  await settled(app.page);
   await home("list");
 });
 
@@ -304,7 +302,7 @@ test("a row tapped while a note's still sliding off opens its note, sliding in f
     return window.testing.notes.selectedId;
   }, other);
   expect(opened).toBe(other);
-  await settled();
+  await settled(app.page);
   expect(await page.evaluate(() => window.testing.notes.selectedId)).toBe(other);
   await home("editor");
   expect(await inert("list")).toBe(true);

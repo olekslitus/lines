@@ -130,3 +130,10 @@ test("Move a heading with its section, off: ⌥↓ moves the heading's line alon
   await app.page.keyboard.press("Alt+ArrowDown");
   await textIs(NOTE.replace("## A\n\na text", "\n## A\na text"));
 });
+
+test("the note's last section moves without its closing tags, which stay at the note's end", async () => {
+  await app.open("## A\n\na text\n\n## B\n\nb text\n\n#org #gym");
+  await placeAt("## B");
+  await app.page.keyboard.press("Alt+ArrowUp");
+  await textIs("## B\n\nb text\n\n## A\n\na text\n\n#org #gym");
+});

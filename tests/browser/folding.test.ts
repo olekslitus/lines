@@ -211,3 +211,17 @@ describe("Fold sections, off", () => {
     expect(await app.text()).toBe(NOTE);
   });
 });
+
+test("tags on lines of their own at the note's end tag the note, so folding its last section leaves them showing; a tag in the text folds with it", async () => {
+  await app.open("# Training\n\n## equipment\n\n- squat stand\n- pull-up bar #home\n\n#org #gym\n#fitness");
+  await placeAt("squat stand");
+  await foldKey("[");
+  await app.page.waitForFunction(() => document.querySelectorAll(".editor-pane .cm-fold-placeholder").length === 1);
+  expect([await shows("squat stand"), await shows("#home"), await shows("org"), await shows("fitness")]).toEqual([false, false, true, true]);
+  // The heading above it folds them in, being a section they're in the middle of no more.
+  await foldKey("]");
+  await placeAt("# Training");
+  await foldKey("[");
+  await app.page.waitForFunction(() => document.querySelectorAll(".editor-pane .cm-fold-placeholder").length === 1);
+  expect([await shows("equipment"), await shows("org")]).toEqual([false, true]);
+});

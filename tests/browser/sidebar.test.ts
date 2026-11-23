@@ -226,6 +226,9 @@ test("places sit in sections, Inbox apart; rows drag between them; a new section
   /** Which section a place is in, by the place first in it. */
   const sectionOf = (name: string) => row(name).evaluate((button) => button.closest("ul")!.querySelector("[data-reorder-key]")!.getAttribute("data-reorder-key"));
   const drag = async (name: string, to: { x: number; y: number }) => {
+    // A menu chosen from as it opened is still closing, its opening animation finishing, and until
+    // it's gone the page takes no pointer.
+    await page.getByRole("menu").waitFor({ state: "detached" });
     const from = (await row(name).boundingBox())!;
     await page.mouse.move(from.x + 30, from.y + from.height / 2);
     await page.mouse.down();

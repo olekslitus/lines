@@ -4,6 +4,7 @@ import { prefs } from "../prefs.svelte";
 import { foldsMoved } from "./folding";
 import { swapLines } from "./listMoves";
 import { readAll, type Section, sectionOn, sections } from "./sections";
+import { parsedFirst } from "./util";
 
 /*
  * Moving a heading moves its section (Settings → Editor → Move a heading with its section, on to
@@ -56,7 +57,9 @@ function moveSection(view: EditorView, up: boolean) {
 
 export const sectionMoveKeymap = Prec.high(
   keymap.of([
-    { key: "Alt-ArrowUp", run: (view) => moveSection(view, true) },
-    { key: "Alt-ArrowDown", run: (view) => moveSection(view, false) },
+    // Read as far as the cursor first: on a busy device, a heading just moved may not be read yet, and
+    // the key would move its line alone.
+    { key: "Alt-ArrowUp", run: parsedFirst((view) => moveSection(view, true)) },
+    { key: "Alt-ArrowDown", run: parsedFirst((view) => moveSection(view, false)) },
   ]),
 );

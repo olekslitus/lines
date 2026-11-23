@@ -1,4 +1,4 @@
-import { ensureSyntaxTree, syntaxTree, syntaxTreeAvailable } from "@codemirror/language";
+import { ensureSyntaxTree, syntaxTree } from "@codemirror/language";
 import { searchPanelOpen } from "@codemirror/search";
 import { type EditorSelection, type EditorState, Facet, type Line, type SelectionRange, Prec, type Range, StateEffect, type StateEffectType, StateField, type Text, type Transaction } from "@codemirror/state";
 import { type Command, Decoration, type DecorationSet, EditorView, keymap, ViewPlugin, type ViewUpdate, type WidgetType } from "@codemirror/view";
@@ -19,23 +19,23 @@ export const editedNote = Facet.define<string, string | null>({ combine: (ids) =
 /** The note's syntax tree, parsed at least as far as `pos`. */
 export const treeTo = (state: EditorState, pos: number) => ensureSyntaxTree(state, pos, Infinity) ?? syntaxTree(state);
 
+/*
+ * Whether the parse has got that far isn't enough to know the state's tree has: the parse goes on
+ * after a state is made (something else asking for the tree), and the state's tree is the one it
+ * had then until the next transaction. So a tree parsed far enough is compared with the state's.
+ */
+
 /** `state`, or the same with its syntax tree (`syntaxTree`) parsed at least as far as `pos`. */
 export function parsedTo(state: EditorState, pos: number) {
-  if (syntaxTreeAvailable(state, pos)) return state;
-  ensureSyntaxTree(state, pos, Infinity);
   // A transaction that changes nothing takes the tree parsed into the state it makes.
-  return state.update({}).state;
+  return treeTo(state, pos) === syntaxTree(state) ? state : state.update({}).state;
 }
 
 /** `command`, with the open note parsed as far as the cursor first. */
 export const parsedFirst =
   (command: Command): Command =>
   (view) => {
-    const { head } = view.state.selection.main;
-    if (!syntaxTreeAvailable(view.state, head)) {
-      ensureSyntaxTree(view.state, head, Infinity);
-      view.dispatch({});
-    }
+    if (treeTo(view.state, view.state.selection.main.head) !== syntaxTree(view.state)) view.dispatch({});
     return command(view);
   };
 

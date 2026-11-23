@@ -126,6 +126,11 @@ export default {
   "editor.format.highlight": "Resaltar",
   "editor.format.withShortcut": "{format} ({shortcut})",
 
+  "editor.keyboardBar": "Formato del texto",
+  "editor.keyboardBar.indent": "Aumentar sangría",
+  "editor.keyboardBar.outdent": "Reducir sangría",
+  "editor.keyboardBar.hide": "Ocultar teclado",
+
   "editor.checkbox": "Tarea",
   "editor.image": "Imagen",
   "editor.imageFailed": "No se ha podido mostrar esta imagen",

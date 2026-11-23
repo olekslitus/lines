@@ -87,6 +87,7 @@
   --ease-sheet: var(--ease-sheet);
   --ease-pop: var(--ease-pop);
   --ease-spring: var(--ease-spring);
+  --ease-keyboard: var(--ease-keyboard);
 }
 
 /* How far a pull down has gone (gestures.ts), registered so it can slide back. */
@@ -126,8 +127,12 @@
   --editor-margin: 40px;
   --editor-pad-x: var(--editor-margin);
   --editor-pad-top: 24px;
-  /* Room under a note's last line, so it can be scrolled up to the middle. */
-  --editor-pad-bottom: 40vh;
+  /*
+   * Room under a note's last line, so it can be scrolled up to the middle: of what shows over the
+   * keyboard and its bar, while they're over the page (editor/KeyboardBar.svelte).
+   */
+  --keyboard-cover: 0px;
+  --editor-pad-bottom: calc(40vh + var(--keyboard-cover));
   /* The panes' title bars reach up under a phone's status bar, in their own colors. */
   --titlebar-pad-top: env(safe-area-inset-top, 0px);
   --titlebar-h: calc(52px + var(--titlebar-pad-top));
@@ -155,6 +160,8 @@
   /* Panes and the sidebar slid by a tap, as UIKit's spring from rest (SLIDE_EASE in spring.ts). */
   --ease-spring: cubic-bezier(0.285, 0.458, 0.044, 1);
   --spring-duration: 573ms;
+  /* What follows a phone's keyboard as it comes up and goes, in 250 ms: close to iOS's own curve for it. */
+  --ease-keyboard: cubic-bezier(0.38, 0.7, 0.125, 1);
 }
 
 /*

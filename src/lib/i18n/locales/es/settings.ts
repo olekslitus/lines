@@ -518,6 +518,9 @@ export default {
   "settings.spellcheckNote": "Subraya las palabras mal escritas en las notas y deja que el sistema las corrija al escribir. El código y las fórmulas nunca se revisan.",
   "settings.copyOnSelect": "Copiar lo que seleccionas",
   "settings.copyOnSelectNote": "El texto que seleccionas en una nota con el ratón se copia al soltarlo, como en un terminal: arrastrando, o con doble clic en una palabra.",
+  "settings.keyboardBar": "Barra de formato sobre el teclado",
+  "settings.keyboardBarNote":
+    "En un teléfono, y en una tableta con el teclado en pantalla: negrita, cursiva, listas, sangría y un botón que oculta el teclado, en una barra sobre el teclado mientras escribes. Desactivada, el texto seleccionado tiene su propia barra de herramientas.",
   "settings.dragBlocks": "Arrastrar para mover líneas",
   "settings.dragBlocksNote": "Un asa junto a la línea o el bloque que señalas, para arrastrarlo a otro sitio de la nota.",
   "settings.foldSections": "Plegar secciones",

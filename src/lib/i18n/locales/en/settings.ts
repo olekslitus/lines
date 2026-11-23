@@ -573,6 +573,9 @@ export default {
   "settings.spellcheckNote": "Underlines misspelled words in notes, and lets the system correct them as you type. Code and math are never checked.",
   "settings.copyOnSelect": "Copy what you select",
   "settings.copyOnSelectNote": "Text you select in a note with the mouse is copied when you let go, as in a terminal: dragged over, or a word double-clicked.",
+  "settings.keyboardBar": "Formatting bar above the keyboard",
+  "settings.keyboardBarNote":
+    "On a phone, and on a tablet with its keyboard on the screen: bold, italics, lists, indenting and a button that puts the keyboard away, in a bar on top of the keyboard as you write. Off, selected text has a toolbar of its own instead.",
   "settings.dragBlocks": "Drag to move lines",
   "settings.dragBlocksNote": "A grip beside the line or block you point at, which drags it somewhere else in the note.",
   "settings.foldSections": "Fold sections",

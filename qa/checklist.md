@@ -89,10 +89,11 @@ Platforms in brackets: **[Mac]** Mac app only, **[Desktop]** desktop apps, **[Ap
 ## 2. Format toolbar
 
 - [ ] Selecting text with the mouse shows the toolbar above the selection once the button is released
-- [ ] [Touch] The toolbar shows below the selection, clear of the system menu, with larger buttons
+- [ ] [Touch] On a tablet typing on keys of its own (no keyboard on the screen), or with the bar above the keyboard turned off, the toolbar shows below the selection, with larger buttons
 - [ ] Buttons show which styles the text already has; clicking toggles them and keeps the selection
 - [ ] No toolbar in code blocks, on a selected image or file, in trashed notes, or over fence-only lines
 - [ ] Esc hides it until the selection changes
+- [ ] [Touch] The bar above the keyboard, on a phone (and the web app on a phone): tapping into a note brings it up with the keyboard, on the keyboard's top edge, sliding with it as it comes up and goes [iOS] or at the page's new bottom [Android], never covering the line being written (at the end of a long note too, and as you type onto a new line); no toolbar over selected text, and iOS's own menu (Cut, Copy, Paste…) doesn't cover it. Its buttons, each at least 44 pt: Bold, Italic, Underline, Strikethrough, Code, Highlight on the selection (or at the cursor, the markers with the cursor between them), each in the accent where the text already is so; Bullet list, Numbered list and Todo make the selected lines items (numbers counting on from the item above), again plain lines; Outdent and Indent nest a list's item as ⇧Tab and Tab do; Hide keyboard puts the keyboard away and the bar with it. Each keeps the keyboard up (but Hide keyboard). Too wide for the screen, it scrolls sideways, Hide keyboard staying at its right. In a LaTeX or plain-text note: Outdent, Indent and Hide keyboard only. In the theme's colors, light and dark; in landscape clear of the camera. [iPad] Only while the keyboard is on the screen; with a keyboard of its own, the toolbar over selected text instead. VoiceOver and TalkBack reach it by swiping, as "Formatting, toolbar", each button by name (and selected or not), in Spanish and French too. Settings → Editor → Formatting bar above the keyboard off: no bar, the toolbar over selected text back. Not on a computer, nor in a narrow window there
 
 ## 3. Key: Value lines
 

@@ -315,6 +315,8 @@ export interface Stored {
   spellcheck: boolean;
   /** Text selected in a note with the pointer is copied when it's let go, as in a terminal (editor/copyOnSelect.ts). */
   copyOnSelect: boolean;
+  /** On phones, and tablets with their keyboard on the screen: formatting and lists in a bar on top of the keyboard (editor/KeyboardBar.svelte), not over selected text. */
+  keyboardBar: boolean;
   /** A keyboard's sound as you type (sounds/typing.svelte.ts): on, which (a plugin's or a sound pack's, by id), and how loud. */
   typingSounds: boolean;
   keyboardSound: string;
@@ -486,6 +488,7 @@ const DEFAULTS: Stored = {
   moveSections: true,
   spellcheck: true,
   copyOnSelect: false,
+  keyboardBar: true,
   typingSounds: false,
   keyboardSound: "creamy",
   typingVolume: 0.5,
@@ -676,6 +679,7 @@ function read(json?: string): Stored {
     moveSections: flag(raw.moveSections, DEFAULTS.moveSections),
     spellcheck: flag(raw.spellcheck, DEFAULTS.spellcheck),
     copyOnSelect: flag(raw.copyOnSelect, DEFAULTS.copyOnSelect),
+    keyboardBar: flag(raw.keyboardBar, DEFAULTS.keyboardBar),
     typingSounds: flag(raw.typingSounds, DEFAULTS.typingSounds),
     keyboardSound: id(raw.keyboardSound, DEFAULTS.keyboardSound),
     typingVolume: clamp(raw.typingVolume, TYPING_VOLUME.min, TYPING_VOLUME.max, DEFAULTS.typingVolume),
@@ -797,6 +801,7 @@ class Prefs {
   moveSections = $state(this.#initial.moveSections);
   spellcheck = $state(this.#initial.spellcheck);
   copyOnSelect = $state(this.#initial.copyOnSelect);
+  keyboardBar = $state(this.#initial.keyboardBar);
   typingSounds = $state(this.#initial.typingSounds);
   keyboardSound = $state(this.#initial.keyboardSound);
   typingVolume = $state(this.#initial.typingVolume);
@@ -1025,6 +1030,7 @@ class Prefs {
       moveSections: this.moveSections,
       spellcheck: this.spellcheck,
       copyOnSelect: this.copyOnSelect,
+      keyboardBar: this.keyboardBar,
       typingSounds: this.typingSounds,
       keyboardSound: this.keyboardSound,
       typingVolume: this.typingVolume,

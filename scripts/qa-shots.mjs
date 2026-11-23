@@ -687,6 +687,31 @@ const SCENES = [
     },
   },
   {
+    id: "keyboard-bar-phone",
+    title: "Phone: the bar on top of the keyboard, a word selected and bold",
+    look: "The bar right on the keyboard's top edge (the grey block stands in for iOS's keyboard), across the screen in the panel's color with a line above it; Bold in the accent, the other buttons muted, their icons centred and evenly spaced, a thin divider between the formats, the lists and Indent/Outdent, and Hide keyboard at the right past one more; the last buttons cut off at the right edge as it scrolls sideways, never squeezed. The line being written clear above it. No toolbar under the selection.",
+    note: "# Groceries\n\nPick up **fresh** bread on the way home, and something for the weekend.\n\n- Milk\n- Eggs",
+    width: 390,
+    height: 780,
+    act: async (page) => {
+      const from = await page.evaluate(() => window.testing.text().indexOf("**fresh**"));
+      await page.evaluate((from) => window.testing.editor().dispatch({ selection: { anchor: from + 2, head: from + 7 } }), from);
+      await page.evaluate(() => window.testing.editor().focus());
+      // iOS's keyboard as WebKit tells the page of it: the visual viewport above it shorter, and a block where it is.
+      await page.evaluate(() => {
+        const viewport = window.visualViewport;
+        const keyboard = 336;
+        const full = innerHeight;
+        Object.defineProperty(viewport, "height", { configurable: true, get: () => full - keyboard });
+        viewport.dispatchEvent(new Event("resize"));
+        const block = Object.assign(document.createElement("div"), { style: `position:fixed;left:0;right:0;bottom:0;height:${keyboard}px;background:#8e8e93;z-index:100` });
+        document.body.append(block);
+      });
+      await page.waitForFunction(() => getComputedStyle(document.querySelector(".keyboard-bar")).visibility === "visible");
+      await page.getByRole("button", { name: "Bold", pressed: true }).waitFor();
+    },
+  },
+  {
     id: "move-section-drag",
     title: "A heading's section being dragged by its grip",
     look: "“Later” and its line dimmed together while dragged, the grip by its heading; the accent drop line above “What to do” (where a section its size starts), in the gap clear of the text; nothing else dimmed.",

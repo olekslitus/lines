@@ -518,6 +518,9 @@ export default {
   "settings.spellcheckNote": "Souligne les mots mal orthographiés dans les notes et laisse le système les corriger pendant la saisie. Le code et les maths ne sont jamais vérifiés.",
   "settings.copyOnSelect": "Copier ce que vous sélectionnez",
   "settings.copyOnSelectNote": "Le texte que vous sélectionnez dans une note à la souris est copié quand vous relâchez, comme dans un terminal : en glissant, ou d’un double-clic sur un mot.",
+  "settings.keyboardBar": "Barre de mise en forme au-dessus du clavier",
+  "settings.keyboardBarNote":
+    "Sur un téléphone, et sur une tablette avec son clavier à l’écran : gras, italique, listes, retrait et un bouton qui masque le clavier, dans une barre au-dessus du clavier pendant que vous écrivez. Désactivée, le texte sélectionné a sa propre barre d’outils.",
   "settings.dragBlocks": "Glisser pour déplacer les lignes",
   "settings.dragBlocksNote": "Une poignée à côté de la ligne ou du bloc que vous pointez, pour le faire glisser ailleurs dans la note.",
   "settings.foldSections": "Replier les sections",

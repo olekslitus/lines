@@ -35,6 +35,7 @@ import { frontMatterField, missingNotes } from "./objects";
 import { markdownOutline, outlineCompartment } from "./outline.svelte";
 import { ancestors, cheer, selectedBlocks, selectedLines } from "./util";
 import { copyOnSelect } from "./copyOnSelect";
+import { typingIn } from "./typing.svelte";
 import { Card, headingSyntax, Highlight, Mention, Tag, TexMath, Underline } from "./syntax";
 import { t as message } from "../i18n/index.svelte";
 import { DEFAULT_LANGUAGE, plugins } from "../plugins/registry.svelte";
@@ -523,6 +524,7 @@ export function createExtensions(onChange: () => void, format?: string): Extensi
     foldingCompartment.of(prefs.foldSections ? folding : []),
     sectionMoveKeymap,
     propertiesCompartment.of([]),
+    typingIn,
     theme,
     EditorView.updateListener.of((update) => {
       if (update.docChanged) onChange();

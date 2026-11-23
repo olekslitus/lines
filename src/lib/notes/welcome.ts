@@ -8,7 +8,7 @@ Type \`/\` at the start of a line for headings, lists, tables, callouts, code, i
 
 ## The basics
 
-- Make text **bold**, *italic*, <u>underlined</u>, ~~struck through~~, ==highlighted==, or \`code\`, or select it for a toolbar
+- Make text **bold**, *italic*, <u>underlined</u>, ~~struck through~~, ==highlighted==, or \`code\`, or select it for a toolbar (on a phone, the bar on top of the keyboard)
 - Start a line with \`#\`, \`##\` or \`###\` for headings
 - Use \`-\` for lists and \`- [ ]\` for todos
   - Tab nests an item, Shift-Tab moves it back out

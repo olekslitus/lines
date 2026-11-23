@@ -2,6 +2,62 @@
 
 What changed in each release of Lines. Written by `bun scripts/release.mjs prepare` from the commits since the release before (docs/releasing.md).
 
+## [0.9.0](https://github.com/olekslitus/lines/compare/v0.8.0...v0.9.0) (2026-11-23)
+
+### Features
+
+- **editor:** keep links, lists and emphasis when pasting from Slack, web pages and documents ([#491](https://github.com/olekslitus/lines/pull/491))
+- **editor:** formatting and lists in a bar on top of the keyboard on phones ([#478](https://github.com/olekslitus/lines/pull/478))
+- **editor:** move a heading with its whole section ([#474](https://github.com/olekslitus/lines/pull/474))
+- **editor:** fold a note's sections by their headings ([#473](https://github.com/olekslitus/lines/pull/473))
+- **editor:** number a numbered list again when its items move, with a setting to keep their numbers ([#472](https://github.com/olekslitus/lines/pull/472))
+- **editor:** number lists inside numbered lists 1. a. i. as an outline, with a setting ([#462](https://github.com/olekslitus/lines/pull/462))
+- **editor:** turn a bullet item numbered by typing 1. at its start, and back with - ([#461](https://github.com/olekslitus/lines/pull/461))
+- **themes:** Geist and Geist Mono, to choose in Settings → Typography ([#460](https://github.com/olekslitus/lines/pull/460))
+
+### Fixes
+
+- **editor:** Hidden Markdown hides fences, math's $, line marks and mentions' source on any line ([#489](https://github.com/olekslitus/lines/pull/489))
+- **editor:** ⌥↑ or ⌥↓ on a heading just moved moves its section on a busy device, not its line alone ([#486](https://github.com/olekslitus/lines/pull/486))
+- **editor:** a long numbered list is numbered again to its last item, past what's been read of it ([#483](https://github.com/olekslitus/lines/pull/483))
+- **editor:** Hidden Markdown hides a link's brackets and address, edited with ⌘K or the bar under it ([#488](https://github.com/olekslitus/lines/pull/488))
+- **editor:** a note's closing tags aren't part of its last section, so folding leaves them showing ([#487](https://github.com/olekslitus/lines/pull/487))
+- **editor:** Enter puts a new list item right under the one before it, never a blank line away ([#485](https://github.com/olekslitus/lines/pull/485))
+- **editor:** an empty item in a list with blank lines goes with its blank line, leaving no gap ([#479](https://github.com/olekslitus/lines/pull/479))
+- **sidebar:** a row dragged goes where it's let go, not where the last move heard was ([#477](https://github.com/olekslitus/lines/pull/477))
+- **editor:** selecting text on iPhone and iPad shows the system's handles, highlight and loupe ([#475](https://github.com/olekslitus/lines/pull/475))
+- **editor:** Enter and Backspace read a list item typed just before them, even on a busy device ([#465](https://github.com/olekslitus/lines/pull/465))
+- **native:** draw every app icon sharp on iOS 26, in its own colors, light, dark, tinted and clear ([#463](https://github.com/olekslitus/lines/pull/463))
+- **spreadsheets:** a csv block's width after a bar is the most its grid is shown at ([#424](https://github.com/olekslitus/lines/pull/424))
+- **editor:** Enter right after a #tag or @mention takes what its menu offers, before it's caught up ([#458](https://github.com/olekslitus/lines/pull/458))
+- **spreadsheets:** deleting a range's first or last row or column narrows it, not #REF! ([#443](https://github.com/olekslitus/lines/pull/443))
+- **notes:** exports past 65,535 files or 4 GB open, written with ZIP64 ([#423](https://github.com/olekslitus/lines/pull/423))
+- **native:** let the sync folder commands into the folder chosen for sync only ([#428](https://github.com/olekslitus/lines/pull/428))
+- **editor:** a tag at a line's end wraps whole, never its # on one line and its name on the next ([#427](https://github.com/olekslitus/lines/pull/427))
+- **native:** draw the iPhone's and Mac's app icon sharp, with the knot's loop open ([#439](https://github.com/olekslitus/lines/pull/439))
+- **notes:** importing an export's .zip brings its notes back with their pictures and files ([#437](https://github.com/olekslitus/lines/pull/437))
+- **sync:** a note deleted here isn't deleted there over another device's edit made meanwhile ([#436](https://github.com/olekslitus/lines/pull/436))
+- **spreadsheets:** keep the empty rows at the end of a one-column csv block ([#418](https://github.com/olekslitus/lines/pull/418))
+- **editor:** on a phone, a Key: Value line's copy button at the end of a full line is never cut off ([#432](https://github.com/olekslitus/lines/pull/432))
+- **editor:** Enter right after a slash command runs it, even before its menu has caught up ([#419](https://github.com/olekslitus/lines/pull/419))
+- **feeds:** a post's picture in an enclosure shows in the reader, as NASA's Image of the Day's ([#430](https://github.com/olekslitus/lines/pull/430))
+- **editor:** a sentence with a colon in it stays prose, without a Key: Value line's copy button ([#422](https://github.com/olekslitus/lines/pull/422))
+- **editor:** a block made by a slash command after text leaves the text no space at its end ([#416](https://github.com/olekslitus/lines/pull/416))
+- **sync:** keep locked notes' key when someone puts a bad copy of it among the synced notes ([#421](https://github.com/olekslitus/lines/pull/421))
+- **plugins:** a book's description from Open Library reads as text, without its Markdown's asterisks ([#426](https://github.com/olekslitus/lines/pull/426))
+- **sync:** a tab no longer syncs its older copy of a note another tab changed ([#435](https://github.com/olekslitus/lines/pull/435))
+- **notes:** imported files the system dates before 1970 are dated when they're imported ([#415](https://github.com/olekslitus/lines/pull/415))
+- **spreadsheets:** cells copied in one window paste into another with their formulas ([#433](https://github.com/olekslitus/lines/pull/433))
+- **sync:** keep the bucket's secret key and the encryption key in the system's keychain ([#434](https://github.com/olekslitus/lines/pull/434))
+- **a11y:** Lock Now from an open locked note's lock button puts focus in its password field ([#425](https://github.com/olekslitus/lines/pull/425))
+- **settings:** two windows changing different settings at the same moment keep both ([#420](https://github.com/olekslitus/lines/pull/420))
+- tags' and types' icons and colors chosen in one window show in the others at once ([#417](https://github.com/olekslitus/lines/pull/417))
+- **native:** the Mac's Dock shows Lines' own icon dark in dark mode, as it does the others ([#412](https://github.com/olekslitus/lines/pull/412))
+
+### Performance
+
+- **editor:** color a code block as soon as its language loads, not half a second later in WebKit ([#466](https://github.com/olekslitus/lines/pull/466))
+
 ## [0.8.0](https://github.com/olekslitus/lines/compare/v0.7.0...v0.8.0) (2026-11-21)
 
 ### Breaking changes
